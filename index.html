@@ -1,1408 +1,1151 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-<title>Studio OS</title>
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-<style>
-:root {
-  --bg: #0a0a0a;
-  --card: #141414;
-  --card2: #1a1a1a;
-  --border: #2a2a2a;
-  --gold: #c9a96e;
-  --gold2: #e6c98a;
-  --text: #e8e8e8;
-  --muted: #888;
-  --muted2: #555;
-  --blue: #4a9eff;
-  --purple: #a855f7;
-  --amber: #f59e0b;
-  --teal: #14b8a6;
-  --pink: #ec4899;
-  --sky: #0ea5e9;
-  --gray: #6b7280;
-  --red: #ef4444;
-  --green: #22c55e;
-  --radius: 10px;
-  --radius-sm: 6px;
-}
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { background: var(--bg); color: var(--text); font-family: 'Georgia', serif; min-height: 100vh; font-size: 14px; -webkit-tap-highlight-color: transparent; }
-a { color: inherit; text-decoration: none; }
-
-::-webkit-scrollbar { width: 4px; height: 4px; }
-::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-/* TOPBAR */
-.topbar { display: flex; align-items: center; justify-content: space-between; padding: 0 24px; height: 56px; border-bottom: 1px solid var(--border); background: rgba(10,10,10,0.95); position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); }
-.logo { display: flex; align-items: center; gap: 10px; font-size: 16px; font-weight: 600; letter-spacing: 0.05em; color: var(--gold); }
-.logo i { font-size: 20px; }
-.topbar-nav { display: flex; gap: 2px; }
-.nav-tab { display: flex; align-items: center; gap: 6px; padding: 6px 14px; border-radius: var(--radius-sm); font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: inherit; }
-.nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
-.nav-tab.active { color: var(--gold); background: rgba(201,169,110,0.1); }
-.nav-tab i { font-size: 16px; }
-.topbar-right { display: flex; gap: 8px; align-items: center; }
-.btn-new { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); background: var(--gold); color: #0a0a0a; border: none; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-new:hover { background: var(--gold2); }
-.btn-new i { font-size: 16px; }
-
-/* SYNC STATUS */
-.sync-status { display: flex; align-items: center; gap: 5px; font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); transition: all 0.3s; }
-.sync-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted2); flex-shrink: 0; transition: background 0.3s; }
-.sync-status.syncing .sync-dot { background: var(--amber); animation: pulse 1s infinite; }
-.sync-status.synced .sync-dot { background: var(--green); }
-.sync-status.error .sync-dot { background: var(--red); }
-.sync-status.synced { color: var(--green); border-color: rgba(34,197,94,0.3); }
-.sync-status.error { color: var(--red); border-color: rgba(239,68,68,0.3); }
-@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.4} }
-
-/* LOADING SCREEN */
-#loading-screen { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
-#loading-screen .logo-big { font-size: 24px; font-weight: 600; color: var(--gold); display: flex; align-items: center; gap: 10px; }
-#loading-screen .logo-big i { font-size: 30px; }
-#loading-screen .loading-text { font-size: 13px; color: var(--muted); }
-#loading-screen .loading-bar { width: 200px; height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
-#loading-screen .loading-bar-fill { height: 100%; width: 0%; background: var(--gold); border-radius: 1px; animation: loadbar 1.5s ease-in-out forwards; }
-@keyframes loadbar { 0%{width:0%} 60%{width:75%} 100%{width:100%} }
-
-/* MAIN */
-.main { padding: 24px; max-width: 1200px; margin: 0 auto; }
-.section { display: none; }
-.section.active { display: block; }
-
-/* PAGE HEADER */
-.page-header { margin-bottom: 24px; }
-.page-title { font-size: 22px; font-weight: 600; color: var(--text); }
-.page-sub { font-size: 13px; color: var(--muted); margin-top: 4px; }
-
-/* STAT CARDS */
-.stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 12px; margin-bottom: 28px; }
-.stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px 20px; }
-.stat-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 8px; }
-.stat-value { font-size: 28px; font-weight: 600; color: var(--text); line-height: 1; }
-.stat-sub { font-size: 12px; color: var(--muted); margin-top: 6px; }
-.stat-card.gold .stat-value { color: var(--gold); }
-.stat-card.green .stat-value { color: var(--green); }
-.stat-card.blue .stat-value { color: var(--blue); }
-.stat-card.purple .stat-value { color: var(--purple); }
-
-/* SECTION TITLES */
-.section-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.1em; color: var(--muted); margin-bottom: 12px; display: flex; align-items: center; gap: 8px; }
-.section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
-
-/* BADGES */
-.badge { display: inline-flex; align-items: center; padding: 2px 8px; border-radius: 99px; font-size: 11px; font-weight: 600; letter-spacing: 0.02em; }
-.badge-wedding { background: rgba(201,169,110,0.15); color: var(--gold); border: 1px solid rgba(201,169,110,0.3); }
-.badge-reception { background: rgba(74,158,255,0.15); color: var(--blue); border: 1px solid rgba(74,158,255,0.3); }
-.badge-sangeet { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
-.badge-haldi { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
-.badge-pellikoduku { background: rgba(20,184,166,0.15); color: var(--teal); border: 1px solid rgba(20,184,166,0.3); }
-.badge-pellikuthuru { background: rgba(236,72,153,0.15); color: var(--pink); border: 1px solid rgba(236,72,153,0.3); }
-.badge-house-warming { background: rgba(14,165,233,0.15); color: var(--sky); border: 1px solid rgba(14,165,233,0.3); }
-.badge-other { background: rgba(107,114,128,0.15); color: var(--gray); border: 1px solid rgba(107,114,128,0.3); }
-.badge-done { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
-.badge-pending { background: rgba(245,158,11,0.15); color: var(--amber); border: 1px solid rgba(245,158,11,0.3); }
-.badge-part { background: rgba(168,85,247,0.15); color: var(--purple); border: 1px solid rgba(168,85,247,0.3); }
-
-/* DATE BOX */
-.date-box { min-width: 46px; width: 46px; height: 50px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-.date-box .dd { font-size: 18px; font-weight: 700; line-height: 1; color: var(--gold); }
-.date-box .mmm { font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-top: 2px; }
-
-/* SHOOT ROW */
-.shoot-row { display: flex; align-items: center; gap: 12px; padding: 12px 14px; border-radius: var(--radius-sm); border: 1px solid transparent; cursor: pointer; transition: all 0.15s; position: relative; }
-.shoot-row:hover { background: var(--card2); border-color: var(--border); }
-.shoot-row-info { flex: 1; min-width: 0; }
-.shoot-row-name { font-size: 14px; font-weight: 500; color: var(--text); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.shoot-row-meta { font-size: 12px; color: var(--muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.shoot-row-actions { display: flex; gap: 4px; opacity: 0; transition: opacity 0.15s; flex-shrink: 0; }
-.shoot-row:hover .shoot-row-actions { opacity: 1; }
-.icon-btn { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); transition: all 0.15s; font-size: 14px; }
-.icon-btn:hover { color: var(--text); border-color: var(--muted2); background: rgba(255,255,255,0.05); }
-.icon-btn.danger:hover { color: var(--red); border-color: var(--red); }
-
-/* PAYMENT BADGE ON SHOOT ROW */
-.pay-info { text-align: right; flex-shrink: 0; }
-.pay-amount { font-size: 13px; font-weight: 600; color: var(--text); }
-.pay-part { font-size: 11px; color: var(--green); margin-top: 2px; }
-.pay-balance { font-size: 11px; color: var(--muted); }
-
-/* UPCOMING LIST */
-.upcoming-list { display: flex; flex-direction: column; gap: 4px; max-height: 360px; overflow-y: auto; }
-
-/* DASHBOARD TWO-COL */
-.dash-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 700px) { .dash-grid { grid-template-columns: 1fr; } }
-.dash-col { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-.dash-col-title { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.dash-col-title i { color: var(--gold); font-size: 16px; }
-
-/* CALENDAR */
-.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 20px; }
-.cal-month { font-size: 20px; font-weight: 600; color: var(--text); }
-.cal-nav { display: flex; gap: 8px; }
-.cal-nav-btn { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); width: 34px; height: 34px; display: flex; align-items: center; justify-content: center; cursor: pointer; color: var(--muted); transition: all 0.15s; font-size: 16px; }
-.cal-nav-btn:hover { color: var(--gold); border-color: var(--gold); }
-.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-.cal-dow { text-align: center; font-size: 11px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); padding: 8px 0; }
-.cal-cell { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); min-height: 72px; padding: 8px; cursor: pointer; transition: all 0.15s; position: relative; }
-.cal-cell:hover { border-color: var(--gold); }
-.cal-cell.other-month { opacity: 0.35; }
-.cal-cell.today { border-color: var(--gold); }
-.cal-cell.selected { border-color: var(--gold); background: rgba(201,169,110,0.08); }
-.cal-day { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
-.cal-cell.today .cal-day { color: var(--gold); }
-.cal-dots { display: flex; flex-wrap: wrap; gap: 3px; }
-.cal-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.cal-day-panel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; margin-top: 16px; }
-.cal-day-panel-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; justify-content: space-between; }
-.add-shoot-prompt { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 24px; color: var(--muted); text-align: center; }
-.btn-outline { display: flex; align-items: center; gap: 6px; padding: 7px 14px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: none; color: var(--text); font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-outline:hover { border-color: var(--gold); color: var(--gold); }
-
-/* SHOOTS LIST */
-.shoots-toolbar { display: flex; gap: 10px; margin-bottom: 18px; flex-wrap: wrap; }
-.search-box { flex: 1; min-width: 180px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 0 12px; }
-.search-box i { color: var(--muted); font-size: 16px; }
-.search-box input { background: none; border: none; outline: none; color: var(--text); font-size: 13px; width: 100%; padding: 8px 0; font-family: inherit; }
-.search-box input::placeholder { color: var(--muted2); }
-select.filter-sel { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; padding: 8px 12px; outline: none; cursor: pointer; font-family: inherit; }
-select.filter-sel option { background: #1a1a1a; }
-.shoots-list { display: flex; flex-direction: column; gap: 4px; }
-.empty-state { display: flex; flex-direction: column; align-items: center; gap: 10px; padding: 48px 24px; color: var(--muted); text-align: center; }
-.empty-state i { font-size: 36px; color: var(--muted2); }
-
-/* SETTINGS */
-.settings-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-@media (max-width: 600px) { .settings-grid { grid-template-columns: 1fr; } }
-.settings-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 18px; }
-.settings-card-title { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 14px; display: flex; align-items: center; gap: 8px; }
-.settings-card-title i { color: var(--gold); }
-.settings-item { display: flex; align-items: center; justify-content: space-between; padding: 9px 0; border-bottom: 1px solid var(--border); }
-.settings-item:last-child { border-bottom: none; }
-.settings-item-name { font-size: 13px; color: var(--text); }
-.settings-item-tag { font-size: 11px; color: var(--muted); background: rgba(255,255,255,0.05); padding: 2px 6px; border-radius: 4px; }
-.settings-actions { display: flex; gap: 6px; }
-.add-item-row { display: flex; gap: 8px; margin-top: 14px; }
-.add-item-input { flex: 1; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; padding: 8px 12px; outline: none; font-family: inherit; }
-.add-item-input:focus { border-color: var(--gold); }
-.btn-add { background: var(--gold); color: #0a0a0a; border: none; border-radius: var(--radius-sm); padding: 8px 14px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; white-space: nowrap; }
-.btn-add:hover { background: var(--gold2); }
-
-/* MODAL */
-.modal-backdrop { position: fixed; inset: 0; background: rgba(0,0,0,0.8); z-index: 200; display: flex; align-items: center; justify-content: center; padding: 20px; opacity: 0; pointer-events: none; transition: opacity 0.2s; }
-.modal-backdrop.open { opacity: 1; pointer-events: all; }
-.modal { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); width: 100%; max-width: 540px; max-height: 90vh; overflow-y: auto; transform: translateY(12px); transition: transform 0.2s; }
-.modal-backdrop.open .modal { transform: translateY(0); }
-.modal-header { display: flex; align-items: center; justify-content: space-between; padding: 18px 20px; border-bottom: 1px solid var(--border); }
-.modal-title { font-size: 16px; font-weight: 600; color: var(--text); }
-.modal-close { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 20px; padding: 2px; line-height: 1; }
-.modal-close:hover { color: var(--text); }
-.modal-body { padding: 20px; display: flex; flex-direction: column; gap: 14px; }
-.modal-footer { padding: 16px 20px; border-top: 1px solid var(--border); display: flex; align-items: center; justify-content: flex-end; gap: 8px; }
-.form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.07em; color: var(--muted); }
-.form-input { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); font-size: 13px; padding: 9px 12px; outline: none; font-family: inherit; width: 100%; -webkit-appearance: none; }
-.form-input:focus { border-color: var(--gold); }
-.form-input option { background: #1a1a1a; }
-textarea.form-input { resize: vertical; min-height: 72px; }
-.btn-primary { background: var(--gold); color: #0a0a0a; border: none; border-radius: var(--radius-sm); padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-primary:hover { background: var(--gold2); }
-.btn-secondary { background: none; border: 1px solid var(--border); border-radius: var(--radius-sm); color: var(--text); padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-secondary:hover { border-color: var(--muted); }
-.btn-danger { background: rgba(239,68,68,0.15); border: 1px solid rgba(239,68,68,0.3); color: var(--red); border-radius: var(--radius-sm); padding: 9px 16px; font-size: 13px; cursor: pointer; font-family: inherit; transition: all 0.15s; }
-.btn-danger:hover { background: rgba(239,68,68,0.25); }
-.btn-danger-solid { background: var(--red); border: none; color: #fff; border-radius: var(--radius-sm); padding: 9px 18px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
-.btn-danger-solid:hover { opacity: 0.85; }
-
-/* CONFIRM MODAL */
-.confirm-modal { max-width: 360px; }
-.confirm-body { padding: 24px 20px; text-align: center; }
-.confirm-icon { font-size: 36px; color: var(--red); margin-bottom: 12px; }
-.confirm-title { font-size: 15px; font-weight: 600; color: var(--text); margin-bottom: 6px; }
-.confirm-sub { font-size: 13px; color: var(--muted); }
-
-/* TABS within section */
-.inner-tabs { display: flex; gap: 4px; margin-bottom: 20px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; width: fit-content; }
-.inner-tab { padding: 6px 14px; border-radius: 4px; font-size: 13px; color: var(--muted); cursor: pointer; transition: all 0.15s; border: none; background: none; font-family: inherit; }
-.inner-tab.active { background: var(--card2); color: var(--gold); }
-
-/* DIVIDER */
-.divider { height: 1px; background: var(--border); margin: 4px 0; }
-
-/* PART PAYMENT HIGHLIGHT */
-.part-payment-box { background: rgba(168,85,247,0.08); border: 1px solid rgba(168,85,247,0.25); border-radius: var(--radius-sm); padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
-.part-payment-box .form-label { color: var(--purple); }
-
-/* TOAST */
-.toast-container { position: fixed; bottom: 24px; right: 24px; z-index: 999; display: flex; flex-direction: column; gap: 8px; }
-.toast { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 10px 14px; font-size: 13px; color: var(--text); display: flex; align-items: center; gap: 8px; animation: toastIn 0.2s ease; box-shadow: 0 4px 20px rgba(0,0,0,0.5); }
-.toast.success { border-color: rgba(34,197,94,0.4); }
-.toast.error { border-color: rgba(239,68,68,0.4); color: var(--red); }
-.toast i { font-size: 16px; }
-.toast.success i { color: var(--green); }
-.toast.error i { color: var(--red); }
-@keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
-
-/* --- MOBILE RESPONSIVENESS --- */
-@media (max-width: 768px) {
-  .main { padding: 16px; padding-bottom: 100px; }
-  .topbar { padding: 0 16px; border-bottom: none; }
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Sakkhi Dashboard</title>
   
-  .topbar-nav {
-    position: fixed; bottom: 0; left: 0; right: 0;
-    background: rgba(10, 10, 10, 0.98);
-    border-top: 1px solid var(--border);
-    padding: 8px 12px;
-    padding-bottom: env(safe-area-inset-bottom, 8px); 
-    z-index: 200;
-    display: flex; justify-content: space-between; gap: 4px;
-  }
-  .nav-tab { flex-direction: column; gap: 4px; padding: 6px; font-size: 10px; border-radius: 8px; flex: 1; text-align: center; }
-  .nav-tab i { font-size: 20px; }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   
-  #sync-label { display: none; } 
-  .sync-status { padding: 6px; }
-  .btn-new { padding: 7px 10px; font-size: 12px; position: relative; z-index: 101; }
-  .btn-new i { font-size: 14px; }
-  .logo { font-size: 14px; }
-  
-  .stat-grid { grid-template-columns: 1fr 1fr; gap: 10px; }
-  .dash-grid, .settings-grid { grid-template-columns: 1fr; }
-  
-  .modal-backdrop { align-items: flex-end; padding: 0; pointer-events: none; }
-  .modal-backdrop.open { pointer-events: all; }
-  .modal { border-radius: 16px 16px 0 0; margin: 0; max-height: 85vh; padding-bottom: env(safe-area-inset-bottom, 20px); }
-  .form-row { grid-template-columns: 1fr; gap: 12px; }
-  .form-input { font-size: 16px; padding: 12px; } 
-  
-  .shoots-toolbar { flex-direction: column; align-items: stretch; gap: 10px; }
-  .search-box, .filter-sel { width: 100%; height: 40px; }
-  
-  .shoot-row { align-items: flex-start; padding: 14px 12px; flex-wrap: wrap; }
-  .shoot-row-actions { opacity: 1; position: absolute; right: 12px; top: 12px; background: transparent; display: flex; z-index: 10; }
-  .shoot-row-info { margin-right: 70px; flex: 1 1 100%; white-space: normal; }
-  .shoot-row-name, .shoot-row-meta { white-space: normal; }
-  .badge { align-self: flex-start; margin-top: 6px; }
-  .pay-info { text-align: left; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; width: 100%; margin-top: 10px; padding-left: 58px; }
-  .pay-info > div { margin: 0 !important; }
-  
-  .cal-header { flex-wrap: wrap; gap: 12px; }
-  .cal-cell { min-height: 55px; padding: 4px; }
-  .cal-day { font-size: 12px; }
-  
-  .shoot-row, .icon-btn, .btn-primary, .btn-secondary, .btn-add, .nav-tab, .cal-cell { cursor: pointer !important; }
-  
-  .toast-container { bottom: 100px; left: 16px; right: 16px; align-items: stretch; }
-  .toast { justify-content: center; width: 100%; }
-}
-</style>
+  <style>
+    :root {
+      --bg: #0a0a0a;
+      --card: #141414;
+      --card2: #1a1a1a;
+      --border: #2a2a2a;
+      --gold: #c9a96e;
+      --gold2: #e6c98a;
+      --text: #e8e8e8;
+      --muted: #888;
+      --muted2: #444;
+      --blue: #4a9eff;
+      --purple: #a855f7;
+      --amber: #f59e0b;
+      --teal: #14b8a6;
+      --pink: #ec4899;
+      --sky: #0ea5e9;
+      --red: #ef4444;
+      --green: #22c55e;
+      --radius: 12px;
+      --radius-sm: 8px;
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { 
+      background: var(--bg); 
+      color: var(--text); 
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
+      min-height: 100vh; 
+      font-size: 14px; 
+      -webkit-tap-highlight-color: transparent;
+      padding-bottom: 80px;
+    }
+    
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+
+    .font-editorial { font-family: 'Georgia', serif; }
+
+    /* LOADING SCREEN */
+    #loading-screen { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
+    .logo-container { text-align: center; }
+    .logo-main { font-size: 32px; font-weight: 700; color: var(--gold); tracking: -0.02em; }
+    .logo-sub { font-size: 9px; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold2); opacity: 0.8; margin-top: -2px; }
+    .loading-bar { width: 180px; height: 2px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 8px; }
+    .loading-bar-fill { height: 100%; width: 100%; background: var(--gold); animation: pulse 1.5s infinite; }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+
+    /* HEADER STYLING */
+    .top-header { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); padding: 0 16px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
+    .header-right { display: flex; align-items: center; gap: 12px; }
+
+    /* ACTION CONTROLS */
+    .pill-status { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
+    .status-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
+    .status-dot.synced { background: var(--green); }
+    .status-dot.error { background: var(--red); }
+    
+    .btn-icon { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; color: var(--gold); cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
+    .btn-icon.unlocked { color: var(--green); }
+    .btn-icon.locked { color: var(--red); }
+    
+    .btn-primary { background: var(--gold); color: #000; padding: 8px 14px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
+    .btn-primary:hover { background: var(--gold2); }
+
+    /* PRIVACY PROTECTION ENGINE OBFUSCATION */
+    .currency-mask.blur-financial { filter: blur(5px); user-select: none; pointer-events: none; }
+
+    /* LAYOUT MATRIX WORKSPACES */
+    .main-workspace { max-width: 1200px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
+    .view-section { display: none; flex-direction: column; gap: 20px; }
+    .view-section.active { display: flex; }
+
+    /* STAT CARDS */
+    .grid-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    @media (min-width: 1024px) { .grid-stats { grid-template-columns: repeat(4, 1fr); } }
+    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }
+    .stat-card-label { font-size: 10px; font-weight: 700; tracking: 0.05em; color: var(--muted); text-transform: uppercase; }
+    .stat-card-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
+
+    /* SPLIT FINANCIAL COLUMNS */
+    .grid-financial-split { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 1024px) { .grid-financial-split { grid-template-columns: 1fr 1fr; } }
+    .fin-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .fin-box-header { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
+    .fin-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
+    .fin-row:last-child { border-bottom: none; }
+
+    /* DASHBOARD BOTTOM THREE COL BLOCK */
+    .grid-timeline-analytics { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 1024px) { .grid-timeline-analytics { grid-template-columns: 1fr 2fr; } }
+    .timeline-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
+    .chart-wrapper { position: relative; width: 100%; min-height: 260px; display: flex; align-items: center; justify-content: center; }
+
+    /* RECORD LIST LAYOUT BLOCK UNITS */
+    .shoots-stack { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
+    .shoot-row { position: relative; display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius); cursor: pointer; transition: border 0.2s; }
+    .shoot-row:hover { border-color: var(--gold); }
+    .date-badge { width: 44px; height: 44px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
+    .date-badge-dd { font-size: 16px; font-weight: 700; color: var(--gold); line-height: 1; }
+    .date-badge-mmm { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
+    .shoot-row-body { flex: 1; min-width: 0; }
+    .shoot-row-title { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .shoot-row-meta { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .shoot-row-tags { display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
+    
+    .badge { padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
+    .pay-side { text-align: right; font-size: 12px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
+    .shoot-row-actions { display: flex; align-items: center; gap: 4px; margin-left: 8px; opacity: 1; z-index: 20; }
+    @media (min-width: 1024px) { .shoot-row-actions { opacity: 0; } .shoot-row:hover .shoot-row-actions { opacity: 1; } }
+    .action-mini-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); cursor: pointer; transition: all 0.2s; }
+    .action-mini-btn.wa { border-color: rgba(16,185,129,0.3); color: #10b981; background: rgba(16,185,129,0.05); }
+    .action-mini-btn.wa:hover { background: rgba(16,185,129,0.15); }
+    .action-mini-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--red); background: rgba(239,68,68,0.05); }
+    .action-mini-btn.danger:hover { background: rgba(239,68,68,0.15); }
+
+    /* DYNAMIC FILTER OVERBAR */
+    .filter-toolbar { display: grid; grid-template-columns: 1fr; gap: 8px; }
+    @media (min-width: 640px) { .filter-toolbar { grid-template-columns: repeat(2, 1fr); } }
+    @media (min-width: 1024px) { .filter-toolbar { grid-template-columns: repeat(4, 1fr); } }
+    .search-input-wrap { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: var(--radius-sm); padding: 8px 12px; }
+    .search-input-wrap input { background: transparent; border: none; outline: none; color: var(--text); font-size: 12px; width: 100%; }
+    .select-dropdown { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text); font-size: 12px; outline: none; width: 100%; }
+
+    /* CALENDAR SYSTEM */
+    .calendar-container { display: flex; flex-direction: column; gap: 12px; }
+    .calendar-navbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
+    .calendar-dow { text-align: center; font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; padding: 4px 0; }
+    .calendar-cell { min-height: 60px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; background: var(--card); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
+    .calendar-cell:hover { border-color: var(--gold); }
+    .calendar-cell.other-month { opacity: 0.25; }
+    .calendar-cell.today { border-color: var(--gold); box-shadow: 0 0 8px rgba(201,169,110,0.15); }
+    .calendar-cell.selected { background: rgba(201,169,110,0.05); border-color: var(--gold); }
+    .calendar-cell-num { font-size: 11px; font-weight: 700; color: var(--muted); }
+    .calendar-cell.today .calendar-cell-num { color: var(--gold); }
+    .calendar-dots { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
+    .calendar-dot { width: 5px; height: 5px; border-radius: 50%; }
+
+    /* SETTINGS COMPONENT PANELS */
+    .settings-layout-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
+    @media (min-width: 768px) { .settings-layout-grid { grid-template-columns: 1fr 1fr; } }
+    .settings-pane { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
+    .settings-line-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
+    .settings-line-item:last-child { border-bottom: none; }
+    .input-row-group { display: flex; gap: 8px; margin-top: 4px; }
+    .form-text-input { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12px; color: var(--text); outline: none; flex: 1; }
+    .form-text-input:focus { border-color: var(--gold); }
+
+    /* BOTTOM FIXED NAVIGATION TERMINAL */
+    .bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: rgba(10,10,10,0.96); border-top: 1px solid var(--border); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 6px 0; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
+    @media (min-width: 768px) { .bottom-navbar { justify-content: center; gap: 32px; } }
+    .nav-terminal-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; border: none; background: transparent; color: #555; cursor: pointer; width: 56px; text-align: center; font-family: inherit; transition: color 0.2s; }
+    .nav-terminal-btn i { font-size: 20px; }
+    .nav-terminal-btn span { font-size: 9px; margin-top: 2px; font-weight: 500; }
+    .nav-terminal-btn.active { color: var(--gold); }
+
+    /* EVENT TEMPLATES COLORS */
+    .evt-wedding { background: rgba(201,169,110,0.1); color: var(--gold); border: 1px solid rgba(201,169,110,0.2); }
+    .evt-reception { background: rgba(74,158,255,0.1); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
+    .evt-sangeet { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+    .evt-haldi { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
+    .evt-pellikoduku { background: rgba(20,184,166,0.1); color: var(--teal); border: 1px solid rgba(20,184,166,0.2); }
+    .evt-pellikuthuru { background: rgba(236,72,153,0.1); color: var(--pink); border: 1px solid rgba(236,72,153,0.2); }
+    .evt-house-warming { background: rgba(14,165,233,0.1); color: var(--sky); border: 1px solid rgba(14,165,233,0.2); }
+    .evt-other { background: rgba(100,100,100,0.1); color: var(--muted); border: 1px solid rgba(100,100,100,0.2); }
+
+    .pay-pending { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
+    .pay-part { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
+    .pay-done { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
+
+    /* MODAL SURFACE LAYERS */
+    .modal-overlay { position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.85); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 0; }
+    @media (min-width: 768px) { .modal-overlay { align-items: center; padding: 16px; } }
+    .modal-overlay.open { opacity: 1; pointer-events: all; }
+    
+    .modal-surface { background: var(--card); border: 1px solid var(--border); width: 100%; max-width: 520px; border-radius: 16px 16px 0 0; display: flex; flex-direction: column; max-height: 85vh; transform: translateY(32px); transition: transform 0.2s ease; overflow: hidden; }
+    @media (min-width: 768px) { .modal-surface { border-radius: 12px; max-height: 90vh; transform: translateY(0); } }
+    .modal-overlay.open .modal-surface { transform: translateY(0); }
+    
+    .modal-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card2); }
+    .modal-title { font-size: 14px; font-weight: 600; }
+    .modal-close-trigger { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; }
+    .modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; font-size: 12px; }
+    .modal-footer { padding: 16px; border-top: 1px solid var(--border); background: var(--card2); display: flex; justify-content: space-between; align-items: center; }
+
+    .form-grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 480px) { .form-grid-2 { grid-template-columns: 1fr 1fr; } }
+    .form-grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    @media (min-width: 480px) { .form-grid-3 { grid-template-columns: repeat(3, 1fr); } }
+    .field-stack { display: flex; flex-direction: column; gap: 4px; }
+    .field-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; tracking: 0.05em; }
+
+    /* TOAST FEEDBACKS */
+    #toast-container { position: fixed; bottom: 80px; right: 16px; left: 16px; z-index: 200; display: flex; flex-direction: column; gap: 6px; max-width: 360px; pointer-events: none; }
+    @media (min-width: 768px) { #toast-container { left: auto; } }
+    .toast-node { padding: 12px; font-size: 12px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.5); pointer-events: auto; }
+    .toast-node.success { border-color: rgba(34,197,94,0.3); color: var(--green); }
+    .toast-node.error { border-color: rgba(239,68,68,0.3); color: var(--red); }
+  </style>
 </head>
 <body>
 
-<div id="loading-screen">
-  <div class="logo-big"><i class="ti ti-aperture"></i> Studio OS</div>
-  <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-  <div class="loading-text" id="loading-text">Connecting to database…</div>
-</div>
-
-<div class="topbar">
-  <div class="logo"><i class="ti ti-aperture"></i> Studio OS</div>
-  <div class="topbar-nav">
-    <button class="nav-tab active" onclick="switchTab('dashboard')" id="tab-dashboard"><i class="ti ti-layout-dashboard"></i> Dashboard</button>
-    <button class="nav-tab" onclick="switchTab('calendar')" id="tab-calendar"><i class="ti ti-calendar"></i> Calendar</button>
-    <button class="nav-tab" onclick="switchTab('shoots')" id="tab-shoots"><i class="ti ti-camera"></i> Shoots</button>
-    <button class="nav-tab" onclick="switchTab('payments')" id="tab-payments"><i class="ti ti-wallet"></i> Payments</button>
-    <button class="nav-tab" onclick="switchTab('settings')" id="tab-settings"><i class="ti ti-settings"></i> Settings</button>
-  </div>
-  <div class="topbar-right">
-    <div class="sync-status" id="sync-status"><div class="sync-dot"></div><span id="sync-label">Connecting…</span></div>
-    <button class="btn-new" onclick="openAddShootModal()"><i class="ti ti-plus"></i> New Shoot</button>
-  </div>
-</div>
-
-<div class="main">
-
-  <div class="section active" id="section-dashboard">
-    <div class="page-header">
-      <div class="page-title">Dashboard</div>
-      <div class="page-sub" id="dash-date"></div>
+  <div id="loading-screen">
+    <div class="logo-container">
+      <div class="logo-main font-editorial">Sakkhi</div>
+      <div class="logo-sub">by jashwanthjp</div>
     </div>
-    <div class="stat-grid" id="dash-stats"></div>
-    <div class="dash-grid">
-      <div class="dash-col">
-        <div class="dash-col-title"><i class="ti ti-calendar-event"></i> Upcoming Shoots</div>
-        <div class="upcoming-list" id="dash-upcoming"></div>
-      </div>
-      <div class="dash-col">
-        <div class="dash-col-title"><i class="ti ti-wallet"></i> Payment Summary</div>
-        <div id="dash-payments"></div>
-      </div>
-    </div>
+    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
+    <div class="text-xs text-gray-500" id="loading-text" style="font-size:11px;color:#555">Initialising Cloud Handshake...</div>
   </div>
 
-  <div class="section" id="section-calendar">
-    <div class="page-header" style="margin-bottom:16px">
-      <div class="cal-header">
-        <div class="cal-month" id="cal-month-label"></div>
-        <div class="cal-nav">
-          <button class="cal-nav-btn" onclick="calPrev()"><i class="ti ti-chevron-left"></i></button>
-          <button class="cal-nav-btn" onclick="calToday()"><i class="ti ti-calendar"></i></button>
-          <button class="cal-nav-btn" onclick="calNext()"><i class="ti ti-chevron-right"></i></button>
+  <header class="top-header">
+    <div style="display:flex;flex-direction:column;justify-content:center">
+      <h1 class="font-editorial" style="font-size:22px;font-weight:700;color:var(--gold);line-height:1">Sakkhi</h1>
+      <span style="font-size:8px;text-transform:uppercase;letter-spacing:0.22em;color:var(--gold2);margin-top:2px;opacity:0.9">by jashwanthjp</span>
+    </div>
+    
+    <div class="header-right">
+      <div id="sync-status" class="pill-status">
+        <span id="sync-dot" class="status-dot"></span>
+        <span id="sync-label">Checking Pipeline</span>
+      </div>
+
+      <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="btn-icon" title="Toggle Financial Blind Mask">
+        <i id="privacy-icon" class="ti ti-eye-off" style="font-size:16px"></i>
+      </button>
+
+      <button onclick="openAddShootModal()" class="btn-primary">
+        <i class="ti ti-plus"></i> <span style="display:none;margin-left:2px" id="header-new-txt">New Shoot</span>
+      </button>
+    </div>
+  </header>
+  <script>if(window.innerWidth > 640) document.getElementById('header-new-txt').style.display='inline';</script>
+
+  <main class="main-workspace">
+
+    <section id="section-dashboard" class="view-section active">
+      <div style="display:flex;flex-direction:column;gap:2px">
+        <h2 style="font-size:18px;font-weight:700;color:var(--text)">Dashboard Overview</h2>
+        <p id="dash-date" style="font-size:11px;color:var(--muted)"></p>
+      </div>
+
+      <div class="grid-stats" id="dash-stats"></div>
+
+      <div class="grid-financial-split">
+        <div class="fin-box">
+          <div class="fin-box-header"><i class="ti ti-wallet" style="color:var(--gold)"></i> Revenue Settlements</div>
+          <div id="dash-payments-breakdown" style="display:flex;flex-direction:column"></div>
+        </div>
+        <div class="fin-box">
+          <div class="fin-box-header"><i class="ti ti-receipt" style="color:var(--purple)"></i> Expense Aggregates</div>
+          <div id="dash-expenses-breakdown" style="display:flex;flex-direction:column"></div>
+        </div>
+      </div>
+
+      <div class="grid-timeline-analytics">
+        <div class="timeline-box">
+          <div class="fin-box-header" style="border-bottom:1px solid var(--border);padding-bottom:8px"><i class="ti ti-calendar-event" style="color:var(--gold)"></i> Upcoming Schedules</div>
+          <div id="dash-upcoming" class="shoots-stack"></div>
+        </div>
+
+        <div class="timeline-box">
+          <div class="fin-box-header" style="border-bottom:1px solid var(--border);padding-bottom:8px"><i class="ti ti-chart-line" style="color:var(--gold)"></i> Gross Monthly Revenue Growth Trends</div>
+          <div class="chart-wrapper">
+            <canvas id="revenueGrowthChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section id="section-calendar" class="view-section">
+      <div class="calendar-container">
+        <div class="calendar-navbar">
+          <h2 id="cal-month-label" style="font-size:18px;font-weight:700"></h2>
+          <div style="display:flex;gap:6px">
+            <button onclick="calPrev()" class="btn-icon"><i class="ti ti-chevron-left"></i></button>
+            <button onclick="calToday()" class="btn-icon"><i class="ti ti-calendar"></i></button>
+            <button onclick="calNext()" class="btn-icon"><i class="ti ti-chevron-right"></i></button>
+          </div>
+        </div>
+        <div id="cal-grid" class="calendar-grid"></div>
+        <div id="cal-day-panel" style="display:none"></div>
+      </div>
+    </section>
+
+    <section id="section-shoots" class="view-section">
+      <h2 style="font-size:18px;font-weight:700">Master Shoot Schedules</h2>
+      <div class="filter-toolbar">
+        <div class="search-input-wrap">
+          <i class="ti ti-search" style="color:#555"></i>
+          <input type="text" id="shoot-search" placeholder="Search client, location..." oninput="renderShootsList()"/>
+        </div>
+        <select id="filter-company" onchange="renderShootsList()" class="select-dropdown"></select>
+        <select id="filter-event" onchange="renderShootsList()" class="select-dropdown"></select>
+        <select id="filter-loc" onchange="renderShootsList()" class="select-dropdown"></select>
+      </div>
+      <div id="shoots-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </section>
+
+    <section id="section-payments" class="view-section">
+      <h2 style="font-size:18px;font-weight:700">Payment Ledger Matrix</h2>
+      <div class="grid-stats" id="pay-stats" style="margin-bottom:4px"></div>
+      <div class="filter-toolbar" style="grid-template-columns:2fr 1fr">
+        <div class="search-input-wrap">
+          <i class="ti ti-search" style="color:#555"></i>
+          <input type="text" id="pay-search" placeholder="Filter by client name..." oninput="renderPaymentsList()"/>
+        </div>
+        <select id="pay-filter-status" onchange="renderPaymentsList()" class="select-dropdown">
+          <option value="">All Verification Classes</option>
+          <option value="pending">Pending Slates</option>
+          <option value="part">Part Disbursed</option>
+          <option value="done">Completed / Cleared</option>
+        </select>
+      </div>
+      <div id="payments-list" style="display:flex;flex-direction:column;gap:8px"></div>
+    </section>
+
+    <section id="section-settings" class="view-section">
+      <h2 style="font-size:18px;font-weight:700">System Settings</h2>
+      <div class="settings-layout-grid">
+        <div class="settings-pane">
+          <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-building" style="color:var(--gold)"></i> Studio Content Producers</div>
+          <div id="settings-companies" style="display:flex;flex-direction:column"></div>
+          <div class="input-row-group">
+            <input type="text" id="new-company-input" placeholder="Add production handle..." class="form-text-input"/>
+            <button onclick="addCompany()" class="btn-primary" style="padding:0 14px">Add</button>
+          </div>
+        </div>
+
+        <div class="settings-pane">
+          <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-map-pin" style="color:var(--gold)"></i> Standard Operations Footprint</div>
+          <div id="settings-locations" style="display:flex;flex-direction:column"></div>
+          <div class="input-row-group">
+            <input type="text" id="new-loc-input" placeholder="Add primary city destination..." class="form-text-input"/>
+            <button onclick="addLocation()" class="btn-primary" style="padding:0 14px">Add</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="settings-pane" style="width:100%">
+        <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-database" style="color:var(--gold)"></i> Supabase Infrastructure Storage Mirror</div>
+        <p style="font-size:11px;color:var(--muted);line-height:1.5">Direct synchronization pipeline initialized on default collections without intercept lines. Local edits resolve to transaction state instantly.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
+          <button onclick="forceSync()" class="form-text-input" style="max-width:160px;cursor:pointer;text-align:center"><i class="ti ti-refresh"></i> Manual Refresh Force</button>
+          <button onclick="confirmClearData()" class="form-text-input" style="max-width:160px;cursor:pointer;text-align:center;color:var(--red);border-color:rgba(239,68,68,0.2)">Clear Local Schemas</button>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <nav class="bottom-navbar">
+    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-terminal-btn active"><i class="ti ti-layout-dashboard"></i><span>Dash</span></button>
+    <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-terminal-btn"><i class="ti ti-calendar"></i><span>Plan</span></button>
+    <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-terminal-btn"><i class="ti ti-camera"></i><span>Shoots</span></button>
+    <button onclick="switchTab('payments')" id="tab-payments" class="nav-terminal-btn"><i class="ti ti-wallet"></i><span>Pay</span></button>
+    <button onclick="switchTab('settings')" id="tab-settings" class="nav-terminal-btn"><i class="ti ti-settings"></i><span>Setup</span></button>
+  </nav>
+
+  <div id="shoot-modal-backdrop" class="modal-overlay" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
+    <div class="modal-surface">
+      <div class="modal-header">
+        <h3 id="shoot-modal-title" class="modal-title">New Shoot Entry</h3>
+        <button onclick="closeShootModal()" class="modal-close-trigger"><i class="ti ti-x"></i></button>
+      </div>
+
+      <div class="modal-body">
+        <input type="hidden" id="edit-shoot-id"/>
+        <div class="form-grid-2">
+          <div class="field-stack">
+            <label class="field-label">Client Designation/Name *</label>
+            <input type="text" id="f-shoot-name" placeholder="Ananya & Karthik Wedding" class="form-text-input"/>
+          </div>
+          <div class="field-stack">
+            <label class="field-label">Timeline Date *</label>
+            <input type="date" id="f-shoot-date" class="form-text-input" style="color-scheme:dark"/>
+          </div>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-stack">
+            <label class="field-label">Event Domain Template</label>
+            <select id="f-shoot-event" onchange="handleEventOther()" class="select-dropdown">
+              <option value="Wedding">Wedding</option>
+              <option value="Reception">Reception</option>
+              <option value="Sangeet">Sangeet</option>
+              <option value="Haldi">Haldi</option>
+              <option value="Pellikoduku">Pellikoduku</option>
+              <option value="Pellikuthuru">Pellikuthuru</option>
+              <option value="House Warming">House Warming</option>
+              <option value="Other">Other (Specify Custom Text)</option>
+            </select>
+          </div>
+          <div class="field-stack">
+            <label class="field-label">Operational Slot Allocation</label>
+            <select id="f-shoot-session" class="select-dropdown">
+              <option value="Morning Session">Morning Session</option>
+              <option value="Evening Session">Evening Session</option>
+              <option value="Full Day">Full Day</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="f-event-other-wrap" class="field-stack" style="display:none">
+          <label class="field-label">Custom Event Type</label>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g. Pre-Wedding Shoot" class="form-text-input"/>
+        </div>
+
+        <div class="form-grid-2">
+          <div class="field-stack">
+            <label class="field-label">Geographic Assignment Location</label>
+            <select id="f-shoot-loc" onchange="handleLocOther()" class="select-dropdown"></select>
+          </div>
+          <div class="field-stack">
+            <label class="field-label">Contractor Production Handle</label>
+            <select id="f-shoot-company" class="select-dropdown"></select>
+          </div>
+        </div>
+
+        <div id="f-loc-other-wrap" class="field-stack" style="display:none">
+          <label class="field-label">Custom Regional Node Target</label>
+          <input type="text" id="f-shoot-loc-other" placeholder="e.g. International Target City" class="form-text-input"/>
+        </div>
+
+        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px" class="form-grid-3">
+          <div class="field-stack">
+            <label class="field-label">Gross Contract Value (₹)</label>
+            <input type="number" id="f-shoot-amount" placeholder="45000" class="form-text-input"/>
+          </div>
+          <div class="field-stack">
+            <label class="field-label" style="color:var(--purple)">Logged Expenses (₹)</label>
+            <input type="number" id="f-shoot-expenses" placeholder="Travel/Fuel/Gear" class="form-text-input"/>
+          </div>
+          <div class="field-stack">
+            <label class="field-label">Verification Clearance</label>
+            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="select-dropdown">
+              <option value="pending">Pending Slate</option>
+              <option value="part">Part Disbursed</option>
+              <option value="done">Cleared / Full</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="f-part-pay-wrap" class="field-stack" style="display:none;background:rgba(168,85,247,0.04);border:1px solid rgba(168,85,247,0.15);padding:10px;border-radius:6px">
+          <label class="field-label" style="color:var(--purple)">Interim Disbursed Amount Received (₹)</label>
+          <input type="number" id="f-shoot-part-paid" placeholder="15000" class="form-text-input"/>
+        </div>
+
+        <div class="field-stack">
+          <label class="field-label">Operational Notes Logbook</label>
+          <textarea id="f-shoot-notes" placeholder="Specify capture constraints, coordination logs..." class="form-text-input" style="height:54px;resize:none;font-family:inherit"></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer">
+        <div>
+          <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="form-text-input" style="display:none;color:var(--red);border-color:rgba(239,68,68,0.2);cursor:pointer;padding:6px 10px"><i class="ti ti-trash"></i> Delete</button>
+        </div>
+        <div style="display:flex;gap:6px;align-items:center">
+          <button id="modal-whatsapp-btn" onclick="triggerWhatsAppFromModal()" class="action-mini-btn wa" style="width:32px;height:32px;display:none" title="Send WhatsApp Message Engine"><i class="ti ti-brand-whatsapp" style="font-size:16px"></i></button>
+          <button onclick="closeShootModal()" class="form-text-input" style="cursor:pointer;padding:6px 12px">Cancel</button>
+          <button onclick="saveShoot()" class="btn-primary" style="padding:8px 16px;border-radius:6px">Save Record</button>
         </div>
       </div>
     </div>
-    <div class="cal-grid" id="cal-grid"></div>
-    <div id="cal-day-panel" style="display:none"></div>
   </div>
 
-  <div class="section" id="section-shoots">
-    <div class="page-header">
-      <div class="page-title">All Shoots</div>
-    </div>
-    <div class="shoots-toolbar">
-      <div class="search-box"><i class="ti ti-search"></i><input type="text" id="shoot-search" placeholder="Search client, location…" oninput="renderShootsList()"/></div>
-      <select class="filter-sel" id="filter-company" onchange="renderShootsList()"><option value="">All Companies</option></select>
-      <select class="filter-sel" id="filter-event" onchange="renderShootsList()"><option value="">All Events</option></select>
-      <select class="filter-sel" id="filter-loc" onchange="renderShootsList()"><option value="">All Locations</option></select>
-    </div>
-    <div class="shoots-list" id="shoots-list"></div>
-  </div>
-
-  <div class="section" id="section-payments">
-    <div class="page-header">
-      <div class="page-title">Payment Tracker</div>
-    </div>
-    <div class="stat-grid" id="pay-stats"></div>
-    <div class="shoots-toolbar">
-      <div class="search-box"><i class="ti ti-search"></i><input type="text" id="pay-search" placeholder="Search client…" oninput="renderPaymentsList()"/></div>
-      <select class="filter-sel" id="pay-filter-status" onchange="renderPaymentsList()">
-        <option value="">All Statuses</option>
-        <option value="pending">Pending</option>
-        <option value="part">Part Payment</option>
-        <option value="done">Done</option>
-      </select>
-    </div>
-    <div class="shoots-list" id="payments-list"></div>
-  </div>
-
-  <div class="section" id="section-settings">
-    <div class="page-header">
-      <div class="page-title">Settings</div>
-    </div>
-    <div class="settings-grid">
-      <div class="settings-card">
-        <div class="settings-card-title"><i class="ti ti-building"></i> Companies</div>
-        <div id="settings-companies"></div>
-        <div class="add-item-row">
-          <input class="add-item-input" type="text" id="new-company-input" placeholder="Add company…"/>
-          <button class="btn-add" onclick="addCompany()">Add</button>
-        </div>
+  <div id="confirm-modal-backdrop" class="modal-overlay" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')" style="align-items:center;padding:16px">
+    <div class="modal-surface" style="max-width:340px;border-radius:12px;padding:20px;text-align:center;gap:14px">
+      <div style="width:40px;height:40px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:18px;margin:0 auto"><i class="ti ti-alert-triangle"></i></div>
+      <div style="display:flex;flex-direction:column;gap:4px">
+        <h4 id="confirm-title" style="font-size:14px;font-weight:600">Confirm Action Block</h4>
+        <p id="confirm-sub-text" style="font-size:11px;color:var(--muted);line-height:1.4"></p>
       </div>
-      <div class="settings-card">
-        <div class="settings-card-title"><i class="ti ti-map-pin"></i> Locations</div>
-        <div id="settings-locations"></div>
-        <div class="add-item-row">
-          <input class="add-item-input" type="text" id="new-loc-input" placeholder="Add location…"/>
-          <button class="btn-add" onclick="addLocation()">Add</button>
-        </div>
-      </div>
-      <div class="settings-card" style="grid-column:1/-1">
-        <div class="settings-card-title"><i class="ti ti-database"></i> Database</div>
-        <div style="font-size:13px;color:var(--muted);margin-bottom:12px">All data is stored in Supabase and synced across all your devices in real-time.</div>
-        <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn-outline" onclick="forceSync()"><i class="ti ti-refresh" style="font-size:14px"></i> Force Sync</button>
-          <button class="btn-outline" style="color:var(--red);border-color:rgba(239,68,68,0.3)" onclick="confirmClearData()"><i class="ti ti-trash" style="font-size:14px"></i> Clear All Data</button>
-        </div>
+      <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
+        <button onclick="closeConfirmModal()" class="form-text-input" style="cursor:pointer">Abort</button>
+        <button id="confirm-action-btn" onclick="confirmDelete()" class="btn-primary" style="background:var(--red);color:#fff">Execute Wipe</button>
       </div>
     </div>
   </div>
 
-</div>
+  <div id="toast-container"></div>
 
-<div class="modal-backdrop" id="shoot-modal-backdrop" onclick="handleBackdropClick(event,'shoot-modal-backdrop')">
-  <div class="modal" id="shoot-modal">
-    <div class="modal-header">
-      <div class="modal-title" id="shoot-modal-title">New Shoot</div>
-      <button class="modal-close" onclick="closeShootModal()"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="modal-body">
-      <input type="hidden" id="edit-shoot-id"/>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Client Name *</label>
-          <input class="form-input" type="text" id="f-shoot-name" placeholder="e.g. Ananya & Karthik"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Date *</label>
-          <input class="form-input" type="date" id="f-shoot-date"/>
-        </div>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Event Type</label>
-          <select class="form-input" id="f-shoot-event" onchange="handleEventOther()">
-            <option value="Wedding">Wedding</option>
-            <option value="Reception">Reception</option>
-            <option value="Sangeet">Sangeet</option>
-            <option value="Haldi">Haldi</option>
-            <option value="Pellikoduku">Pellikoduku</option>
-            <option value="Pellikuthuru">Pellikuthuru</option>
-            <option value="House Warming">House Warming</option>
-            <option value="Other">Other (specify)</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Session</label>
-          <select class="form-input" id="f-shoot-session">
-            <option value="Morning Session">Morning Session</option>
-            <option value="Evening Session">Evening Session</option>
-            <option value="Full Day">Full Day</option>
-          </select>
-        </div>
-      </div>
-      <div class="form-group" id="f-event-other-wrap" style="display:none">
-        <label class="form-label">Custom Event Type</label>
-        <input class="form-input" type="text" id="f-shoot-event-other" placeholder="e.g. Mehendi"/>
-      </div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Location</label>
-          <select class="form-input" id="f-shoot-loc" onchange="handleLocOther()"></select>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Company</label>
-          <select class="form-input" id="f-shoot-company"></select>
-        </div>
-      </div>
-      <div class="form-group" id="f-loc-other-wrap" style="display:none">
-        <label class="form-label">Custom Location</label>
-        <input class="form-input" type="text" id="f-shoot-loc-other" placeholder="e.g. Mumbai"/>
-      </div>
-      <div class="divider"></div>
-      <div class="form-row">
-        <div class="form-group">
-          <label class="form-label">Total Amount (₹)</label>
-          <input class="form-input" type="number" id="f-shoot-amount" placeholder="e.g. 45000"/>
-        </div>
-        <div class="form-group">
-          <label class="form-label">Payment Status</label>
-          <select class="form-input" id="f-shoot-pay-status" onchange="handlePayStatusChange()">
-            <option value="pending">Pending</option>
-            <option value="part">Part Payment</option>
-            <option value="done">Done</option>
-          </select>
-        </div>
-      </div>
-      <div class="part-payment-box" id="f-part-pay-wrap" style="display:none">
-        <label class="form-label">Part Payment Received (₹)</label>
-        <input class="form-input" type="number" id="f-shoot-part-paid" placeholder="e.g. 15000"/>
-      </div>
-      <div class="form-group">
-        <label class="form-label">Notes</label>
-        <textarea class="form-input" id="f-shoot-notes" placeholder="Any details…"></textarea>
-      </div>
-    </div>
-    <div class="modal-footer">
-      <div style="flex:1"><button class="btn-danger" id="modal-delete-btn" style="display:none" onclick="triggerDeleteFromModal()"><i class="ti ti-trash" style="font-size:14px;vertical-align:-2px;margin-right:4px"></i>Delete</button></div>
-      <button class="btn-secondary" onclick="closeShootModal()">Cancel</button>
-      <button class="btn-primary" onclick="saveShoot()">Save Shoot</button>
-    </div>
-  </div>
-</div>
+  <script>
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 
-<div class="modal-backdrop" id="confirm-modal-backdrop" onclick="handleBackdropClick(event,'confirm-modal-backdrop')">
-  <div class="modal confirm-modal">
-    <div class="confirm-body">
-      <div class="confirm-icon"><i class="ti ti-trash"></i></div>
-      <div class="confirm-title" id="confirm-title">Delete Shoot?</div>
-      <div class="confirm-sub" id="confirm-sub-text">This cannot be undone.</div>
-    </div>
-    <div class="modal-footer" style="justify-content:center;gap:12px">
-      <button class="btn-secondary" onclick="closeConfirmModal()">Cancel</button>
-      <button class="btn-danger-solid" id="confirm-action-btn" onclick="confirmDelete()">Delete</button>
-    </div>
-  </div>
-</div>
+    const HEADERS = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    };
 
-<div class="toast-container" id="toast-container"></div>
+    let pendingDeleteId = null;
 
-<script>
-// ─── SUPABASE CONFIG ──────────────────────────────────────────────────────────
-const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
-const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
-
-const HEADERS = {
-  'Content-Type': 'application/json',
-  'apikey': SUPABASE_KEY,
-  'Authorization': 'Bearer ' + SUPABASE_KEY,
-  'Prefer': 'return=representation'
-};
-
-async function sbFetch(path, opts = {}) {
-  const res = await fetch(SUPABASE_URL + '/rest/v1/' + path, {
-    ...opts,
-    headers: { ...HEADERS, ...(opts.headers || {}) }
-  });
-  if (!res.ok) {
-    const err = await res.text();
-    throw new Error(err);
-  }
-  const text = await res.text();
-  return text ? JSON.parse(text) : [];
-}
-
-// ─── CONSTANTS ────────────────────────────────────────────────────────────────
-const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
-const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
-const EVENT_COLORS = {
-  'Wedding':'#c9a96e','Reception':'#4a9eff','Sangeet':'#a855f7',
-  'Haldi':'#f59e0b','Pellikoduku':'#14b8a6','Pellikuthuru':'#ec4899',
-  'House Warming':'#0ea5e9','Other':'#6b7280'
-};
-const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
-
-// ─── IN-MEMORY CACHE ──────────────────────────────────────────────────────────
-let _shoots = [];
-let _companies = [...DEFAULT_COMPANIES];
-let _locs = [];
-let _initialized = false;
-
-// ─── SYNC STATUS UI ──────────────────────────────────────────────────────────
-function setSyncStatus(state, label) {
-  const el = document.getElementById('sync-status');
-  const lbl = document.getElementById('sync-label');
-  if(el) el.className = 'sync-status ' + state;
-  if(lbl) lbl.textContent = label;
-}
-
-// ─── TOAST ────────────────────────────────────────────────────────────────────
-function showToast(msg, type = 'success') {
-  const c = document.getElementById('toast-container');
-  if(!c) return;
-  const t = document.createElement('div');
-  t.className = 'toast ' + type;
-  t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-check' : 'ti-alert-circle'}"></i>${msg}`;
-  c.appendChild(t);
-  setTimeout(() => t.remove(), 3000);
-}
-
-// ─── DB INIT ──────────────────────────────────────────────────────────────────
-async function ensureTables() {
-  try {
-    await sbFetch('shoots?limit=1');
-    return true;
-  } catch(e) {
-    if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
-      setSyncStatus('error', 'Tables missing — see setup');
-      showTableSetupInstructions();
-      return false;
-    }
-    throw e;
-  }
-}
-
-function showTableSetupInstructions() {
-  document.getElementById('loading-screen').innerHTML = `
-    <div style="max-width:520px;padding:32px;background:var(--card);border:1px solid var(--border);border-radius:var(--radius);text-align:left">
-      <div style="color:var(--gold);font-size:18px;font-weight:600;margin-bottom:12px;display:flex;align-items:center;gap:10px"><i class="ti ti-database" style="font-size:22px"></i> One-Time Setup Required</div>
-      <p style="color:var(--muted);font-size:13px;margin-bottom:16px;line-height:1.6">Your Supabase database needs the following tables. Go to your <a href="https://supabase.com/dashboard" target="_blank" style="color:var(--gold)">Supabase Dashboard → SQL Editor</a> and run this SQL:</p>
-      <pre style="background:var(--bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-size:11px;color:var(--text);overflow-x:auto;line-height:1.6">${sqlSetup()}</pre>
-      <button class="btn-primary" style="margin-top:16px;width:100%" onclick="location.reload()">I've run the SQL — Reload</button>
-    </div>
-  `;
-  document.getElementById('loading-screen').style.background = 'var(--bg)';
-  document.getElementById('loading-screen').style.display = 'flex';
-}
-
-function sqlSetup() {
-  return `create table if not exists shoots (
-  id text primary key,
-  name text,
-  date text,
-  event text,
-  session text,
-  location text,
-  company text,
-  notes text,
-  amount numeric default 0,
-  pay_status text default 'pending',
-  part_paid numeric default 0,
-  created timestamptz default now()
-);
-
-create table if not exists settings (
-  key text primary key,
-  value jsonb
-);
-
-alter table shoots enable row level security;
-alter table settings enable row level security;
-
-create policy "Allow all" on shoots for all using (true) with check (true);
-create policy "Allow all" on settings for all using (true) with check (true);`;
-}
-
-// ─── DATA LAYER ──────────────────────────────────────────────────────────────
-function getShoots() { return _shoots; }
-function getCompanies() { return _companies; }
-function getLocs() { return _locs; }
-function allLocs() { return [...DEFAULT_LOCS, ..._locs]; }
-
-async function loadAll() {
-  setSyncStatus('syncing', 'Loading…');
-  const ok = await ensureTables();
-  if (!ok) return;
-
-  try {
-    const raw = await sbFetch('shoots?select=*&order=date.desc');
-    _shoots = raw.map(dbToShoot);
-
-    const sets = await sbFetch('settings?select=*');
-    const compRow = sets.find(r => r.key === 'companies');
-    const locRow  = sets.find(r => r.key === 'locations');
-    _companies = compRow ? compRow.value : [...DEFAULT_COMPANIES];
-    _locs      = locRow  ? locRow.value  : [];
-
-    _initialized = true;
-    setSyncStatus('synced', 'Synced');
-    document.getElementById('loading-screen').style.display = 'none';
-    renderDashboard();
-  } catch(e) {
-    setSyncStatus('error', 'Sync error');
-    showToast('Failed to load data: ' + e.message, 'error');
-    document.getElementById('loading-screen').style.display = 'none';
-  }
-}
-
-function dbToShoot(r) {
-  return {
-    id: r.id,
-    name: r.name || '',
-    date: r.date || '',
-    event: r.event || 'Wedding',
-    session: r.session || 'Morning Session',
-    location: r.location || '',
-    company: r.company || '',
-    notes: r.notes || '',
-    amount: Number(r.amount || 0),
-    payStatus: r.pay_status || 'pending',
-    partPaid: Number(r.part_paid || 0),
-    created: r.created
-  };
-}
-
-function shootToDb(s) {
-  return {
-    id: s.id,
-    name: s.name,
-    date: s.date,
-    event: s.event,
-    session: s.session,
-    location: s.location,
-    company: s.company,
-    notes: s.notes,
-    amount: s.amount || 0,
-    pay_status: s.payStatus || 'pending',
-    part_paid: s.partPaid || 0,
-    created: s.created || new Date().toISOString()
-  };
-}
-
-async function saveShootToDB(shoot) {
-  setSyncStatus('syncing', 'Saving…');
-  try {
-    const existing = _shoots.find(s => s.id === shoot.id);
-    if (existing) {
-      await sbFetch('shoots?id=eq.' + shoot.id, {
-        method: 'PATCH',
-        body: JSON.stringify(shootToDb(shoot))
+    async function sbFetch(path, opts = {}) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        ...opts,
+        headers: { ...HEADERS, ...(opts.headers || {}) }
       });
-      const idx = _shoots.findIndex(s => s.id === shoot.id);
-      if (idx >= 0) _shoots[idx] = shoot;
-    } else {
-      await sbFetch('shoots', {
-        method: 'POST',
-        body: JSON.stringify(shootToDb(shoot))
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
+    }
+
+    const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
+    const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
+    const EVENT_COLORS = {
+      'Wedding':'#c9a96e','Reception':'#4a9eff','Sangeet':'#a855f7',
+      'Haldi':'#f59e0b','Pellikoduku':'#14b8a6','Pellikuthuru':'#ec4899',
+      'House Warming':'#0ea5e9','Other':'#6b7280'
+    };
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+
+    let _shoots = [];
+    let _companies = [...DEFAULT_COMPANIES];
+    let _locs = [];
+    let _initialized = false;
+    let revenueChartInstance = null;
+    let _privacyModeActive = true; 
+
+    function setSyncStatus(state, label) {
+      const dot = document.getElementById('sync-dot');
+      const lbl = document.getElementById('sync-label');
+      if (!dot || !lbl) return;
+      dot.className = 'status-dot ' + state;
+      lbl.textContent = label;
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      if(!c) return;
+      const t = document.createElement('div');
+      t.className = 'toast-node ' + type;
+      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'}"></i><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    async function ensureTables() {
+      try {
+        await sbFetch('shoots?limit=1');
+        return true;
+      } catch(e) {
+        setSyncStatus('error', 'Schema Connection Exception');
+        showToast('Infrastructure connection dropped.', 'error');
+        return false;
+      }
+    }
+
+    function resetModal() {
+      document.getElementById('edit-shoot-id').value = '';
+      document.getElementById('f-shoot-name').value = '';
+      document.getElementById('f-shoot-date').value = '';
+      document.getElementById('f-shoot-event').value = 'Wedding';
+      document.getElementById('f-shoot-event-other').value = '';
+      document.getElementById('f-event-other-wrap').style.display = 'none';
+      document.getElementById('f-shoot-session').value = 'Morning Session';
+      document.getElementById('f-shoot-loc-other').value = '';
+      document.getElementById('f-loc-other-wrap').style.display = 'none';
+      document.getElementById('f-shoot-notes').value = '';
+      document.getElementById('f-shoot-amount').value = '';
+      document.getElementById('f-shoot-expenses').value = ''; 
+      document.getElementById('f-shoot-pay-status').value = 'pending';
+      document.getElementById('f-shoot-part-paid').value = '';
+      document.getElementById('f-part-pay-wrap').style.display = 'none';
+    }
+
+    function dbToShoot(r) {
+      return {
+        id: r.id,
+        name: r.name || '',
+        date: r.date || '',
+        event: r.event || 'Wedding',
+        session: r.session || 'Morning Session',
+        location: r.location || '',
+        company: r.company || '',
+        notes: r.notes || '',
+        amount: Number(r.amount || 0),
+        expenses: Number(r.expenses || 0),
+        payStatus: r.pay_status || 'pending',
+        partPaid: Number(r.part_paid || 0),
+        created: r.created
+      };
+    }
+
+    function shootToDb(s) {
+      return {
+        id: s.id,
+        name: s.name,
+        date: s.date,
+        event: s.event,
+        session: s.session,
+        location: s.location,
+        company: s.company,
+        notes: s.notes,
+        amount: s.amount || 0,
+        expenses: s.expenses || 0,
+        pay_status: s.payStatus || 'pending',
+        part_paid: s.partPaid || 0,
+        created: s.created || new Date().toISOString()
+      };
+    }
+
+    async function loadAll() {
+      setSyncStatus('syncing', 'Synchronising Storage...');
+      const ok = await ensureTables();
+      if (!ok) return;
+      try {
+        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        _shoots = raw.map(dbToShoot);
+        const sets = await sbFetch('settings?select=*');
+        const compRow = sets.find(r => r.key === 'companies');
+        const locRow  = sets.find(r => r.key === 'locations');
+        _companies = compRow ? compRow.value : [...DEFAULT_COMPANIES];
+        _locs      = locRow  ? locRow.value  : [];
+        _initialized = true;
+        setSyncStatus('synced', 'Synced Cloud');
+        document.getElementById('loading-screen').style.display = 'none';
+        applyPrivacyUIVisualState();
+        renderDashboard();
+      } catch(e) {
+        setSyncStatus('error', 'Connection Intercept Error');
+        document.getElementById('loading-screen').style.display = 'none';
+      }
+    }
+
+    function togglePrivacyMode() {
+      if (_privacyModeActive) {
+        const phrase = prompt("Enter verification passkey to decrypt financial data summaries:");
+        if (phrase === "JP@22") {
+          _privacyModeActive = false;
+          showToast("Privacy mode deactivated.");
+        } else if (phrase !== null) {
+          showToast("Access configuration code authentication failed.", "error");
+        }
+      } else {
+        _privacyModeActive = true;
+        showToast("Financial data encrypted successfully.");
+      }
+      applyPrivacyUIVisualState();
+    }
+
+    function applyPrivacyUIVisualState() {
+      const btn = document.getElementById('privacy-toggle-btn');
+      const icon = document.getElementById('privacy-icon');
+      if (!btn || !icon) return;
+      if (_privacyModeActive) {
+        btn.className = "btn-icon locked";
+        icon.className = "ti ti-eye-off";
+      } else {
+        btn.className = "btn-icon unlocked";
+        icon.className = "ti ti-eye";
+      }
+      document.querySelectorAll('.currency-mask').forEach(el => {
+        if (_privacyModeActive) el.classList.add('blur-financial');
+        else el.classList.remove('blur-financial');
       });
-      _shoots.push(shoot);
     }
-    setSyncStatus('synced', 'Synced');
-    showToast('Shoot saved');
-  } catch(e) {
-    setSyncStatus('error', 'Save failed');
-    showToast('Save failed: ' + e.message, 'error');
-    throw e;
-  }
-}
 
-async function deleteShootFromDB(id) {
-  setSyncStatus('syncing', 'Deleting…');
-  try {
-    await sbFetch('shoots?id=eq.' + id, { method: 'DELETE' });
-    _shoots = _shoots.filter(s => s.id !== id);
-    setSyncStatus('synced', 'Synced');
-    showToast('Shoot deleted');
-  } catch(e) {
-    setSyncStatus('error', 'Delete failed');
-    showToast('Delete failed: ' + e.message, 'error');
-    throw e;
-  }
-}
-
-async function saveSettingToDB(key, value) {
-  setSyncStatus('syncing', 'Saving…');
-  try {
-    await sbFetch('settings?key=eq.' + key, {
-      method: 'DELETE'
-    }).catch(() => {});
-    await sbFetch('settings', {
-      method: 'POST',
-      headers: { 'Prefer': 'resolution=merge-duplicates' },
-      body: JSON.stringify({ key, value })
-    });
-    setSyncStatus('synced', 'Synced');
-  } catch(e) {
-    setSyncStatus('error', 'Settings save failed');
-    showToast('Settings save failed: ' + e.message, 'error');
-  }
-}
-
-async function forceSync() {
-  setSyncStatus('syncing', 'Refreshing…');
-  try {
-    const raw = await sbFetch('shoots?select=*&order=date.desc');
-    _shoots = raw.map(dbToShoot);
-    const sets = await sbFetch('settings?select=*');
-    const compRow = sets.find(r => r.key === 'companies');
-    const locRow  = sets.find(r => r.key === 'locations');
-    _companies = compRow ? compRow.value : [...DEFAULT_COMPANIES];
-    _locs      = locRow  ? locRow.value  : [];
-    setSyncStatus('synced', 'Synced');
-    showToast('Data refreshed from cloud');
-    refreshCurrentTab();
-  } catch(e) {
-    setSyncStatus('error', 'Sync failed');
-    showToast('Sync failed: ' + e.message, 'error');
-  }
-}
-
-// ─── HELPERS ─────────────────────────────────────────────────────────────────
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-function today() { return new Date().toISOString().slice(0,10); }
-function fmtDate(d) {
-  if (!d) return '';
-  const dt = new Date(d + 'T00:00:00');
-  return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
-}
-function fmtAmt(n) { return '₹' + Number(n||0).toLocaleString('en-IN'); }
-function eventColor(ev) { return EVENT_COLORS[ev] || '#6b7280'; }
-function eventBadgeClass(ev) {
-  const map = {'Wedding':'badge-wedding','Reception':'badge-reception','Sangeet':'badge-sangeet','Haldi':'badge-haldi','Pellikoduku':'badge-pellikoduku','Pellikuthuru':'badge-pellikuthuru','House Warming':'badge-house-warming'};
-  return map[ev] || 'badge-other';
-}
-function payBadgeClass(s) { return {'pending':'badge-pending','part':'badge-part','done':'badge-done'}[s]||'badge-pending'; }
-function payLabel(s) { return {'pending':'Pending','part':'Part Payment','done':'Done'}[s]||'Pending'; }
-function ddMmm(d) {
-  if (!d) return {dd:'',mmm:''};
-  const dt = new Date(d+'T00:00:00');
-  return { dd: dt.getDate(), mmm: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()] };
-}
-
-// ─── NAV ─────────────────────────────────────────────────────────────────────
-function switchTab(tab) {
-  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
-  document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active'));
-  document.getElementById('section-' + tab).classList.add('active');
-  document.getElementById('tab-' + tab).classList.add('active');
-  if (tab === 'dashboard') renderDashboard();
-  if (tab === 'calendar') renderCalendar();
-  if (tab === 'shoots') renderShootsList();
-  if (tab === 'payments') renderPayments();
-  if (tab === 'settings') renderSettings();
-}
-
-// ─── DASHBOARD ───────────────────────────────────────────────────────────────
-function renderDashboard() {
-  const shoots = getShoots();
-  const td = today();
-  const now = new Date();
-  const monthStr = now.toISOString().slice(0,7);
-  const in7 = new Date(now); in7.setDate(in7.getDate()+7);
-  const in7str = in7.toISOString().slice(0,10);
-
-  document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-
-  const thisMonth = shoots.filter(s => s.date && s.date.startsWith(monthStr)).length;
-  const upcoming = shoots.filter(s => s.date >= td).length;
-  const next7 = shoots.filter(s => s.date >= td && s.date <= in7str).length;
-
-  document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card gold"><div class="stat-label">Total Shoots</div><div class="stat-value">${shoots.length}</div><div class="stat-sub">all time</div></div>
-    <div class="stat-card blue"><div class="stat-label">This Month</div><div class="stat-value">${thisMonth}</div><div class="stat-sub">${MONTHS[now.getMonth()]}</div></div>
-    <div class="stat-card purple"><div class="stat-label">Upcoming</div><div class="stat-value">${upcoming}</div><div class="stat-sub">from today</div></div>
-    <div class="stat-card green"><div class="stat-label">Next 7 Days</div><div class="stat-value">${next7}</div><div class="stat-sub">shoots ahead</div></div>
-  `;
-
-  const upcomingList = shoots.filter(s => s.date >= td).sort((a,b) => a.date.localeCompare(b.date)).slice(0,15);
-  const ul = document.getElementById('dash-upcoming');
-  if (!upcomingList.length) {
-    ul.innerHTML = '<div class="empty-state"><i class="ti ti-calendar-off"></i><span>No upcoming shoots</span></div>';
-  } else {
-    ul.innerHTML = upcomingList.map(s => shootRowHTML(s, true)).join('');
-  }
-
-  const totalAmt = shoots.reduce((a,s)=>a+Number(s.amount||0),0);
-  const received = shoots.reduce((a,s)=>{
-    if (s.payStatus==='done') return a+Number(s.amount||0);
-    if (s.payStatus==='part') return a+Number(s.partPaid||0);
-    return a;
-  },0);
-  const outstanding = totalAmt - received;
-  const doneCount = shoots.filter(s=>s.payStatus==='done').length;
-  const partCount = shoots.filter(s=>s.payStatus==='part').length;
-  const pendingCount = shoots.filter(s=>!s.payStatus||s.payStatus==='pending').length;
-
-  document.getElementById('dash-payments').innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:10px">
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--muted);font-size:13px">Total contracted</span>
-        <span style="font-weight:600;font-size:15px">${fmtAmt(totalAmt)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--muted);font-size:13px">Received</span>
-        <span style="font-weight:600;font-size:15px;color:var(--green)">${fmtAmt(received)}</span>
-      </div>
-      <div style="display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid var(--border)">
-        <span style="color:var(--muted);font-size:13px">Outstanding</span>
-        <span style="font-weight:600;font-size:15px;color:var(--amber)">${fmtAmt(outstanding)}</span>
-      </div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:4px">
-        <span class="badge badge-done">${doneCount} Paid</span>
-        <span class="badge badge-part">${partCount} Part paid</span>
-        <span class="badge badge-pending">${pendingCount} Pending</span>
-      </div>
-    </div>
-  `;
-}
-
-// ─── SHOOT ROW HTML ───────────────────────────────────────────────────────────
-function shootRowHTML(s, hideActions) {
-  const {dd, mmm} = ddMmm(s.date);
-  const balance = Number(s.amount||0) - Number(s.partPaid||0);
-  const payInfo = s.amount ? `
-    <div class="pay-info">
-      <div class="pay-amount">${fmtAmt(s.amount)}</div>
-      ${s.payStatus==='part' ? `<div class="pay-part">+${fmtAmt(s.partPaid||0)}</div><div class="pay-balance">${fmtAmt(balance)} due</div>` : ''}
-      <div style="margin-top:3px"><span class="badge ${payBadgeClass(s.payStatus)}">${payLabel(s.payStatus)}</span></div>
-    </div>` : '';
-  const actions = hideActions ? '' : `
-    <div class="shoot-row-actions">
-      <button class="icon-btn" onclick="event.stopPropagation();openEditShootModal('${s.id}')" title="Edit"><i class="ti ti-edit"></i></button>
-      <button class="icon-btn danger" onclick="event.stopPropagation();askDelete('${s.id}')" title="Delete"><i class="ti ti-trash"></i></button>
-    </div>`;
-  return `
-    <div class="shoot-row" onclick="openEditShootModal('${s.id}')">
-      <div class="date-box"><div class="dd">${dd}</div><div class="mmm">${mmm}</div></div>
-      <div class="shoot-row-info">
-        <div class="shoot-row-name">${s.name}</div>
-        <div class="shoot-row-meta">${s.location||''}${s.location&&s.company?' · ':''}${s.company||''} &nbsp; <span style="color:var(--muted2)">${s.session||''}</span></div>
-      </div>
-      <span class="badge ${eventBadgeClass(s.event)}" style="flex-shrink:0">${s.event||'Other'}</span>
-      ${payInfo}
-      ${actions}
-    </div>`;
-}
-
-// ─── CALENDAR ────────────────────────────────────────────────────────────────
-let calYear = new Date().getFullYear();
-let calMonth = new Date().getMonth();
-let calSelected = null;
-
-function renderCalendar() {
-  const shoots = getShoots();
-  const td = today();
-  document.getElementById('cal-month-label').textContent = MONTHS[calMonth] + ' ' + calYear;
-
-  const firstDay = new Date(calYear, calMonth, 1).getDay();
-  const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
-  const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-
-  let html = DAYS.map(d => `<div class="cal-dow">${d}</div>`).join('');
-
-  const shootsByDate = {};
-  shoots.forEach(s => {
-    if (!s.date) return;
-    if (!shootsByDate[s.date]) shootsByDate[s.date] = [];
-    shootsByDate[s.date].push(s);
-  });
-
-  let cells = [];
-  for (let i = 0; i < firstDay; i++) {
-    const d = daysInPrev - firstDay + 1 + i;
-    cells.push({ day: d, month: calMonth - 1, year: calYear, other: true });
-  }
-  for (let d = 1; d <= daysInMonth; d++) {
-    cells.push({ day: d, month: calMonth, year: calYear, other: false });
-  }
-  const rem = 42 - cells.length;
-  for (let d = 1; d <= rem; d++) {
-    cells.push({ day: d, month: calMonth + 1, year: calYear, other: true });
-  }
-
-  cells.forEach(c => {
-    const dd = String(c.day).padStart(2,'0');
-    const yr = c.month < 0 ? c.year - 1 : (c.month > 11 ? c.year + 1 : c.year);
-    const realMm = c.month < 0 ? 12 : (c.month > 11 ? 1 : c.month + 1);
-    const dateStr = yr + '-' + String(realMm).padStart(2,'0') + '-' + dd;
-    const isToday = dateStr === td;
-    const isSelected = dateStr === calSelected;
-    const dayShoots = shootsByDate[dateStr] || [];
-    const dots = dayShoots.map(s => `<div class="cal-dot" style="background:${eventColor(s.event)}"></div>`).join('');
-    html += `<div class="cal-cell${c.other?' other-month':''}${isToday?' today':''}${isSelected?' selected':''}" onclick="selectCalDay('${dateStr}')">
-      <div class="cal-day">${c.day}</div>
-      <div class="cal-dots">${dots}</div>
-    </div>`;
-  });
-
-  document.getElementById('cal-grid').innerHTML = html;
-  renderCalDayPanel();
-}
-
-function selectCalDay(dateStr) {
-  calSelected = calSelected === dateStr ? null : dateStr;
-  renderCalendar();
-}
-
-function renderCalDayPanel() {
-  const panel = document.getElementById('cal-day-panel');
-  if (!panel) return;
-  if (!calSelected) { panel.style.display = 'none'; return; }
-  const shoots = getShoots().filter(s => s.date === calSelected);
-  const dt = new Date(calSelected + 'T00:00:00');
-  const label = dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
-  panel.style.display = 'block';
-  let inner = `<div class="cal-day-panel-title"><span>${label}</span><button class="btn-outline" onclick="openAddShootModal('${calSelected}')"><i class="ti ti-plus"></i> Add Shoot</button></div>`;
-  if (!shoots.length) {
-    inner += `<div class="add-shoot-prompt"><i class="ti ti-camera-off" style="font-size:28px;color:var(--muted2)"></i><span style="font-size:13px">No shoots on this day</span></div>`;
-  } else {
-    inner += shoots.map(s => shootRowHTML(s, false)).join('');
-  }
-  panel.innerHTML = `<div class="cal-day-panel">${inner}</div>`;
-}
-
-function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
-function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
-function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
-
-// ─── SHOOTS LIST ──────────────────────────────────────────────────────────────
-function renderShootsList() {
-  const q = (document.getElementById('shoot-search')?.value||'').toLowerCase();
-  const fc = document.getElementById('filter-company')?.value||'';
-  const fe = document.getElementById('filter-event')?.value||'';
-  const fl = document.getElementById('filter-loc')?.value||'';
-
-  const companies = getCompanies();
-  const ce = document.getElementById('filter-company');
-  if (ce) {
-    const curC = ce.value;
-    ce.innerHTML = '<option value="">All Companies</option>' + companies.map(c=>`<option value="${c}" ${c===curC?'selected':''}>${c}</option>`).join('');
-  }
-
-  const events = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
-  const ee = document.getElementById('filter-event');
-  if (ee) {
-    const curE = ee.value;
-    ee.innerHTML = '<option value="">All Events</option>' + events.map(e=>`<option value="${e}" ${e===curE?'selected':''}>${e}</option>`).join('');
-  }
-
-  const le = document.getElementById('filter-loc');
-  if (le) {
-    const curL = le.value;
-    le.innerHTML = '<option value="">All Locations</option>' + allLocs().map(l=>`<option value="${l}" ${l===curL?'selected':''}>${l}</option>`).join('');
-  }
-
-  let shoots = getShoots().sort((a,b) => (b.date||'').localeCompare(a.date||''));
-  if (q) shoots = shoots.filter(s => (s.name+s.location+s.company+s.notes).toLowerCase().includes(q));
-  if (fc) shoots = shoots.filter(s => s.company === fc);
-  if (fe) shoots = shoots.filter(s => s.event === fe);
-  if (fl) shoots = shoots.filter(s => s.location === fl);
-
-  const el = document.getElementById('shoots-list');
-  if (el) {
-    if (!shoots.length) {
-      el.innerHTML = '<div class="empty-state"><i class="ti ti-camera-off"></i><span>No shoots found</span></div>';
-    } else {
-      el.innerHTML = shoots.map(s => shootRowHTML(s, false)).join('');
+    function generateWhatsAppMessagePayload(shootObj) {
+      const name = shootObj.name || 'Client';
+      const date = shootObj.date ? fmtDate(shootObj.date) : '[Date Not Specified]';
+      const event = shootObj.event || 'Shoot';
+      const location = shootObj.location || 'Your Specified Location';
+      const rawString = `Hi ${name}, this is Jashwanth JP. Just confirming our schedule for the ${event} shoot on ${date} at ${location}. Looking forward to working with you!`;
+      return `https://wa.me/?text=${encodeURIComponent(rawString)}`;
     }
-  }
-}
 
-// ─── PAYMENTS ────────────────────────────────────────────────────────────────
-function renderPayments() {
-  const shoots = getShoots();
-  const totalAmt = shoots.reduce((a,s)=>a+Number(s.amount||0),0);
-  const received = shoots.reduce((a,s)=>{
-    if (s.payStatus==='done') return a+Number(s.amount||0);
-    if (s.payStatus==='part') return a+Number(s.partPaid||0);
-    return a;
-  },0);
-  const outstanding = shoots.reduce((a,s)=>{
-    if (s.payStatus==='done') return a;
-    if (s.payStatus==='part') return a + (Number(s.amount||0) - Number(s.partPaid||0));
-    return a + Number(s.amount||0);
-  },0);
-  const partTotal = shoots.filter(s=>s.payStatus==='part').reduce((a,s)=>a+Number(s.partPaid||0),0);
-
-  const pStats = document.getElementById('pay-stats');
-  if (pStats) {
-    pStats.innerHTML = `
-      <div class="stat-card gold"><div class="stat-label">Total Contracted</div><div class="stat-value" style="font-size:20px">${fmtAmt(totalAmt)}</div><div class="stat-sub">${shoots.filter(s=>s.amount).length} shoots with amount</div></div>
-      <div class="stat-card green"><div class="stat-label">Total Received</div><div class="stat-value" style="font-size:20px">${fmtAmt(received)}</div><div class="stat-sub">fully paid + part paid</div></div>
-      <div class="stat-card"><div class="stat-label">Outstanding</div><div class="stat-value" style="font-size:20px;color:var(--amber)">${fmtAmt(outstanding)}</div><div class="stat-sub">balance due</div></div>
-      <div class="stat-card purple"><div class="stat-label">Part Payments</div><div class="stat-value" style="font-size:20px">${fmtAmt(partTotal)}</div><div class="stat-sub">${shoots.filter(s=>s.payStatus==='part').length} shoots</div></div>
-    `;
-  }
-  renderPaymentsList();
-}
-
-// ─── PAYMENTS LIST ───────────────────────────────────────────────────────────
-function renderPaymentsList() {
-  const q = (document.getElementById('pay-search')?.value||'').toLowerCase();
-  const fs = document.getElementById('pay-filter-status')?.value||'';
-  let shoots = getShoots().filter(s => s.amount).sort((a,b) => (b.date||'').localeCompare(a.date||''));
-  if (q) shoots = shoots.filter(s => (s.name||'').toLowerCase().includes(q));
-  if (fs) shoots = shoots.filter(s => (s.payStatus||'pending') === fs);
-
-  const el = document.getElementById('payments-list');
-  if (!el) return;
-  if (!shoots.length) {
-    el.innerHTML = '<div class="empty-state"><i class="ti ti-wallet-off"></i><span>No payment records found</span></div>';
-    return;
-  }
-  el.innerHTML = shoots.map(s => {
-    const {dd, mmm} = ddMmm(s.date);
-    const balance = Number(s.amount||0) - Number(s.partPaid||0);
-    return `<div class="shoot-row" onclick="openEditShootModal('${s.id}')">
-      <div class="date-box"><div class="dd">${dd}</div><div class="mmm">${mmm}</div></div>
-      <div class="shoot-row-info">
-        <div class="shoot-row-name">${s.name}</div>
-        <div class="shoot-row-meta">${s.company||''} &nbsp; <span class="badge ${eventBadgeClass(s.event)}">${s.event||''}</span></div>
-      </div>
-      <div class="pay-info">
-        <div style="font-size:15px;font-weight:600">${fmtAmt(s.amount)}</div>
-        ${s.payStatus==='part' ? `<div style="font-size:12px;color:var(--green);margin-top:2px">${fmtAmt(s.partPaid||0)} received</div><div style="font-size:11px;color:var(--muted)">${fmtAmt(balance)} due</div>` : ''}
-        <div style="margin-top:4px"><span class="badge ${payBadgeClass(s.payStatus||'pending')}">${payLabel(s.payStatus||'pending')}</span></div>
-      </div>
-      <div class="shoot-row-actions">
-        <button class="icon-btn" onclick="event.stopPropagation();openEditShootModal('${s.id}')" title="Edit"><i class="ti ti-edit"></i></button>
-        <button class="icon-btn danger" onclick="event.stopPropagation();askDelete('${s.id}')" title="Delete"><i class="ti ti-trash"></i></button>
-      </div>
-    </div>`;
-  }).join('');
-}
-
-// ─── SETTINGS ────────────────────────────────────────────────────────────────
-function renderSettings() {
-  const companies = getCompanies();
-  const customLocs = getLocs();
-
-  const sComp = document.getElementById('settings-companies');
-  if (sComp) {
-    sComp.innerHTML = companies.map((c,i) => `
-      <div class="settings-item">
-        <span class="settings-item-name">${c}</span>
-        <div class="settings-actions">
-          <button class="icon-btn" onclick="renameCompany(${i})" title="Rename"><i class="ti ti-pencil"></i></button>
-          <button class="icon-btn danger" onclick="deleteCompany(${i})" title="Delete"><i class="ti ti-trash"></i></button>
-        </div>
-      </div>`).join('');
-  }
-
-  const sLoc = document.getElementById('settings-locations');
-  if (sLoc) {
-    const locHTML = DEFAULT_LOCS.map(l => `
-      <div class="settings-item">
-        <span class="settings-item-name">${l}</span>
-        <span class="settings-item-tag">default</span>
-      </div>`).join('') +
-      customLocs.map((l,i) => `
-      <div class="settings-item">
-        <span class="settings-item-name">${l}</span>
-        <div class="settings-actions">
-          <button class="icon-btn" onclick="renameLocation(${i})" title="Rename"><i class="ti ti-pencil"></i></button>
-          <button class="icon-btn danger" onclick="deleteLocation(${i})" title="Delete"><i class="ti ti-trash"></i></button>
-        </div>
-      </div>`).join('');
-    sLoc.innerHTML = locHTML;
-  }
-}
-
-async function addCompany() {
-  const val = document.getElementById('new-company-input').value.trim();
-  if (!val) return;
-  _companies.push(val);
-  await saveSettingToDB('companies', _companies);
-  document.getElementById('new-company-input').value = '';
-  renderSettings();
-}
-async function deleteCompany(i) {
-  _companies.splice(i,1);
-  await saveSettingToDB('companies', _companies);
-  renderSettings();
-}
-async function renameCompany(i) {
-  const newName = prompt('Rename company:', _companies[i]);
-  if (!newName || newName === _companies[i]) return;
-  const old = _companies[i];
-  _companies[i] = newName;
-  await saveSettingToDB('companies', _companies);
-  for (const s of _shoots.filter(s => s.company === old)) {
-    s.company = newName;
-    await saveShootToDB(s);
-  }
-  renderSettings();
-}
-async function addLocation() {
-  const val = document.getElementById('new-loc-input').value.trim();
-  if (!val || DEFAULT_LOCS.includes(val)) return;
-  if (!_locs.includes(val)) { _locs.push(val); await saveSettingToDB('locations', _locs); }
-  document.getElementById('new-loc-input').value = '';
-  renderSettings();
-}
-async function deleteLocation(i) {
-  _locs.splice(i,1);
-  await saveSettingToDB('locations', _locs);
-  renderSettings();
-}
-async function renameLocation(i) {
-  const newName = prompt('Rename location:', _locs[i]);
-  if (!newName || newName === _locs[i]) return;
-  const old = _locs[i];
-  _locs[i] = newName;
-  await saveSettingToDB('locations', _locs);
-  for (const s of _shoots.filter(s => s.location === old)) {
-    s.location = newName;
-    await saveShootToDB(s);
-  }
-  renderSettings();
-}
-
-// ─── CLEAR DATA ───────────────────────────────────────────────────────────────
-let _pendingClear = false;
-function confirmClearData() {
-  _pendingClear = true;
-  document.getElementById('confirm-title').textContent = 'Clear All Data?';
-  document.getElementById('confirm-sub-text').textContent = 'This will permanently delete ALL shoots and settings from the database.';
-  document.getElementById('confirm-action-btn').textContent = 'Clear All';
-  document.getElementById('confirm-action-btn').onclick = doClearData;
-  openModal('confirm-modal-backdrop');
-}
-async function doClearData() {
-  closeConfirmModal();
-  setSyncStatus('syncing', 'Clearing…');
-  try {
-    await sbFetch('shoots?id=neq.___none___', { method: 'DELETE' });
-    await sbFetch('settings?key=neq.___none___', { method: 'DELETE' });
-    _shoots = []; _companies = [...DEFAULT_COMPANIES]; _locs = [];
-    setSyncStatus('synced', 'Synced');
-    showToast('All data cleared');
-    refreshCurrentTab();
-  } catch(e) {
-    setSyncStatus('error', 'Clear failed');
-    showToast('Clear failed: ' + e.message, 'error');
-  }
-}
-
-// ─── MODAL MANAGEMENT ─────────────────────────────────────────────────────────
-function openAddShootModal(prefillDate) {
-  resetModal();
-  document.getElementById('shoot-modal-title').textContent = 'New Shoot';
-  document.getElementById('modal-delete-btn').style.display = 'none';
-  document.getElementById('f-shoot-date').value = prefillDate || today();
-  populateModalDropdowns();
-  openModal('shoot-modal-backdrop');
-}
-
-function openEditShootModal(id) {
-  const s = _shoots.find(x => x.id === id);
-  if (!s) return;
-  resetModal();
-  document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
-  document.getElementById('modal-delete-btn').style.display = 'inline-flex';
-  document.getElementById('edit-shoot-id').value = id;
-  populateModalDropdowns(s);
-  document.getElementById('f-shoot-name').value = s.name || '';
-  document.getElementById('f-shoot-date').value = s.date || '';
-  document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
-  document.getElementById('f-shoot-notes').value = s.notes || '';
-  document.getElementById('f-shoot-amount').value = s.amount || '';
-  document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
-  document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
-  document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? '' : 'none';
-
-  const events = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
-  if (s.event && !events.includes(s.event)) {
-    document.getElementById('f-shoot-event').value = 'Other';
-    document.getElementById('f-shoot-event-other').value = s.event;
-    document.getElementById('f-event-other-wrap').style.display = '';
-  } else {
-    document.getElementById('f-shoot-event').value = s.event || 'Wedding';
-    document.getElementById('f-event-other-wrap').style.display = 'none';
-  }
-
-  openModal('shoot-modal-backdrop');
-}
-
-function populateModalDropdowns(s) {
-  const companies = getCompanies();
-  const locs = allLocs();
-  const compSel = document.getElementById('f-shoot-company');
-  if (compSel) {
-    compSel.innerHTML = companies.map(c => `<option value="${c}">${c}</option>`).join('');
-    if (s && s.company) compSel.value = s.company;
-  }
-
-  const locSel = document.getElementById('f-shoot-loc');
-  if (locSel) {
-    locSel.innerHTML = locs.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Other (specify below)</option>';
-    if (s && s.location) {
-      if (locs.includes(s.location)) { locSel.value = s.location; document.getElementById('f-loc-other-wrap').style.display = 'none'; }
-      else { locSel.value = '__other__'; document.getElementById('f-shoot-loc-other').value = s.location; document.getElementById('f-loc-other-wrap').style.display = ''; }
+    function executeWhatsAppRedirect(id, e) {
+      if(e) { e.stopPropagation(); e.preventDefault(); }
+      const targetShoot = _shoots.find(s => s.id === id);
+      if(!targetShoot) return;
+      window.open(generateWhatsAppMessagePayload(targetShoot), '_blank');
     }
-  }
-}
 
-function resetModal() {
-  document.getElementById('edit-shoot-id').value = '';
-  document.getElementById('f-shoot-name').value = '';
-  document.getElementById('f-shoot-date').value = '';
-  document.getElementById('f-shoot-event').value = 'Wedding';
-  document.getElementById('f-shoot-event-other').value = '';
-  document.getElementById('f-event-other-wrap').style.display = 'none';
-  document.getElementById('f-shoot-session').value = 'Morning Session';
-  document.getElementById('f-shoot-loc-other').value = '';
-  document.getElementById('f-loc-other-wrap').style.display = 'none';
-  document.getElementById('f-shoot-notes').value = '';
-  document.getElementById('f-shoot-amount').value = '';
-  document.getElementById('f-shoot-pay-status').value = 'pending';
-  document.getElementById('f-shoot-part-paid').value = '';
-  document.getElementById('f-part-pay-wrap').style.display = 'none';
-}
-
-function handleEventOther() {
-  document.getElementById('f-event-other-wrap').style.display = document.getElementById('f-shoot-event').value === 'Other' ? '' : 'none';
-}
-function handleLocOther() {
-  document.getElementById('f-loc-other-wrap').style.display = document.getElementById('f-shoot-loc').value === '__other__' ? '' : 'none';
-}
-function handlePayStatusChange() {
-  document.getElementById('f-part-pay-wrap').style.display = document.getElementById('f-shoot-pay-status').value === 'part' ? '' : 'none';
-}
-
-async function saveShoot() {
-  const name = document.getElementById('f-shoot-name').value.trim();
-  const date = document.getElementById('f-shoot-date').value;
-  if (!name) { document.getElementById('f-shoot-name').focus(); return; }
-  if (!date) { document.getElementById('f-shoot-date').focus(); return; }
-
-  let event = document.getElementById('f-shoot-event').value;
-  if (event === 'Other') {
-    event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
-  }
-
-  let location = document.getElementById('f-shoot-loc').value;
-  if (location === '__other__') {
-    location = document.getElementById('f-shoot-loc-other').value.trim();
-    if (location && !_locs.includes(location)) {
-      _locs.push(location);
-      await saveSettingToDB('locations', _locs);
+    function triggerWhatsAppFromModal() {
+      const editId = document.getElementById('edit-shoot-id').value;
+      if(editId) executeWhatsAppRedirect(editId, null);
     }
-  }
 
-  const payStatus = document.getElementById('f-shoot-pay-status').value;
-  const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-  const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value)||0) : (payStatus === 'done' ? amount : 0);
+    function handleEventOther() {
+      const ev = document.getElementById('f-shoot-event').value;
+      document.getElementById('f-event-other-wrap').style.display = (ev === 'Other') ? 'block' : 'none';
+    }
 
-  const editId = document.getElementById('edit-shoot-id').value;
-  const shoot = {
-    id: editId || uid(),
-    name, date, event,
-    session: document.getElementById('f-shoot-session').value,
-    location,
-    company: document.getElementById('f-shoot-company').value,
-    notes: document.getElementById('f-shoot-notes').value.trim(),
-    amount, payStatus, partPaid,
-    created: editId ? (_shoots.find(s=>s.id===editId)?.created || new Date().toISOString()) : new Date().toISOString()
-  };
+    function handleLocOther() {
+      const loc = document.getElementById('f-shoot-loc').value;
+      document.getElementById('f-loc-other-wrap').style.display = (loc === '__other__') ? 'block' : 'none';
+    }
 
-  try {
-    await saveShootToDB(shoot);
-    closeShootModal();
-    refreshCurrentTab();
-  } catch(e) { /* error handled */ }
-}
+    function handlePayStatusChange() {
+      const status = document.getElementById('f-shoot-pay-status').value;
+      document.getElementById('f-part-pay-wrap').style.display = (status === 'part') ? 'block' : 'none';
+    }
 
-function refreshCurrentTab() {
-  const active = document.querySelector('.nav-tab.active');
-  if (!active) return;
-  const tab = active.id.replace('tab-','');
-  if (tab === 'dashboard') renderDashboard();
-  if (tab === 'calendar') renderCalendar();
-  if (tab === 'shoots') renderShootsList();
-  if (tab === 'payments') renderPayments();
-}
+    function injectAnalyticsGrowthChartGraphics() {
+      const canvasCtx = document.getElementById('revenueGrowthChart');
+      if(!canvasCtx) return;
+      const matrixMap = {};
+      _shoots.forEach(s => {
+        if(!s.date) return;
+        const indexMonth = s.date.slice(0, 7);
+        if(!matrixMap[indexMonth]) matrixMap[indexMonth] = 0;
+        matrixMap[indexMonth] += Number(s.amount || 0);
+      });
+      const chronologKeys = Object.keys(matrixMap).sort();
+      const chartLabels = chronologKeys.map(k => {
+        const p = k.split('-');
+        return `${MONTHS[parseInt(p[1])-1].slice(0,3)} ${p[0].slice(2)}`;
+      });
+      const dataPayload = chronologKeys.map(k => matrixMap[k]);
+      if (revenueChartInstance) revenueChartInstance.destroy();
+      if(chronologKeys.length === 0) { canvasCtx.style.display = 'none'; return; }
+      else { canvasCtx.style.display = 'block'; }
+      
+      revenueChartInstance = new Chart(canvasCtx, {
+        type: 'line',
+        data: {
+          labels: chartLabels,
+          datasets: [{
+            label: 'Contract Gross (₹)',
+            data: dataPayload,
+            borderColor: '#c9a96e',
+            backgroundColor: 'rgba(201, 169, 110, 0.03)',
+            borderWidth: 2,
+            tension: 0.3,
+            fill: true,
+            pointBackgroundColor: '#e6c98a',
+            pointRadius: 4
+          }]
+        },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          plugins: { legend: { display: false } },
+          scales: {
+            y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666', font: { size: 10 }, callback: v => '₹' + v.toLocaleString('en-IN') } },
+            x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } }
+          }
+        }
+      });
+    }
 
-function triggerDeleteFromModal() {
-  const id = document.getElementById('edit-shoot-id').value;
-  if (id) { closeShootModal(); setTimeout(() => askDelete(id), 100); }
-}
+    function renderDashboard() {
+      const shoots = _shoots;
+      const td = today();
+      const now = new Date();
+      const monthStr = now.toISOString().slice(0,7);
+      document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
+      
+      const totalValueCount = shoots.length;
+      const volumeThisMonth = shoots.filter(s => s.date && s.date.startsWith(monthStr)).length;
+      const volumeUpcoming = shoots.filter(s => s.date >= td).length;
+      const aggregateExpensesSum = shoots.reduce((a,s)=>a+Number(s.expenses||0),0);
 
-// ─── DELETE MANAGEMENT ───────────────────────────────────────────────────────
-let pendingDeleteId = null;
-function askDelete(id) {
-  const s = _shoots.find(x => x.id === id);
-  if (!s) return;
-  pendingDeleteId = id;
-  _pendingClear = false;
-  document.getElementById('confirm-title').textContent = 'Delete Shoot?';
-  document.getElementById('confirm-sub-text').textContent = `"${s.name}" on ${fmtDate(s.date)} will be permanently deleted.`;
-  document.getElementById('confirm-action-btn').textContent = 'Delete';
-  document.getElementById('confirm-action-btn').onclick = confirmDelete;
-  openModal('confirm-modal-backdrop');
-}
-async function confirmDelete() {
-  if (!pendingDeleteId) return;
-  try {
-    await deleteShootFromDB(pendingDeleteId);
-    pendingDeleteId = null;
-    closeConfirmModal();
-    refreshCurrentTab();
-  } catch(e) { /* error handled */ }
-}
-function closeConfirmModal() { closeModal('confirm-modal-backdrop'); pendingDeleteId = null; }
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="stat-card"><span class="stat-card-label">Total Contracts</span><span class="stat-card-value font-editorial" style="color:var(--gold)">${totalValueCount}</span></div>
+        <div class="stat-card"><span class="stat-card-label">Active Month</span><span class="stat-card-value font-editorial" style="color:var(--blue)">${volumeThisMonth}</span></div>
+        <div class="stat-card"><span class="stat-card-label">Upcoming Timeline</span><span class="stat-card-value font-editorial" style="color:var(--purple)">${volumeUpcoming}</span></div>
+        <div class="stat-card"><span class="stat-card-label" style="color:var(--purple)">Gross Outflows</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--red)">${fmtAmt(aggregateExpensesSum)}</span></div>
+      `;
 
-function openModal(id) { 
-  document.getElementById(id).classList.add('open'); 
-  document.body.style.overflow = 'hidden'; 
-}
-function closeModal(id) { 
-  document.getElementById(id).classList.remove('open'); 
-  document.body.style.overflow = ''; 
-}
-function closeShootModal() { closeModal('shoot-modal-backdrop'); }
-function handleBackdropClick(e, id) { 
-  if (e.target === document.getElementById(id)) closeModal(id); 
-}
+      const upcomingList = shoots.filter(s => s.date >= td).sort((a,b) => a.date.localeCompare(b.date)).slice(0,10);
+      const ul = document.getElementById('dash-upcoming');
+      if (!upcomingList.length) ul.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:24px 0">No pending line operational items.</div>';
+      else ul.innerHTML = upcomingList.map(s => shootRowHTML(s, true)).join('');
 
-// ─── INITIALIZATION ──────────────────────────────────────────────────────────
-loadAll();
-</script>
+      const totalGrossContracted = shoots.reduce((a,s)=>a+Number(s.amount||0),0);
+      const recoveredSettlements = shoots.reduce((a,s)=>{
+        if (s.payStatus==='done') return a+Number(s.amount||0);
+        if (s.payStatus==='part') return a+Number(s.partPaid||0);
+        return a;
+      },0);
+      const dynamicOutstandingBalance = totalGrossContracted - recoveredSettlements;
+      const receivedExpensesSum = shoots.reduce((a,s)=> s.payStatus==='done'?a+Number(s.expenses||0):a,0);
+      const pendingExpensesSum = aggregateExpensesSum - receivedExpensesSum;
+
+      document.getElementById('dash-payments-breakdown').innerHTML = `
+        <div class="fin-row"><span style="color:var(--muted)">Contracted Aggregates</span><span class="currency-mask" style="font-weight:600">${fmtAmt(totalGrossContracted)}</span></div>
+        <div class="fin-row"><span style="color:var(--green)">Settlements Deposited</span><span class="currency-mask" style="font-weight:600;color:var(--green)">${fmtAmt(recoveredSettlements)}</span></div>
+        <div class="fin-row"><span style="color:var(--amber)">Outstanding Arrears</span><span class="currency-mask" style="font-weight:600;color:var(--amber)">${fmtAmt(dynamicOutstandingBalance)}</span></div>
+      `;
+
+      document.getElementById('dash-expenses-breakdown').innerHTML = `
+        <div class="fin-row"><span style="color:var(--muted)">Operational Capital Loss</span><span class="currency-mask" style="font-weight:600">${fmtAmt(aggregateExpensesSum)}</span></div>
+        <div class="fin-row"><span style="color:var(--green)">Recovered Cost Slates</span><span class="currency-mask" style="font-weight:600;color:var(--green)">${fmtAmt(receivedExpensesSum)}</span></div>
+        <div class="fin-row"><span style="color:var(--purple)">Pending Liability Outflow</span><span class="currency-mask" style="font-weight:600;color:var(--purple)">${fmtAmt(pendingExpensesSum)}</span></div>
+      `;
+
+      injectAnalyticsGrowthChartGraphics();
+      applyPrivacyUIVisualState();
+    }
+
+    function shootRowHTML(s, hideActions) {
+      const {dd, mmm} = ddMmm(s.date);
+      const balance = Number(s.amount||0) - Number(s.partPaid||0);
+      const evtClass = 'evt-' + (s.event || 'other').toLowerCase().replace(' ', '-');
+      
+      const paymentElementSegment = s.amount ? `
+        <div class="pay-side">
+          <div class="currency-mask" style="font-weight:700;color:var(--text)">${fmtAmt(s.amount)}</div>
+          ${s.payStatus==='part' ? `<div class="currency-mask" style="font-size:10px;color:var(--purple)">+${fmtAmt(s.partPaid)}</div><div class="currency-mask" style="font-size:9px;color:var(--muted)">${fmtAmt(balance)} due</div>` : ''}
+          <div style="margin-top:2px"><span class="badge ${payBadgeClass(s.payStatus)}">${payLabel(s.payStatus)}</span></div>
+        </div>` : '';
+
+      const actionsMarkupSegment = hideActions ? '' : `
+        <div class="shoot-row-actions">
+          <button onclick="executeWhatsAppRedirect('${s.id}', event)" class="action-mini-btn wa" title="WhatsApp Message Notification"><i class="ti ti-brand-whatsapp"></i></button>
+          <button onclick="event.stopPropagation();openEditShootModal('${s.id}')" class="action-mini-btn" title="Edit"><i class="ti ti-edit"></i></button>
+          <button onclick="event.stopPropagation();askDelete('${s.id}')" class="action-mini-btn danger" title="Delete"><i class="ti ti-trash"></i></button>
+        </div>`;
+
+      return `
+        <div onclick="openEditShootModal('${s.id}')" class="shoot-row">
+          <div class="date-badge"><span class="date-badge-dd font-editorial">${dd}</span><span class="date-badge-mmm">${mmm}</span></div>
+          <div class="shoot-row-body">
+            <h5 class="shoot-row-title">${s.name}</h5>
+            <p class="shoot-row-meta">${s.location || 'No Node Specified'}${s.location&&s.company?' &middot; ':''}${s.company||''}</p>
+            <div class="shoot-row-tags">
+              <span class="badge ${evtClass}">${s.event}</span>
+              ${s.expenses ? `<span class="currency-mask" style="font-size:9px;color:var(--purple);display:flex;align-items:center;gap:2px"><i class="ti ti-receipt" style="font-size:10px"></i>₹${s.expenses}</span>` : ''}
+            </div>
+          </div>
+          ${paymentElementSegment}
+          ${actionsMarkupSegment}
+        </div>`;
+    }
+
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let calSelected = null;
+
+    function renderCalendar() {
+      document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+      const daysInPrev = new Date(calYear, calMonth, 0).getDate();
+      let html = DAYS.map(d => `<div class="calendar-dow">${d}</div>`).join('');
+      const shootsByDate = {};
+      _shoots.forEach(s => { if (s.date) { if (!shootsByDate[s.date]) shootsByDate[s.date] = []; shootsByDate[s.date].push(s); } });
+      
+      let cells = [];
+      for (let i = 0; i < firstDay; i++) cells.push({ day: daysInPrev - firstDay + 1 + i, month: calMonth - 1, year: calYear, other: true });
+      for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, month: calMonth, year: calYear, other: false });
+      const rem = 42 - cells.length;
+      for (let d = 1; d <= rem; d++) cells.push({ day: d, month: calMonth + 1, year: calYear, other: true });
+
+      cells.forEach(c => {
+        const dd = String(c.day).padStart(2,'0');
+        const yr = c.month < 0 ? c.year - 1 : (c.month > 11 ? c.year + 1 : c.year);
+        const realMm = c.month < 0 ? 12 : (c.month > 11 ? 1 : c.month + 1);
+        const dateStr = `${yr}-${String(realMm).padStart(2,'0')}-${dd}`;
+        const isToday = dateStr === today();
+        const isSelected = dateStr === calSelected;
+        const dayShoots = shootsByDate[dateStr] || [];
+        const dots = dayShoots.map(s => `<div class="calendar-dot" style="background-color:${eventColor(s.event)}"></div>`).join('');
+        
+        html += `
+          <div onclick="selectCalDay('${dateStr}')" class="calendar-cell ${c.other?'other-month':''} ${isToday?'today':''} ${isSelected?'selected':''}">
+            <span class="calendar-cell-num">${c.day}</span>
+            <div class="calendar-dots">${dots}</div>
+          </div>`;
+      });
+      document.getElementById('cal-grid').innerHTML = html;
+      renderCalDayPanel();
+    }
+
+    function selectCalDay(dateStr) { calSelected = calSelected === dateStr ? null : dateStr; renderCalendar(); }
+    function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
+    function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
+    function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
+
+    function renderCalDayPanel() {
+      const panel = document.getElementById('cal-day-panel');
+      if (!panel) return;
+      if (!calSelected) { panel.style.display = 'none'; return; }
+      const shoots = _shoots.filter(s => s.date === calSelected);
+      const dt = new Date(calSelected + 'T00:00:00');
+      panel.style.display = 'block';
+      let inner = `
+        <div style="display:flex;justify-content:between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;justify-content:space-between">
+          <span style="font-size:12px;font-weight:700">${dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
+          <button onclick="openAddShootModal('${calSelected}')" class="btn-primary" style="padding:4px 8px;font-size:11px"><i class="ti ti-plus"></i> Add Shoot</button>
+        </div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">`;
+      if (!shoots.length) inner += '<p style="font-size:11px;color:#555;text-align:center;padding:12px 0">No allocations on this vector entry line.</p>';
+      else inner += shoots.map(s => shootRowHTML(s, false)).join('');
+      inner += '</div>';
+      panel.innerHTML = inner;
+      applyPrivacyUIVisualState();
+    }
+
+    function renderShootsList() {
+      const q = (document.getElementById('shoot-search')?.value||'').toLowerCase();
+      const fc = document.getElementById('filter-company')?.value||'';
+      const fe = document.getElementById('filter-event')?.value||'';
+      const fl = document.getElementById('filter-loc')?.value||'';
+
+      const ce = document.getElementById('filter-company');
+      if(ce) ce.innerHTML = '<option value="">All Management Handles</option>' + _companies.map(c=>`<option value="${c}">${c}</option>`).join('');
+      const ee = document.getElementById('filter-event');
+      if(ee) ee.innerHTML = '<option value="">All Events</option>' + ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'].map(e=>`<option value="${e}">${e}</option>`).join('');
+      const le = document.getElementById('filter-loc');
+      if(le) le.innerHTML = '<option value="">All Regions</option>' + allLocs().map(l=>`<option value="${l}">${l}</option>`).join('');
+
+      if(fc) ce.value = fc; if(fe) ee.value = fe; if(fl) le.value = fl;
+
+      let shoots = [..._shoots].sort((a,b) => (b.date||'').localeCompare(a.date||''));
+      if (q) shoots = shoots.filter(s => `${s.name} ${s.location} ${s.company} ${s.notes}`.toLowerCase().includes(q));
+      if (fc) shoots = shoots.filter(s => s.company === fc);
+      if (fe) shoots = shoots.filter(s => s.event === fe);
+      if (fl) shoots = shoots.filter(s => s.location === fl);
+
+      const el = document.getElementById('shoots-list');
+      if (el) {
+        if (!shoots.length) el.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:32px 0">No logs found mapping to metrics parameters.</div>';
+        else el.innerHTML = shoots.map(s => shootRowHTML(s, false)).join('');
+      }
+      applyPrivacyUIVisualState();
+    }
+
+    function renderPayments() {
+      const totalAmt = _shoots.reduce((a,s)=>a+Number(s.amount||0),0);
+      const received = _shoots.reduce((a,s)=>s.payStatus==='done'?a+Number(s.amount||0):(s.payStatus==='part'?a+Number(s.partPaid||0):a),0);
+      const partTotal = _shoots.filter(s=>s.payStatus==='part').reduce((a,s)=>a+Number(s.partPaid||0),0);
+
+      document.getElementById('pay-stats').innerHTML = `
+        <div class="stat-card"><span class="stat-card-label">Volume Gross</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--gold);font-size:18px">${fmtAmt(totalAmt)}</span></div>
+        <div class="stat-card"><span class="stat-card-label">Deposited</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--green);font-size:18px">${fmtAmt(received)}</span></div>
+        <div class="stat-card"><span class="stat-card-label">Outstanding</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--amber);font-size:18px">${fmtAmt(totalAmt - received)}</span></div>
+        <div class="stat-card"><span class="stat-card-label">Part Balance</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--purple);font-size:18px">${fmtAmt(partTotal)}</span></div>
+      `;
+      renderPaymentsList();
+    }
+
+    function renderPaymentsList() {
+      const q = (document.getElementById('pay-search')?.value||'').toLowerCase();
+      const fs = document.getElementById('pay-filter-status')?.value||'';
+      let shoots = _shoots.filter(s => s.amount).sort((a,b) => (b.date||'').localeCompare(a.date||''));
+      if (q) shoots = shoots.filter(s => (s.name||'').toLowerCase().includes(q));
+      if (fs) shoots = shoots.filter(s => (s.payStatus||'pending') === fs);
+      const el = document.getElementById('payments-list');
+      if (!el) return;
+      if (!shoots.length) { el.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:32px 0">No operational payment lines.</div>'; return; }
+      el.innerHTML = shoots.map(s => {
+        const {dd, mmm} = ddMmm(s.date);
+        const balance = Number(s.amount||0) - Number(s.partPaid||0);
+        return `
+          <div onclick="openEditShootModal('${s.id}')" class="shoot-row">
+            <div class="date-badge"><span class="date-badge-dd font-editorial">${dd}</span><span class="date-badge-mmm">${mmm}</span></div>
+            <div class="shoot-row-body">
+              <h5 class="shoot-row-title">${s.name}</h5>
+              <p class="shoot-row-meta">${s.company||''} &nbsp;&middot;&nbsp; <span style="color:var(--muted)">${s.event}</span></p>
+            </div>
+            <div class="pay-side">
+              <div class="currency-mask" style="font-weight:700">${fmtAmt(s.amount)}</div>
+              ${s.payStatus==='part' ? `<div class="currency-mask" style="font-size:10px;color:var(--green)">${fmtAmt(s.partPaid)} partial</div><div class="currency-mask" style="font-size:9px;color:var(--muted)">${fmtAmt(balance)} due</div>` : ''}
+              <div style="margin-top:2px"><span class="badge ${payBadgeClass(s.payStatus)}">${payLabel(s.payStatus)}</span></div>
+            </div>
+            <div class="shoot-row-actions"><button onclick="executeWhatsAppRedirect('${s.id}', event)" class="action-mini-btn wa"><i class="ti ti-brand-whatsapp"></i></button></div>
+          </div>`;
+      }).join('');
+      applyPrivacyUIVisualState();
+    }
+
+    function renderSettings() {
+      document.getElementById('settings-companies').innerHTML = _companies.map((c,i) => `
+        <div class="settings-line-item"><span>${c}</span><div>
+          <button onclick="renameCompany(${i})" class="btn-icon" style="display:inline;padding:2px 6px"><i class="ti ti-pencil"></i></button>
+          <button onclick="deleteCompany(${i})" class="btn-icon" style="display:inline;padding:2px 6px;color:var(--red)"><i class="ti ti-trash"></i></button>
+        </div></div>`).join('');
+      document.getElementById('settings-locations').innerHTML = DEFAULT_LOCS.map(l => `<div class="settings-line-item" style="opacity:0.5"><span>${l}</span><span style="font-size:9px;color:var(--muted)">SYSTEM DEFAULT</span></div>`).join('') +
+        _locs.map((l,i) => `
+        <div class="settings-line-item"><span>${l}</span><div>
+          <button onclick="renameLocation(${i})" class="btn-icon" style="display:inline;padding:2px 6px"><i class="ti ti-pencil"></i></button>
+          <button onclick="deleteLocation(${i})" class="btn-icon" style="display:inline;padding:2px 6px;color:var(--red)"><i class="ti ti-trash"></i></button>
+        </div></div>`).join('');
+    }
+
+    async function addCompany() { const v = document.getElementById('new-company-input').value.trim(); if(!v) return; _companies.push(v); await saveSettingToDB('companies', _companies); document.getElementById('new-company-input').value=''; renderSettings(); }
+    async function deleteCompany(i) { _companies.splice(i,1); await saveSettingToDB('companies', _companies); renderSettings(); }
+    async function renameCompany(i) { const n = prompt('Modify producer assignment handle text string:', _companies[i]); if(!n || n === _companies[i]) return; const old = _companies[i]; _companies[i] = n; await saveSettingToDB('companies', _companies); _shoots.forEach(async s => { if(s.company===old) { s.company=n; await saveShootToDB(s); } }); renderSettings(); }
+    async function addLocation() { const v = document.getElementById('new-loc-input').value.trim(); if(!v || DEFAULT_LOCS.includes(v)) return; if(!_locs.includes(v)) { _locs.push(v); await saveSettingToDB('locations', _locs); } document.getElementById('new-loc-input').value=''; renderSettings(); }
+    async function deleteLocation(i) { _locs.splice(i,1); await saveSettingToDB('locations', _locs); renderSettings(); }
+    async function renameLocation(i) { const n = prompt('Modify operational deployment city footprint text mapping:', _locs[i]); if(!n || n === _locs[i]) return; const old = _locs[i]; _locs[i] = n; await saveSettingToDB('locations', _locs); _shoots.forEach(async s => { if(s.location===old) { s.location=n; await saveShootToDB(s); } }); renderSettings(); }
+
+    async function saveSettingToDB(key, value) { try { await sbFetch('settings?key=eq.' + key, { method: 'DELETE' }).catch(()=>{}); await sbFetch('settings', { method: 'POST', body: JSON.stringify({ key, value }) }); } catch(e){} }
+    async function forceSync() { setSyncStatus('syncing', 'Updating State Memory Maps...'); try { await loadAll(); showToast('State vector maps aligned with cluster hosts.'); } catch(e){} }
+    function confirmClearData() { if(confirm("Permanently wipe local operational metrics log templates? This cannot be undone.")) doClearData(); }
+    async function doClearData() { try { await sbFetch('shoots?id=neq.___none___', { method: 'DELETE' }); await sbFetch('settings?key=neq.___none___', { method: 'DELETE' }); _shoots = []; _companies=[...DEFAULT_COMPANIES]; _locs=[]; showToast('System logs wiped.'); refreshCurrentTab(); } catch(e){} }
+
+    function openAddShootModal(prefillDate) { resetModal(); document.getElementById('shoot-modal-title').textContent = 'Create Operational Allocation Slates'; document.getElementById('modal-delete-btn').style.display = 'none'; document.getElementById('modal-whatsapp-btn').style.display = 'none'; document.getElementById('f-shoot-date').value = prefillDate || today(); populateModalDropdowns(); openModal('shoot-modal-backdrop'); }
+    function openEditShootModal(id) {
+      const s = _shoots.find(x => x.id === id); if(!s) return; resetModal();
+      document.getElementById('shoot-modal-title').textContent = 'Modify Schedule Configuration Parameters';
+      document.getElementById('modal-delete-btn').style.display = 'inline-block';
+      document.getElementById('modal-whatsapp-btn').style.display = 'inline-flex';
+      document.getElementById('edit-shoot-id').value = id; populateModalDropdowns(s);
+      document.getElementById('f-shoot-name').value = s.name;
+      document.getElementById('f-shoot-date').value = s.date;
+      document.getElementById('f-shoot-session').value = s.session;
+      document.getElementById('f-shoot-notes').value = s.notes;
+      document.getElementById('f-shoot-amount').value = s.amount || '';
+      document.getElementById('f-shoot-expenses').value = s.expenses || '';
+      document.getElementById('f-shoot-pay-status').value = s.payStatus;
+      document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
+      document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? 'block' : 'none';
+      if (!['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'].includes(s.event)) {
+        document.getElementById('f-shoot-event').value = 'Other'; document.getElementById('f-shoot-event-other').value = s.event; document.getElementById('f-event-other-wrap').style.display = 'block';
+      } else { document.getElementById('f-shoot-event').value = s.event; }
+      openModal('shoot-modal-backdrop');
+    }
+
+    function populateModalDropdowns(s) {
+      document.getElementById('f-shoot-company').innerHTML = _companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      if (s && s.company) document.getElementById('f-shoot-company').value = s.company;
+      const locs = allLocs();
+      document.getElementById('f-shoot-loc').innerHTML = locs.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Other (Specify Custom Parameters)</option>';
+      if (s && s.location) {
+        if (locs.includes(s.location)) {
+          document.getElementById('f-shoot-loc').value = s.location;
+        } else { 
+          document.getElementById('f-shoot-loc').value = '__other__'; 
+          document.getElementById('f-shoot-loc-other').value = s.location; 
+          document.getElementById('f-loc-other-wrap').style.display = 'block'; 
+        }
+      }
+    }
+
+    async function saveShootToDB(shoot) {
+      setSyncStatus('syncing', 'Committing Logs...');
+      try {
+        const existing = _shoots.find(s => s.id === shoot.id);
+        if (existing) { 
+          await sbFetch('shoots?id=eq.' + shoot.id, { method: 'PATCH', body: JSON.stringify(shootToDb(shoot)) }); 
+          const idx = _shoots.findIndex(s => s.id === shoot.id); 
+          if (idx >= 0) _shoots[idx] = shoot; 
+        }
+        else { 
+          await sbFetch('shoots', { method: 'POST', body: JSON.stringify(shootToDb(shoot)) }); 
+          _shoots.push(shoot); 
+        }
+        setSyncStatus('synced', 'Synced Cloud'); 
+        showToast('Transaction completed safely.');
+      } catch(e) { 
+        setSyncStatus('error', 'Execution Error Write Phase'); 
+        throw e; 
+      }
+    }
+
+    async function saveShoot() {
+      const name = document.getElementById('f-shoot-name').value.trim(); 
+      const date = document.getElementById('f-shoot-date').value;
+      if (!name || !date) return;
+      
+      let event = document.getElementById('f-shoot-event').value; 
+      if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
+      
+      let location = document.getElementById('f-shoot-loc').value; 
+      if (location === '__other__') { 
+        location = document.getElementById('f-shoot-loc-other').value.trim() || 'Other';
+        if (location && location !== 'Other' && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) { 
+          _locs.push(location); 
+          await saveSettingToDB('locations', _locs); 
+        } 
+      }
+      
+      const payStatus = document.getElementById('f-shoot-pay-status').value; 
+      const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
+      const expenses = parseFloat(document.getElementById('f-shoot-expenses').value) || 0; 
+      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value)||0) : (payStatus === 'done' ? amount : 0);
+      const editId = document.getElementById('edit-shoot-id').value;
+      
+      const shoot = { 
+        id: editId || uid(), 
+        name, 
+        date, 
+        event, 
+        session: document.getElementById('f-shoot-session').value, 
+        location, 
+        company: document.getElementById('f-shoot-company').value, 
+        notes: document.getElementById('f-shoot-notes').value.trim(), 
+        amount, 
+        expenses, 
+        payStatus, 
+        partPaid, 
+        created: editId ? (_shoots.find(s=>s.id===editId)?.created || new Date().toISOString()) : new Date().toISOString() 
+      };
+      
+      try { 
+        await saveShootToDB(shoot); 
+        closeModal('shoot-modal-backdrop'); 
+        refreshCurrentTab(); 
+      } catch(e){}
+    }
+
+    function triggerDeleteFromModal() { const id = document.getElementById('edit-shoot-id').value; if (id) { closeShootModal(); setTimeout(() => askDelete(id), 100); } }
+    function askDelete(id) { const s = _shoots.find(x => x.id === id); if(!s) return; pendingDeleteId = id; document.getElementById('confirm-title').textContent = 'Drop Matrix Allocation Profile?'; document.getElementById('confirm-sub-text').textContent = `"${s.name}" record data tracking arrays will be purged.`; openModal('confirm-modal-backdrop'); }
+    async function confirmDelete() { if(!pendingDeleteId) return; try { setSyncStatus('syncing', 'Purging...'); await sbFetch('shoots?id=eq.' + pendingDeleteId, { method: 'DELETE' }); _shoots = _shoots.filter(s => s.id !== pendingDeleteId); setSyncStatus('synced', 'Synced Memory'); closeConfirmModal(); refreshCurrentTab(); } catch(e){} }
+
+    function refreshCurrentTab() {
+      const activeBtn = document.querySelector('.nav-terminal-btn.active'); if(!activeBtn) return;
+      const tab = activeBtn.id.replace('tab-','');
+      if (tab === 'dashboard') renderDashboard(); if (tab === 'calendar') renderCalendar(); if (tab === 'shoots') renderShootsList(); if (tab === 'payments') renderPayments(); if (tab === 'settings') renderSettings();
+    }
+    
+    function switchTab(tab) {
+      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.nav-terminal-btn').forEach(b => b.classList.remove('active'));
+      document.getElementById('section-' + tab).classList.add('active');
+      document.getElementById('tab-' + tab).classList.add('active');
+      refreshCurrentTab();
+    }
+
+    function openModal(id) { document.getElementById(id).classList.add('open'); }
+    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    function closeShootModal() { closeModal('shoot-modal-backdrop'); }
+    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); }
+    function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+    function today() { return new Date().toISOString().slice(0,10); }
+    function fmtDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
+    function fmtAmt(n) { return '₹' + Number(n||0).toLocaleString('en-IN'); }
+    function eventColor(ev) { return EVENT_COLORS[ev] || '#6b7280'; }
+    function payBadgeClass(s) { return {'pending':'pay-pending','part':'pay-part','done':'pay-done'}[s]||'pay-pending'; }
+    function payLabel(s) { return {'pending':'Unsettled','part':'Part Paid','done':'Cleared'}[s]||'Unsettled'; }
+    function ddMmm(d) { if (!d) return {dd:'',mmm:''}; const dt = new Date(d+'T00:00:00'); return { dd: dt.getDate(), mmm: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()] }; }
+    function allLocs() { return [...DEFAULT_LOCS, ..._locs]; }
+
+    loadAll();
+  </script>
 </body>
 </html>
