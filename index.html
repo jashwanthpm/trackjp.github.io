@@ -5,10 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Sakkhi by Jashwanth JP</title>
   
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=500;700&family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -31,22 +31,17 @@
       pointer-events: none;
       transition: filter 0.2s ease-in-out;
     }
-    /* Safe selection override for all input elements */
-    input, select, textarea {
-      user-select: text !important;
-      -webkit-user-select: text !important;
-    }
   </style>
 </head>
 <body class="min-h-screen pb-24 md:pb-6">
 
   <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
-    <div class="text-center animate-fade-in">
+    <div class="text-center">
       <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
       <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 mt-1 font-light">by Jashwanth JP</p>
     </div>
     <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
-      <div class="h-full bg-[#c9a96e] w-0 animate-[loadbar_1.5s_ease-in-out_forwards]"></div>
+      <div id="load-progress" class="h-full bg-[#c9a96e] w-1/12 transition-all duration-500"></div>
     </div>
     <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
   </div>
@@ -68,7 +63,7 @@
       </div>
 
       <button onclick="openAddShootModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
-        <i class="ti ti-plus text-base"></i> <span class="hidden xs:inline">New Shoot</span>
+        <i class="ti ti-plus text-base"></i> <span class="hidden sm:inline">New Shoot</span>
       </button>
     </div>
   </header>
@@ -214,11 +209,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
-            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
+            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] shadow-none"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
-            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
+            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
         </div>
 
@@ -248,7 +243,7 @@
 
         <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Name</label>
-          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -264,17 +259,17 @@
 
         <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
+          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
         <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
+            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
-            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50 select-text"/>
+            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Status</label>
@@ -288,12 +283,12 @@
 
         <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500 select-text"/>
+          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
-          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none select-text"></textarea>
+          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
         </div>
       </div>
       
@@ -330,7 +325,7 @@
         <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
       </div>
       <div class="space-y-3">
-        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition select-text"/>
+        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition"/>
         <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
       </div>
       <div class="flex gap-2 pt-2">
@@ -491,6 +486,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (!isConfigured) return;
 
       try {
+        const bar = document.getElementById('load-progress');
+        if(bar) bar.style.width = "60%";
+        
         const raw = await sbFetch('shoots?select=*&order=date.desc');
         _shoots = raw.map(dbToShoot);
 
@@ -500,10 +498,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
         _locs = lRow ? lRow.value : [];
 
-        setSyncStatus('synced', 'Synced with Cloud');
-        document.getElementById('loading-screen').classList.add('hidden');
-        applyPrivacyUIVisibility();
-        renderDashboard();
+        if(bar) bar.style.width = "100%";
+        setTimeout(() => {
+          setSyncStatus('synced', 'Synced with Cloud');
+          document.getElementById('loading-screen').classList.add('hidden');
+          applyPrivacyUIVisibility();
+          renderDashboard();
+        }, 400);
+
       } catch (e) {
         setSyncStatus('error', 'Sync Lost');
         showToast('Load Error: ' + e.message, 'error');
@@ -619,8 +621,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       } else {
         const lbl = document.getElementById('privacy-error-lbl');
         lbl.classList.remove('hidden');
-        lbl.classList.add('animate-shake');
-        setTimeout(() => lbl.classList.remove('animate-shake'), 400);
       }
     }
 
@@ -628,8 +628,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const btn = document.getElementById('privacy-toggle-btn');
       const icon = document.getElementById('privacy-icon');
       
+      if (!btn || !icon) return;
+
       if (_privacyModeActive) {
-        btn.className = "flex items-center justify-center p-2 rounded-lg border border-red-950 bg-red-950/20 text-red-400 hover:border-red-500 transition shadow-inner animate-pulse";
+        btn.className = "flex items-center justify-center p-2 rounded-lg border border-red-950 bg-red-950/20 text-red-400 hover:border-red-500 transition shadow-inner";
         icon.className = "ti ti-lock-square text-lg";
         document.querySelectorAll('.privacy-target').forEach(el => el.classList.add('blur-financial'));
       } else {
@@ -777,25 +779,25 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const { dd, mmm } = ddMmm(s.date);
       
       const badgeStyles = {
-        'Wedding':'bg-amber-950/40 text-[#c9a96e] border border-amber-900/60',
-        'Reception':'bg-blue-950/40 text-blue-400 border border-blue-900/60',
-        'Sangeet':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
-        'Haldi':'bg-yellow-950/40 text-yellow-400 border border-yellow-900/60',
-        'Pellikoduku':'bg-teal-950/40 text-teal-400 border border-teal-900/60',
-        'Pellikuthuru':'bg-pink-950/40 text-pink-400 border border-pink-900/60',
-        'House Warming':'bg-sky-950/40 text-sky-400 border border-sky-900/60'
+        'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
+        'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
+        'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
+        'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
+        'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
+        'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
+        'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
       }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
 
       const stateBadge = {
         'pending':'bg-neutral-950 text-neutral-400 border border-neutral-800',
-        'part':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
-        'done':'bg-emerald-950/40 text-emerald-400 border border-emerald-900/60'
+        'part':'bg-purple-950 text-purple-400 border border-purple-900',
+        'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
       }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
 
       const stateLabel = { 'pending':'Pending','part':'Partial','done':'Settled' }[s.payStatus] || 'Unknown';
 
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900/80 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
+        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
           <div class="flex items-center gap-3 min-w-0">
             <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
@@ -810,7 +812,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           </div>
 
           <div class="flex items-center gap-4 flex-shrink-0">
-            <span class="hidden xs:inline-block text-[10px] px-2 py-0.5 font-semibold rounded-md ${badgeStyles}">${s.event}</span>
+            <span class="hidden sm:inline-block text-[10px] px-2 py-0.5 font-semibold rounded-md ${badgeStyles}">${s.event}</span>
             
             ${s.amount ? `
               <div class="text-right min-w-[70px]">
@@ -869,15 +871,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               label: 'Amount',
               data: finalGrossDataset,
               backgroundColor: '#c9a96e',
-              borderRadius: 4,
-              borderSkipped: false
+              borderRadius: 4
             },
             {
               label: 'Expenses',
               data: finalExpenseDataset,
               backgroundColor: '#ef4444',
-              borderRadius: 4,
-              borderSkipped: false
+              borderRadius: 4
             }
           ]
         },
@@ -1023,6 +1023,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (fl) filtered = filtered.filter(s => s.location === fl);
 
       const targetContainer = document.getElementById('shoots-list');
+      if (!targetContainer) return;
       if (!filtered.length) {
         targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
       } else {
@@ -1067,6 +1068,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
 
       const rootList = document.getElementById('payments-list');
+      if (!rootList) return;
       if (!filtered.length) {
         rootList.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No active ledgers found.</div>';
         return;
@@ -1078,8 +1080,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         
         const stateStyle = {
           'pending':'bg-neutral-900 text-neutral-500 border border-neutral-800',
-          'part':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
-          'done':'bg-emerald-950/40 text-emerald-400 border border-emerald-900/60'
+          'part':'bg-purple-950 text-purple-400 border border-purple-900',
+          'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
         }[s.payStatus];
 
         return `
