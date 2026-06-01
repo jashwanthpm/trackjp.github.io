@@ -31,6 +31,11 @@
       pointer-events: none;
       transition: filter 0.2s ease-in-out;
     }
+    /* Safe selection override for all input elements */
+    input, select, textarea {
+      user-select: text !important;
+      -webkit-user-select: text !important;
+    }
   </style>
 </head>
 <body class="min-h-screen pb-24 md:pb-6 select-none md:select-text">
@@ -209,11 +214,11 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
-            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
-            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
           </div>
         </div>
 
@@ -243,7 +248,7 @@
 
         <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Name</label>
-          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -259,17 +264,17 @@
 
         <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
         </div>
 
         <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] select-text"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
-            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
+            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50 select-text"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Status</label>
@@ -283,12 +288,12 @@
 
         <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
+          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500 select-text"/>
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
-          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
+          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none select-text"></textarea>
         </div>
       </div>
       
@@ -325,7 +330,7 @@
         <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
       </div>
       <div class="space-y-3">
-        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition"/>
+        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition select-text"/>
         <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
       </div>
       <div class="flex gap-2 pt-2">
