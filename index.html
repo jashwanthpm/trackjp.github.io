@@ -2,398 +2,227 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Sakkhi Dashboard</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Sakkhi by Jashwanth JP</title>
   
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-  
-  <style>
-    :root {
-      --bg: #0a0a0a;
-      --card: #141414;
-      --card2: #1a1a1a;
-      --border: #2a2a2a;
-      --gold: #c9a96e;
-      --gold2: #e6c98a;
-      --text: #e8e8e8;
-      --muted: #888;
-      --muted2: #444;
-      --blue: #4a9eff;
-      --purple: #a855f7;
-      --amber: #f59e0b;
-      --teal: #14b8a6;
-      --pink: #ec4899;
-      --sky: #0ea5e9;
-      --red: #ef4444;
-      --green: #22c55e;
-      --radius: 12px;
-      --radius-sm: 8px;
-    }
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-    body { 
-      background: var(--bg); 
-      color: var(--text); 
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-      min-height: 100vh; 
-      font-size: 14px; 
-      -webkit-tap-highlight-color: transparent;
-      padding-bottom: 80px;
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050505;
+      color: #e8e8e8;
     }
-    
+    .brand-serif {
+      font-family: 'Cinzel', serif;
+    }
+    /* Smooth Scrollbar Customization */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
-
-    .font-editorial { font-family: 'Georgia', serif; }
-
-    /* LOADING SCREEN */
-    #loading-screen { position: fixed; inset: 0; background: var(--bg); z-index: 999; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; }
-    .logo-container { text-align: center; }
-    .logo-main { font-size: 32px; font-weight: 700; color: var(--gold); tracking: -0.02em; }
-    .logo-sub { font-size: 9px; text-transform: uppercase; letter-spacing: 0.25em; color: var(--gold2); opacity: 0.8; margin-top: -2px; }
-    .loading-bar { width: 180px; height: 2px; background: var(--border); border-radius: 99px; overflow: hidden; margin-top: 8px; }
-    .loading-bar-fill { height: 100%; width: 100%; background: var(--gold); animation: pulse 1.5s infinite; }
-    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
-
-    /* HEADER STYLING */
-    .top-header { position: sticky; top: 0; z-index: 50; background: rgba(10,10,10,0.95); border-bottom: 1px solid var(--border); backdrop-filter: blur(10px); padding: 0 16px; height: 64px; display: flex; align-items: center; justify-content: space-between; }
-    .header-right { display: flex; align-items: center; gap: 12px; }
-
-    /* ACTION CONTROLS */
-    .pill-status { display: flex; align-items: center; gap: 6px; font-size: 11px; padding: 4px 10px; border-radius: 99px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); }
-    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-    .status-dot.syncing { background: var(--amber); animation: pulse 1s infinite; }
-    .status-dot.synced { background: var(--green); }
-    .status-dot.error { background: var(--red); }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
     
-    .btn-icon { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px; color: var(--gold); cursor: pointer; display: flex; align-items: center; transition: all 0.2s; }
-    .btn-icon.unlocked { color: var(--green); }
-    .btn-icon.locked { color: var(--red); }
-    
-    .btn-primary { background: var(--gold); color: #000; padding: 8px 14px; border: none; border-radius: var(--radius-sm); font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 6px; transition: background 0.2s; }
-    .btn-primary:hover { background: var(--gold2); }
-
-    /* PRIVACY PROTECTION ENGINE OBFUSCATION */
-    .currency-mask.blur-financial { filter: blur(5px); user-select: none; pointer-events: none; }
-
-    /* LAYOUT MATRIX WORKSPACES */
-    .main-workspace { max-width: 1200px; margin: 0 auto; padding: 16px; display: flex; flex-direction: column; gap: 24px; }
-    .view-section { display: none; flex-direction: column; gap: 20px; }
-    .view-section.active { display: flex; }
-
-    /* STAT CARDS */
-    .grid-stats { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; }
-    @media (min-width: 1024px) { .grid-stats { grid-template-columns: repeat(4, 1fr); } }
-    .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; display: flex; flex-direction: column; justify-content: space-between; min-height: 90px; }
-    .stat-card-label { font-size: 10px; font-weight: 700; tracking: 0.05em; color: var(--muted); text-transform: uppercase; }
-    .stat-card-value { font-size: 24px; font-weight: 700; margin-top: 4px; }
-
-    /* SPLIT FINANCIAL COLUMNS */
-    .grid-financial-split { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 1024px) { .grid-financial-split { grid-template-columns: 1fr 1fr; } }
-    .fin-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .fin-box-header { display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; border-bottom: 1px solid var(--border); padding-bottom: 8px; }
-    .fin-row { display: flex; justify-content: space-between; align-items: center; font-size: 12px; padding: 6px 0; border-bottom: 1px solid rgba(255,255,255,0.03); }
-    .fin-row:last-child { border-bottom: none; }
-
-    /* DASHBOARD BOTTOM THREE COL BLOCK */
-    .grid-timeline-analytics { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 1024px) { .grid-timeline-analytics { grid-template-columns: 1fr 2fr; } }
-    .timeline-box { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 16px; }
-    .chart-wrapper { position: relative; width: 100%; min-height: 260px; display: flex; align-items: center; justify-content: center; }
-
-    /* RECORD LIST LAYOUT BLOCK UNITS */
-    .shoots-stack { display: flex; flex-direction: column; gap: 8px; max-height: 400px; overflow-y: auto; }
-    .shoot-row { position: relative; display: flex; align-items: center; gap: 12px; background: var(--card); border: 1px solid var(--border); padding: 12px; border-radius: var(--radius); cursor: pointer; transition: border 0.2s; }
-    .shoot-row:hover { border-color: var(--gold); }
-    .date-badge { width: 44px; height: 44px; background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); display: flex; flex-direction: column; align-items: center; justify-content: center; flex-shrink: 0; }
-    .date-badge-dd { font-size: 16px; font-weight: 700; color: var(--gold); line-height: 1; }
-    .date-badge-mmm { font-size: 9px; text-transform: uppercase; color: var(--muted); margin-top: 2px; }
-    .shoot-row-body { flex: 1; min-width: 0; }
-    .shoot-row-title { font-size: 13px; font-weight: 600; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .shoot-row-meta { font-size: 11px; color: var(--muted); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-    .shoot-row-tags { display: flex; gap: 6px; align-items: center; margin-top: 4px; flex-wrap: wrap; }
-    
-    .badge { padding: 2px 6px; border-radius: 4px; font-size: 8px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.02em; }
-    .pay-side { text-align: right; font-size: 12px; display: flex; flex-direction: column; align-items: flex-end; justify-content: center; }
-    .shoot-row-actions { display: flex; align-items: center; gap: 4px; margin-left: 8px; opacity: 1; z-index: 20; }
-    @media (min-width: 1024px) { .shoot-row-actions { opacity: 0; } .shoot-row:hover .shoot-row-actions { opacity: 1; } }
-    .action-mini-btn { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; border-radius: 6px; border: 1px solid var(--border); background: var(--card2); color: var(--muted); cursor: pointer; transition: all 0.2s; }
-    .action-mini-btn.wa { border-color: rgba(16,185,129,0.3); color: #10b981; background: rgba(16,185,129,0.05); }
-    .action-mini-btn.wa:hover { background: rgba(16,185,129,0.15); }
-    .action-mini-btn.danger { border-color: rgba(239,68,68,0.3); color: var(--red); background: rgba(239,68,68,0.05); }
-    .action-mini-btn.danger:hover { background: rgba(239,68,68,0.15); }
-
-    /* DYNAMIC FILTER OVERBAR */
-    .filter-toolbar { display: grid; grid-template-columns: 1fr; gap: 8px; }
-    @media (min-width: 640px) { .filter-toolbar { grid-template-columns: repeat(2, 1fr); } }
-    @media (min-width: 1024px) { .filter-toolbar { grid-template-columns: repeat(4, 1fr); } }
-    .search-input-wrap { display: flex; align-items: center; gap: 8px; border: 1px solid var(--border); background: var(--card); border-radius: var(--radius-sm); padding: 8px 12px; }
-    .search-input-wrap input { background: transparent; border: none; outline: none; color: var(--text); font-size: 12px; width: 100%; }
-    .select-dropdown { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; color: var(--text); font-size: 12px; outline: none; width: 100%; }
-
-    /* CALENDAR SYSTEM */
-    .calendar-container { display: flex; flex-direction: column; gap: 12px; }
-    .calendar-navbar { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--border); padding-bottom: 12px; }
-    .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-    .calendar-dow { text-align: center; font-size: 10px; font-weight: 700; color: #555; text-transform: uppercase; padding: 4px 0; }
-    .calendar-cell { min-height: 60px; border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 4px; background: var(--card); display: flex; flex-direction: column; justify-content: space-between; cursor: pointer; transition: all 0.2s; }
-    .calendar-cell:hover { border-color: var(--gold); }
-    .calendar-cell.other-month { opacity: 0.25; }
-    .calendar-cell.today { border-color: var(--gold); box-shadow: 0 0 8px rgba(201,169,110,0.15); }
-    .calendar-cell.selected { background: rgba(201,169,110,0.05); border-color: var(--gold); }
-    .calendar-cell-num { font-size: 11px; font-weight: 700; color: var(--muted); }
-    .calendar-cell.today .calendar-cell-num { color: var(--gold); }
-    .calendar-dots { display: flex; flex-wrap: wrap; gap: 2px; margin-top: 4px; }
-    .calendar-dot { width: 5px; height: 5px; border-radius: 50%; }
-
-    /* SETTINGS COMPONENT PANELS */
-    .settings-layout-grid { display: grid; grid-template-columns: 1fr; gap: 16px; }
-    @media (min-width: 768px) { .settings-layout-grid { grid-template-columns: 1fr 1fr; } }
-    .settings-pane { background: var(--card); border: 1px solid var(--border); border-radius: var(--radius); padding: 20px; display: flex; flex-direction: column; gap: 12px; }
-    .settings-line-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid var(--border); }
-    .settings-line-item:last-child { border-bottom: none; }
-    .input-row-group { display: flex; gap: 8px; margin-top: 4px; }
-    .form-text-input { background: var(--card2); border: 1px solid var(--border); border-radius: var(--radius-sm); padding: 8px 12px; font-size: 12px; color: var(--text); outline: none; flex: 1; }
-    .form-text-input:focus { border-color: var(--gold); }
-
-    /* BOTTOM FIXED NAVIGATION TERMINAL */
-    .bottom-navbar { position: fixed; bottom: 0; left: 0; right: 0; z-index: 50; background: rgba(10,10,10,0.96); border-top: 1px solid var(--border); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 6px 0; padding-bottom: calc(6px + env(safe-area-inset-bottom, 0px)); }
-    @media (min-width: 768px) { .bottom-navbar { justify-content: center; gap: 32px; } }
-    .nav-terminal-btn { display: flex; flex-direction: column; align-items: center; justify-content: center; border: none; background: transparent; color: #555; cursor: pointer; width: 56px; text-align: center; font-family: inherit; transition: color 0.2s; }
-    .nav-terminal-btn i { font-size: 20px; }
-    .nav-terminal-btn span { font-size: 9px; margin-top: 2px; font-weight: 500; }
-    .nav-terminal-btn.active { color: var(--gold); }
-
-    /* EVENT TEMPLATES COLORS */
-    .evt-wedding { background: rgba(201,169,110,0.1); color: var(--gold); border: 1px solid rgba(201,169,110,0.2); }
-    .evt-reception { background: rgba(74,158,255,0.1); color: var(--blue); border: 1px solid rgba(74,158,255,0.2); }
-    .evt-sangeet { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
-    .evt-haldi { background: rgba(245,158,11,0.1); color: var(--amber); border: 1px solid rgba(245,158,11,0.2); }
-    .evt-pellikoduku { background: rgba(20,184,166,0.1); color: var(--teal); border: 1px solid rgba(20,184,166,0.2); }
-    .evt-pellikuthuru { background: rgba(236,72,153,0.1); color: var(--pink); border: 1px solid rgba(236,72,153,0.2); }
-    .evt-house-warming { background: rgba(14,165,233,0.1); color: var(--sky); border: 1px solid rgba(14,165,233,0.2); }
-    .evt-other { background: rgba(100,100,100,0.1); color: var(--muted); border: 1px solid rgba(100,100,100,0.2); }
-
-    .pay-pending { background: rgba(239,68,68,0.1); color: var(--red); border: 1px solid rgba(239,68,68,0.2); }
-    .pay-part { background: rgba(168,85,247,0.1); color: var(--purple); border: 1px solid rgba(168,85,247,0.2); }
-    .pay-done { background: rgba(34,197,94,0.1); color: var(--green); border: 1px solid rgba(34,197,94,0.2); }
-
-    /* MODAL SURFACE LAYERS */
-    .modal-overlay { position: fixed; inset: 0; z-index: 150; background: rgba(0,0,0,0.85); display: flex; align-items: flex-end; justify-content: center; opacity: 0; pointer-events: none; transition: opacity 0.2s ease; padding: 0; }
-    @media (min-width: 768px) { .modal-overlay { align-items: center; padding: 16px; } }
-    .modal-overlay.open { opacity: 1; pointer-events: all; }
-    
-    .modal-surface { background: var(--card); border: 1px solid var(--border); width: 100%; max-width: 520px; border-radius: 16px 16px 0 0; display: flex; flex-direction: column; max-height: 85vh; transform: translateY(32px); transition: transform 0.2s ease; overflow: hidden; }
-    @media (min-width: 768px) { .modal-surface { border-radius: 12px; max-height: 90vh; transform: translateY(0); } }
-    .modal-overlay.open .modal-surface { transform: translateY(0); }
-    
-    .modal-header { padding: 16px; border-bottom: 1px solid var(--border); display: flex; justify-content: space-between; align-items: center; background: var(--card2); }
-    .modal-title { font-size: 14px; font-weight: 600; }
-    .modal-close-trigger { background: transparent; border: none; color: var(--muted); cursor: pointer; font-size: 18px; }
-    .modal-body { padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 14px; font-size: 12px; }
-    .modal-footer { padding: 16px; border-top: 1px solid var(--border); background: var(--card2); display: flex; justify-content: space-between; align-items: center; }
-
-    .form-grid-2 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 480px) { .form-grid-2 { grid-template-columns: 1fr 1fr; } }
-    .form-grid-3 { display: grid; grid-template-columns: 1fr; gap: 12px; }
-    @media (min-width: 480px) { .form-grid-3 { grid-template-columns: repeat(3, 1fr); } }
-    .field-stack { display: flex; flex-direction: column; gap: 4px; }
-    .field-label { font-size: 10px; font-weight: 700; color: var(--muted); text-transform: uppercase; tracking: 0.05em; }
-
-    /* TOAST FEEDBACKS */
-    #toast-container { position: fixed; bottom: 80px; right: 16px; left: 16px; z-index: 200; display: flex; flex-direction: column; gap: 6px; max-width: 360px; pointer-events: none; }
-    @media (min-width: 768px) { #toast-container { left: auto; } }
-    .toast-node { padding: 12px; font-size: 12px; display: flex; align-items: center; gap: 8px; background: var(--card); border: 1px solid var(--border); border-radius: var(--radius-sm); box-shadow: 0 8px 24px rgba(0,0,0,0.5); pointer-events: auto; }
-    .toast-node.success { border-color: rgba(34,197,94,0.3); color: var(--green); }
-    .toast-node.error { border-color: rgba(239,68,68,0.3); color: var(--red); }
+    /* Privacy Mode Blur Styling */
+    .blur-financial {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.2s ease-in-out;
+    }
   </style>
 </head>
-<body>
+<body class="min-h-screen pb-24 md:pb-6 select-none md:select-text">
 
-  <div id="loading-screen">
-    <div class="logo-container">
-      <div class="logo-main font-editorial">Sakkhi</div>
-      <div class="logo-sub">by jashwanthjp</div>
+  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
+    <div class="text-center animate-fade-in">
+      <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
+      <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 mt-1 font-light">by Jashwanth JP</p>
     </div>
-    <div class="loading-bar"><div class="loading-bar-fill"></div></div>
-    <div class="text-xs text-gray-500" id="loading-text" style="font-size:11px;color:#555">Initialising Cloud Handshake...</div>
+    <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
+      <div class="h-full bg-[#c9a96e] w-0 animate-[loadbar_1.5s_ease-in-out_forwards]"></div>
+    </div>
+    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Securing database connection...</p>
   </div>
 
-  <header class="top-header">
-    <div style="display:flex;flex-direction:column;justify-content:center">
-      <h1 class="font-editorial" style="font-size:22px;font-weight:700;color:var(--gold);line-height:1">Sakkhi</h1>
-      <span style="font-size:8px;text-transform:uppercase;letter-spacing:0.22em;color:var(--gold2);margin-top:2px;opacity:0.9">by jashwanthjp</span>
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between">
+    <div class="flex flex-col">
+      <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
+      <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
     </div>
-    
-    <div class="header-right">
-      <div id="sync-status" class="pill-status">
-        <span id="sync-dot" class="status-dot"></span>
-        <span id="sync-label">Checking Pipeline</span>
+
+    <div class="flex items-center gap-2 md:gap-4">
+      <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
+        <i id="privacy-icon" class="ti ti-eye-off text-lg"></i>
+      </button>
+      
+      <div id="sync-status" class="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/30 text-xs font-medium text-neutral-400">
+        <span class="w-2 h-2 rounded-full bg-neutral-600 transition-colors duration-300" id="sync-dot"></span>
+        <span id="sync-label" class="hidden sm:inline">Connecting</span>
       </div>
 
-      <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="btn-icon" title="Toggle Financial Blind Mask">
-        <i id="privacy-icon" class="ti ti-eye-off" style="font-size:16px"></i>
-      </button>
-
-      <button onclick="openAddShootModal()" class="btn-primary">
-        <i class="ti ti-plus"></i> <span style="display:none;margin-left:2px" id="header-new-txt">New Shoot</span>
+      <button onclick="openAddShootModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
+        <i class="ti ti-plus text-base"></i> <span class="hidden xs:inline">New Shoot</span>
       </button>
     </div>
   </header>
-  <script>if(window.innerWidth > 640) document.getElementById('header-new-txt').style.display='inline';</script>
 
-  <main class="main-workspace">
+  <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
-    <section id="section-dashboard" class="view-section active">
-      <div style="display:flex;flex-direction:column;gap:2px">
-        <h2 style="font-size:18px;font-weight:700;color:var(--text)">Dashboard Overview</h2>
-        <p id="dash-date" style="font-size:11px;color:var(--muted)"></p>
-      </div>
-
-      <div class="grid-stats" id="dash-stats"></div>
-
-      <div class="grid-financial-split">
-        <div class="fin-box">
-          <div class="fin-box-header"><i class="ti ti-wallet" style="color:var(--gold)"></i> Revenue Settlements</div>
-          <div id="dash-payments-breakdown" style="display:flex;flex-direction:column"></div>
-        </div>
-        <div class="fin-box">
-          <div class="fin-box-header"><i class="ti ti-receipt" style="color:var(--purple)"></i> Expense Aggregates</div>
-          <div id="dash-expenses-breakdown" style="display:flex;flex-direction:column"></div>
+    <section id="section-dashboard" class="app-section space-y-6">
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-900 pb-4">
+        <div>
+          <h2 class="text-xl font-bold tracking-tight text-white">Studio Ledger Dashboard</h2>
+          <p id="dash-date" class="text-xs text-neutral-400 mt-0.5"></p>
         </div>
       </div>
 
-      <div class="grid-timeline-analytics">
-        <div class="timeline-box">
-          <div class="fin-box-header" style="border-bottom:1px solid var(--border);padding-bottom:8px"><i class="ti ti-calendar-event" style="color:var(--gold)"></i> Upcoming Schedules</div>
-          <div id="dash-upcoming" class="shoots-stack"></div>
-        </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-        <div class="timeline-box">
-          <div class="fin-box-header" style="border-bottom:1px solid var(--border);padding-bottom:8px"><i class="ti ti-chart-line" style="color:var(--gold)"></i> Gross Monthly Revenue Growth Trends</div>
-          <div class="chart-wrapper">
-            <canvas id="revenueGrowthChart"></canvas>
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+        <div class="lg:col-span-7 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm">
+          <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+            <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i> Upcoming Productions
+          </div>
+          <div class="space-y-2 overflow-y-auto max-h-[420px] pr-1" id="dash-upcoming"></div>
+        </div>
+        
+        <div class="lg:col-span-5 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm flex flex-col justify-between">
+          <div>
+            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
+              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i> Financial Breakdown Matrix
+            </div>
+            <div id="dash-payments" class="space-y-3"></div>
+          </div>
+          <div class="mt-6 pt-4 border-t border-neutral-900">
+            <div class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Monthly Net Trends</div>
+            <div class="relative w-full h-44 bg-neutral-950 rounded-lg p-2 border border-neutral-900">
+              <canvas id="revenueAnalyticsChart"></canvas>
+            </div>
           </div>
         </div>
       </div>
     </section>
 
-    <section id="section-calendar" class="view-section">
-      <div class="calendar-container">
-        <div class="calendar-navbar">
-          <h2 id="cal-month-label" style="font-size:18px;font-weight:700"></h2>
-          <div style="display:flex;gap:6px">
-            <button onclick="calPrev()" class="btn-icon"><i class="ti ti-chevron-left"></i></button>
-            <button onclick="calToday()" class="btn-icon"><i class="ti ti-calendar"></i></button>
-            <button onclick="calNext()" class="btn-icon"><i class="ti ti-chevron-right"></i></button>
-          </div>
+    <section id="section-calendar" class="app-section hidden space-y-6">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
+        <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
+        <div class="flex items-center gap-1">
+          <button onclick="calPrev()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-left"></i></button>
+          <button onclick="calToday()" class="px-3 py-2 text-xs font-medium border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Today</button>
+          <button onclick="calNext()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-right"></i></button>
         </div>
-        <div id="cal-grid" class="calendar-grid"></div>
-        <div id="cal-day-panel" style="display:none"></div>
       </div>
+      <div class="grid grid-cols-7 gap-1 bg-neutral-950 p-2 border border-neutral-900 rounded-xl shadow-inner" id="cal-grid"></div>
+      <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
     </section>
 
-    <section id="section-shoots" class="view-section">
-      <h2 style="font-size:18px;font-weight:700">Master Shoot Schedules</h2>
-      <div class="filter-toolbar">
-        <div class="search-input-wrap">
-          <i class="ti ti-search" style="color:#555"></i>
-          <input type="text" id="shoot-search" placeholder="Search client, location..." oninput="renderShootsList()"/>
-        </div>
-        <select id="filter-company" onchange="renderShootsList()" class="select-dropdown"></select>
-        <select id="filter-event" onchange="renderShootsList()" class="select-dropdown"></select>
-        <select id="filter-loc" onchange="renderShootsList()" class="select-dropdown"></select>
+    <section id="section-shoots" class="app-section hidden space-y-4">
+      <div class="border-b border-neutral-900 pb-3">
+        <h2 class="text-xl font-bold text-white">Master Production Registry</h2>
       </div>
-      <div id="shoots-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+        <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+          <i class="ti ti-search text-neutral-500"></i>
+          <input type="text" id="shoot-search" placeholder="Search parameters..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
+        </div>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-company" onchange="renderShootsList()"></select>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-event" onchange="renderShootsList()"></select>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-loc" onchange="renderShootsList()"></select>
+      </div>
+      <div class="space-y-2" id="shoots-list"></div>
     </section>
 
-    <section id="section-payments" class="view-section">
-      <h2 style="font-size:18px;font-weight:700">Payment Ledger Matrix</h2>
-      <div class="grid-stats" id="pay-stats" style="margin-bottom:4px"></div>
-      <div class="filter-toolbar" style="grid-template-columns:2fr 1fr">
-        <div class="search-input-wrap">
-          <i class="ti ti-search" style="color:#555"></i>
-          <input type="text" id="pay-search" placeholder="Filter by client name..." oninput="renderPaymentsList()"/>
+    <section id="section-payments" class="app-section hidden space-y-4">
+      <div class="border-b border-neutral-900 pb-3">
+        <h2 class="text-xl font-bold text-white">Accounts Receivable & Overhead Payables</h2>
+      </div>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div class="sm:col-span-2 flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+          <i class="ti ti-search text-neutral-500"></i>
+          <input type="text" id="pay-search" placeholder="Filter client name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
         </div>
-        <select id="pay-filter-status" onchange="renderPaymentsList()" class="select-dropdown">
-          <option value="">All Verification Classes</option>
-          <option value="pending">Pending Slates</option>
-          <option value="part">Part Disbursed</option>
-          <option value="done">Completed / Cleared</option>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-status" onchange="renderPaymentsList()">
+          <option value="">All Verification States</option>
+          <option value="pending">Awaiting Inception</option>
+          <option value="part">Tranche Allocation</option>
+          <option value="done">Settled Fully</option>
         </select>
       </div>
-      <div id="payments-list" style="display:flex;flex-direction:column;gap:8px"></div>
+      <div class="space-y-2" id="payments-list"></div>
     </section>
 
-    <section id="section-settings" class="view-section">
-      <h2 style="font-size:18px;font-weight:700">System Settings</h2>
-      <div class="settings-layout-grid">
-        <div class="settings-pane">
-          <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-building" style="color:var(--gold)"></i> Studio Content Producers</div>
-          <div id="settings-companies" style="display:flex;flex-direction:column"></div>
-          <div class="input-row-group">
-            <input type="text" id="new-company-input" placeholder="Add production handle..." class="form-text-input"/>
-            <button onclick="addCompany()" class="btn-primary" style="padding:0 14px">Add</button>
+    <section id="section-settings" class="app-section hidden space-y-6">
+      <div class="border-b border-neutral-900 pb-3">
+        <h2 class="text-xl font-bold text-white">System Environment Configuration</h2>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Entities</div>
+          <div id="settings-companies" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
+          <div class="flex gap-2">
+            <input type="text" id="new-company-input" placeholder="New company title..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
-        <div class="settings-pane">
-          <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-map-pin" style="color:var(--gold)"></i> Standard Operations Footprint</div>
-          <div id="settings-locations" style="display:flex;flex-direction:column"></div>
-          <div class="input-row-group">
-            <input type="text" id="new-loc-input" placeholder="Add primary city destination..." class="form-text-input"/>
-            <button onclick="addLocation()" class="btn-primary" style="padding:0 14px">Add</button>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Core Target Locales</div>
+          <div id="settings-locations" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
+          <div class="flex gap-2">
+            <input type="text" id="new-loc-input" placeholder="Add location blueprint..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+          </div>
+        </div>
+
+        <div class="md:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Cloud Datastore Sync Layer</div>
+          <p class="text-xs text-neutral-500 mb-4">Direct persistence loop with active Supabase constructs. No proxy structures applied.</p>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Execute Force Sync Loop</button>
+            <button onclick="confirmClearData()" class="flex items-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/40 text-red-400 rounded-lg hover:bg-red-950/40 text-xs font-semibold transition"><i class="ti ti-trash"></i> Destroy Cloud Schemas</button>
           </div>
         </div>
       </div>
-
-      <div class="settings-pane" style="width:100%">
-        <div style="font-size:13px;font-weight:600;color:var(--text);display:flex;align-items:center;gap:6px"><i class="ti ti-database" style="color:var(--gold)"></i> Supabase Infrastructure Storage Mirror</div>
-        <p style="font-size:11px;color:var(--muted);line-height:1.5">Direct synchronization pipeline initialized on default collections without intercept lines. Local edits resolve to transaction state instantly.</p>
-        <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:6px">
-          <button onclick="forceSync()" class="form-text-input" style="max-width:160px;cursor:pointer;text-align:center"><i class="ti ti-refresh"></i> Manual Refresh Force</button>
-          <button onclick="confirmClearData()" class="form-text-input" style="max-width:160px;cursor:pointer;text-align:center;color:var(--red);border-color:rgba(239,68,68,0.2)">Clear Local Schemas</button>
-        </div>
-      </div>
     </section>
-
   </main>
 
-  <nav class="bottom-navbar">
-    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-terminal-btn active"><i class="ti ti-layout-dashboard"></i><span>Dash</span></button>
-    <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-terminal-btn"><i class="ti ti-calendar"></i><span>Plan</span></button>
-    <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-terminal-btn"><i class="ti ti-camera"></i><span>Shoots</span></button>
-    <button onclick="switchTab('payments')" id="tab-payments" class="nav-terminal-btn"><i class="ti ti-wallet"></i><span>Pay</span></button>
-    <button onclick="switchTab('settings')" id="tab-settings" class="nav-terminal-btn"><i class="ti ti-settings"></i><span>Setup</span></button>
+  <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
+    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
+    <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
+    <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
+    <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
+    <button onclick="switchTab('settings')" id="tab-settings" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-settings text-xl"></i>System</button>
   </nav>
 
-  <div id="shoot-modal-backdrop" class="modal-overlay" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
-    <div class="modal-surface">
-      <div class="modal-header">
-        <h3 id="shoot-modal-title" class="modal-title">New Shoot Entry</h3>
-        <button onclick="closeShootModal()" class="modal-close-trigger"><i class="ti ti-x"></i></button>
+  <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
+    <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
+        <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Configure Shoot Configuration</h3>
+        <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
       </div>
-
-      <div class="modal-body">
+      
+      <div class="p-5 space-y-4 flex-1">
         <input type="hidden" id="edit-shoot-id"/>
-        <div class="form-grid-2">
-          <div class="field-stack">
-            <label class="field-label">Client Designation/Name *</label>
-            <input type="text" id="f-shoot-name" placeholder="Ananya & Karthik Wedding" class="form-text-input"/>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Designation *</label>
+            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra & Co" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
-          <div class="field-stack">
-            <label class="field-label">Timeline Date *</label>
-            <input type="date" id="f-shoot-date" class="form-text-input" style="color-scheme:dark"/>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Assignment Date *</label>
+            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
         </div>
 
-        <div class="form-grid-2">
-          <div class="field-stack">
-            <label class="field-label">Event Domain Template</label>
-            <select id="f-shoot-event" onchange="handleEventOther()" class="select-dropdown">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Production Category</label>
+            <select id="f-shoot-event" onchange="handleEventOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="Wedding">Wedding</option>
               <option value="Reception">Reception</option>
               <option value="Sangeet">Sangeet</option>
@@ -401,12 +230,12 @@
               <option value="Pellikoduku">Pellikoduku</option>
               <option value="Pellikuthuru">Pellikuthuru</option>
               <option value="House Warming">House Warming</option>
-              <option value="Other">Other (Specify Custom Text)</option>
+              <option value="Other">Other (Specify Below)</option>
             </select>
           </div>
-          <div class="field-stack">
-            <label class="field-label">Operational Slot Allocation</label>
-            <select id="f-shoot-session" class="select-dropdown">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Segment Window</label>
+            <select id="f-shoot-session" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="Morning Session">Morning Session</option>
               <option value="Evening Session">Evening Session</option>
               <option value="Full Day">Full Day</option>
@@ -414,87 +243,104 @@
           </div>
         </div>
 
-        <div id="f-event-other-wrap" class="field-stack" style="display:none">
-          <label class="field-label">Custom Event Type</label>
-          <input type="text" id="f-shoot-event-other" placeholder="e.g. Pre-Wedding Shoot" class="form-text-input"/>
+        <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Signature</label>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Feature Film" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
-        <div class="form-grid-2">
-          <div class="field-stack">
-            <label class="field-label">Geographic Assignment Location</label>
-            <select id="f-shoot-loc" onchange="handleLocOther()" class="select-dropdown"></select>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operational Locale Base</label>
+            <select id="f-shoot-loc" onchange="handleLocOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
           </div>
-          <div class="field-stack">
-            <label class="field-label">Contractor Production Handle</label>
-            <select id="f-shoot-company" class="select-dropdown"></select>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Executing Operational Entity</label>
+            <select id="f-shoot-company" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
           </div>
         </div>
 
-        <div id="f-loc-other-wrap" class="field-stack" style="display:none">
-          <label class="field-label">Custom Regional Node Target</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g. International Target City" class="form-text-input"/>
+        <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Uncharted Location Entry</label>
+          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
-        <div style="border-top:1px solid var(--border);padding-top:12px;margin-top:4px" class="form-grid-3">
-          <div class="field-stack">
-            <label class="field-label">Gross Contract Value (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="45000" class="form-text-input"/>
+        <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Gross Aggregate (₹)</label>
+            <input type="number" id="f-shoot-amount" placeholder="Gross contracted value" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
-          <div class="field-stack">
-            <label class="field-label" style="color:var(--purple)">Logged Expenses (₹)</label>
-            <input type="number" id="f-shoot-expenses" placeholder="Travel/Fuel/Gear" class="form-text-input"/>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Production Expenses (₹)</label>
+            <input type="number" id="f-shoot-expense" placeholder="Operational overhead costs" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
           </div>
-          <div class="field-stack">
-            <label class="field-label">Verification Clearance</label>
-            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="select-dropdown">
-              <option value="pending">Pending Slate</option>
-              <option value="part">Part Disbursed</option>
-              <option value="done">Cleared / Full</option>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Settlement Index</label>
+            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
+              <option value="pending">Awaiting Downpayment</option>
+              <option value="part">Tranche Complete</option>
+              <option value="done">Settled Fully</option>
             </select>
           </div>
         </div>
 
-        <div id="f-part-pay-wrap" class="field-stack" style="display:none;background:rgba(168,85,247,0.04);border:1px solid rgba(168,85,247,0.15);padding:10px;border-radius:6px">
-          <label class="field-label" style="color:var(--purple)">Interim Disbursed Amount Received (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="15000" class="form-text-input"/>
+        <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Tranche Allocation Realized (₹)</label>
+          <input type="number" id="f-shoot-part-paid" placeholder="Enter captured funds" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
         </div>
 
-        <div class="field-stack">
-          <label class="field-label">Operational Notes Logbook</label>
-          <textarea id="f-shoot-notes" placeholder="Specify capture constraints, coordination logs..." class="form-text-input" style="height:54px;resize:none;font-family:inherit"></textarea>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Production Manifest Annotations</label>
+          <textarea id="f-shoot-notes" placeholder="Structural requirements, metadata records..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
         </div>
       </div>
-
-      <div class="modal-footer">
-        <div>
-          <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="form-text-input" style="display:none;color:var(--red);border-color:rgba(239,68,68,0.2);cursor:pointer;padding:6px 10px"><i class="ti ti-trash"></i> Delete</button>
-        </div>
-        <div style="display:flex;gap:6px;align-items:center">
-          <button id="modal-whatsapp-btn" onclick="triggerWhatsAppFromModal()" class="action-mini-btn wa" style="width:32px;height:32px;display:none" title="Send WhatsApp Message Engine"><i class="ti ti-brand-whatsapp" style="font-size:16px"></i></button>
-          <button onclick="closeShootModal()" class="form-text-input" style="cursor:pointer;padding:6px 12px">Cancel</button>
-          <button onclick="saveShoot()" class="btn-primary" style="padding:8px 16px;border-radius:6px">Save Record</button>
+      
+      <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 bg-[#0f0f0f] gap-2 pb-safe-offset">
+        <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Drop</button>
+        <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Verify via WhatsApp</button>
+        <div class="flex items-center gap-2 ml-auto">
+          <button onclick="closeShootModal()" class="px-4 py-2 text-xs font-semibold border border-neutral-800 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Cancel</button>
+          <button onclick="saveShoot()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Commit Record</button>
         </div>
       </div>
     </div>
   </div>
 
-  <div id="confirm-modal-backdrop" class="modal-overlay" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')" style="align-items:center;padding:16px">
-    <div class="modal-surface" style="max-width:340px;border-radius:12px;padding:20px;text-align:center;gap:14px">
-      <div style="width:40px;height:40px;background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.2);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);font-size:18px;margin:0 auto"><i class="ti ti-alert-triangle"></i></div>
-      <div style="display:flex;flex-direction:column;gap:4px">
-        <h4 id="confirm-title" style="font-size:14px;font-weight:600">Confirm Action Block</h4>
-        <p id="confirm-sub-text" style="font-size:11px;color:var(--muted);line-height:1.4"></p>
+  <div id="confirm-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')">
+    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
+      <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
+      <div class="space-y-1">
+        <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Confirm Pipeline Break?</h4>
+        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">System state modifications are irreversible once executed.</p>
       </div>
-      <div style="display:flex;gap:8px;justify-content:center;margin-top:4px">
-        <button onclick="closeConfirmModal()" class="form-text-input" style="cursor:pointer">Abort</button>
-        <button id="confirm-action-btn" onclick="confirmDelete()" class="btn-primary" style="background:var(--red);color:#fff">Execute Wipe</button>
+      <div class="flex items-center justify-center gap-2 pt-2">
+        <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
+        <button id="confirm-action-btn" class="w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Authorize Execution</button>
       </div>
     </div>
   </div>
 
-  <div id="toast-container"></div>
+  <div id="privacy-prompt-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
+      <div class="w-12 h-12 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-lock"></i></div>
+      <div class="space-y-1">
+        <h4 class="text-white font-bold text-base tracking-wide">Unlock Encrypted Assets</h4>
+        <p class="text-xs text-neutral-500">Provide high-tier authorization credential to expose dashboard values.</p>
+      </div>
+      <div class="space-y-3">
+        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition"/>
+        <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Credential verification failed. Recalibrating.</p>
+      </div>
+      <div class="flex gap-2 pt-2">
+        <button onclick="closePrivacyPrompt()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Abort</button>
+        <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Authorize Unlock</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
+    // SUPABASE DATA INTERFACE CREDENTIALS
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 
@@ -504,8 +350,6 @@
       'Authorization': 'Bearer ' + SUPABASE_KEY,
       'Prefer': 'return=representation'
     };
-
-    let pendingDeleteId = null;
 
     async function sbFetch(path, opts = {}) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
@@ -522,66 +366,87 @@
 
     const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
     const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
-    const EVENT_COLORS = {
-      'Wedding':'#c9a96e','Reception':'#4a9eff','Sangeet':'#a855f7',
-      'Haldi':'#f59e0b','Pellikoduku':'#14b8a6','Pellikuthuru':'#ec4899',
-      'House Warming':'#0ea5e9','Other':'#6b7280'
-    };
+    const EVENT_COLORS = { 'Wedding':'#c9a96e','Reception':'#4a9eff','Sangeet':'#a855f7','Haldi':'#f59e0b','Pellikoduku':'#14b8a6','Pellikuthuru':'#ec4899','House Warming':'#0ea5e9','Other':'#6b7280' };
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const DAYS = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
 
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
-    let _initialized = false;
-    let revenueChartInstance = null;
+    let _analyticsChartInstance = null;
+
+    // UPGRADE #2: PRIVACY STATE CONTROLS (ENABLED BY DEFAULT EVERY REBOOT)
     let _privacyModeActive = true; 
 
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
       const lbl = document.getElementById('sync-label');
-      if (!dot || !lbl) return;
-      dot.className = 'status-dot ' + state;
-      lbl.textContent = label;
+      if (dot) {
+        dot.className = "w-2 h-2 rounded-full transition-colors duration-300 " + 
+          (state === 'syncing' ? 'bg-amber-500 animate-pulse' : state === 'synced' ? 'bg-emerald-500' : 'bg-red-500');
+      }
+      if (lbl) lbl.textContent = label;
     }
 
     function showToast(msg, type = 'success') {
       const c = document.getElementById('toast-container');
-      if(!c) return;
+      if (!c) return;
       const t = document.createElement('div');
-      t.className = 'toast-node ' + type;
-      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'}"></i><span>${msg}</span>`;
+      t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
+      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
       c.appendChild(t);
-      setTimeout(() => { t.style.opacity = '0'; t.style.transition = 'opacity 0.3s'; setTimeout(() => t.remove(), 300); }, 3000);
+      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
     async function ensureTables() {
       try {
         await sbFetch('shoots?limit=1');
         return true;
-      } catch(e) {
-        setSyncStatus('error', 'Schema Connection Exception');
-        showToast('Infrastructure connection dropped.', 'error');
-        return false;
+      } catch (e) {
+        if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
+          setSyncStatus('error', 'Schema Blueprint Truncated');
+          injectCloudTables();
+          return false;
+        }
+        throw e;
       }
     }
 
-    function resetModal() {
-      document.getElementById('edit-shoot-id').value = '';
-      document.getElementById('f-shoot-name').value = '';
-      document.getElementById('f-shoot-date').value = '';
-      document.getElementById('f-shoot-event').value = 'Wedding';
-      document.getElementById('f-shoot-event-other').value = '';
-      document.getElementById('f-event-other-wrap').style.display = 'none';
-      document.getElementById('f-shoot-session').value = 'Morning Session';
-      document.getElementById('f-shoot-loc-other').value = '';
-      document.getElementById('f-loc-other-wrap').style.display = 'none';
-      document.getElementById('f-shoot-notes').value = '';
-      document.getElementById('f-shoot-amount').value = '';
-      document.getElementById('f-shoot-expenses').value = ''; 
-      document.getElementById('f-shoot-pay-status').value = 'pending';
-      document.getElementById('f-shoot-part-paid').value = '';
-      document.getElementById('f-part-pay-wrap').style.display = 'none';
+    function injectCloudTables() {
+      document.getElementById('loading-screen').innerHTML = `
+        <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
+          <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Schema Initializer Protocol</div>
+          <p class="text-xs text-neutral-400 leading-relaxed">Supabase relational instances are absent. Direct SQL Execution required. Access <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and execute the script block below:</p>
+          <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
+          <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Re-evaluate Sync Loop Connection</button>
+        </div>`;
+    }
+
+    function getSqlSetupScript() {
+      return `create table if not exists shoots (
+  id text primary key,
+  name text,
+  date text,
+  event text,
+  session text,
+  location text,
+  company text,
+  notes text,
+  amount numeric default 0,
+  expense numeric default 0,
+  pay_status text default 'pending',
+  part_paid numeric default 0,
+  created timestamptz default now()
+);
+
+create table if not exists settings (
+  key text primary key,
+  value jsonb
+);
+
+alter table shoots enable row level security;
+alter table settings enable row level security;
+create policy "Allow all" on shoots for all using (true) with check (true);
+create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function dbToShoot(r) {
@@ -595,7 +460,7 @@
         company: r.company || '',
         notes: r.notes || '',
         amount: Number(r.amount || 0),
-        expenses: Number(r.expenses || 0),
+        expense: Number(r.expense || 0), // UPGRADE #3
         payStatus: r.pay_status || 'pending',
         partPaid: Number(r.part_paid || 0),
         created: r.created
@@ -613,7 +478,7 @@
         company: s.company,
         notes: s.notes,
         amount: s.amount || 0,
-        expenses: s.expenses || 0,
+        expense: s.expense || 0, // UPGRADE #3
         pay_status: s.payStatus || 'pending',
         part_paid: s.partPaid || 0,
         created: s.created || new Date().toISOString()
@@ -621,530 +486,939 @@
     }
 
     async function loadAll() {
-      setSyncStatus('syncing', 'Synchronising Storage...');
-      const ok = await ensureTables();
-      if (!ok) return;
+      setSyncStatus('syncing', 'Initializing Link');
+      const isConfigured = await ensureTables();
+      if (!isConfigured) return;
+
       try {
         const raw = await sbFetch('shoots?select=*&order=date.desc');
         _shoots = raw.map(dbToShoot);
-        const sets = await sbFetch('settings?select=*');
-        const compRow = sets.find(r => r.key === 'companies');
-        const locRow  = sets.find(r => r.key === 'locations');
-        _companies = compRow ? compRow.value : [...DEFAULT_COMPANIES];
-        _locs      = locRow  ? locRow.value  : [];
-        _initialized = true;
-        setSyncStatus('synced', 'Synced Cloud');
-        document.getElementById('loading-screen').style.display = 'none';
-        applyPrivacyUIVisualState();
+
+        const configurations = await sbFetch('settings?select=*');
+        const cRow = configurations.find(r => r.key === 'companies');
+        const lRow = configurations.find(r => r.key === 'locations');
+        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
+        _locs = lRow ? lRow.value : [];
+
+        setSyncStatus('synced', 'Synced Cloud Data');
+        document.getElementById('loading-screen').classList.add('hidden');
+        applyPrivacyUIVisibility();
         renderDashboard();
-      } catch(e) {
-        setSyncStatus('error', 'Connection Intercept Error');
-        document.getElementById('loading-screen').style.display = 'none';
+      } catch (e) {
+        setSyncStatus('error', 'Connection Severed');
+        showToast('Hydration Exception: ' + e.message, 'error');
+        document.getElementById('loading-screen').classList.add('hidden');
       }
     }
 
+    async function saveShootToDB(shoot) {
+      setSyncStatus('syncing', 'Syncing Record');
+      try {
+        const existing = _shoots.find(s => s.id === shoot.id);
+        if (existing) {
+          await sbFetch(`shoots?id=eq.${shoot.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(shootToDb(shoot))
+          });
+          const idx = _shoots.findIndex(s => s.id === shoot.id);
+          if (idx >= 0) _shoots[idx] = shoot;
+        } else {
+          await sbFetch('shoots', {
+            method: 'POST',
+            body: JSON.stringify(shootToDb(shoot))
+          });
+          _shoots.push(shoot);
+        }
+        setSyncStatus('synced', 'Pipeline Locked');
+        showToast('Shoot record synchronized successfully');
+      } catch (e) {
+        setSyncStatus('error', 'Transaction Failure');
+        showToast('Push Error: ' + e.message, 'error');
+        throw e;
+      }
+    }
+
+    async function deleteShootFromDB(id) {
+      setSyncStatus('syncing', 'Purging File');
+      try {
+        await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
+        _shoots = _shoots.filter(s => s.id !== id);
+        setSyncStatus('synced', 'Purge Resolved');
+        showToast('Shoot registry data purged clean');
+      } catch (e) {
+        setSyncStatus('error', 'Drop Exception');
+        showToast('Purge Interrupted: ' + e.message, 'error');
+        throw e;
+      }
+    }
+
+    async function saveSettingToDB(key, value) {
+      setSyncStatus('syncing', 'Updating Matrix');
+      try {
+        await sbFetch(`settings?key=eq.${key}`, { method: 'DELETE' }).catch(() => {});
+        await sbFetch('settings', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key, value })
+        });
+        setSyncStatus('synced', 'Matrix Set');
+      } catch (e) {
+        setSyncStatus('error', 'Configuration Fault');
+        showToast('Setting Set Intercepted: ' + e.message, 'error');
+      }
+    }
+
+    async function forceSync() {
+      setSyncStatus('syncing', 'Hot Reboot Sync');
+      try {
+        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        _shoots = raw.map(dbToShoot);
+        const config = await sbFetch('settings?select=*');
+        const cRow = config.find(r => r.key === 'companies');
+        const lRow = config.find(r => r.key === 'locations');
+        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
+        _locs = lRow ? lRow.value : [];
+        setSyncStatus('synced', 'Sync Fully Normalized');
+        showToast('All cache metrics recalculated directly from Supabase');
+        refreshCurrentView();
+      } catch (e) {
+        setSyncStatus('error', 'Sync Severed');
+        showToast('Hot Sync Fault: ' + e.message, 'error');
+      }
+    }
+
+    // UPGRADE #2: RE-ENGINEERED PRIVACY MODE LOGIC ENGINE (HARDCODED CHECK TO MATCH EXACTLY "JP@22")
     function togglePrivacyMode() {
       if (_privacyModeActive) {
-        const phrase = prompt("Enter verification passkey to decrypt financial data summaries:");
-        if (phrase === "JP@22") {
-          _privacyModeActive = false;
-          showToast("Privacy mode deactivated.");
-        } else if (phrase !== null) {
-          showToast("Access configuration code authentication failed.", "error");
-        }
+        openPrivacyPrompt();
       } else {
         _privacyModeActive = true;
-        showToast("Financial data encrypted successfully.");
+        applyPrivacyUIVisibility();
+        showToast('Financial transparency parameters locked');
       }
-      applyPrivacyUIVisualState();
     }
 
-    function applyPrivacyUIVisualState() {
+    function openPrivacyPrompt() {
+      const modal = document.getElementById('privacy-prompt-backdrop');
+      document.getElementById('privacy-pass-input').value = '';
+      document.getElementById('privacy-error-lbl').classList.add('hidden');
+      modal.classList.add('opacity-100', 'pointer-events-all');
+      document.getElementById('privacy-pass-input').focus();
+    }
+
+    function closePrivacyPrompt() {
+      document.getElementById('privacy-prompt-backdrop').classList.remove('opacity-100', 'pointer-events-all');
+    }
+
+    function verifyPrivacyPassword() {
+      const pin = document.getElementById('privacy-pass-input').value;
+      if (pin === "JP@22") { 
+        _privacyModeActive = false;
+        closePrivacyPrompt();
+        applyPrivacyUIVisibility();
+        showToast('Financial matrix decrypted successfully');
+      } else {
+        const lbl = document.getElementById('privacy-error-lbl');
+        lbl.classList.remove('hidden');
+        lbl.classList.add('animate-shake');
+        setTimeout(() => lbl.classList.remove('animate-shake'), 400);
+      }
+    }
+
+    function applyPrivacyUIVisibility() {
       const btn = document.getElementById('privacy-toggle-btn');
       const icon = document.getElementById('privacy-icon');
-      if (!btn || !icon) return;
-      if (_privacyModeActive) {
-        btn.className = "btn-icon locked";
-        icon.className = "ti ti-eye-off";
-      } else {
-        btn.className = "btn-icon unlocked";
-        icon.className = "ti ti-eye";
-      }
-      document.querySelectorAll('.currency-mask').forEach(el => {
-        if (_privacyModeActive) el.classList.add('blur-financial');
-        else el.classList.remove('blur-financial');
-      });
-    }
-
-    function generateWhatsAppMessagePayload(shootObj) {
-      const name = shootObj.name || 'Client';
-      const date = shootObj.date ? fmtDate(shootObj.date) : '[Date Not Specified]';
-      const event = shootObj.event || 'Shoot';
-      const location = shootObj.location || 'Your Specified Location';
-      const rawString = `Hi ${name}, this is Jashwanth JP. Just confirming our schedule for the ${event} shoot on ${date} at ${location}. Looking forward to working with you!`;
-      return `https://wa.me/?text=${encodeURIComponent(rawString)}`;
-    }
-
-    function executeWhatsAppRedirect(id, e) {
-      if(e) { e.stopPropagation(); e.preventDefault(); }
-      const targetShoot = _shoots.find(s => s.id === id);
-      if(!targetShoot) return;
-      window.open(generateWhatsAppMessagePayload(targetShoot), '_blank');
-    }
-
-    function triggerWhatsAppFromModal() {
-      const editId = document.getElementById('edit-shoot-id').value;
-      if(editId) executeWhatsAppRedirect(editId, null);
-    }
-
-    function handleEventOther() {
-      const ev = document.getElementById('f-shoot-event').value;
-      document.getElementById('f-event-other-wrap').style.display = (ev === 'Other') ? 'block' : 'none';
-    }
-
-    function handleLocOther() {
-      const loc = document.getElementById('f-shoot-loc').value;
-      document.getElementById('f-loc-other-wrap').style.display = (loc === '__other__') ? 'block' : 'none';
-    }
-
-    function handlePayStatusChange() {
-      const status = document.getElementById('f-shoot-pay-status').value;
-      document.getElementById('f-part-pay-wrap').style.display = (status === 'part') ? 'block' : 'none';
-    }
-
-    function injectAnalyticsGrowthChartGraphics() {
-      const canvasCtx = document.getElementById('revenueGrowthChart');
-      if(!canvasCtx) return;
-      const matrixMap = {};
-      _shoots.forEach(s => {
-        if(!s.date) return;
-        const indexMonth = s.date.slice(0, 7);
-        if(!matrixMap[indexMonth]) matrixMap[indexMonth] = 0;
-        matrixMap[indexMonth] += Number(s.amount || 0);
-      });
-      const chronologKeys = Object.keys(matrixMap).sort();
-      const chartLabels = chronologKeys.map(k => {
-        const p = k.split('-');
-        return `${MONTHS[parseInt(p[1])-1].slice(0,3)} ${p[0].slice(2)}`;
-      });
-      const dataPayload = chronologKeys.map(k => matrixMap[k]);
-      if (revenueChartInstance) revenueChartInstance.destroy();
-      if(chronologKeys.length === 0) { canvasCtx.style.display = 'none'; return; }
-      else { canvasCtx.style.display = 'block'; }
       
-      revenueChartInstance = new Chart(canvasCtx, {
-        type: 'line',
+      if (_privacyModeActive) {
+        btn.className = "flex items-center justify-center p-2 rounded-lg border border-red-950 bg-red-950/20 text-red-400 hover:border-red-500 transition shadow-inner animate-pulse";
+        icon.className = "ti ti-lock-square text-lg";
+        document.querySelectorAll('.privacy-target').forEach(el => el.classList.add('blur-financial'));
+      } else {
+        btn.className = "flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition";
+        icon.className = "ti ti-lock-square-open text-lg";
+        document.querySelectorAll('.privacy-target').forEach(el => el.classList.remove('blur-financial'));
+      }
+    }
+
+    // UPGRADE #5: INSTANT WHATSAPP CONFIRMATION ROUTER
+    function buildWhatsAppActionLink(s) {
+      const d = s.date ? new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending Confirmation';
+      const template = `Hi ${s.name || 'Client'}, this is Jashwanth JP. Just confirming our schedule for the ${s.event || 'scheduled'} shoot on ${d} at ${s.location || 'noted location'}. Looking forward to working with you!`;
+      return `https://wa.me/?text=${encodeURIComponent(template)}`;
+    }
+
+    function triggerRowWhatsApp(id, e) {
+      if (e) e.stopPropagation(); // CRITICAL TOUCH CONTROL: CRITICAL INTERCEPTIONS OF PROPAGATION IN TACTILE GRAPHICS
+      const s = _shoots.find(x => x.id === id);
+      if (s) window.open(buildWhatsAppActionLink(s), '_blank');
+    }
+
+    function triggerModalWhatsApp() {
+      const id = document.getElementById('edit-shoot-id').value;
+      if (!id) return;
+      
+      let event = document.getElementById('f-shoot-event').value;
+      if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
+      
+      let location = document.getElementById('f-shoot-loc').value;
+      if (location === '__other__') location = document.getElementById('f-shoot-loc-other').value.trim();
+
+      const contextData = {
+        name: document.getElementById('f-shoot-name').value.trim(),
+        date: document.getElementById('f-shoot-date').value,
+        event: event,
+        location: location
+      };
+      window.open(buildWhatsAppActionLink(contextData), '_blank');
+    }
+
+    // INTERACTION HELPERS
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function fmtAmt(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+    function getEventConfig(ev) { return { color: EVENT_COLORS[ev] || '#6b7280' }; }
+    
+    function ddMmm(d) {
+      if (!d) return { dd: '', mmm: '' };
+      const dt = new Date(d + 'T00:00:00');
+      return { dd: dt.getDate(), mmm: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dt.getMonth()] };
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+      document.querySelectorAll('.nav-tab').forEach(t => {
+        t.className = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all";
+      });
+      
+      document.getElementById('section-' + tab).classList.remove('hidden');
+      const targetTab = document.getElementById('tab-' + tab);
+      targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+      
+      if (tab === 'dashboard') renderDashboard();
+      if (tab === 'calendar') renderCalendar();
+      if (tab === 'shoots') renderShootsList();
+      if (tab === 'payments') renderPayments();
+      if (tab === 'settings') renderSettings();
+    }
+
+    // RENDERING LOGIC CORES
+    function renderDashboard() {
+      const shoots = _shoots;
+      const td = today();
+      const now = new Date();
+      const curMonthStr = now.toISOString().slice(0, 7);
+
+      document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+
+      // Calculate total revenue, overheads, and true profit arrays
+      const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const trueOutstanding = totalGross - realizedReceived;
+
+      // UPGRADE #3 & #2: EXPENSE DATA INTEGRATION & PRIVACY WRAPPER INJECTORS
+      document.getElementById('dash-stats').innerHTML = `
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Gross Valuations</div>
+          <div class="text-xl md:text-2xl font-bold tracking-tight text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalGross)}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Contract assets mapped</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500/80">Operational Expenses</div>
+          <div class="text-xl md:text-2xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(totalExpenses)}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Total operational overheads</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Capital Captured</div>
+          <div class="text-xl md:text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(realizedReceived)}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Liquidity safe in hand</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-red-400">Arrears Matrix</div>
+          <div class="text-xl md:text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(trueOutstanding)}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Pending collection balances</div>
+        </div>`;
+
+      const upcoming = shoots.filter(s => s.date >= td).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
+      const ul = document.getElementById('dash-upcoming');
+      if (!upcoming.length) {
+        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No production pipelines currently pending execution.</div>';
+      } else {
+        ul.innerHTML = upcoming.map(s => getShootRowHtmlTemplate(s, true)).join('');
+      }
+
+      const verifiedSettledCount = shoots.filter(s => s.payStatus === 'done').length;
+      const allocatedTrancheCount = shoots.filter(s => s.payStatus === 'part').length;
+      const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending').length;
+
+      document.getElementById('dash-payments').innerHTML = `
+        <div class="space-y-2 text-xs">
+          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
+            <span class="text-neutral-500">Consolidated Gross Book</span>
+            <span class="font-bold text-white privacy-target">${fmtAmt(totalGross)}</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
+            <span class="text-neutral-500">Realized Cashflows</span>
+            <span class="font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
+          </div>
+          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
+            <span class="text-neutral-500">Unresolved Ledger Arrears</span>
+            <span class="font-bold text-amber-500 privacy-target">${fmtAmt(trueOutstanding)}</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 pt-2">
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/40 border border-amber-900/60 text-amber-400">${unliquidatedCount} Awaiting</span>
+          </div>
+        </div>`;
+
+      applyPrivacyUIVisibility();
+      // UPGRADE #4: PARSE TIMELINES AND PLOT ADVANCED MONTHLY REVENUE CHART
+      setTimeout(buildInteractiveRevenueGrowthChart, 50);
+    }
+
+    // GENERATIVE HTML BUILD ENGINE PARADIGMS
+    function getShootRowHtmlTemplate(s, isDashboardFrame) {
+      const { dd, mmm } = ddMmm(s.date);
+      const balanceOwed = Number(s.amount || 0) - Number(s.partPaid || 0);
+      
+      const badgeStyles = {
+        'Wedding':'bg-amber-950/40 text-[#c9a96e] border border-amber-900/60',
+        'Reception':'bg-blue-950/40 text-blue-400 border border-blue-900/60',
+        'Sangeet':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
+        'Haldi':'bg-yellow-950/40 text-yellow-400 border border-yellow-900/60',
+        'Pellikoduku':'bg-teal-950/40 text-teal-400 border border-teal-900/60',
+        'Pellikuthuru':'bg-pink-950/40 text-pink-400 border border-pink-900/60',
+        'House Warming':'bg-sky-950/40 text-sky-400 border border-sky-900/60'
+      }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
+
+      const stateBadge = {
+        'pending':'bg-neutral-950 text-neutral-400 border border-neutral-800',
+        'part':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
+        'done':'bg-emerald-950/40 text-emerald-400 border border-emerald-900/60'
+      }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
+
+      const stateLabel = { 'pending':'Awaiting','part':'Partial','done':'Settled' }[s.payStatus] || 'Unresolved';
+
+      return `
+        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900/80 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+              <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
+              <span class="text-[9px] uppercase tracking-wider text-neutral-500 font-medium mt-0.5">${mmm}</span>
+            </div>
+            <div class="min-w-0">
+              <div class="text-sm font-semibold text-white truncate">${s.name}</div>
+              <div class="text-xs text-neutral-500 truncate mt-0.5">
+                <span>${s.location || 'Undefined Locale'}</span> ${s.company ? `• <span class="text-neutral-400">${s.company}</span>` : ''}
+              </div>
+            </div>
+          </div>
+
+          <div class="flex items-center gap-4 flex-shrink-0">
+            <span class="hidden xs:inline-block text-[10px] px-2 py-0.5 font-semibold rounded-md ${badgeStyles}">${s.event}</span>
+            
+            ${s.amount ? `
+              <div class="text-right min-w-[70px]">
+                <div class="text-xs font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
+                ${s.expense ? `<div class="text-[9px] text-amber-500 privacy-target">Exp: ${fmtAmt(s.expense)}</div>` : ''}
+                <div class="mt-1"><span class="text-[9px] px-1.5 py-0.2 font-medium rounded ${stateBadge}">${stateLabel}</span></div>
+              </div>` : ''}
+
+            <div class="flex items-center gap-1">
+              <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition" title="Send Notification Script">
+                <i class="ti ti-brand-whatsapp text-base"></i>
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }
+
+    // UPGRADE #4: PARSE TIMELINES AND PLOT ADVANCED CHART ENGINE GROUPING Gross vs Expense
+    function buildInteractiveRevenueGrowthChart() {
+      const ctx = document.getElementById('revenueAnalyticsChart');
+      if (!ctx) return;
+
+      if (_analyticsChartInstance) {
+        _analyticsChartInstance.destroy();
+      }
+
+      // Group matrix calculations chronologically
+      const monthlyData = {};
+      _shoots.forEach(s => {
+        if (!s.date) return;
+        const monthKey = s.date.slice(0, 7); // Format: YYYY-MM
+        if (!monthlyData[monthKey]) {
+          monthlyData[monthKey] = { gross: 0, expense: 0 };
+        }
+        monthlyData[monthKey].gross += Number(s.amount || 0);
+        monthlyData[monthKey].expense += Number(s.expense || 0);
+      });
+
+      const sortedTimelineKeys = Object.keys(monthlyData).sort();
+      const labels = sortedTimelineKeys.map(k => {
+        const parts = k.split('-');
+        return `${MONTHS[parseInt(parts[1]) - 1].slice(0, 3)} ${parts[0].slice(2)}`;
+      });
+      
+      const grossDataset = sortedTimelineKeys.map(k => monthlyData[k].gross);
+      const expenseDataset = sortedTimelineKeys.map(k => monthlyData[k].expense);
+
+      // Handle structural fallbacks for barren schemas
+      const configurationLabels = labels.length ? labels : ["Cache Null"];
+      const finalGrossDataset = grossDataset.length ? grossDataset : [0];
+      const finalExpenseDataset = expenseDataset.length ? expenseDataset : [0];
+
+      _analyticsChartInstance = new Chart(ctx, {
+        type: 'bar',
         data: {
-          labels: chartLabels,
-          datasets: [{
-            label: 'Contract Gross (₹)',
-            data: dataPayload,
-            borderColor: '#c9a96e',
-            backgroundColor: 'rgba(201, 169, 110, 0.03)',
-            borderWidth: 2,
-            tension: 0.3,
-            fill: true,
-            pointBackgroundColor: '#e6c98a',
-            pointRadius: 4
-          }]
+          labels: configurationLabels,
+          datasets: [
+            {
+              label: 'Gross',
+              data: finalGrossDataset,
+              backgroundColor: '#c9a96e',
+              borderRadius: 4,
+              borderSkipped: false
+            },
+            {
+              label: 'Overhead',
+              data: finalExpenseDataset,
+              backgroundColor: '#ef4444',
+              borderRadius: 4,
+              borderSkipped: false
+            }
+          ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          plugins: { legend: { display: false } },
+          plugins: {
+            legend: { display: false },
+            tooltip: {
+              enabled: !_privacyModeActive, // Structural fallback to mask configurations inside analytics logic
+              callbacks: {
+                label: function(context) { return ` ${context.dataset.label}: ₹${context.raw.toLocaleString()}`; }
+              }
+            }
+          },
           scales: {
-            y: { grid: { color: '#1a1a1a' }, ticks: { color: '#666', font: { size: 10 }, callback: v => '₹' + v.toLocaleString('en-IN') } },
-            x: { grid: { display: false }, ticks: { color: '#666', font: { size: 10 } } }
+            x: { grid: { display: false }, ticks: { color: '#666', font: { size: 9 } } },
+            y: { grid: { color: '#141414' }, ticks: { display: false } }
           }
         }
       });
     }
 
-    function renderDashboard() {
-      const shoots = _shoots;
-      const td = today();
-      const now = new Date();
-      const monthStr = now.toISOString().slice(0,7);
-      document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN',{weekday:'long',year:'numeric',month:'long',day:'numeric'});
-      
-      const totalValueCount = shoots.length;
-      const volumeThisMonth = shoots.filter(s => s.date && s.date.startsWith(monthStr)).length;
-      const volumeUpcoming = shoots.filter(s => s.date >= td).length;
-      const aggregateExpensesSum = shoots.reduce((a,s)=>a+Number(s.expenses||0),0);
-
-      document.getElementById('dash-stats').innerHTML = `
-        <div class="stat-card"><span class="stat-card-label">Total Contracts</span><span class="stat-card-value font-editorial" style="color:var(--gold)">${totalValueCount}</span></div>
-        <div class="stat-card"><span class="stat-card-label">Active Month</span><span class="stat-card-value font-editorial" style="color:var(--blue)">${volumeThisMonth}</span></div>
-        <div class="stat-card"><span class="stat-card-label">Upcoming Timeline</span><span class="stat-card-value font-editorial" style="color:var(--purple)">${volumeUpcoming}</span></div>
-        <div class="stat-card"><span class="stat-card-label" style="color:var(--purple)">Gross Outflows</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--red)">${fmtAmt(aggregateExpensesSum)}</span></div>
-      `;
-
-      const upcomingList = shoots.filter(s => s.date >= td).sort((a,b) => a.date.localeCompare(b.date)).slice(0,10);
-      const ul = document.getElementById('dash-upcoming');
-      if (!upcomingList.length) ul.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:24px 0">No pending line operational items.</div>';
-      else ul.innerHTML = upcomingList.map(s => shootRowHTML(s, true)).join('');
-
-      const totalGrossContracted = shoots.reduce((a,s)=>a+Number(s.amount||0),0);
-      const recoveredSettlements = shoots.reduce((a,s)=>{
-        if (s.payStatus==='done') return a+Number(s.amount||0);
-        if (s.payStatus==='part') return a+Number(s.partPaid||0);
-        return a;
-      },0);
-      const dynamicOutstandingBalance = totalGrossContracted - recoveredSettlements;
-      const receivedExpensesSum = shoots.reduce((a,s)=> s.payStatus==='done'?a+Number(s.expenses||0):a,0);
-      const pendingExpensesSum = aggregateExpensesSum - receivedExpensesSum;
-
-      document.getElementById('dash-payments-breakdown').innerHTML = `
-        <div class="fin-row"><span style="color:var(--muted)">Contracted Aggregates</span><span class="currency-mask" style="font-weight:600">${fmtAmt(totalGrossContracted)}</span></div>
-        <div class="fin-row"><span style="color:var(--green)">Settlements Deposited</span><span class="currency-mask" style="font-weight:600;color:var(--green)">${fmtAmt(recoveredSettlements)}</span></div>
-        <div class="fin-row"><span style="color:var(--amber)">Outstanding Arrears</span><span class="currency-mask" style="font-weight:600;color:var(--amber)">${fmtAmt(dynamicOutstandingBalance)}</span></div>
-      `;
-
-      document.getElementById('dash-expenses-breakdown').innerHTML = `
-        <div class="fin-row"><span style="color:var(--muted)">Operational Capital Loss</span><span class="currency-mask" style="font-weight:600">${fmtAmt(aggregateExpensesSum)}</span></div>
-        <div class="fin-row"><span style="color:var(--green)">Recovered Cost Slates</span><span class="currency-mask" style="font-weight:600;color:var(--green)">${fmtAmt(receivedExpensesSum)}</span></div>
-        <div class="fin-row"><span style="color:var(--purple)">Pending Liability Outflow</span><span class="currency-mask" style="font-weight:600;color:var(--purple)">${fmtAmt(pendingExpensesSum)}</span></div>
-      `;
-
-      injectAnalyticsGrowthChartGraphics();
-      applyPrivacyUIVisualState();
-    }
-
-    function shootRowHTML(s, hideActions) {
-      const {dd, mmm} = ddMmm(s.date);
-      const balance = Number(s.amount||0) - Number(s.partPaid||0);
-      const evtClass = 'evt-' + (s.event || 'other').toLowerCase().replace(' ', '-');
-      
-      const paymentElementSegment = s.amount ? `
-        <div class="pay-side">
-          <div class="currency-mask" style="font-weight:700;color:var(--text)">${fmtAmt(s.amount)}</div>
-          ${s.payStatus==='part' ? `<div class="currency-mask" style="font-size:10px;color:var(--purple)">+${fmtAmt(s.partPaid)}</div><div class="currency-mask" style="font-size:9px;color:var(--muted)">${fmtAmt(balance)} due</div>` : ''}
-          <div style="margin-top:2px"><span class="badge ${payBadgeClass(s.payStatus)}">${payLabel(s.payStatus)}</span></div>
-        </div>` : '';
-
-      const actionsMarkupSegment = hideActions ? '' : `
-        <div class="shoot-row-actions">
-          <button onclick="executeWhatsAppRedirect('${s.id}', event)" class="action-mini-btn wa" title="WhatsApp Message Notification"><i class="ti ti-brand-whatsapp"></i></button>
-          <button onclick="event.stopPropagation();openEditShootModal('${s.id}')" class="action-mini-btn" title="Edit"><i class="ti ti-edit"></i></button>
-          <button onclick="event.stopPropagation();askDelete('${s.id}')" class="action-mini-btn danger" title="Delete"><i class="ti ti-trash"></i></button>
-        </div>`;
-
-      return `
-        <div onclick="openEditShootModal('${s.id}')" class="shoot-row">
-          <div class="date-badge"><span class="date-badge-dd font-editorial">${dd}</span><span class="date-badge-mmm">${mmm}</span></div>
-          <div class="shoot-row-body">
-            <h5 class="shoot-row-title">${s.name}</h5>
-            <p class="shoot-row-meta">${s.location || 'No Node Specified'}${s.location&&s.company?' &middot; ':''}${s.company||''}</p>
-            <div class="shoot-row-tags">
-              <span class="badge ${evtClass}">${s.event}</span>
-              ${s.expenses ? `<span class="currency-mask" style="font-size:9px;color:var(--purple);display:flex;align-items:center;gap:2px"><i class="ti ti-receipt" style="font-size:10px"></i>₹${s.expenses}</span>` : ''}
-            </div>
-          </div>
-          ${paymentElementSegment}
-          ${actionsMarkupSegment}
-        </div>`;
-    }
-
+    // CALENDAR PARSER SYSTEM CONTROLS
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
     let calSelected = null;
 
     function renderCalendar() {
       document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth+1, 0).getDate();
+      const firstDayIdx = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
       const daysInPrev = new Date(calYear, calMonth, 0).getDate();
-      let html = DAYS.map(d => `<div class="calendar-dow">${d}</div>`).join('');
-      const shootsByDate = {};
-      _shoots.forEach(s => { if (s.date) { if (!shootsByDate[s.date]) shootsByDate[s.date] = []; shootsByDate[s.date].push(s); } });
-      
-      let cells = [];
-      for (let i = 0; i < firstDay; i++) cells.push({ day: daysInPrev - firstDay + 1 + i, month: calMonth - 1, year: calYear, other: true });
-      for (let d = 1; d <= daysInMonth; d++) cells.push({ day: d, month: calMonth, year: calYear, other: false });
-      const rem = 42 - cells.length;
-      for (let d = 1; d <= rem; d++) cells.push({ day: d, month: calMonth + 1, year: calYear, other: true });
 
-      cells.forEach(c => {
-        const dd = String(c.day).padStart(2,'0');
-        const yr = c.month < 0 ? c.year - 1 : (c.month > 11 ? c.year + 1 : c.year);
-        const realMm = c.month < 0 ? 12 : (c.month > 11 ? 1 : c.month + 1);
-        const dateStr = `${yr}-${String(realMm).padStart(2,'0')}-${dd}`;
-        const isToday = dateStr === today();
-        const isSelected = dateStr === calSelected;
-        const dayShoots = shootsByDate[dateStr] || [];
-        const dots = dayShoots.map(s => `<div class="calendar-dot" style="background-color:${eventColor(s.event)}"></div>`).join('');
+      const daysOfWeekHeader = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let html = daysOfWeekHeader.map(d => `<div class="text-center text-[10px] font-bold text-neutral-600 uppercase py-1 tracking-wider">${d}</div>`).join('');
+
+      const mappedDates = {};
+      _shoots.forEach(s => {
+        if (!s.date) return;
+        if (!mappedDates[s.date]) mappedDates[s.date] = [];
+        mappedDates[s.date].push(s);
+      });
+
+      let gridCells = [];
+      for (let i = 0; i < firstDayIdx; i++) {
+        gridCells.push({ day: daysInPrev - firstDayIdx + 1 + i, otherMonth: true, offset: -1 });
+      }
+      for (let d = 1; d <= daysInMonth; d++) {
+        gridCells.push({ day: d, otherMonth: false, offset: 0 });
+      }
+      const extendedBoundsCount = 42 - gridCells.length;
+      for (let d = 1; d <= extendedBoundsCount; d++) {
+        gridCells.push({ day: d, otherMonth: true, offset: 1 });
+      }
+
+      gridCells.forEach(cell => {
+        let yr = calYear;
+        let mo = calMonth + cell.offset;
+        if (mo < 0) { mo = 11; yr--; }
+        if (mo > 11) { mo = 0; yr++; }
         
+        const dateStr = `${yr}-${String(mo + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`;
+        const isCurrentActiveDay = dateStr === today();
+        const isSelectedDay = dateStr === calSelected;
+        const dayAssignments = mappedDates[dateStr] || [];
+
+        let nodeIndicators = dayAssignments.map(s => `<span class="w-1.5 h-1.5 rounded-full" style="background:${getEventConfig(s.event).color}"></span>`).join('');
+
         html += `
-          <div onclick="selectCalDay('${dateStr}')" class="calendar-cell ${c.other?'other-month':''} ${isToday?'today':''} ${isSelected?'selected':''}">
-            <span class="calendar-cell-num">${c.day}</span>
-            <div class="calendar-dots">${dots}</div>
+          <div onclick="selectCalDay('${dateStr}')" class="min-h-[64px] bg-[#0f0f0f] border border-neutral-900/50 p-1.5 flex flex-col justify-between rounded-lg cursor-pointer hover:border-[#c9a96e] transition ${cell.otherMonth ? 'opacity-25' : ''} ${isCurrentActiveDay ? 'border-amber-500/80 bg-amber-500/[0.02]' : ''} ${isSelectedDay ? 'border-[#c9a96e] bg-neutral-900' : ''}">
+            <span class="text-xs font-semibold ${isCurrentActiveDay ? 'text-amber-400 font-bold' : 'text-neutral-400'}">${cell.day}</span>
+            <div class="flex flex-wrap gap-0.5">${nodeIndicators}</div>
           </div>`;
       });
+
       document.getElementById('cal-grid').innerHTML = html;
       renderCalDayPanel();
     }
 
-    function selectCalDay(dateStr) { calSelected = calSelected === dateStr ? null : dateStr; renderCalendar(); }
+    function selectCalDay(dateStr) {
+      calSelected = calSelected === dateStr ? null : dateStr;
+      renderCalendar();
+    }
+
+    function renderCalDayPanel() {
+      const panel = document.getElementById('cal-day-panel');
+      if (!calSelected) { panel.classList.add('hidden'); return; }
+
+      panel.classList.remove('hidden');
+      const contextualShoots = _shoots.filter(s => s.date === calSelected);
+      const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      let interiorHtml = `
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
+          <div class="flex items-center justify-between">
+            <div class="text-sm font-bold text-white">${headerLabel}</div>
+            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold text-[#c9a96e] flex items-center gap-1 hover:underline"><i class="ti ti-plus"></i> Inject Production Slot</button>
+          </div>`;
+
+      if (!contextualShoots.length) {
+        interiorHtml += `<p class="text-xs text-neutral-600 py-2">No active projects assigned to this temporal index.</p>`;
+      } else {
+        interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
+      }
+      interiorHtml += `</div>`;
+      panel.innerHTML = interiorHtml;
+      applyPrivacyUIVisibility();
+    }
+
     function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
     function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
     function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
 
-    function renderCalDayPanel() {
-      const panel = document.getElementById('cal-day-panel');
-      if (!panel) return;
-      if (!calSelected) { panel.style.display = 'none'; return; }
-      const shoots = _shoots.filter(s => s.date === calSelected);
-      const dt = new Date(calSelected + 'T00:00:00');
-      panel.style.display = 'block';
-      let inner = `
-        <div style="display:flex;justify-content:between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:8px;justify-content:space-between">
-          <span style="font-size:12px;font-weight:700">${dt.toLocaleDateString('en-IN',{weekday:'long',day:'numeric',month:'long',year:'numeric'})}</span>
-          <button onclick="openAddShootModal('${calSelected}')" class="btn-primary" style="padding:4px 8px;font-size:11px"><i class="ti ti-plus"></i> Add Shoot</button>
-        </div><div style="display:flex;flex-direction:column;gap:8px;margin-top:8px">`;
-      if (!shoots.length) inner += '<p style="font-size:11px;color:#555;text-align:center;padding:12px 0">No allocations on this vector entry line.</p>';
-      else inner += shoots.map(s => shootRowHTML(s, false)).join('');
-      inner += '</div>';
-      panel.innerHTML = inner;
-      applyPrivacyUIVisualState();
-    }
-
+    // FILTER REGISTRY SCHEMAS
     function renderShootsList() {
-      const q = (document.getElementById('shoot-search')?.value||'').toLowerCase();
-      const fc = document.getElementById('filter-company')?.value||'';
-      const fe = document.getElementById('filter-event')?.value||'';
-      const fl = document.getElementById('filter-loc')?.value||'';
+      const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
+      const fc = document.getElementById('filter-company')?.value || '';
+      const fe = document.getElementById('filter-event')?.value || '';
+      const fl = document.getElementById('filter-loc')?.value || '';
 
-      const ce = document.getElementById('filter-company');
-      if(ce) ce.innerHTML = '<option value="">All Management Handles</option>' + _companies.map(c=>`<option value="${c}">${c}</option>`).join('');
-      const ee = document.getElementById('filter-event');
-      if(ee) ee.innerHTML = '<option value="">All Events</option>' + ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'].map(e=>`<option value="${e}">${e}</option>`).join('');
-      const le = document.getElementById('filter-loc');
-      if(le) le.innerHTML = '<option value="">All Regions</option>' + allLocs().map(l=>`<option value="${l}">${l}</option>`).join('');
-
-      if(fc) ce.value = fc; if(fe) ee.value = fe; if(fl) le.value = fl;
-
-      let shoots = [..._shoots].sort((a,b) => (b.date||'').localeCompare(a.date||''));
-      if (q) shoots = shoots.filter(s => `${s.name} ${s.location} ${s.company} ${s.notes}`.toLowerCase().includes(q));
-      if (fc) shoots = shoots.filter(s => s.company === fc);
-      if (fe) shoots = shoots.filter(s => s.event === fe);
-      if (fl) shoots = shoots.filter(s => s.location === fl);
-
-      const el = document.getElementById('shoots-list');
-      if (el) {
-        if (!shoots.length) el.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:32px 0">No logs found mapping to metrics parameters.</div>';
-        else el.innerHTML = shoots.map(s => shootRowHTML(s, false)).join('');
+      const compDropdown = document.getElementById('filter-company');
+      if (compDropdown) {
+        const cachedSelection = compDropdown.value;
+        compDropdown.innerHTML = '<option value="">All Contracting Agencies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
       }
-      applyPrivacyUIVisualState();
+
+      const eventsList = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
+      const eventDropdown = document.getElementById('filter-event');
+      if (eventDropdown) {
+        const cachedSelection = eventDropdown.value;
+        eventDropdown.innerHTML = '<option value="">All Categories</option>' + eventsList.map(e => `<option value="${e}" ${e === cachedSelection ? 'selected' : ''}>${e}</option>`).join('');
+      }
+
+      const locDropdown = document.getElementById('filter-loc');
+      if (locDropdown) {
+        const cachedSelection = locDropdown.value;
+        locDropdown.innerHTML = '<option value="">All Locales</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
+      }
+
+      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
+      if (fc) filtered = filtered.filter(s => s.company === fc);
+      if (fe) filtered = filtered.filter(s => s.event === fe);
+      if (fl) filtered = filtered.filter(s => s.location === fl);
+
+      const targetContainer = document.getElementById('shoots-list');
+      if (!filtered.length) {
+        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No production files correlate with specified search parameters.</div>';
+      } else {
+        targetContainer.innerHTML = filtered.map(s => getShootRowHtmlTemplate(s, false)).join('');
+      }
+      applyPrivacyUIVisibility();
     }
 
+    // ARREARS MANAGEMENT VIEWS
     function renderPayments() {
-      const totalAmt = _shoots.reduce((a,s)=>a+Number(s.amount||0),0);
-      const received = _shoots.reduce((a,s)=>s.payStatus==='done'?a+Number(s.amount||0):(s.payStatus==='part'?a+Number(s.partPaid||0):a),0);
-      const partTotal = _shoots.filter(s=>s.payStatus==='part').reduce((a,s)=>a+Number(s.partPaid||0),0);
+      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0); // UPGRADE #3
+      const outstanding = gross - captured;
 
+      // UPGRADE #3 & #2: EXPENSE TRACKING MATRIX OVERVIEW
       document.getElementById('pay-stats').innerHTML = `
-        <div class="stat-card"><span class="stat-card-label">Volume Gross</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--gold);font-size:18px">${fmtAmt(totalAmt)}</span></div>
-        <div class="stat-card"><span class="stat-card-label">Deposited</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--green);font-size:18px">${fmtAmt(received)}</span></div>
-        <div class="stat-card"><span class="stat-card-label">Outstanding</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--amber);font-size:18px">${fmtAmt(totalAmt - received)}</span></div>
-        <div class="stat-card"><span class="stat-card-label">Part Balance</span><span class="stat-card-value font-editorial currency-mask" style="color:var(--purple);font-size:18px">${fmtAmt(partTotal)}</span></div>
-      `;
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Gross Contract Value</div>
+          <div class="text-xl font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Overhead Payables</div>
+          <div class="text-xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Realized Cash Assets</div>
+          <div class="text-xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
+        </div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Outstanding Collection</div>
+          <div class="text-xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
+        </div>`;
+
       renderPaymentsList();
     }
 
     function renderPaymentsList() {
-      const q = (document.getElementById('pay-search')?.value||'').toLowerCase();
-      const fs = document.getElementById('pay-filter-status')?.value||'';
-      let shoots = _shoots.filter(s => s.amount).sort((a,b) => (b.date||'').localeCompare(a.date||''));
-      if (q) shoots = shoots.filter(s => (s.name||'').toLowerCase().includes(q));
-      if (fs) shoots = shoots.filter(s => (s.payStatus||'pending') === fs);
-      const el = document.getElementById('payments-list');
-      if (!el) return;
-      if (!shoots.length) { el.innerHTML = '<div style="font-size:12px;color:#555;text-align:center;padding:32px 0">No operational payment lines.</div>'; return; }
-      el.innerHTML = shoots.map(s => {
-        const {dd, mmm} = ddMmm(s.date);
-        const balance = Number(s.amount||0) - Number(s.partPaid||0);
+      const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
+      const fs = document.getElementById('pay-filter-status')?.value || '';
+
+      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      if (q) filtered = filtered.filter(s => s.name.toLowerCase().includes(q));
+      if (fs) filtered = filtered.filter(s => s.payStatus === fs);
+
+      const rootList = document.getElementById('payments-list');
+      if (!filtered.length) {
+        rootList.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No active ledgers found matching parameters.</div>';
+        return;
+      }
+
+      rootList.innerHTML = filtered.map(s => {
+        const { dd, mmm } = ddMmm(s.date);
+        const remainder = Number(s.amount || 0) - Number(s.partPaid || 0);
+        
+        const stateStyle = {
+          'pending':'bg-neutral-900 text-neutral-500 border border-neutral-800',
+          'part':'bg-purple-950/40 text-purple-400 border border-purple-900/60',
+          'done':'bg-emerald-950/40 text-emerald-400 border border-emerald-900/60'
+        }[s.payStatus];
+
         return `
-          <div onclick="openEditShootModal('${s.id}')" class="shoot-row">
-            <div class="date-badge"><span class="date-badge-dd font-editorial">${dd}</span><span class="date-badge-mmm">${mmm}</span></div>
-            <div class="shoot-row-body">
-              <h5 class="shoot-row-title">${s.name}</h5>
-              <p class="shoot-row-meta">${s.company||''} &nbsp;&middot;&nbsp; <span style="color:var(--muted)">${s.event}</span></p>
+          <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
+            <div class="flex items-center gap-3 min-w-0">
+              <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
+                <span class="text-[9px] uppercase tracking-wider text-neutral-500 font-medium mt-0.5">${mmm}</span>
+              </div>
+              <div class="min-w-0">
+                <div class="text-sm font-semibold text-white truncate">${s.name}</div>
+                <div class="text-xs text-neutral-500 truncate mt-0.5">${s.company || 'Direct Client Portfolio'}</div>
+              </div>
             </div>
-            <div class="pay-side">
-              <div class="currency-mask" style="font-weight:700">${fmtAmt(s.amount)}</div>
-              ${s.payStatus==='part' ? `<div class="currency-mask" style="font-size:10px;color:var(--green)">${fmtAmt(s.partPaid)} partial</div><div class="currency-mask" style="font-size:9px;color:var(--muted)">${fmtAmt(balance)} due</div>` : ''}
-              <div style="margin-top:2px"><span class="badge ${payBadgeClass(s.payStatus)}">${payLabel(s.payStatus)}</span></div>
+
+            <div class="flex items-center gap-4 flex-shrink-0">
+              <div class="text-right">
+                <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
+                ${s.payStatus === 'part' ? `<div class="text-[10px] text-emerald-400 font-medium privacy-target">-${fmtAmt(s.partPaid)} rec</div><div class="text-[9px] text-neutral-500 privacy-target">${fmtAmt(remainder)} due</div>` : ''}
+                <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
+              </div>
+              
+              <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
+                <i class="ti ti-brand-whatsapp text-base"></i>
+              </button>
             </div>
-            <div class="shoot-row-actions"><button onclick="executeWhatsAppRedirect('${s.id}', event)" class="action-mini-btn wa"><i class="ti ti-brand-whatsapp"></i></button></div>
           </div>`;
       }).join('');
-      applyPrivacyUIVisualState();
+      applyPrivacyUIVisibility();
     }
 
+    // SYSTEM ENVIRONMENT SETTINGS MANIFESTS
     function renderSettings() {
-      document.getElementById('settings-companies').innerHTML = _companies.map((c,i) => `
-        <div class="settings-line-item"><span>${c}</span><div>
-          <button onclick="renameCompany(${i})" class="btn-icon" style="display:inline;padding:2px 6px"><i class="ti ti-pencil"></i></button>
-          <button onclick="deleteCompany(${i})" class="btn-icon" style="display:inline;padding:2px 6px;color:var(--red)"><i class="ti ti-trash"></i></button>
-        </div></div>`).join('');
-      document.getElementById('settings-locations').innerHTML = DEFAULT_LOCS.map(l => `<div class="settings-line-item" style="opacity:0.5"><span>${l}</span><span style="font-size:9px;color:var(--muted)">SYSTEM DEFAULT</span></div>`).join('') +
-        _locs.map((l,i) => `
-        <div class="settings-line-item"><span>${l}</span><div>
-          <button onclick="renameLocation(${i})" class="btn-icon" style="display:inline;padding:2px 6px"><i class="ti ti-pencil"></i></button>
-          <button onclick="deleteLocation(${i})" class="btn-icon" style="display:inline;padding:2px 6px;color:var(--red)"><i class="ti ti-trash"></i></button>
-        </div></div>`).join('');
+      const compTarget = document.getElementById('settings-companies');
+      if (compTarget) {
+        compTarget.innerHTML = _companies.map((c, i) => `
+          <div class="flex items-center justify-between py-2 text-xs">
+            <span class="text-neutral-300 font-medium">${c}</span>
+            <div class="flex gap-1">
+              <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+            </div>
+          </div>`).join('');
+      }
+
+      const locTarget = document.getElementById('settings-locations');
+      if (locTarget) {
+        locTarget.innerHTML = DEFAULT_LOCS.map(l => `
+          <div class="flex items-center justify-between py-2 text-xs opacity-50">
+            <span class="text-neutral-400">${l}</span>
+            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Static System Default</span>
+          </div>`).join('') + 
+          _locs.map((l, i) => `
+          <div class="flex items-center justify-between py-2 text-xs">
+            <span class="text-neutral-300 font-medium">${l}</span>
+            <div class="flex gap-1">
+              <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+            </div>
+          </div>`).join('');
+      }
     }
 
-    async function addCompany() { const v = document.getElementById('new-company-input').value.trim(); if(!v) return; _companies.push(v); await saveSettingToDB('companies', _companies); document.getElementById('new-company-input').value=''; renderSettings(); }
-    async function deleteCompany(i) { _companies.splice(i,1); await saveSettingToDB('companies', _companies); renderSettings(); }
-    async function renameCompany(i) { const n = prompt('Modify producer assignment handle text string:', _companies[i]); if(!n || n === _companies[i]) return; const old = _companies[i]; _companies[i] = n; await saveSettingToDB('companies', _companies); _shoots.forEach(async s => { if(s.company===old) { s.company=n; await saveShootToDB(s); } }); renderSettings(); }
-    async function addLocation() { const v = document.getElementById('new-loc-input').value.trim(); if(!v || DEFAULT_LOCS.includes(v)) return; if(!_locs.includes(v)) { _locs.push(v); await saveSettingToDB('locations', _locs); } document.getElementById('new-loc-input').value=''; renderSettings(); }
-    async function deleteLocation(i) { _locs.splice(i,1); await saveSettingToDB('locations', _locs); renderSettings(); }
-    async function renameLocation(i) { const n = prompt('Modify operational deployment city footprint text mapping:', _locs[i]); if(!n || n === _locs[i]) return; const old = _locs[i]; _locs[i] = n; await saveSettingToDB('locations', _locs); _shoots.forEach(async s => { if(s.location===old) { s.location=n; await saveShootToDB(s); } }); renderSettings(); }
+    async function addCompany() {
+      const el = document.getElementById('new-company-input');
+      const val = el.value.trim(); if (!val) return;
+      _companies.push(val); await saveSettingToDB('companies', _companies);
+      el.value = ''; renderSettings();
+    }
+    async function deleteCompany(i) {
+      _companies.splice(i, 1); await saveSettingToDB('companies', _companies); renderSettings();
+    }
+    async function renameCompany(i) {
+      const input = prompt('Enter revised entity designation:', _companies[i]);
+      if (!input || input.trim() === _companies[i]) return;
+      const original = _companies[i]; _companies[i] = input.trim();
+      await saveSettingToDB('companies', _companies);
+      for (let s of _shoots.filter(x => x.company === original)) { s.company = _companies[i]; await saveShootToDB(s); }
+      renderSettings();
+    }
 
-    async function saveSettingToDB(key, value) { try { await sbFetch('settings?key=eq.' + key, { method: 'DELETE' }).catch(()=>{}); await sbFetch('settings', { method: 'POST', body: JSON.stringify({ key, value }) }); } catch(e){} }
-    async function forceSync() { setSyncStatus('syncing', 'Updating State Memory Maps...'); try { await loadAll(); showToast('State vector maps aligned with cluster hosts.'); } catch(e){} }
-    function confirmClearData() { if(confirm("Permanently wipe local operational metrics log templates? This cannot be undone.")) doClearData(); }
-    async function doClearData() { try { await sbFetch('shoots?id=neq.___none___', { method: 'DELETE' }); await sbFetch('settings?key=neq.___none___', { method: 'DELETE' }); _shoots = []; _companies=[...DEFAULT_COMPANIES]; _locs=[]; showToast('System logs wiped.'); refreshCurrentTab(); } catch(e){} }
+    async function addLocation() {
+      const el = document.getElementById('new-loc-input');
+      const val = el.value.trim(); if (!val || DEFAULT_LOCS.includes(val)) return;
+      if (!_locs.includes(val)) { _locs.push(val); await saveSettingToDB('locations', _locs); }
+      el.value = ''; renderSettings();
+    }
+    async function deleteLocation(i) {
+      _locs.splice(i, 1); await saveSettingToDB('locations', _locs); renderSettings();
+    }
+    async function renameLocation(i) {
+      const input = prompt('Enter revised architectural locale entry:', _locs[i]);
+      if (!input || input.trim() === _locs[i]) return;
+      const original = _locs[i]; _locs[i] = input.trim();
+      await saveSettingToDB('locations', _locs);
+      for (let s of _shoots.filter(x => x.location === original)) { s.location = _locs[i]; await saveShootToDB(s); }
+      renderSettings();
+    }
 
-    function openAddShootModal(prefillDate) { resetModal(); document.getElementById('shoot-modal-title').textContent = 'Create Operational Allocation Slates'; document.getElementById('modal-delete-btn').style.display = 'none'; document.getElementById('modal-whatsapp-btn').style.display = 'none'; document.getElementById('f-shoot-date').value = prefillDate || today(); populateModalDropdowns(); openModal('shoot-modal-backdrop'); }
-    function openEditShootModal(id) {
-      const s = _shoots.find(x => x.id === id); if(!s) return; resetModal();
-      document.getElementById('shoot-modal-title').textContent = 'Modify Schedule Configuration Parameters';
-      document.getElementById('modal-delete-btn').style.display = 'inline-block';
-      document.getElementById('modal-whatsapp-btn').style.display = 'inline-flex';
-      document.getElementById('edit-shoot-id').value = id; populateModalDropdowns(s);
-      document.getElementById('f-shoot-name').value = s.name;
-      document.getElementById('f-shoot-date').value = s.date;
-      document.getElementById('f-shoot-session').value = s.session;
-      document.getElementById('f-shoot-notes').value = s.notes;
-      document.getElementById('f-shoot-amount').value = s.amount || '';
-      document.getElementById('f-shoot-expenses').value = s.expenses || '';
-      document.getElementById('f-shoot-pay-status').value = s.payStatus;
-      document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
-      document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? 'block' : 'none';
-      if (!['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'].includes(s.event)) {
-        document.getElementById('f-shoot-event').value = 'Other'; document.getElementById('f-shoot-event-other').value = s.event; document.getElementById('f-event-other-wrap').style.display = 'block';
-      } else { document.getElementById('f-shoot-event').value = s.event; }
+    function confirmClearData() {
+      document.getElementById('confirm-title').textContent = 'Purge Total Cloud Ledger?';
+      document.getElementById('confirm-sub-text').textContent = 'This action executes structural drops across all linked production instances completely.';
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = executeTotalClearPurge;
+      openModal('confirm-modal-backdrop');
+    }
+
+    async function executeTotalClearPurge() {
+      closeConfirmModal();
+      setSyncStatus('syncing', 'Dropping Schemas');
+      try {
+        await sbFetch('shoots?id=neq.___null___', { method: 'DELETE' });
+        await sbFetch('settings?key=neq.___null___', { method: 'DELETE' });
+        _shoots = []; _companies = [...DEFAULT_COMPANIES]; _locs = [];
+        setSyncStatus('synced', 'Database Blank');
+        showToast('All remote entries systematically destroyed');
+        refreshCurrentView();
+      } catch (e) {
+        setSyncStatus('error', 'Purge Faulted');
+        showToast('Purge Exception Intercepted: ' + e.message, 'error');
+      }
+    }
+
+    // INTERIOR MODAL FRAMEWORK PLUMBING
+    function openAddShootModal(targetDate) {
+      clearModalFields();
+      document.getElementById('shoot-modal-title').textContent = 'Initialize New Production Record';
+      document.getElementById('modal-delete-btn').classList.add('hidden');
+      document.getElementById('modal-whatsapp-btn').classList.add('hidden');
+      document.getElementById('f-shoot-date').value = targetDate || today();
+      hydrateModalDropdownObjects();
       openModal('shoot-modal-backdrop');
     }
 
-    function populateModalDropdowns(s) {
-      document.getElementById('f-shoot-company').innerHTML = _companies.map(c => `<option value="${c}">${c}</option>`).join('');
-      if (s && s.company) document.getElementById('f-shoot-company').value = s.company;
-      const locs = allLocs();
-      document.getElementById('f-shoot-loc').innerHTML = locs.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Other (Specify Custom Parameters)</option>';
-      if (s && s.location) {
-        if (locs.includes(s.location)) {
-          document.getElementById('f-shoot-loc').value = s.location;
-        } else { 
-          document.getElementById('f-shoot-loc').value = '__other__'; 
-          document.getElementById('f-shoot-loc-other').value = s.location; 
-          document.getElementById('f-loc-other-wrap').style.display = 'block'; 
+    function openEditShootModal(id) {
+      const s = _shoots.find(x => x.id === id); if (!s) return;
+      clearModalFields();
+      document.getElementById('shoot-modal-title').textContent = 'Modify Production Parameters';
+      document.getElementById('modal-delete-btn').classList.remove('hidden');
+      document.getElementById('modal-delete-btn').className = "flex items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition";
+      
+      // UPGRADE #5: UNMASK WHATSAPP DIRECT INITIATOR BUTTON INSIDE EDIT MODAL FRAMEWORK
+      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
+
+      document.getElementById('edit-shoot-id').value = id;
+      hydrateModalDropdownObjects(s);
+
+      document.getElementById('f-shoot-name').value = s.name || '';
+      document.getElementById('f-shoot-date').value = s.date || '';
+      document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
+      document.getElementById('f-shoot-notes').value = s.notes || '';
+      document.getElementById('f-shoot-amount').value = s.amount || '';
+      document.getElementById('f-shoot-expense').value = s.expense || ''; // UPGRADE #3
+      document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
+      document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
+      document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? 'flex' : 'none';
+
+      const explicitTypes = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
+      if (s.event && !explicitTypes.includes(s.event)) {
+        document.getElementById('f-shoot-event').value = 'Other';
+        document.getElementById('f-shoot-event-other').value = s.event;
+        document.getElementById('f-event-other-wrap').classList.remove('hidden');
+      } else {
+        document.getElementById('f-shoot-event').value = s.event || 'Wedding';
+        document.getElementById('f-event-other-wrap').classList.add('hidden');
+      }
+      openModal('shoot-modal-backdrop');
+    }
+
+    function hydrateModalDropdownObjects(s) {
+      const comps = _companies;
+      const locales = [...DEFAULT_LOCS, ..._locs];
+      
+      const cSel = document.getElementById('f-shoot-company');
+      if (cSel) {
+        cSel.innerHTML = comps.map(c => `<option value="${c}">${c}</option>`).join('');
+        if (s && s.company) cSel.value = s.company;
+      }
+
+      const lSel = document.getElementById('f-shoot-loc');
+      if (lSel) {
+        lSel.innerHTML = locales.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Uncharted Locale Specifier</option>';
+        if (s && s.location) {
+          if (locales.includes(s.location)) {
+            lSel.value = s.location;
+            document.getElementById('f-loc-other-wrap').classList.add('hidden');
+          } else {
+            lSel.value = '__other__';
+            document.getElementById('f-shoot-loc-other').value = s.location;
+            document.getElementById('f-loc-other-wrap').classList.remove('hidden');
+          }
         }
       }
     }
 
-    async function saveShootToDB(shoot) {
-      setSyncStatus('syncing', 'Committing Logs...');
-      try {
-        const existing = _shoots.find(s => s.id === shoot.id);
-        if (existing) { 
-          await sbFetch('shoots?id=eq.' + shoot.id, { method: 'PATCH', body: JSON.stringify(shootToDb(shoot)) }); 
-          const idx = _shoots.findIndex(s => s.id === shoot.id); 
-          if (idx >= 0) _shoots[idx] = shoot; 
-        }
-        else { 
-          await sbFetch('shoots', { method: 'POST', body: JSON.stringify(shootToDb(shoot)) }); 
-          _shoots.push(shoot); 
-        }
-        setSyncStatus('synced', 'Synced Cloud'); 
-        showToast('Transaction completed safely.');
-      } catch(e) { 
-        setSyncStatus('error', 'Execution Error Write Phase'); 
-        throw e; 
-      }
+    function clearModalFields() {
+      document.getElementById('edit-shoot-id').value = '';
+      document.getElementById('f-shoot-name').value = '';
+      document.getElementById('f-shoot-date').value = '';
+      document.getElementById('f-shoot-event').value = 'Wedding';
+      document.getElementById('f-shoot-event-other').value = '';
+      document.getElementById('f-event-other-wrap').classList.add('hidden');
+      document.getElementById('f-shoot-session').value = 'Morning Session';
+      document.getElementById('f-shoot-loc-other').value = '';
+      document.getElementById('f-loc-other-wrap').classList.add('hidden');
+      document.getElementById('f-shoot-notes').value = '';
+      document.getElementById('f-shoot-amount').value = '';
+      document.getElementById('f-shoot-expense').value = ''; // UPGRADE #3
+      document.getElementById('f-shoot-pay-status').value = 'pending';
+      document.getElementById('f-shoot-part-paid').value = '';
+      document.getElementById('f-part-pay-wrap').style.display = 'none';
+    }
+
+    function handleEventOther() {
+      const wrap = document.getElementById('f-event-other-wrap');
+      if (document.getElementById('f-shoot-event').value === 'Other') wrap.classList.remove('hidden');
+      else wrap.classList.add('hidden');
+    }
+
+    function handleLocOther() {
+      const wrap = document.getElementById('f-loc-other-wrap');
+      if (document.getElementById('f-shoot-loc').value === '__other__') wrap.classList.remove('hidden');
+      else wrap.classList.add('hidden');
+    }
+
+    function handlePayStatusChange() {
+      const wrap = document.getElementById('f-part-pay-wrap');
+      if (document.getElementById('f-shoot-pay-status').value === 'part') wrap.style.display = 'flex';
+      else wrap.style.display = 'none';
     }
 
     async function saveShoot() {
-      const name = document.getElementById('f-shoot-name').value.trim(); 
+      const name = document.getElementById('f-shoot-name').value.trim();
       const date = document.getElementById('f-shoot-date').value;
-      if (!name || !date) return;
-      
-      let event = document.getElementById('f-shoot-event').value; 
+      if (!name || !date) { showToast('Required parameter values absent', 'error'); return; }
+
+      let event = document.getElementById('f-shoot-event').value;
       if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
-      
-      let location = document.getElementById('f-shoot-loc').value; 
-      if (location === '__other__') { 
-        location = document.getElementById('f-shoot-loc-other').value.trim() || 'Other';
-        if (location && location !== 'Other' && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) { 
-          _locs.push(location); 
-          await saveSettingToDB('locations', _locs); 
-        } 
+
+      let location = document.getElementById('f-shoot-loc').value;
+      if (location === '__other__') {
+        location = document.getElementById('f-shoot-loc-other').value.trim();
+        if (location && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) {
+          _locs.push(location); await saveSettingToDB('locations', _locs);
+        }
       }
-      
-      const payStatus = document.getElementById('f-shoot-pay-status').value; 
+
+      const payStatus = document.getElementById('f-shoot-pay-status').value;
       const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-      const expenses = parseFloat(document.getElementById('f-shoot-expenses').value) || 0; 
-      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value)||0) : (payStatus === 'done' ? amount : 0);
+      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0; // UPGRADE #3
+      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
+
       const editId = document.getElementById('edit-shoot-id').value;
-      
-      const shoot = { 
-        id: editId || uid(), 
-        name, 
-        date, 
-        event, 
-        session: document.getElementById('f-shoot-session').value, 
-        location, 
-        company: document.getElementById('f-shoot-company').value, 
-        notes: document.getElementById('f-shoot-notes').value.trim(), 
-        amount, 
-        expenses, 
-        payStatus, 
-        partPaid, 
-        created: editId ? (_shoots.find(s=>s.id===editId)?.created || new Date().toISOString()) : new Date().toISOString() 
+      const record = {
+        id: editId || uid(),
+        name, date, event,
+        session: document.getElementById('f-shoot-session').value,
+        location,
+        company: document.getElementById('f-shoot-company').value,
+        notes: document.getElementById('f-shoot-notes').value.trim(),
+        amount, expense, payStatus, partPaid,
+        created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString()
       };
-      
-      try { 
-        await saveShootToDB(shoot); 
-        closeModal('shoot-modal-backdrop'); 
-        refreshCurrentTab(); 
-      } catch(e){}
+
+      try {
+        await saveShootToDB(record);
+        closeShootModal();
+        refreshCurrentView();
+      } catch (e) {}
     }
 
-    function triggerDeleteFromModal() { const id = document.getElementById('edit-shoot-id').value; if (id) { closeShootModal(); setTimeout(() => askDelete(id), 100); } }
-    function askDelete(id) { const s = _shoots.find(x => x.id === id); if(!s) return; pendingDeleteId = id; document.getElementById('confirm-title').textContent = 'Drop Matrix Allocation Profile?'; document.getElementById('confirm-sub-text').textContent = `"${s.name}" record data tracking arrays will be purged.`; openModal('confirm-modal-backdrop'); }
-    async function confirmDelete() { if(!pendingDeleteId) return; try { setSyncStatus('syncing', 'Purging...'); await sbFetch('shoots?id=eq.' + pendingDeleteId, { method: 'DELETE' }); _shoots = _shoots.filter(s => s.id !== pendingDeleteId); setSyncStatus('synced', 'Synced Memory'); closeConfirmModal(); refreshCurrentTab(); } catch(e){} }
-
-    function refreshCurrentTab() {
-      const activeBtn = document.querySelector('.nav-terminal-btn.active'); if(!activeBtn) return;
-      const tab = activeBtn.id.replace('tab-','');
-      if (tab === 'dashboard') renderDashboard(); if (tab === 'calendar') renderCalendar(); if (tab === 'shoots') renderShootsList(); if (tab === 'payments') renderPayments(); if (tab === 'settings') renderSettings();
-    }
-    
-    function switchTab(tab) {
-      document.querySelectorAll('.view-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.nav-terminal-btn').forEach(b => b.classList.remove('active'));
-      document.getElementById('section-' + tab).classList.add('active');
-      document.getElementById('tab-' + tab).classList.add('active');
-      refreshCurrentTab();
+    function triggerDeleteFromModal() {
+      const id = document.getElementById('edit-shoot-id').value;
+      if (id) { closeShootModal(); setTimeout(() => askDeletePrompt(id), 250); }
     }
 
-    function openModal(id) { document.getElementById(id).classList.add('open'); }
-    function closeModal(id) { document.getElementById(id).classList.remove('open'); }
+    let _pendingDropTargetId = null;
+    function askDeletePrompt(id) {
+      const s = _shoots.find(x => x.id === id); if (!s) return;
+      _pendingDropTargetId = id;
+      document.getElementById('confirm-title').textContent = 'Drop Production Segment?';
+      document.getElementById('confirm-sub-text').textContent = `Authorize drop execution pipeline for execution map referencing "${s.name}".`;
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop;
+      openModal('confirm-modal-backdrop');
+    }
+
+    async function executeConfirmedRecordDrop() {
+      if (!_pendingDropTargetId) return;
+      try {
+        await deleteShootFromDB(_pendingDropTargetId);
+        _pendingDropTargetId = null; closeConfirmModal(); refreshCurrentView();
+      } catch (e) {}
+    }
+
+    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
+    function openModal(id) {
+      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-all');
+      const inner = m.firstElementChild;
+      if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal(id) {
+      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-all');
+      const inner = m.firstElementChild;
+      if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4');
+      document.body.style.overflow = '';
+    }
     function closeShootModal() { closeModal('shoot-modal-backdrop'); }
-    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); }
     function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-    function today() { return new Date().toISOString().slice(0,10); }
-    function fmtDate(d) { if (!d) return ''; const dt = new Date(d + 'T00:00:00'); return dt.toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'}); }
-    function fmtAmt(n) { return '₹' + Number(n||0).toLocaleString('en-IN'); }
-    function eventColor(ev) { return EVENT_COLORS[ev] || '#6b7280'; }
-    function payBadgeClass(s) { return {'pending':'pay-pending','part':'pay-part','done':'pay-done'}[s]||'pay-pending'; }
-    function payLabel(s) { return {'pending':'Unsettled','part':'Part Paid','done':'Cleared'}[s]||'Unsettled'; }
-    function ddMmm(d) { if (!d) return {dd:'',mmm:''}; const dt = new Date(d+'T00:00:00'); return { dd: dt.getDate(), mmm: ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][dt.getMonth()] }; }
-    function allLocs() { return [...DEFAULT_LOCS, ..._locs]; }
 
+    function refreshCurrentView() {
+      const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
+      if (!activeNode) return;
+      const activeTabId = activeNode.id.replace('tab-', '');
+      if (activeTabId === 'dashboard') renderDashboard();
+      if (activeTabId === 'calendar') renderCalendar();
+      if (activeTabId === 'shoots') renderShootsList();
+      if (activeTabId === 'payments') renderPayments();
+    }
+
+    // INITIALIZATION ROUTE CALLS
     loadAll();
   </script>
 </body>
