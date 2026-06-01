@@ -21,12 +21,10 @@
     .brand-serif {
       font-family: 'Cinzel', serif;
     }
-    /* Smooth Scrollbar Customization */
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
     
-    /* Privacy Mode Blur Styling */
     .blur-financial {
       filter: blur(5px);
       user-select: none;
@@ -45,7 +43,7 @@
     <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
       <div class="h-full bg-[#c9a96e] w-0 animate-[loadbar_1.5s_ease-in-out_forwards]"></div>
     </div>
-    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Securing database connection...</p>
+    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
   </div>
 
   <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between">
@@ -75,7 +73,7 @@
     <section id="section-dashboard" class="app-section space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-900 pb-4">
         <div>
-          <h2 class="text-xl font-bold tracking-tight text-white">Studio Ledger Dashboard</h2>
+          <h2 class="text-xl font-bold tracking-tight text-white">Dashboard</h2>
           <p id="dash-date" class="text-xs text-neutral-400 mt-0.5"></p>
         </div>
       </div>
@@ -85,7 +83,7 @@
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm">
           <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
-            <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i> Upcoming Productions
+            <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i> Upcoming Shoots
           </div>
           <div class="space-y-2 overflow-y-auto max-h-[420px] pr-1" id="dash-upcoming"></div>
         </div>
@@ -93,12 +91,12 @@
         <div class="lg:col-span-5 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm flex flex-col justify-between">
           <div>
             <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
-              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i> Financial Breakdown Matrix
+              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i> Payment Status
             </div>
             <div id="dash-payments" class="space-y-3"></div>
           </div>
           <div class="mt-6 pt-4 border-t border-neutral-900">
-            <div class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Monthly Net Trends</div>
+            <div class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Monthly Trends</div>
             <div class="relative w-full h-44 bg-neutral-950 rounded-lg p-2 border border-neutral-900">
               <canvas id="revenueAnalyticsChart"></canvas>
             </div>
@@ -122,12 +120,12 @@
 
     <section id="section-shoots" class="app-section hidden space-y-4">
       <div class="border-b border-neutral-900 pb-3">
-        <h2 class="text-xl font-bold text-white">Master Production Registry</h2>
+        <h2 class="text-xl font-bold text-white">Shoots List</h2>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
-          <input type="text" id="shoot-search" placeholder="Search parameters..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
+          <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
         </div>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-company" onchange="renderShootsList()"></select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-event" onchange="renderShootsList()"></select>
@@ -138,19 +136,19 @@
 
     <section id="section-payments" class="app-section hidden space-y-4">
       <div class="border-b border-neutral-900 pb-3">
-        <h2 class="text-xl font-bold text-white">Accounts Receivable & Overhead Payables</h2>
+        <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
         <div class="sm:col-span-2 flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
-          <input type="text" id="pay-search" placeholder="Filter client name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
+          <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
         </div>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-status" onchange="renderPaymentsList()">
-          <option value="">All Verification States</option>
-          <option value="pending">Awaiting Inception</option>
-          <option value="part">Tranche Allocation</option>
-          <option value="done">Settled Fully</option>
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="part">Partial</option>
+          <option value="done">Settled</option>
         </select>
       </div>
       <div class="space-y-2" id="payments-list"></div>
@@ -158,33 +156,33 @@
 
     <section id="section-settings" class="app-section hidden space-y-6">
       <div class="border-b border-neutral-900 pb-3">
-        <h2 class="text-xl font-bold text-white">System Environment Configuration</h2>
+        <h2 class="text-xl font-bold text-white">System Settings</h2>
       </div>
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Entities</div>
+          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
           <div id="settings-companies" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
-            <input type="text" id="new-company-input" placeholder="New company title..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <input type="text" id="new-company-input" placeholder="New company name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
             <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Core Target Locales</div>
+          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
           <div id="settings-locations" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
-            <input type="text" id="new-loc-input" placeholder="Add location blueprint..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <input type="text" id="new-loc-input" placeholder="New location name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
             <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
         <div class="md:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Cloud Datastore Sync Layer</div>
-          <p class="text-xs text-neutral-500 mb-4">Direct persistence loop with active Supabase constructs. No proxy structures applied.</p>
+          <div class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Cloud Sync Layer</div>
+          <p class="text-xs text-neutral-500 mb-4">Direct sync link with active Supabase server.</p>
           <div class="flex flex-wrap gap-2">
-            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Execute Force Sync Loop</button>
-            <button onclick="confirmClearData()" class="flex items-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/40 text-red-400 rounded-lg hover:bg-red-950/40 text-xs font-semibold transition"><i class="ti ti-trash"></i> Destroy Cloud Schemas</button>
+            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync Loop</button>
+            <button onclick="confirmClearData()" class="flex items-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/40 text-red-400 rounded-lg hover:bg-red-950/40 text-xs font-semibold transition"><i class="ti ti-trash"></i> Reset Database</button>
           </div>
         </div>
       </div>
@@ -202,7 +200,7 @@
   <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
     <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
       <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
-        <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Configure Shoot Configuration</h3>
+        <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
         <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
       </div>
       
@@ -210,18 +208,18 @@
         <input type="hidden" id="edit-shoot-id"/>
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Designation *</label>
-            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra & Co" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
+            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Assignment Date *</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
             <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Production Category</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
             <select id="f-shoot-event" onchange="handleEventOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="Wedding">Wedding</option>
               <option value="Reception">Reception</option>
@@ -234,7 +232,7 @@
             </select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Segment Window</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
             <select id="f-shoot-session" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="Morning Session">Morning Session</option>
               <option value="Evening Session">Evening Session</option>
@@ -244,62 +242,62 @@
         </div>
 
         <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Signature</label>
-          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Feature Film" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Name</label>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Operational Locale Base</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
             <select id="f-shoot-loc" onchange="handleLocOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Executing Operational Entity</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
             <select id="f-shoot-company" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
           </div>
         </div>
 
         <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Uncharted Location Entry</label>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
           <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
         </div>
 
         <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Gross Aggregate (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="Gross contracted value" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
+            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Production Expenses (₹)</label>
-            <input type="number" id="f-shoot-expense" placeholder="Operational overhead costs" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
+            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
+            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Settlement Index</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Status</label>
             <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
-              <option value="pending">Awaiting Downpayment</option>
-              <option value="part">Tranche Complete</option>
-              <option value="done">Settled Fully</option>
+              <option value="pending">Pending</option>
+              <option value="part">Partial</option>
+              <option value="done">Settled</option>
             </select>
           </div>
         </div>
 
         <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Tranche Allocation Realized (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="Enter captured funds" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
+          <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
+          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
         </div>
 
         <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Production Manifest Annotations</label>
-          <textarea id="f-shoot-notes" placeholder="Structural requirements, metadata records..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
+          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
         </div>
       </div>
       
       <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 bg-[#0f0f0f] gap-2 pb-safe-offset">
-        <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Drop</button>
-        <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Verify via WhatsApp</button>
+        <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Delete</button>
+        <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Text via WhatsApp</button>
         <div class="flex items-center gap-2 ml-auto">
           <button onclick="closeShootModal()" class="px-4 py-2 text-xs font-semibold border border-neutral-800 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Cancel</button>
-          <button onclick="saveShoot()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Commit Record</button>
+          <button onclick="saveShoot()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Save Record</button>
         </div>
       </div>
     </div>
@@ -309,12 +307,12 @@
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
       <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
       <div class="space-y-1">
-        <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Confirm Pipeline Break?</h4>
-        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">System state modifications are irreversible once executed.</p>
+        <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Are you sure?</h4>
+        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This structural action cannot be reversed once done.</p>
       </div>
       <div class="flex items-center justify-center gap-2 pt-2">
         <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
-        <button id="confirm-action-btn" class="w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Authorize Execution</button>
+        <button id="confirm-action-btn" class="w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm</button>
       </div>
     </div>
   </div>
@@ -323,16 +321,16 @@
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
       <div class="w-12 h-12 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-lock"></i></div>
       <div class="space-y-1">
-        <h4 class="text-white font-bold text-base tracking-wide">Unlock Encrypted Assets</h4>
-        <p class="text-xs text-neutral-500">Provide high-tier authorization credential to expose dashboard values.</p>
+        <h4 class="text-white font-bold text-base tracking-wide">Unlock Dashboard Ledger</h4>
+        <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
       </div>
       <div class="space-y-3">
         <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition"/>
-        <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Credential verification failed. Recalibrating.</p>
+        <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
       </div>
       <div class="flex gap-2 pt-2">
         <button onclick="closePrivacyPrompt()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Abort</button>
-        <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Authorize Unlock</button>
+        <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Unlock</button>
       </div>
     </div>
   </div>
@@ -340,7 +338,6 @@
   <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    // SUPABASE DATA INTERFACE CREDENTIALS
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 
@@ -373,8 +370,6 @@
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
     let _analyticsChartInstance = null;
-
-    // UPGRADE #2: PRIVACY STATE CONTROLS (ENABLED BY DEFAULT EVERY REBOOT)
     let _privacyModeActive = true; 
 
     function setSyncStatus(state, label) {
@@ -403,7 +398,7 @@
         return true;
       } catch (e) {
         if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
-          setSyncStatus('error', 'Schema Blueprint Truncated');
+          setSyncStatus('error', 'Schema Needed');
           injectCloudTables();
           return false;
         }
@@ -414,10 +409,10 @@
     function injectCloudTables() {
       document.getElementById('loading-screen').innerHTML = `
         <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
-          <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Schema Initializer Protocol</div>
-          <p class="text-xs text-neutral-400 leading-relaxed">Supabase relational instances are absent. Direct SQL Execution required. Access <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and execute the script block below:</p>
+          <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Database Setup Protocol</div>
+          <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and run this SQL query block directly:</p>
           <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
-          <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Re-evaluate Sync Loop Connection</button>
+          <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Check Database Sync Again</button>
         </div>`;
     }
 
@@ -460,7 +455,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         company: r.company || '',
         notes: r.notes || '',
         amount: Number(r.amount || 0),
-        expense: Number(r.expense || 0), // UPGRADE #3
+        expense: Number(r.expense || 0),
         payStatus: r.pay_status || 'pending',
         partPaid: Number(r.part_paid || 0),
         created: r.created
@@ -478,7 +473,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         company: s.company,
         notes: s.notes,
         amount: s.amount || 0,
-        expense: s.expense || 0, // UPGRADE #3
+        expense: s.expense || 0,
         pay_status: s.payStatus || 'pending',
         part_paid: s.partPaid || 0,
         created: s.created || new Date().toISOString()
@@ -486,7 +481,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     async function loadAll() {
-      setSyncStatus('syncing', 'Initializing Link');
+      setSyncStatus('syncing', 'Connecting');
       const isConfigured = await ensureTables();
       if (!isConfigured) return;
 
@@ -500,19 +495,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
         _locs = lRow ? lRow.value : [];
 
-        setSyncStatus('synced', 'Synced Cloud Data');
+        setSyncStatus('synced', 'Synced with Cloud');
         document.getElementById('loading-screen').classList.add('hidden');
         applyPrivacyUIVisibility();
         renderDashboard();
       } catch (e) {
-        setSyncStatus('error', 'Connection Severed');
-        showToast('Hydration Exception: ' + e.message, 'error');
+        setSyncStatus('error', 'Sync Lost');
+        showToast('Load Error: ' + e.message, 'error');
         document.getElementById('loading-screen').classList.add('hidden');
       }
     }
 
     async function saveShootToDB(shoot) {
-      setSyncStatus('syncing', 'Syncing Record');
+      setSyncStatus('syncing', 'Saving Record...');
       try {
         const existing = _shoots.find(s => s.id === shoot.id);
         if (existing) {
@@ -529,31 +524,31 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           });
           _shoots.push(shoot);
         }
-        setSyncStatus('synced', 'Pipeline Locked');
-        showToast('Shoot record synchronized successfully');
+        setSyncStatus('synced', 'Saved Successfully');
+        showToast('Shoot record saved successfully');
       } catch (e) {
-        setSyncStatus('error', 'Transaction Failure');
+        setSyncStatus('error', 'Save Failed');
         showToast('Push Error: ' + e.message, 'error');
         throw e;
       }
     }
 
     async function deleteShootFromDB(id) {
-      setSyncStatus('syncing', 'Purging File');
+      setSyncStatus('syncing', 'Deleting...');
       try {
         await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
         _shoots = _shoots.filter(s => s.id !== id);
-        setSyncStatus('synced', 'Purge Resolved');
-        showToast('Shoot registry data purged clean');
+        setSyncStatus('synced', 'Deleted');
+        showToast('Shoot registry data deleted cleanly');
       } catch (e) {
-        setSyncStatus('error', 'Drop Exception');
-        showToast('Purge Interrupted: ' + e.message, 'error');
+        setSyncStatus('error', 'Delete Failed');
+        showToast('Delete Error: ' + e.message, 'error');
         throw e;
       }
     }
 
     async function saveSettingToDB(key, value) {
-      setSyncStatus('syncing', 'Updating Matrix');
+      setSyncStatus('syncing', 'Updating...');
       try {
         await sbFetch(`settings?key=eq.${key}`, { method: 'DELETE' }).catch(() => {});
         await sbFetch('settings', {
@@ -561,15 +556,15 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           headers: { 'Prefer': 'resolution=merge-duplicates' },
           body: JSON.stringify({ key, value })
         });
-        setSyncStatus('synced', 'Matrix Set');
+        setSyncStatus('synced', 'Updated');
       } catch (e) {
-        setSyncStatus('error', 'Configuration Fault');
-        showToast('Setting Set Intercepted: ' + e.message, 'error');
+        setSyncStatus('error', 'Failed');
+        showToast('Settings error: ' + e.message, 'error');
       }
     }
 
     async function forceSync() {
-      setSyncStatus('syncing', 'Hot Reboot Sync');
+      setSyncStatus('syncing', 'Refreshing...');
       try {
         const raw = await sbFetch('shoots?select=*&order=date.desc');
         _shoots = raw.map(dbToShoot);
@@ -578,23 +573,22 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const lRow = config.find(r => r.key === 'locations');
         _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
         _locs = lRow ? lRow.value : [];
-        setSyncStatus('synced', 'Sync Fully Normalized');
-        showToast('All cache metrics recalculated directly from Supabase');
+        setSyncStatus('synced', 'Sync Complete');
+        showToast('All metrics reloaded from Supabase');
         refreshCurrentView();
       } catch (e) {
-        setSyncStatus('error', 'Sync Severed');
-        showToast('Hot Sync Fault: ' + e.message, 'error');
+        setSyncStatus('error', 'Sync Failed');
+        showToast('Sync error: ' + e.message, 'error');
       }
     }
 
-    // UPGRADE #2: RE-ENGINEERED PRIVACY MODE LOGIC ENGINE (HARDCODED CHECK TO MATCH EXACTLY "JP@22")
     function togglePrivacyMode() {
       if (_privacyModeActive) {
         openPrivacyPrompt();
       } else {
         _privacyModeActive = true;
         applyPrivacyUIVisibility();
-        showToast('Financial transparency parameters locked');
+        showToast('Ledger amounts hidden');
       }
     }
 
@@ -602,12 +596,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const modal = document.getElementById('privacy-prompt-backdrop');
       document.getElementById('privacy-pass-input').value = '';
       document.getElementById('privacy-error-lbl').classList.add('hidden');
-      modal.classList.add('opacity-100', 'pointer-events-all');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
       document.getElementById('privacy-pass-input').focus();
     }
 
     function closePrivacyPrompt() {
-      document.getElementById('privacy-prompt-backdrop').classList.remove('opacity-100', 'pointer-events-all');
+      document.getElementById('privacy-prompt-backdrop').classList.remove('opacity-100', 'pointer-events-auto');
     }
 
     function verifyPrivacyPassword() {
@@ -616,7 +610,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         _privacyModeActive = false;
         closePrivacyPrompt();
         applyPrivacyUIVisibility();
-        showToast('Financial matrix decrypted successfully');
+        showToast('Amounts unlocked');
       } else {
         const lbl = document.getElementById('privacy-error-lbl');
         lbl.classList.remove('hidden');
@@ -640,7 +634,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
-    // UPGRADE #5: INSTANT WHATSAPP CONFIRMATION ROUTER
     function buildWhatsAppActionLink(s) {
       const d = s.date ? new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending Confirmation';
       const template = `Hi ${s.name || 'Client'}, this is Jashwanth JP. Just confirming our schedule for the ${s.event || 'scheduled'} shoot on ${d} at ${s.location || 'noted location'}. Looking forward to working with you!`;
@@ -648,7 +641,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function triggerRowWhatsApp(id, e) {
-      if (e) e.stopPropagation(); // CRITICAL TOUCH CONTROL: CRITICAL INTERCEPTIONS OF PROPAGATION IN TACTILE GRAPHICS
+      if (e) e.stopPropagation(); 
       const s = _shoots.find(x => x.id === id);
       if (s) window.open(buildWhatsAppActionLink(s), '_blank');
     }
@@ -672,7 +665,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       window.open(buildWhatsAppActionLink(contextData), '_blank');
     }
 
-    // INTERACTION HELPERS
     function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
     function today() { return new Date().toISOString().slice(0, 10); }
     function fmtDate(d) {
@@ -705,48 +697,44 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (tab === 'settings') renderSettings();
     }
 
-    // RENDERING LOGIC CORES
     function renderDashboard() {
       const shoots = _shoots;
       const td = today();
       const now = new Date();
-      const curMonthStr = now.toISOString().slice(0, 7);
 
       document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
 
-      // Calculate total revenue, overheads, and true profit arrays
       const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const trueOutstanding = totalGross - realizedReceived;
 
-      // UPGRADE #3 & #2: EXPENSE DATA INTEGRATION & PRIVACY WRAPPER INJECTORS
       document.getElementById('dash-stats').innerHTML = `
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Gross Valuations</div>
+          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Total Amount</div>
           <div class="text-xl md:text-2xl font-bold tracking-tight text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalGross)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Contract assets mapped</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Gross worth of shoots</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500/80">Operational Expenses</div>
+          <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500/80">Total Expenses</div>
           <div class="text-xl md:text-2xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(totalExpenses)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Total operational overheads</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Total run costs</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Capital Captured</div>
+          <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Amount Received</div>
           <div class="text-xl md:text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(realizedReceived)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Liquidity safe in hand</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Cash in hand</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-red-400">Arrears Matrix</div>
+          <div class="text-[10px] uppercase font-bold tracking-wider text-red-400">Amount Due</div>
           <div class="text-xl md:text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(trueOutstanding)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Pending collection balances</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Outstanding collections</div>
         </div>`;
 
       const upcoming = shoots.filter(s => s.date >= td).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
       const ul = document.getElementById('dash-upcoming');
       if (!upcoming.length) {
-        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No production pipelines currently pending execution.</div>';
+        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No pending shoots found.</div>';
       } else {
         ul.innerHTML = upcoming.map(s => getShootRowHtmlTemplate(s, true)).join('');
       }
@@ -758,33 +746,30 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('dash-payments').innerHTML = `
         <div class="space-y-2 text-xs">
           <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Consolidated Gross Book</span>
+            <span class="text-neutral-500">Gross Amount</span>
             <span class="font-bold text-white privacy-target">${fmtAmt(totalGross)}</span>
           </div>
           <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Realized Cashflows</span>
+            <span class="text-neutral-500">Received Amount</span>
             <span class="font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
           </div>
           <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Unresolved Ledger Arrears</span>
+            <span class="text-neutral-500">Due Amount</span>
             <span class="font-bold text-amber-500 privacy-target">${fmtAmt(trueOutstanding)}</span>
           </div>
           <div class="flex flex-wrap gap-1.5 pt-2">
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
             <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/40 border border-amber-900/60 text-amber-400">${unliquidatedCount} Awaiting</span>
+            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/40 border border-amber-900/60 text-amber-400">${unliquidatedCount} Pending</span>
           </div>
         </div>`;
 
       applyPrivacyUIVisibility();
-      // UPGRADE #4: PARSE TIMELINES AND PLOT ADVANCED MONTHLY REVENUE CHART
       setTimeout(buildInteractiveRevenueGrowthChart, 50);
     }
 
-    // GENERATIVE HTML BUILD ENGINE PARADIGMS
     function getShootRowHtmlTemplate(s, isDashboardFrame) {
       const { dd, mmm } = ddMmm(s.date);
-      const balanceOwed = Number(s.amount || 0) - Number(s.partPaid || 0);
       
       const badgeStyles = {
         'Wedding':'bg-amber-950/40 text-[#c9a96e] border border-amber-900/60',
@@ -802,7 +787,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         'done':'bg-emerald-950/40 text-emerald-400 border border-emerald-900/60'
       }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
 
-      const stateLabel = { 'pending':'Awaiting','part':'Partial','done':'Settled' }[s.payStatus] || 'Unresolved';
+      const stateLabel = { 'pending':'Pending','part':'Partial','done':'Settled' }[s.payStatus] || 'Unknown';
 
       return `
         <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900/80 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
@@ -814,7 +799,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             <div class="min-w-0">
               <div class="text-sm font-semibold text-white truncate">${s.name}</div>
               <div class="text-xs text-neutral-500 truncate mt-0.5">
-                <span>${s.location || 'Undefined Locale'}</span> ${s.company ? `• <span class="text-neutral-400">${s.company}</span>` : ''}
+                <span>${s.location || 'No Location'}</span> ${s.company ? `• <span class="text-neutral-400">${s.company}</span>` : ''}
               </div>
             </div>
           </div>
@@ -830,7 +815,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               </div>` : ''}
 
             <div class="flex items-center gap-1">
-              <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition" title="Send Notification Script">
+              <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition" title="Send WhatsApp Text">
                 <i class="ti ti-brand-whatsapp text-base"></i>
               </button>
             </div>
@@ -838,7 +823,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         </div>`;
     }
 
-    // UPGRADE #4: PARSE TIMELINES AND PLOT ADVANCED CHART ENGINE GROUPING Gross vs Expense
     function buildInteractiveRevenueGrowthChart() {
       const ctx = document.getElementById('revenueAnalyticsChart');
       if (!ctx) return;
@@ -847,11 +831,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         _analyticsChartInstance.destroy();
       }
 
-      // Group matrix calculations chronologically
       const monthlyData = {};
       _shoots.forEach(s => {
         if (!s.date) return;
-        const monthKey = s.date.slice(0, 7); // Format: YYYY-MM
+        const monthKey = s.date.slice(0, 7); 
         if (!monthlyData[monthKey]) {
           monthlyData[monthKey] = { gross: 0, expense: 0 };
         }
@@ -868,8 +851,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const grossDataset = sortedTimelineKeys.map(k => monthlyData[k].gross);
       const expenseDataset = sortedTimelineKeys.map(k => monthlyData[k].expense);
 
-      // Handle structural fallbacks for barren schemas
-      const configurationLabels = labels.length ? labels : ["Cache Null"];
+      const configurationLabels = labels.length ? labels : ["No Data"];
       const finalGrossDataset = grossDataset.length ? grossDataset : [0];
       const finalExpenseDataset = expenseDataset.length ? expenseDataset : [0];
 
@@ -879,14 +861,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           labels: configurationLabels,
           datasets: [
             {
-              label: 'Gross',
+              label: 'Amount',
               data: finalGrossDataset,
               backgroundColor: '#c9a96e',
               borderRadius: 4,
               borderSkipped: false
             },
             {
-              label: 'Overhead',
+              label: 'Expenses',
               data: finalExpenseDataset,
               backgroundColor: '#ef4444',
               borderRadius: 4,
@@ -900,7 +882,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           plugins: {
             legend: { display: false },
             tooltip: {
-              enabled: !_privacyModeActive, // Structural fallback to mask configurations inside analytics logic
+              enabled: !_privacyModeActive, 
               callbacks: {
                 label: function(context) { return ` ${context.dataset.label}: ₹${context.raw.toLocaleString()}`; }
               }
@@ -914,7 +896,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       });
     }
 
-    // CALENDAR PARSER SYSTEM CONTROLS
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
     let calSelected = null;
@@ -988,11 +969,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
           <div class="flex items-center justify-between">
             <div class="text-sm font-bold text-white">${headerLabel}</div>
-            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold text-[#c9a96e] flex items-center gap-1 hover:underline"><i class="ti ti-plus"></i> Inject Production Slot</button>
+            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold text-[#c9a96e] flex items-center gap-1 hover:underline"><i class="ti ti-plus"></i> Add Shoot Here</button>
           </div>`;
 
       if (!contextualShoots.length) {
-        interiorHtml += `<p class="text-xs text-neutral-600 py-2">No active projects assigned to this temporal index.</p>`;
+        interiorHtml += `<p class="text-xs text-neutral-600 py-2">No shoots planned for this day.</p>`;
       } else {
         interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
       }
@@ -1005,7 +986,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
     function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
 
-    // FILTER REGISTRY SCHEMAS
     function renderShootsList() {
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
       const fc = document.getElementById('filter-company')?.value || '';
@@ -1015,7 +995,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const compDropdown = document.getElementById('filter-company');
       if (compDropdown) {
         const cachedSelection = compDropdown.value;
-        compDropdown.innerHTML = '<option value="">All Contracting Agencies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
+        compDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
       }
 
       const eventsList = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
@@ -1028,7 +1008,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const locDropdown = document.getElementById('filter-loc');
       if (locDropdown) {
         const cachedSelection = locDropdown.value;
-        locDropdown.innerHTML = '<option value="">All Locales</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
+        locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
       }
 
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
@@ -1039,36 +1019,34 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const targetContainer = document.getElementById('shoots-list');
       if (!filtered.length) {
-        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No production files correlate with specified search parameters.</div>';
+        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
       } else {
         targetContainer.innerHTML = filtered.map(s => getShootRowHtmlTemplate(s, false)).join('');
       }
       applyPrivacyUIVisibility();
     }
 
-    // ARREARS MANAGEMENT VIEWS
     function renderPayments() {
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0); // UPGRADE #3
+      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0); 
       const outstanding = gross - captured;
 
-      // UPGRADE #3 & #2: EXPENSE TRACKING MATRIX OVERVIEW
       document.getElementById('pay-stats').innerHTML = `
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Gross Contract Value</div>
+          <div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total Amount</div>
           <div class="text-xl font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Overhead Payables</div>
+          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
           <div class="text-xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Realized Cash Assets</div>
+          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Received Amount</div>
           <div class="text-xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Outstanding Collection</div>
+          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Due Amount</div>
           <div class="text-xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
         </div>`;
 
@@ -1085,7 +1063,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const rootList = document.getElementById('payments-list');
       if (!filtered.length) {
-        rootList.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No active ledgers found matching parameters.</div>';
+        rootList.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No active ledgers found.</div>';
         return;
       }
 
@@ -1108,7 +1086,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               </div>
               <div class="min-w-0">
                 <div class="text-sm font-semibold text-white truncate">${s.name}</div>
-                <div class="text-xs text-neutral-500 truncate mt-0.5">${s.company || 'Direct Client Portfolio'}</div>
+                <div class="text-xs text-neutral-500 truncate mt-0.5">${s.company || 'Direct Client'}</div>
               </div>
             </div>
 
@@ -1128,7 +1106,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       applyPrivacyUIVisibility();
     }
 
-    // SYSTEM ENVIRONMENT SETTINGS MANIFESTS
     function renderSettings() {
       const compTarget = document.getElementById('settings-companies');
       if (compTarget) {
@@ -1147,7 +1124,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         locTarget.innerHTML = DEFAULT_LOCS.map(l => `
           <div class="flex items-center justify-between py-2 text-xs opacity-50">
             <span class="text-neutral-400">${l}</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Static System Default</span>
+            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span>
           </div>`).join('') + 
           _locs.map((l, i) => `
           <div class="flex items-center justify-between py-2 text-xs">
@@ -1170,7 +1147,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       _companies.splice(i, 1); await saveSettingToDB('companies', _companies); renderSettings();
     }
     async function renameCompany(i) {
-      const input = prompt('Enter revised entity designation:', _companies[i]);
+      const input = prompt('Enter revised company name:', _companies[i]);
       if (!input || input.trim() === _companies[i]) return;
       const original = _companies[i]; _companies[i] = input.trim();
       await saveSettingToDB('companies', _companies);
@@ -1188,7 +1165,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       _locs.splice(i, 1); await saveSettingToDB('locations', _locs); renderSettings();
     }
     async function renameLocation(i) {
-      const input = prompt('Enter revised architectural locale entry:', _locs[i]);
+      const input = prompt('Enter revised location name:', _locs[i]);
       if (!input || input.trim() === _locs[i]) return;
       const original = _locs[i]; _locs[i] = input.trim();
       await saveSettingToDB('locations', _locs);
@@ -1197,8 +1174,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function confirmClearData() {
-      document.getElementById('confirm-title').textContent = 'Purge Total Cloud Ledger?';
-      document.getElementById('confirm-sub-text').textContent = 'This action executes structural drops across all linked production instances completely.';
+      document.getElementById('confirm-title').textContent = 'Reset Database?';
+      document.getElementById('confirm-sub-text').textContent = 'This action will completely delete all records from the cloud database.';
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
       document.getElementById('confirm-action-btn').onclick = executeTotalClearPurge;
       openModal('confirm-modal-backdrop');
@@ -1206,24 +1183,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     async function executeTotalClearPurge() {
       closeConfirmModal();
-      setSyncStatus('syncing', 'Dropping Schemas');
+      setSyncStatus('syncing', 'Resetting database...');
       try {
         await sbFetch('shoots?id=neq.___null___', { method: 'DELETE' });
         await sbFetch('settings?key=neq.___null___', { method: 'DELETE' });
         _shoots = []; _companies = [...DEFAULT_COMPANIES]; _locs = [];
-        setSyncStatus('synced', 'Database Blank');
-        showToast('All remote entries systematically destroyed');
+        setSyncStatus('synced', 'Database Reset');
+        showToast('All data has been deleted');
         refreshCurrentView();
       } catch (e) {
-        setSyncStatus('error', 'Purge Faulted');
-        showToast('Purge Exception Intercepted: ' + e.message, 'error');
+        setSyncStatus('error', 'Reset Failed');
+        showToast('Error resetting: ' + e.message, 'error');
       }
     }
 
-    // INTERIOR MODAL FRAMEWORK PLUMBING
     function openAddShootModal(targetDate) {
       clearModalFields();
-      document.getElementById('shoot-modal-title').textContent = 'Initialize New Production Record';
+      document.getElementById('shoot-modal-title').textContent = 'Add New Shoot';
       document.getElementById('modal-delete-btn').classList.add('hidden');
       document.getElementById('modal-whatsapp-btn').classList.add('hidden');
       document.getElementById('f-shoot-date').value = targetDate || today();
@@ -1234,11 +1210,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function openEditShootModal(id) {
       const s = _shoots.find(x => x.id === id); if (!s) return;
       clearModalFields();
-      document.getElementById('shoot-modal-title').textContent = 'Modify Production Parameters';
+      document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
       document.getElementById('modal-delete-btn').classList.remove('hidden');
       document.getElementById('modal-delete-btn').className = "flex items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition";
       
-      // UPGRADE #5: UNMASK WHATSAPP DIRECT INITIATOR BUTTON INSIDE EDIT MODAL FRAMEWORK
       document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
 
       document.getElementById('edit-shoot-id').value = id;
@@ -1249,7 +1224,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
       document.getElementById('f-shoot-notes').value = s.notes || '';
       document.getElementById('f-shoot-amount').value = s.amount || '';
-      document.getElementById('f-shoot-expense').value = s.expense || ''; // UPGRADE #3
+      document.getElementById('f-shoot-expense').value = s.expense || ''; 
       document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
       document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
       document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? 'flex' : 'none';
@@ -1278,7 +1253,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const lSel = document.getElementById('f-shoot-loc');
       if (lSel) {
-        lSel.innerHTML = locales.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Uncharted Locale Specifier</option>';
+        lSel.innerHTML = locales.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
         if (s && s.location) {
           if (locales.includes(s.location)) {
             lSel.value = s.location;
@@ -1304,7 +1279,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('f-loc-other-wrap').classList.add('hidden');
       document.getElementById('f-shoot-notes').value = '';
       document.getElementById('f-shoot-amount').value = '';
-      document.getElementById('f-shoot-expense').value = ''; // UPGRADE #3
+      document.getElementById('f-shoot-expense').value = ''; 
       document.getElementById('f-shoot-pay-status').value = 'pending';
       document.getElementById('f-shoot-part-paid').value = '';
       document.getElementById('f-part-pay-wrap').style.display = 'none';
@@ -1331,7 +1306,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     async function saveShoot() {
       const name = document.getElementById('f-shoot-name').value.trim();
       const date = document.getElementById('f-shoot-date').value;
-      if (!name || !date) { showToast('Required parameter values absent', 'error'); return; }
+      if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
 
       let event = document.getElementById('f-shoot-event').value;
       if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
@@ -1346,7 +1321,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const payStatus = document.getElementById('f-shoot-pay-status').value;
       const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0; // UPGRADE #3
+      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0; 
       const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
 
       const editId = document.getElementById('edit-shoot-id').value;
@@ -1377,8 +1352,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function askDeletePrompt(id) {
       const s = _shoots.find(x => x.id === id); if (!s) return;
       _pendingDropTargetId = id;
-      document.getElementById('confirm-title').textContent = 'Drop Production Segment?';
-      document.getElementById('confirm-sub-text').textContent = `Authorize drop execution pipeline for execution map referencing "${s.name}".`;
+      document.getElementById('confirm-title').textContent = 'Delete Shoot?';
+      document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
       document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop;
       openModal('confirm-modal-backdrop');
@@ -1394,13 +1369,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
     function openModal(id) {
-      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-all');
+      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-auto');
       const inner = m.firstElementChild;
       if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
       document.body.style.overflow = 'hidden';
     }
     function closeModal(id) {
-      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-all');
+      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
       const inner = m.firstElementChild;
       if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4');
       document.body.style.overflow = '';
@@ -1418,7 +1393,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (activeTabId === 'payments') renderPayments();
     }
 
-    // INITIALIZATION ROUTE CALLS
     loadAll();
   </script>
 </body>
