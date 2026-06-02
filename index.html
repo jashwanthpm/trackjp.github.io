@@ -1608,32 +1608,43 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      let yPos = 20;
+      const margin = 15;
+      let yPos = margin;
+
+      // Background color for header
+      doc.setFillColor(245, 245, 245);
+      doc.rect(0, 0, pageWidth, 35, 'F');
 
       // Header
-      doc.setFontSize(24);
+      doc.setFontSize(28);
       doc.setTextColor(201, 169, 110);
-      doc.text('SAKKHI', pageWidth / 2, yPos, { align: 'center' });
+      doc.setFont(undefined, 'bold');
+      doc.text('SAKKHI', margin, yPos + 15);
       
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
-      doc.text('by Jashwanth JP', pageWidth / 2, yPos + 8, { align: 'center' });
+      doc.setFont(undefined, 'normal');
+      doc.text('Payments Ledger Report', margin, yPos + 24);
       
-      yPos += 20;
+      yPos = 42;
       
-      // Date
+      // Report Info
       doc.setFontSize(9);
       doc.setTextColor(100, 100, 100);
-      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 20, yPos);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}`, margin, yPos);
       
       yPos += 12;
       
-      // Summary Section
-      doc.setFontSize(14);
-      doc.setTextColor(50, 50, 50);
-      doc.text('Payments Ledger Summary', 20, yPos);
-      
-      yPos += 10;
+      // Summary Box
+      doc.setFillColor(250, 250, 250);
+      doc.rect(margin, yPos, pageWidth - 2 * margin, 45, 'F');
+      doc.setDrawColor(220, 220, 220);
+      doc.rect(margin, yPos, pageWidth - 2 * margin, 45);
+
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      doc.setFont(undefined, 'bold');
+      doc.text('SUMMARY', margin + 5, yPos + 7);
       
       // Calculate totals
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
@@ -1641,24 +1652,27 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
       
-      doc.setFontSize(10);
-      doc.setTextColor(80, 80, 80);
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      
       const summaryData = [
-        ['Total Amount', '₹' + gross.toLocaleString('en-IN')],
-        ['Amount Received', '₹' + captured.toLocaleString('en-IN')],
-        ['Total Expenses', '₹' + expenses.toLocaleString('en-IN')],
-        ['Expenses Settled', '₹' + expensesSettled.toLocaleString('en-IN')]
+        { label: 'Total Amount', value: '₹' + gross.toLocaleString('en-IN'), color: [50, 50, 50] },
+        { label: 'Amount Received', value: '₹' + captured.toLocaleString('en-IN'), color: [76, 175, 80] },
+        { label: 'Total Expenses', value: '₹' + expenses.toLocaleString('en-IN'), color: [255, 152, 0] }
       ];
       
-      summaryData.forEach(row => {
-        doc.text(row[0] + ': ' + row[1], 20, yPos);
-        yPos += 8;
+      let colWidth = (pageWidth - 2 * margin - 10) / 3;
+      summaryData.forEach((item, idx) => {
+        const xPos = margin + 5 + idx * (colWidth + 5);
+        doc.setTextColor(120, 120, 120);
+        doc.setFont(undefined, 'normal');
+        doc.text(item.label, xPos, yPos + 12);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...item.color);
+        doc.text(item.value, xPos, yPos + 22);
       });
       
-      yPos += 8;
-      doc.setDrawColor(200, 200, 200);
-      doc.line(20, yPos, pageWidth - 20, yPos);
-      yPos += 10;
+      yPos += 52;
       
       // Group by months
       const grouped = {};
@@ -1669,14 +1683,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         grouped[monthKey].push(s);
       });
 
-      doc.setFontSize(11);
-      doc.setTextColor(50, 50, 50);
-      
       const sortedMonths = Object.keys(grouped).sort().reverse();
+      
       sortedMonths.forEach(monthKey => {
-        if (yPos > pageHeight - 40) {
+        // Page break check
+        if (yPos > pageHeight - 50) {
           doc.addPage();
-          yPos = 20;
+          yPos = margin;
         }
         
         const shoots = grouped[monthKey];
@@ -1686,42 +1699,74 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
         const monthExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
         
+        // Month Header
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 12, 'F');
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 12);
+        
+        doc.setFontSize(11);
         doc.setFont(undefined, 'bold');
-        doc.text(`${monthName} ${year} - ₹${monthTotal.toLocaleString('en-IN')} | Expenses: ₹${monthExpenses.toLocaleString('en-IN')}`, 20, yPos);
+        doc.setTextColor(50, 50, 50);
+        doc.text(`${monthName} ${year}`, margin + 5, yPos + 8);
+        
+        doc.setFontSize(9);
         doc.setFont(undefined, 'normal');
+        doc.setTextColor(100, 100, 100);
+        doc.text(`Total: ₹${monthTotal.toLocaleString('en-IN')} | Expenses: ₹${monthExpenses.toLocaleString('en-IN')}`, pageWidth - margin - 80, yPos + 8);
         
-        yPos += 8;
+        yPos += 15;
         
+        // Shoots in this month
         shoots.forEach(s => {
           if (yPos > pageHeight - 20) {
             doc.addPage();
-            yPos = 20;
+            yPos = margin;
           }
-          
-          const status = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Unknown';
-          const expStatus = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
           
           doc.setFontSize(9);
+          doc.setTextColor(50, 50, 50);
+          doc.setFont(undefined, 'bold');
+          doc.text(s.name, margin + 5, yPos);
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(100, 100, 100);
+          
+          const eventLabel = `${s.event} • ${s.date}`;
+          doc.text(eventLabel, margin + 5, yPos + 5);
+          
+          const status = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus];
+          const expStatus = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
+          
+          const amountText = `Amount: ₹${Number(s.amount).toLocaleString('en-IN')} (${status})`;
           doc.setTextColor(80, 80, 80);
-          doc.text(`${s.date} | ${s.name} | ${s.event}`, 25, yPos);
-          doc.text(`Amount: ₹${Number(s.amount).toLocaleString('en-IN')} (${status})`, 25, yPos + 5);
+          doc.text(amountText, margin + 5, yPos + 10);
+          
           if (s.expense) {
-            doc.text(`Expenses: ₹${Number(s.expense).toLocaleString('en-IN')} (${expStatus})`, 25, yPos + 10);
-            yPos += 15;
+            const expenseText = `Expenses: ₹${Number(s.expense).toLocaleString('en-IN')} (${expStatus})`;
+            doc.setTextColor(200, 100, 0);
+            doc.text(expenseText, margin + 5, yPos + 15);
+            yPos += 20;
           } else {
-            yPos += 10;
+            yPos += 15;
           }
+          
+          // Divider
+          doc.setDrawColor(240, 240, 240);
+          doc.line(margin + 5, yPos, pageWidth - margin - 5, yPos);
+          yPos += 3;
         });
         
-        yPos += 5;
+        yPos += 8;
       });
       
       // Footer
       doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text('This is an automatically generated report from SAKKHI', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      doc.setTextColor(180, 180, 180);
+      doc.text('SAKKHI • by Jashwanth JP', pageWidth / 2, pageHeight - 10, { align: 'center' });
       
-      doc.save(`Sakkhi_Payments_Ledger_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`SAKKHI_Payments_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('PDF Downloaded Successfully', 'success');
     }
 
@@ -1731,54 +1776,69 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      let yPos = 20;
+      const margin = 15;
+      let yPos = margin;
+
+      // Background color for header
+      doc.setFillColor(245, 245, 245);
+      doc.rect(0, 0, pageWidth, 35, 'F');
 
       // Header
-      doc.setFontSize(24);
+      doc.setFontSize(28);
       doc.setTextColor(201, 169, 110);
-      doc.text('SAKKHI', pageWidth / 2, yPos, { align: 'center' });
+      doc.setFont(undefined, 'bold');
+      doc.text('SAKKHI', margin, yPos + 15);
       
-      doc.setFontSize(10);
+      doc.setFontSize(9);
       doc.setTextColor(120, 120, 120);
-      doc.text('by Jashwanth JP', pageWidth / 2, yPos + 8, { align: 'center' });
+      doc.setFont(undefined, 'normal');
+      doc.text('Shoots List Report', margin, yPos + 24);
       
-      yPos += 20;
+      yPos = 42;
       
-      // Date
+      // Report Info
       doc.setFontSize(9);
       doc.setTextColor(100, 100, 100);
-      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 20, yPos);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN', { year: 'numeric', month: 'long', day: 'numeric' })}`, margin, yPos);
       
       yPos += 12;
       
-      // Summary Section
-      doc.setFontSize(14);
-      doc.setTextColor(50, 50, 50);
-      doc.text('Shoots List', 20, yPos);
-      
-      yPos += 10;
-      
+      // Summary Box
+      doc.setFillColor(250, 250, 250);
+      doc.rect(margin, yPos, pageWidth - 2 * margin, 35, 'F');
+      doc.setDrawColor(220, 220, 220);
+      doc.rect(margin, yPos, pageWidth - 2 * margin, 35);
+
       doc.setFontSize(10);
       doc.setTextColor(80, 80, 80);
+      doc.setFont(undefined, 'bold');
+      doc.text('SUMMARY', margin + 5, yPos + 7);
+      
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'normal');
+      
       const td = today();
       const upcomingShoots = _shoots.filter(s => s.date >= td).length;
       const completedShoots = _shoots.filter(s => s.date < td).length;
       
       const summaryData = [
-        ['Total Shoots', _shoots.length.toString()],
-        ['Upcoming Shoots', upcomingShoots.toString()],
-        ['Completed Shoots', completedShoots.toString()]
+        { label: 'Total Shoots', value: _shoots.length.toString(), color: [50, 50, 50] },
+        { label: 'Upcoming', value: upcomingShoots.toString(), color: [76, 175, 80] },
+        { label: 'Completed', value: completedShoots.toString(), color: [255, 152, 0] }
       ];
       
-      summaryData.forEach(row => {
-        doc.text(row[0] + ': ' + row[1], 20, yPos);
-        yPos += 8;
+      let colWidth = (pageWidth - 2 * margin - 10) / 3;
+      summaryData.forEach((item, idx) => {
+        const xPos = margin + 5 + idx * (colWidth + 5);
+        doc.setTextColor(120, 120, 120);
+        doc.setFont(undefined, 'normal');
+        doc.text(item.label, xPos, yPos + 12);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...item.color);
+        doc.text(item.value, xPos, yPos + 22);
       });
       
-      yPos += 8;
-      doc.setDrawColor(200, 200, 200);
-      doc.line(20, yPos, pageWidth - 20, yPos);
-      yPos += 10;
+      yPos += 42;
       
       // Group by months
       const grouped = {};
@@ -1788,54 +1848,72 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         grouped[monthKey].push(s);
       });
 
-      doc.setFontSize(11);
-      doc.setTextColor(50, 50, 50);
-      
       const sortedMonths = Object.keys(grouped).sort().reverse();
+      
       sortedMonths.forEach(monthKey => {
-        if (yPos > pageHeight - 40) {
+        // Page break check
+        if (yPos > pageHeight - 50) {
           doc.addPage();
-          yPos = 20;
+          yPos = margin;
         }
         
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
         
+        // Month Header
+        doc.setFillColor(240, 240, 240);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
+        doc.setDrawColor(200, 200, 200);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
+        
+        doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
-        doc.text(`${monthName} ${year} - ${shoots.length} shoots`, 20, yPos);
-        doc.setFont(undefined, 'normal');
+        doc.setTextColor(50, 50, 50);
+        doc.text(`${monthName} ${year} (${shoots.length} shoots)`, margin + 5, yPos + 7);
         
-        yPos += 8;
+        yPos += 13;
         
+        // Shoots in this month
         shoots.forEach(s => {
           if (yPos > pageHeight - 20) {
             doc.addPage();
-            yPos = 20;
+            yPos = margin;
           }
           
           doc.setFontSize(9);
+          doc.setTextColor(50, 50, 50);
+          doc.setFont(undefined, 'bold');
+          doc.text(s.name, margin + 5, yPos);
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(100, 100, 100);
+          
+          const detailLine = `${s.event} • ${s.location || 'N/A'} • ${s.company || 'Direct Client'}`;
+          doc.text(detailLine, margin + 5, yPos + 5);
+          
           doc.setTextColor(80, 80, 80);
-          doc.text(`${s.date} | ${s.name}`, 25, yPos);
-          doc.text(`Event: ${s.event} | Location: ${s.location || 'N/A'} | Company: ${s.company || 'N/A'}`, 25, yPos + 5);
-          if (s.amount) {
-            const status = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Unknown';
-            doc.text(`Amount: ₹${Number(s.amount).toLocaleString('en-IN')} (${status})`, 25, yPos + 10);
-            yPos += 15;
-          } else {
-            yPos += 10;
-          }
+          const dateStatusLine = `${s.date}${s.amount ? ' • ₹' + Number(s.amount).toLocaleString('en-IN') : ''}`;
+          doc.text(dateStatusLine, margin + 5, yPos + 10);
+          
+          yPos += 14;
+          
+          // Divider
+          doc.setDrawColor(240, 240, 240);
+          doc.line(margin + 5, yPos, pageWidth - margin - 5, yPos);
+          yPos += 2;
         });
         
-        yPos += 5;
+        yPos += 6;
       });
       
       // Footer
       doc.setFontSize(8);
-      doc.setTextColor(150, 150, 150);
-      doc.text('This is an automatically generated report from SAKKHI', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      doc.setTextColor(180, 180, 180);
+      doc.text('SAKKHI • by Jashwanth JP', pageWidth / 2, pageHeight - 10, { align: 'center' });
       
-      doc.save(`Sakkhi_Shoots_List_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`SAKKHI_Shoots_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('PDF Downloaded Successfully', 'success');
     }
 
