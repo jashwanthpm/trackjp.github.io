@@ -123,7 +123,7 @@
       <div class="border-b border-neutral-900 pb-3">
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
@@ -134,8 +134,6 @@
           <option value="completed">Completed Shoots</option>
         </select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-company" onchange="renderShootsList()"></select>
-      </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-loc" onchange="renderShootsList()"></select>
       </div>
       <div class="space-y-2" id="shoots-list"></div>
@@ -197,7 +195,6 @@
           <p class="text-xs text-neutral-500 mb-4">Direct sync link with active Supabase server.</p>
           <div class="flex flex-wrap gap-2">
             <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync Loop</button>
-            <button onclick="confirmClearData()" class="flex items-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/40 text-red-400 rounded-lg hover:bg-red-950/40 text-xs font-semibold transition"><i class="ti ti-trash"></i> Reset Database</button>
           </div>
         </div>
       </div>
@@ -228,7 +225,22 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
-            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <div class="relative">
+              <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+              <button type="button" onclick="toggleDatePicker()" class="absolute right-2 top-2.5 p-1.5 text-neutral-500 hover:text-[#c9a96e] transition">
+                <i class="ti ti-calendar text-lg"></i>
+              </button>
+              <div id="date-picker-dropdown" class="hidden absolute top-full right-0 mt-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg shadow-xl p-3 z-50">
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between mb-3">
+                    <button type="button" onclick="datePickerPrev()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-left"></i></button>
+                    <span id="date-picker-label" class="text-xs font-bold text-white"></span>
+                    <button type="button" onclick="datePickerNext()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-right"></i></button>
+                  </div>
+                  <div class="grid grid-cols-7 gap-1" id="date-picker-grid"></div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -949,7 +961,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
           <div class="flex items-center justify-between">
             <div class="text-sm font-bold text-white">${headerLabel}</div>
-            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold text-[#c9a96e] flex items-center gap-1 hover:underline"><i class="ti ti-plus"></i> Add Shoot Here</button>
+            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button>
           </div>`;
 
       if (!contextualShoots.length) {
@@ -1089,66 +1101,94 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         return;
       }
 
-      rootList.innerHTML = filtered.map(s => {
-        const { dd, mmm } = ddMmm(s.date);
-        const remainder = Number(s.amount || 0) - Number(s.partPaid || 0);
+      // Group by month
+      const grouped = {};
+      filtered.forEach(s => {
+        const monthKey = s.date.slice(0, 7); // YYYY-MM
+        if (!grouped[monthKey]) grouped[monthKey] = [];
+        grouped[monthKey].push(s);
+      });
+
+      let html = '';
+      const sortedMonths = Object.keys(grouped).sort().reverse();
+      sortedMonths.forEach(monthKey => {
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        const monthLabel = `${monthName} ${year}`;
         
-        const stateStyle = {
-          'pending':'bg-neutral-900 text-neutral-500 border border-neutral-800',
-          'part':'bg-purple-950 text-purple-400 border border-purple-900',
-          'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
-        }[s.payStatus];
-
-        const expenseStateStyle = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
-        const expenseStateLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
-
-        const badgeStyles = {
-          'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
-          'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
-          'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
-          'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
-          'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
-          'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
-          'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
-        }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
-
-        return `
-          <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
-            <div class="flex items-center gap-3 min-w-0">
-              <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
-                <span class="text-[9px] uppercase tracking-wider text-neutral-500 font-medium mt-0.5">${mmm}</span>
-              </div>
-              <div class="min-w-0">
-                <div class="text-sm font-semibold text-white truncate">${s.name}</div>
-                <div class="flex items-center gap-2 mt-0.5">
-                  <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                  <span class="text-xs text-neutral-500 truncate">${s.company || 'Direct Client'}</span>
-                </div>
-              </div>
-            </div>
-
-            <div class="flex items-center gap-3 flex-shrink-0">
-              <div class="text-right">
-                <div class="text-xs font-bold text-neutral-400">Amount</div>
-                <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
-                <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
-              </div>
-
-              ${s.expense ? `
-              <div class="text-right">
-                <div class="text-xs font-bold text-amber-400">Expenses</div>
-                <div class="text-sm font-bold text-amber-400 privacy-target">${fmtAmt(s.expense)}</div>
-                <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${expenseStateStyle}">${expenseStateLabel.toUpperCase()}</span></div>
-              </div>
-              ` : ''}
+        html += `<div class="mb-6">
+          <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
+            <i class="ti ti-calendar text-[#c9a96e]"></i>
+            <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
+            <span class="text-xs text-neutral-500 ml-auto">${shoots.length} payments</span>
+          </div>
+          <div class="space-y-2">
+            ${shoots.map(s => {
+              const { dd, mmm } = ddMmm(s.date);
+              const remainder = Number(s.amount || 0) - Number(s.partPaid || 0);
               
-              <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
-                <i class="ti ti-brand-whatsapp text-base"></i>
-              </button>
-            </div>
-          </div>`;
-      }).join('');
+              const stateStyle = {
+                'pending':'bg-neutral-900 text-neutral-500 border border-neutral-800',
+                'part':'bg-purple-950 text-purple-400 border border-purple-900',
+                'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
+              }[s.payStatus];
+
+              const expenseStateStyle = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
+              const expenseStateLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
+
+              const badgeStyles = {
+                'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
+                'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
+                'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
+                'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
+                'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
+                'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
+                'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
+              }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
+
+              return `
+                <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
+                  <div class="flex items-center gap-3 min-w-0">
+                    <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                      <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
+                      <span class="text-[9px] uppercase tracking-wider text-neutral-500 font-medium mt-0.5">${mmm}</span>
+                    </div>
+                    <div class="min-w-0">
+                      <div class="text-sm font-semibold text-white truncate">${s.name}</div>
+                      <div class="flex items-center gap-2 mt-0.5">
+                        <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
+                        <span class="text-xs text-neutral-500 truncate">${s.company || 'Direct Client'}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="flex items-center gap-3 flex-shrink-0">
+                    <div class="text-right">
+                      <div class="text-xs font-bold text-neutral-400">Amount</div>
+                      <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
+                      <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
+                    </div>
+
+                    ${s.expense ? `
+                    <div class="text-right">
+                      <div class="text-xs font-bold text-amber-400">Expenses</div>
+                      <div class="text-sm font-bold text-amber-400 privacy-target">${fmtAmt(s.expense)}</div>
+                      <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${expenseStateStyle}">${expenseStateLabel.toUpperCase()}</span></div>
+                    </div>
+                    ` : ''}
+                    
+                    <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
+                      <i class="ti ti-brand-whatsapp text-base"></i>
+                    </button>
+                  </div>
+                </div>`;
+            }).join('')}
+          </div>
+        </div>`;
+      });
+      
+      rootList.innerHTML = html;
       applyPrivacyUIVisibility();
     }
 
@@ -1245,7 +1285,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function verifyPrivacyPassword() {
       const input = document.getElementById('privacy-pass-input').value;
       const errorLabel = document.getElementById('privacy-error-lbl');
-      if (input === '1234') {
+      if (input === '1234jp') {
         _privacyModeActive = false;
         applyPrivacyUIVisibility();
         const icon = document.getElementById('privacy-icon');
@@ -1442,7 +1482,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       event.stopPropagation();
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
-      const msg = `Hi, I wanted to check on the shoot details:\n📸 ${s.name}\n📅 ${s.date}\n💰 Amount: ₹${s.amount || '0'}`;
+      const msg = `Hi ${s.name},\nThis is Jashwanth JP. Just confirming our schedule for the ${s.event} shoot on ${s.date} at ${s.location}.\nLooking forward to working with you!`;
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
     }
@@ -1481,6 +1521,62 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (activeTabId === 'calendar') renderCalendar();
       if (activeTabId === 'shoots') renderShootsList();
       if (activeTabId === 'payments') renderPayments();
+    }
+
+    let datePickerMonth = new Date().getMonth();
+    let datePickerYear = new Date().getFullYear();
+
+    function toggleDatePicker() {
+      const picker = document.getElementById('date-picker-dropdown');
+      if (picker.classList.contains('hidden')) {
+        datePickerMonth = new Date().getMonth();
+        datePickerYear = new Date().getFullYear();
+        renderDatePicker();
+        picker.classList.remove('hidden');
+      } else {
+        picker.classList.add('hidden');
+      }
+    }
+
+    function datePickerPrev() {
+      datePickerMonth--;
+      if (datePickerMonth < 0) {
+        datePickerMonth = 11;
+        datePickerYear--;
+      }
+      renderDatePicker();
+    }
+
+    function datePickerNext() {
+      datePickerMonth++;
+      if (datePickerMonth > 11) {
+        datePickerMonth = 0;
+        datePickerYear++;
+      }
+      renderDatePicker();
+    }
+
+    function renderDatePicker() {
+      const label = document.getElementById('date-picker-label');
+      label.textContent = MONTHS[datePickerMonth] + ' ' + datePickerYear;
+
+      const firstDay = new Date(datePickerYear, datePickerMonth, 1);
+      const daysInMonth = new Date(datePickerYear, datePickerMonth + 1, 0).getDate();
+      const startingDayOfWeek = firstDay.getDay();
+
+      const grid = document.getElementById('date-picker-grid');
+      let html = '';
+      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = datePickerYear + '-' + String(datePickerMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        html += `<button type="button" onclick="selectDateFromPicker('${dateStr}')" class="text-xs p-1.5 rounded hover:bg-[#c9a96e] hover:text-black transition">${d}</button>`;
+      }
+      grid.innerHTML = html;
+    }
+
+    function selectDateFromPicker(dateStr) {
+      document.getElementById('f-shoot-date').value = dateStr;
+      document.getElementById('date-picker-dropdown').classList.add('hidden');
     }
 
     loadAll();
