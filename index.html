@@ -1113,11 +1113,21 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const monthName = MONTHS[parseInt(month) - 1];
         const monthLabel = `${monthName} ${year}`;
         
+        // Calculate monthly totals
+        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+        const monthExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+        
         html += `<div class="mb-6">
-          <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-            <i class="ti ti-calendar text-[#c9a96e]"></i>
-            <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
-            <span class="text-xs text-neutral-500 ml-auto">${shoots.length} payments</span>
+          <div class="flex items-center justify-between gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
+            <div class="flex items-center gap-2">
+              <i class="ti ti-calendar text-[#c9a96e]"></i>
+              <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
+            </div>
+            <div class="flex items-center gap-4 text-xs">
+              <span class="text-neutral-500">${shoots.length} payments</span>
+              <span class="font-semibold text-white privacy-target">₹${monthTotal.toLocaleString('en-IN')}</span>
+              <span class="font-semibold text-amber-400 privacy-target">₹${monthExpenses.toLocaleString('en-IN')}</span>
+            </div>
           </div>
           <div class="space-y-2">
             ${shoots.map(s => {
