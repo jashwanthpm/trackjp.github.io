@@ -122,11 +122,16 @@
       <div class="border-b border-neutral-900 pb-3">
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
       </div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
         </div>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-timeline" onchange="renderShootsList()">
+          <option value="">All Timelines</option>
+          <option value="upcoming">Upcoming Shoots</option>
+          <option value="completed">Completed Shoots</option>
+        </select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-company" onchange="renderShootsList()"></select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-event" onchange="renderShootsList()"></select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-loc" onchange="renderShootsList()"></select>
@@ -993,9 +998,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     function renderShootsList() {
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
+      const ft = document.getElementById('filter-timeline')?.value || '';
       const fc = document.getElementById('filter-company')?.value || '';
       const fe = document.getElementById('filter-event')?.value || '';
       const fl = document.getElementById('filter-loc')?.value || '';
+      const td = today();
 
       const compDropdown = document.getElementById('filter-company');
       if (compDropdown) {
@@ -1017,10 +1024,17 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
 
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
       if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fe) filtered = filtered.filter(s => s.event === fe);
       if (fl) filtered = filtered.filter(s => s.location === fl);
+      
+      if (ft === 'upcoming') {
+        filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      } else if (ft === 'completed') {
+        filtered = filtered.filter(s => s.date < td);
+      }
 
       const targetContainer = document.getElementById('shoots-list');
       if (!targetContainer) return;
