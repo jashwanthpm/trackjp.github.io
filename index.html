@@ -32,6 +32,7 @@
       transition: filter 0.2s ease-in-out;
     }
   </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body class="min-h-screen pb-24 md:pb-6">
 
@@ -149,6 +150,9 @@
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
         </div>
+        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-company" onchange="renderPaymentsList()">
+          <option value="">All Companies</option>
+        </select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-status" onchange="renderPaymentsList()">
           <option value="">All Statuses</option>
           <option value="pending">Pending</option>
@@ -648,7 +652,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     function buildWhatsAppActionLink(s) {
       const d = s.date ? new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending Confirmation';
-      const template = `Hi ${s.name || 'Client'}, this is Jashwanth JP. Just confirming our schedule for the ${s.event || 'scheduled'} shoot on ${d} at ${s.location || 'noted location'}. Looking forward to working with you!`;
+      const template = `Hi ${s.name || 'Client'},\n\nThis is Jashwanth JP. Just confirming our schedule for the ${s.event || 'scheduled'} shoot on ${d} at ${s.location || 'noted location'}.\n\nLooking forward to working with you!`;
       return `https://wa.me/?text=${encodeURIComponent(template)}`;
     }
 
@@ -1073,12 +1077,34 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       renderPaymentsList();
     }
 
-    function renderPaymentsList() {
+    
+function downloadPaymentsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text('Payments Ledger - Sakkhi by Jashwanth JP', 10, 15);
+  let y = 30;
+  _shoots.filter(s=>s.amount).forEach((s,i)=>{
+    doc.text(`${i+1}. ${s.name} | ${s.company||'-'} | ₹${s.amount} | ${s.payStatus}`,10,y);
+    y+=8;
+    if(y>280){doc.addPage(); y=20;}
+  });
+  doc.save('Payments-Ledger.pdf');
+}
+
+function renderPaymentsList() {
       const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
       const fs = document.getElementById('pay-filter-status')?.value || '';
+      const fc = document.getElementById('pay-filter-company')?.value || '';
 
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       if (q) filtered = filtered.filter(s => s.name.toLowerCase().includes(q));
+      const companyDropdown=document.getElementById('pay-filter-company');
+      if(companyDropdown){
+        const cur=companyDropdown.value;
+        companyDropdown.innerHTML='<option value="">All Companies</option>'+_companies.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
+      }
+      if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
 
       const rootList = document.getElementById('payments-list');
