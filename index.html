@@ -1298,6 +1298,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('modal-delete-btn').classList.add('hidden');
       document.getElementById('modal-whatsapp-btn').classList.add('hidden');
       clearModalFields();
+      
+      // Populate dropdowns
+      const cSel = document.getElementById('f-shoot-company');
+      if (cSel) {
+        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      }
+
+      const lSel = document.getElementById('f-shoot-loc');
+      if (lSel) {
+        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
+      }
+      
       if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
       openModal('shoot-modal-backdrop');
     }
@@ -1319,24 +1331,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
       document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
       
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && s.event) {
-        if (['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'].includes(s.event)) {
-          eSel.value = s.event;
-          document.getElementById('f-event-other-wrap').classList.add('hidden');
-        } else {
-          eSel.value = 'Other';
-          document.getElementById('f-shoot-event-other').value = s.event;
-          document.getElementById('f-event-other-wrap').classList.remove('hidden');
-        }
-      }
-
+      // Populate company dropdown
       const cSel = document.getElementById('f-shoot-company');
       if (cSel) {
         cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
         if (s && s.company) cSel.value = s.company;
       }
 
+      // Populate location dropdown
       const lSel = document.getElementById('f-shoot-loc');
       if (lSel) {
         lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
@@ -1349,6 +1351,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             document.getElementById('f-shoot-loc-other').value = s.location;
             document.getElementById('f-loc-other-wrap').classList.remove('hidden');
           }
+        }
+      }
+
+      // Populate event dropdown
+      const eSel = document.getElementById('f-shoot-event');
+      if (eSel && s.event) {
+        if (['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'].includes(s.event)) {
+          eSel.value = s.event;
+          document.getElementById('f-event-other-wrap').classList.add('hidden');
+        } else {
+          eSel.value = 'Other';
+          document.getElementById('f-shoot-event-other').value = s.event;
+          document.getElementById('f-event-other-wrap').classList.remove('hidden');
         }
       }
 
