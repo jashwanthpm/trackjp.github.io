@@ -120,8 +120,9 @@
     </section>
 
     <section id="section-shoots" class="app-section hidden space-y-4">
-      <div class="border-b border-neutral-900 pb-3">
+      <div class="border-b border-neutral-900 pb-3 flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
+        <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
@@ -140,8 +141,9 @@
     </section>
 
     <section id="section-payments" class="app-section hidden space-y-4">
-      <div class="border-b border-neutral-900 pb-3">
+      <div class="border-b border-neutral-900 pb-3 flex items-center justify-between">
         <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
+        <button onclick="downloadPaymentsLedgerPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
@@ -1598,6 +1600,243 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function selectDateFromPicker(dateStr) {
       document.getElementById('f-shoot-date').value = dateStr;
       document.getElementById('date-picker-dropdown').classList.add('hidden');
+    }
+
+    function downloadPaymentsLedgerPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPos = 20;
+
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(201, 169, 110);
+      doc.text('SAKKHI', pageWidth / 2, yPos, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(120, 120, 120);
+      doc.text('by Jashwanth JP', pageWidth / 2, yPos + 8, { align: 'center' });
+      
+      yPos += 20;
+      
+      // Date
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 20, yPos);
+      
+      yPos += 12;
+      
+      // Summary Section
+      doc.setFontSize(14);
+      doc.setTextColor(50, 50, 50);
+      doc.text('Payments Ledger Summary', 20, yPos);
+      
+      yPos += 10;
+      
+      // Calculate totals
+      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
+      
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      const summaryData = [
+        ['Total Amount', '₹' + gross.toLocaleString('en-IN')],
+        ['Amount Received', '₹' + captured.toLocaleString('en-IN')],
+        ['Total Expenses', '₹' + expenses.toLocaleString('en-IN')],
+        ['Expenses Settled', '₹' + expensesSettled.toLocaleString('en-IN')]
+      ];
+      
+      summaryData.forEach(row => {
+        doc.text(row[0] + ': ' + row[1], 20, yPos);
+        yPos += 8;
+      });
+      
+      yPos += 8;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, yPos, pageWidth - 20, yPos);
+      yPos += 10;
+      
+      // Group by months
+      const grouped = {};
+      _shoots.forEach(s => {
+        if (!s.amount) return;
+        const monthKey = s.date.slice(0, 7);
+        if (!grouped[monthKey]) grouped[monthKey] = [];
+        grouped[monthKey].push(s);
+      });
+
+      doc.setFontSize(11);
+      doc.setTextColor(50, 50, 50);
+      
+      const sortedMonths = Object.keys(grouped).sort().reverse();
+      sortedMonths.forEach(monthKey => {
+        if (yPos > pageHeight - 40) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        
+        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+        const monthExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+        
+        doc.setFont(undefined, 'bold');
+        doc.text(`${monthName} ${year} - ₹${monthTotal.toLocaleString('en-IN')} | Expenses: ₹${monthExpenses.toLocaleString('en-IN')}`, 20, yPos);
+        doc.setFont(undefined, 'normal');
+        
+        yPos += 8;
+        
+        shoots.forEach(s => {
+          if (yPos > pageHeight - 20) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          const status = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Unknown';
+          const expStatus = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
+          
+          doc.setFontSize(9);
+          doc.setTextColor(80, 80, 80);
+          doc.text(`${s.date} | ${s.name} | ${s.event}`, 25, yPos);
+          doc.text(`Amount: ₹${Number(s.amount).toLocaleString('en-IN')} (${status})`, 25, yPos + 5);
+          if (s.expense) {
+            doc.text(`Expenses: ₹${Number(s.expense).toLocaleString('en-IN')} (${expStatus})`, 25, yPos + 10);
+            yPos += 15;
+          } else {
+            yPos += 10;
+          }
+        });
+        
+        yPos += 5;
+      });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('This is an automatically generated report from SAKKHI', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      
+      doc.save(`Sakkhi_Payments_Ledger_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('PDF Downloaded Successfully', 'success');
+    }
+
+    function downloadShootsListPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      let yPos = 20;
+
+      // Header
+      doc.setFontSize(24);
+      doc.setTextColor(201, 169, 110);
+      doc.text('SAKKHI', pageWidth / 2, yPos, { align: 'center' });
+      
+      doc.setFontSize(10);
+      doc.setTextColor(120, 120, 120);
+      doc.text('by Jashwanth JP', pageWidth / 2, yPos + 8, { align: 'center' });
+      
+      yPos += 20;
+      
+      // Date
+      doc.setFontSize(9);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Generated: ${new Date().toLocaleDateString('en-IN')}`, 20, yPos);
+      
+      yPos += 12;
+      
+      // Summary Section
+      doc.setFontSize(14);
+      doc.setTextColor(50, 50, 50);
+      doc.text('Shoots List', 20, yPos);
+      
+      yPos += 10;
+      
+      doc.setFontSize(10);
+      doc.setTextColor(80, 80, 80);
+      const td = today();
+      const upcomingShoots = _shoots.filter(s => s.date >= td).length;
+      const completedShoots = _shoots.filter(s => s.date < td).length;
+      
+      const summaryData = [
+        ['Total Shoots', _shoots.length.toString()],
+        ['Upcoming Shoots', upcomingShoots.toString()],
+        ['Completed Shoots', completedShoots.toString()]
+      ];
+      
+      summaryData.forEach(row => {
+        doc.text(row[0] + ': ' + row[1], 20, yPos);
+        yPos += 8;
+      });
+      
+      yPos += 8;
+      doc.setDrawColor(200, 200, 200);
+      doc.line(20, yPos, pageWidth - 20, yPos);
+      yPos += 10;
+      
+      // Group by months
+      const grouped = {};
+      _shoots.forEach(s => {
+        const monthKey = s.date.slice(0, 7);
+        if (!grouped[monthKey]) grouped[monthKey] = [];
+        grouped[monthKey].push(s);
+      });
+
+      doc.setFontSize(11);
+      doc.setTextColor(50, 50, 50);
+      
+      const sortedMonths = Object.keys(grouped).sort().reverse();
+      sortedMonths.forEach(monthKey => {
+        if (yPos > pageHeight - 40) {
+          doc.addPage();
+          yPos = 20;
+        }
+        
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        
+        doc.setFont(undefined, 'bold');
+        doc.text(`${monthName} ${year} - ${shoots.length} shoots`, 20, yPos);
+        doc.setFont(undefined, 'normal');
+        
+        yPos += 8;
+        
+        shoots.forEach(s => {
+          if (yPos > pageHeight - 20) {
+            doc.addPage();
+            yPos = 20;
+          }
+          
+          doc.setFontSize(9);
+          doc.setTextColor(80, 80, 80);
+          doc.text(`${s.date} | ${s.name}`, 25, yPos);
+          doc.text(`Event: ${s.event} | Location: ${s.location || 'N/A'} | Company: ${s.company || 'N/A'}`, 25, yPos + 5);
+          if (s.amount) {
+            const status = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Unknown';
+            doc.text(`Amount: ₹${Number(s.amount).toLocaleString('en-IN')} (${status})`, 25, yPos + 10);
+            yPos += 15;
+          } else {
+            yPos += 10;
+          }
+        });
+        
+        yPos += 5;
+      });
+      
+      // Footer
+      doc.setFontSize(8);
+      doc.setTextColor(150, 150, 150);
+      doc.text('This is an automatically generated report from SAKKHI', pageWidth / 2, pageHeight - 10, { align: 'center' });
+      
+      doc.save(`Sakkhi_Shoots_List_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('PDF Downloaded Successfully', 'success');
     }
 
     loadAll();
