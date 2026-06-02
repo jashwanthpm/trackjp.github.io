@@ -949,10 +949,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
       const panel = document.getElementById('cal-day-panel');
-      if (!contextualShoots.length) {
-        panel.classList.add('hidden');
-        return;
-      }
+      
       panel.classList.remove('hidden');
 
       const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -965,7 +962,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           </div>`;
 
       if (!contextualShoots.length) {
-        interiorHtml += `<p class="text-xs text-neutral-600 py-2">No shoots planned for this day.</p>`;
+        interiorHtml += `<p class="text-xs text-neutral-600 py-4 text-center">No shoots scheduled for this day.</p>`;
       } else {
         interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
       }
