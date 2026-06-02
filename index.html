@@ -8,7 +8,7 @@
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght=500;700&family=Plus+Jakarta+Sans:wght=300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
@@ -145,8 +145,8 @@
         <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+        <div class="sm:col-span-2 flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
         </div>
@@ -154,15 +154,10 @@
           <option value="">All Companies</option>
         </select>
         <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-status" onchange="renderPaymentsList()">
-          <option value="">All Payment Status</option>
-          <option value="pending">Pending Payment</option>
-          <option value="part">Partial Payment</option>
-          <option value="done">Settled Payment</option>
-        </select>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-expenses" onchange="renderPaymentsList()">
-          <option value="">All Expenses</option>
-          <option value="pending">Pending Expenses</option>
-          <option value="settled">Settled Expenses</option>
+          <option value="">All Statuses</option>
+          <option value="pending">Pending</option>
+          <option value="part">Partial</option>
+          <option value="done">Settled</option>
         </select>
       </div>
       <div class="space-y-2" id="payments-list"></div>
@@ -242,32 +237,29 @@
               <option value="Pellikoduku">Pellikoduku</option>
               <option value="Pellikuthuru">Pellikuthuru</option>
               <option value="House Warming">House Warming</option>
-              <option value="Other">Other</option>
+              <option value="Other">Other (Specify Below)</option>
             </select>
           </div>
-          <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
-            <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
             <select id="f-shoot-session" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="Morning Session">Morning Session</option>
-              <option value="Afternoon Session">Afternoon Session</option>
               <option value="Evening Session">Evening Session</option>
               <option value="Full Day">Full Day</option>
             </select>
           </div>
+        </div>
+
+        <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Event Name</label>
+          <input type="text" id="f-shoot-event-other" placeholder="e.g., Pre-Wedding Shoot" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
             <select id="f-shoot-loc" onchange="handleLocOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
           </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
             <select id="f-shoot-company" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
@@ -289,17 +281,7 @@
             <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
           </div>
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expense Status</label>
-            <select id="f-shoot-expense-status" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50">
-              <option value="pending">Pending</option>
-              <option value="settled">Settled</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Status</label>
             <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
               <option value="pending">Pending</option>
               <option value="part">Partial</option>
@@ -366,105 +348,352 @@
 
   <script>
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzI3OTE4NzgsImV4cCI6MjA0ODM2Nzg3OH0.pYKH0qE-7ydqkjTzHSqnhECy7HO7H_NYfCqKPU-DWHA';
-    const TABLE_NAME = 'shoots';
-    const SETTINGS_TABLE = 'settings';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+
+    const HEADERS = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    };
+
+    async function sbFetch(path, opts = {}) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        ...opts,
+        headers: { ...HEADERS, ...(opts.headers || {}) }
+      });
+      if (!res.ok) {
+        const err = await res.text();
+        throw new Error(err);
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
+    }
+
+    const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
+    const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
+    const EVENT_COLORS = { 'Wedding':'#c9a96e','Reception':'#4a9eff','Sangeet':'#a855f7','Haldi':'#f59e0b','Pellikoduku':'#14b8a6','Pellikuthuru':'#ec4899','House Warming':'#0ea5e9','Other':'#6b7280' };
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
-    const DEFAULT_LOCS = ['Hyderabad', 'Vijayawada, Visakhapatnam'];
-    
+
     let _shoots = [];
-    let _companies = [];
+    let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
-    let _privacyModeActive = false;
     let _analyticsChartInstance = null;
-    let calYear = new Date().getFullYear();
-    let calMonth = new Date().getMonth();
-    let calSelected = today();
+    let _privacyModeActive = true; 
 
-    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function uid() { return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
-    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
-    function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
+    function setSyncStatus(state, label) {
+      const dot = document.getElementById('sync-dot');
+      const lbl = document.getElementById('sync-label');
+      if (dot) {
+        dot.className = "w-2 h-2 rounded-full transition-colors duration-300 " + 
+          (state === 'syncing' ? 'bg-amber-500 animate-pulse' : state === 'synced' ? 'bg-emerald-500' : 'bg-red-500');
+      }
+      if (lbl) lbl.textContent = label;
+    }
 
-    async function loadAll() {
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      if (!c) return;
+      const t = document.createElement('div');
+      t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
+      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
+      c.appendChild(t);
+      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+    }
+
+    async function ensureTables() {
       try {
-        const [shRes, setRes] = await Promise.all([
-          fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-          }),
-          fetch(`${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}`, {
-            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-          })
-        ]);
-
-        if (shRes.ok) { _shoots = await shRes.json(); }
-        if (setRes.ok) {
-          const settings = await setRes.json();
-          settings.forEach(s => {
-            if (s.key === 'companies' && s.value) _companies = s.value;
-            if (s.key === 'locations' && s.value) _locs = s.value;
-          });
-        }
-
-        document.getElementById('loading-screen').classList.add('hidden');
-        renderDashboard();
-        updateSyncStatus(true);
+        await sbFetch('shoots?limit=1');
+        return true;
       } catch (e) {
-        console.error('Load error:', e);
-        document.getElementById('loading-screen').classList.add('hidden');
-        updateSyncStatus(false);
+        if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
+          setSyncStatus('error', 'Schema Needed');
+          injectCloudTables();
+          return false;
+        }
+        throw e;
       }
     }
 
-    async function saveShootToDB(record) {
-      const existing = _shoots.find(s => s.id === record.id);
-      const method = existing ? 'PATCH' : 'POST';
-      const url = existing ? `${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${record.id}` : `${SUPABASE_URL}/rest/v1/${TABLE_NAME}`;
-      
-      await fetch(url, {
-        method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json', 'Prefer': 'return=representation' },
-        body: JSON.stringify(record)
-      });
+    function injectCloudTables() {
+      document.getElementById('loading-screen').innerHTML = `
+        <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
+          <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Database Setup Protocol</div>
+          <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and run this SQL query block directly:</p>
+          <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
+          <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Check Database Sync Again</button>
+        </div>`;
+    }
 
-      if (existing) {
-        const idx = _shoots.findIndex(s => s.id === record.id);
-        _shoots[idx] = record;
-      } else {
-        _shoots.push(record);
+    function getSqlSetupScript() {
+      return `create table if not exists shoots (
+  id text primary key,
+  name text,
+  date text,
+  event text,
+  session text,
+  location text,
+  company text,
+  notes text,
+  amount numeric default 0,
+  expense numeric default 0,
+  pay_status text default 'pending',
+  part_paid numeric default 0,
+  created timestamptz default now()
+);
+
+create table if not exists settings (
+  key text primary key,
+  value jsonb
+);
+
+alter table shoots enable row level security;
+alter table settings enable row level security;
+create policy "Allow all" on shoots for all using (true) with check (true);
+create policy "Allow all" on settings for all using (true) with check (true);`;
+    }
+
+    function dbToShoot(r) {
+      return {
+        id: r.id,
+        name: r.name || '',
+        date: r.date || '',
+        event: r.event || 'Wedding',
+        session: r.session || 'Morning Session',
+        location: r.location || '',
+        company: r.company || '',
+        notes: r.notes || '',
+        amount: Number(r.amount || 0),
+        expense: Number(r.expense || 0),
+        payStatus: r.pay_status || 'pending',
+        partPaid: Number(r.part_paid || 0),
+        created: r.created
+      };
+    }
+
+    function shootToDb(s) {
+      return {
+        id: s.id,
+        name: s.name,
+        date: s.date,
+        event: s.event,
+        session: s.session,
+        location: s.location,
+        company: s.company,
+        notes: s.notes,
+        amount: s.amount || 0,
+        expense: s.expense || 0,
+        pay_status: s.payStatus || 'pending',
+        part_paid: s.partPaid || 0,
+        created: s.created || new Date().toISOString()
+      };
+    }
+
+    async function loadAll() {
+      setSyncStatus('syncing', 'Connecting');
+      const isConfigured = await ensureTables();
+      if (!isConfigured) return;
+
+      try {
+        const bar = document.getElementById('load-progress');
+        if(bar) bar.style.width = "60%";
+        
+        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        _shoots = raw.map(dbToShoot);
+
+        const configurations = await sbFetch('settings?select=*');
+        const cRow = configurations.find(r => r.key === 'companies');
+        const lRow = configurations.find(r => r.key === 'locations');
+        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
+        _locs = lRow ? lRow.value : [];
+
+        if(bar) bar.style.width = "100%";
+        setTimeout(() => {
+          setSyncStatus('synced', 'Synced with Cloud');
+          document.getElementById('loading-screen').classList.add('hidden');
+          applyPrivacyUIVisibility();
+          renderDashboard();
+        }, 400);
+
+      } catch (e) {
+        setSyncStatus('error', 'Sync Lost');
+        showToast('Load Error: ' + e.message, 'error');
+        document.getElementById('loading-screen').classList.add('hidden');
+      }
+    }
+
+    async function saveShootToDB(shoot) {
+      setSyncStatus('syncing', 'Saving Record...');
+      try {
+        const existing = _shoots.find(s => s.id === shoot.id);
+        if (existing) {
+          await sbFetch(`shoots?id=eq.${shoot.id}`, {
+            method: 'PATCH',
+            body: JSON.stringify(shootToDb(shoot))
+          });
+          const idx = _shoots.findIndex(s => s.id === shoot.id);
+          if (idx >= 0) _shoots[idx] = shoot;
+        } else {
+          await sbFetch('shoots', {
+            method: 'POST',
+            body: JSON.stringify(shootToDb(shoot))
+          });
+          _shoots.push(shoot);
+        }
+        setSyncStatus('synced', 'Saved Successfully');
+        showToast('Shoot record saved successfully');
+      } catch (e) {
+        setSyncStatus('error', 'Save Failed');
+        showToast('Push Error: ' + e.message, 'error');
+        throw e;
       }
     }
 
     async function deleteShootFromDB(id) {
-      await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}?id=eq.${id}`, {
-        method: 'DELETE',
-        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-      });
-      _shoots = _shoots.filter(s => s.id !== id);
+      setSyncStatus('syncing', 'Deleting...');
+      try {
+        await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
+        _shoots = _shoots.filter(s => s.id !== id);
+        setSyncStatus('synced', 'Deleted');
+        showToast('Shoot registry data deleted cleanly');
+      } catch (e) {
+        setSyncStatus('error', 'Delete Failed');
+        showToast('Delete Error: ' + e.message, 'error');
+        throw e;
+      }
     }
 
     async function saveSettingToDB(key, value) {
-      const existing = { companies: 'companies', locations: 'locations' }[key];
-      const payload = { key, value };
-      const method = existing ? 'PATCH' : 'POST';
-      const url = existing ? `${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}?key=eq.${key}` : `${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}`;
-      
-      await fetch(url, {
-        method, headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}`, 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
+      setSyncStatus('syncing', 'Updating...');
+      try {
+        await sbFetch(`settings?key=eq.${key}`, { method: 'DELETE' }).catch(() => {});
+        await sbFetch('settings', {
+          method: 'POST',
+          headers: { 'Prefer': 'resolution=merge-duplicates' },
+          body: JSON.stringify({ key, value })
+        });
+        setSyncStatus('synced', 'Updated');
+      } catch (e) {
+        setSyncStatus('error', 'Failed');
+        showToast('Settings error: ' + e.message, 'error');
+      }
     }
 
-    function updateSyncStatus(isConnected) {
-      const status = document.getElementById('sync-status');
-      const dot = document.getElementById('sync-dot');
-      const label = document.getElementById('sync-label');
-      if (isConnected) {
-        dot.className = 'w-2 h-2 rounded-full bg-emerald-600 transition-colors duration-300';
-        label.textContent = 'Synced';
-      } else {
-        dot.className = 'w-2 h-2 rounded-full bg-red-600 transition-colors duration-300';
-        label.textContent = 'Offline';
+    async function forceSync() {
+      setSyncStatus('syncing', 'Refreshing...');
+      try {
+        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        _shoots = raw.map(dbToShoot);
+        const config = await sbFetch('settings?select=*');
+        const cRow = config.find(r => r.key === 'companies');
+        const lRow = config.find(r => r.key === 'locations');
+        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
+        _locs = lRow ? lRow.value : [];
+        setSyncStatus('synced', 'Sync Complete');
+        showToast('All metrics reloaded from Supabase');
+        refreshCurrentView();
+      } catch (e) {
+        setSyncStatus('error', 'Sync Failed');
+        showToast('Sync error: ' + e.message, 'error');
       }
+    }
+
+    function togglePrivacyMode() {
+      if (_privacyModeActive) {
+        openPrivacyPrompt();
+      } else {
+        _privacyModeActive = true;
+        applyPrivacyUIVisibility();
+        showToast('Ledger amounts hidden');
+      }
+    }
+
+    function openPrivacyPrompt() {
+      const modal = document.getElementById('privacy-prompt-backdrop');
+      document.getElementById('privacy-pass-input').value = '';
+      document.getElementById('privacy-error-lbl').classList.add('hidden');
+      modal.classList.add('opacity-100', 'pointer-events-auto');
+      document.getElementById('privacy-pass-input').focus();
+    }
+
+    function closePrivacyPrompt() {
+      document.getElementById('privacy-prompt-backdrop').classList.remove('opacity-100', 'pointer-events-auto');
+    }
+
+    function verifyPrivacyPassword() {
+      const pin = document.getElementById('privacy-pass-input').value;
+      if (pin === "JP@22") { 
+        _privacyModeActive = false;
+        closePrivacyPrompt();
+        applyPrivacyUIVisibility();
+        showToast('Amounts unlocked');
+      } else {
+        const lbl = document.getElementById('privacy-error-lbl');
+        lbl.classList.remove('hidden');
+      }
+    }
+
+    function applyPrivacyUIVisibility() {
+      const btn = document.getElementById('privacy-toggle-btn');
+      const icon = document.getElementById('privacy-icon');
+      
+      if (!btn || !icon) return;
+
+      if (_privacyModeActive) {
+        btn.className = "flex items-center justify-center p-2 rounded-lg border border-red-950 bg-red-950/20 text-red-400 hover:border-red-500 transition shadow-inner";
+        icon.className = "ti ti-lock-square text-lg";
+        document.querySelectorAll('.privacy-target').forEach(el => el.classList.add('blur-financial'));
+      } else {
+        btn.className = "flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-emerald-400 hover:text-emerald-300 hover:border-emerald-500/50 transition";
+        icon.className = "ti ti-lock-square-open text-lg";
+        document.querySelectorAll('.privacy-target').forEach(el => el.classList.remove('blur-financial'));
+      }
+    }
+
+    function buildWhatsAppActionLink(s) {
+      const d = s.date ? new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : 'Pending Confirmation';
+      const template = `Hi ${s.name || 'Client'},\n\nThis is Jashwanth JP. Just confirming our schedule for the ${s.event || 'scheduled'} shoot on ${d} at ${s.location || 'noted location'}.\n\nLooking forward to working with you!`;
+      return `https://wa.me/?text=${encodeURIComponent(template)}`;
+    }
+
+    function triggerRowWhatsApp(id, e) {
+      if (e) e.stopPropagation(); 
+      const s = _shoots.find(x => x.id === id);
+      if (s) window.open(buildWhatsAppActionLink(s), '_blank');
+    }
+
+    function triggerModalWhatsApp() {
+      const id = document.getElementById('edit-shoot-id').value;
+      if (!id) return;
+      
+      let event = document.getElementById('f-shoot-event').value;
+      if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
+      
+      let location = document.getElementById('f-shoot-loc').value;
+      if (location === '__other__') location = document.getElementById('f-shoot-loc-other').value.trim();
+
+      const contextData = {
+        name: document.getElementById('f-shoot-name').value.trim(),
+        date: document.getElementById('f-shoot-date').value,
+        event: event,
+        location: location
+      };
+      window.open(buildWhatsAppActionLink(contextData), '_blank');
+    }
+
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
+    function today() { return new Date().toISOString().slice(0, 10); }
+    function fmtDate(d) {
+      if (!d) return '';
+      return new Date(d + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' });
+    }
+    function fmtAmt(n) { return '₹' + Number(n || 0).toLocaleString('en-IN'); }
+    function getEventConfig(ev) { return { color: EVENT_COLORS[ev] || '#6b7280' }; }
+    
+    function ddMmm(d) {
+      if (!d) return { dd: '', mmm: '' };
+      const dt = new Date(d + 'T00:00:00');
+      return { dd: dt.getDate(), mmm: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][dt.getMonth()] };
     }
 
     function switchTab(tab) {
@@ -575,8 +804,6 @@
       }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
 
       const stateLabel = { 'pending':'Pending','part':'Partial','done':'Settled' }[s.payStatus] || 'Unknown';
-      const expenseStatusBadge = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
-      const expenseStatusLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
 
       return `
         <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
@@ -593,11 +820,11 @@
             </div>
           </div>
 
-          <div class="flex items-center gap-2 flex-shrink-0">
+          <div class="flex items-center gap-4 flex-shrink-0">
             <span class="hidden sm:inline-block text-[10px] px-2 py-0.5 font-semibold rounded-md ${badgeStyles}">${s.event}</span>
             
             ${s.amount ? `
-              <div class="text-right min-w-[90px]">
+              <div class="text-right min-w-[70px]">
                 <div class="text-xs font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
                 ${s.expense ? `<div class="text-[9px] text-amber-500 privacy-target">Exp: ${fmtAmt(s.expense)}</div>` : ''}
                 <div class="mt-1"><span class="text-[9px] px-1.5 py-0.2 font-medium rounded ${stateBadge}">${stateLabel}</span></div>
@@ -671,47 +898,85 @@
             tooltip: {
               enabled: !_privacyModeActive, 
               callbacks: {
-                label: ctx => `${ctx.dataset.label}: ₹${ctx.parsed.y.toLocaleString('en-IN')}`
+                label: function(context) { return ` ${context.dataset.label}: ₹${context.raw.toLocaleString()}`; }
               }
             }
           },
           scales: {
-            y: { beginAtZero: true, ticks: { callback: val => '₹' + (val / 100000).toFixed(0) + 'L' } }
+            x: { grid: { display: false }, ticks: { color: '#666', font: { size: 9 } } },
+            y: { grid: { color: '#141414' }, ticks: { display: false } }
           }
         }
       });
     }
 
+    let calYear = new Date().getFullYear();
+    let calMonth = new Date().getMonth();
+    let calSelected = null;
+
     function renderCalendar() {
-      const monthLabel = MONTHS[calMonth] + ' ' + calYear;
-      document.getElementById('cal-month-label').textContent = monthLabel;
-
-      const firstDay = new Date(calYear, calMonth, 1);
+      document.getElementById('cal-month-label').textContent = `${MONTHS[calMonth]} ${calYear}`;
+      const firstDayIdx = new Date(calYear, calMonth, 1).getDay();
       const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const startingDayOfWeek = firstDay.getDay();
+      const daysInPrev = new Date(calYear, calMonth, 0).getDate();
 
-      const grid = document.getElementById('cal-grid');
-      let html = '<div class="text-center text-xs font-bold text-neutral-500 py-1">SUN</div><div class="text-center text-xs font-bold text-neutral-500 py-1">MON</div><div class="text-center text-xs font-bold text-neutral-500 py-1">TUE</div><div class="text-center text-xs font-bold text-neutral-500 py-1">WED</div><div class="text-center text-xs font-bold text-neutral-500 py-1">THU</div><div class="text-center text-xs font-bold text-neutral-500 py-1">FRI</div><div class="text-center text-xs font-bold text-neutral-500 py-1">SAT</div>';
+      const daysOfWeekHeader = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+      let html = daysOfWeekHeader.map(d => `<div class="text-center text-[10px] font-bold text-neutral-600 uppercase py-1 tracking-wider">${d}</div>`).join('');
 
-      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
+      const mappedDates = {};
+      _shoots.forEach(s => {
+        if (!s.date) return;
+        if (!mappedDates[s.date]) mappedDates[s.date] = [];
+        mappedDates[s.date].push(s);
+      });
 
+      let gridCells = [];
+      for (let i = 0; i < firstDayIdx; i++) {
+        gridCells.push({ day: daysInPrev - firstDayIdx + 1 + i, otherMonth: true, offset: -1 });
+      }
       for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
-        const isSelected = dateStr === calSelected ? 'bg-[#c9a96e] text-black font-bold' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
-        html += `<div onclick="calSelectDate('${dateStr}')" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
+        gridCells.push({ day: d, otherMonth: false, offset: 0 });
+      }
+      const extendedBoundsCount = 42 - gridCells.length;
+      for (let d = 1; d <= extendedBoundsCount; d++) {
+        gridCells.push({ day: d, otherMonth: true, offset: 1 });
       }
 
-      grid.innerHTML = html;
+      gridCells.forEach(cell => {
+        let yr = calYear;
+        let mo = calMonth + cell.offset;
+        if (mo < 0) { mo = 11; yr--; }
+        if (mo > 11) { mo = 0; yr++; }
+        
+        const dateStr = `${yr}-${String(mo + 1).padStart(2, '0')}-${String(cell.day).padStart(2, '0')}`;
+        const isCurrentActiveDay = dateStr === today();
+        const isSelectedDay = dateStr === calSelected;
+        const dayAssignments = mappedDates[dateStr] || [];
 
-      const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
+        let nodeIndicators = dayAssignments.map(s => `<span class="w-1.5 h-1.5 rounded-full" style="background:${getEventConfig(s.event).color}"></span>`).join('');
+
+        html += `
+          <div onclick="selectCalDay('${dateStr}')" class="min-h-[64px] bg-[#0f0f0f] border border-neutral-900/50 p-1.5 flex flex-col justify-between rounded-lg cursor-pointer hover:border-[#c9a96e] transition ${cell.otherMonth ? 'opacity-25' : ''} ${isCurrentActiveDay ? 'border-amber-500/80 bg-amber-500/[0.02]' : ''} ${isSelectedDay ? 'border-[#c9a96e] bg-neutral-900' : ''}">
+            <span class="text-xs font-semibold ${isCurrentActiveDay ? 'text-amber-400 font-bold' : 'text-neutral-400'}">${cell.day}</span>
+            <div class="flex flex-wrap gap-0.5">${nodeIndicators}</div>
+          </div>`;
+      });
+
+      document.getElementById('cal-grid').innerHTML = html;
+      renderCalDayPanel();
+    }
+
+    function selectCalDay(dateStr) {
+      calSelected = calSelected === dateStr ? null : dateStr;
+      renderCalendar();
+    }
+
+    function renderCalDayPanel() {
       const panel = document.getElementById('cal-day-panel');
-      if (!contextualShoots.length) {
-        panel.classList.add('hidden');
-        return;
-      }
-      panel.classList.remove('hidden');
+      if (!calSelected) { panel.classList.add('hidden'); return; }
 
+      panel.classList.remove('hidden');
+      const contextualShoots = _shoots.filter(s => s.date === calSelected);
       const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
 
       let interiorHtml = `
@@ -731,7 +996,6 @@
       applyPrivacyUIVisibility();
     }
 
-    function calSelectDate(date) { calSelected = date; renderCalendar(); }
     function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
     function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
     function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
@@ -789,9 +1053,7 @@
     function renderPayments() {
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
-      const expensesPending = expenses - expensesSettled;
+      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0); 
       const outstanding = gross - captured;
 
       document.getElementById('pay-stats').innerHTML = `
@@ -804,34 +1066,46 @@
           <div class="text-xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Expenses Received</div>
-          <div class="text-xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(expensesSettled)}</div>
+          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Received Amount</div>
+          <div class="text-xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
         </div>
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Expenses Pending</div>
-          <div class="text-xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(expensesPending)}</div>
+          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Due Amount</div>
+          <div class="text-xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
         </div>`;
 
       renderPaymentsList();
     }
 
-    function renderPaymentsList() {
+    
+function downloadPaymentsPDF() {
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF();
+  doc.setFontSize(16);
+  doc.text('Payments Ledger - Sakkhi by Jashwanth JP', 10, 15);
+  let y = 30;
+  _shoots.filter(s=>s.amount).forEach((s,i)=>{
+    doc.text(`${i+1}. ${s.name} | ${s.company||'-'} | ₹${s.amount} | ${s.payStatus}`,10,y);
+    y+=8;
+    if(y>280){doc.addPage(); y=20;}
+  });
+  doc.save('Payments-Ledger.pdf');
+}
+
+function renderPaymentsList() {
       const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
       const fs = document.getElementById('pay-filter-status')?.value || '';
       const fc = document.getElementById('pay-filter-company')?.value || '';
-      const fe = document.getElementById('pay-filter-expenses')?.value || '';
 
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       if (q) filtered = filtered.filter(s => s.name.toLowerCase().includes(q));
-      
-      const companyDropdown = document.getElementById('pay-filter-company');
-      if (companyDropdown) {
-        const cur = companyDropdown.value;
-        companyDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cur ? 'selected' : ''}>${c}</option>`).join('');
+      const companyDropdown=document.getElementById('pay-filter-company');
+      if(companyDropdown){
+        const cur=companyDropdown.value;
+        companyDropdown.innerHTML='<option value="">All Companies</option>'+_companies.map(c=>`<option value="${c}" ${c===cur?'selected':''}>${c}</option>`).join('');
       }
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
-      if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
 
       const rootList = document.getElementById('payments-list');
       if (!rootList) return;
@@ -850,9 +1124,6 @@
           'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
         }[s.payStatus];
 
-        const expenseStateStyle = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
-        const expenseStateLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
-
         return `
           <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
             <div class="flex items-center gap-3 min-w-0">
@@ -866,20 +1137,12 @@
               </div>
             </div>
 
-            <div class="flex items-center gap-3 flex-shrink-0">
+            <div class="flex items-center gap-4 flex-shrink-0">
               <div class="text-right">
-                <div class="text-xs font-bold text-neutral-400">Amount</div>
                 <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
+                ${s.payStatus === 'part' ? `<div class="text-[10px] text-emerald-400 font-medium privacy-target">-${fmtAmt(s.partPaid)} rec</div><div class="text-[9px] text-neutral-500 privacy-target">${fmtAmt(remainder)} due</div>` : ''}
                 <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
               </div>
-
-              ${s.expense ? `
-              <div class="text-right">
-                <div class="text-xs font-bold text-amber-400">Expenses</div>
-                <div class="text-sm font-bold text-amber-400 privacy-target">${fmtAmt(s.expense)}</div>
-                <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${expenseStateStyle}">${expenseStateLabel.toUpperCase()}</span></div>
-              </div>
-              ` : ''}
               
               <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
                 <i class="ti ti-brand-whatsapp text-base"></i>
@@ -935,13 +1198,14 @@
       if (!input || input.trim() === _companies[i]) return;
       const original = _companies[i]; _companies[i] = input.trim();
       await saveSettingToDB('companies', _companies);
-      renderSettings(); renderShootsList(); renderPayments();
+      for (let s of _shoots.filter(x => x.company === original)) { s.company = _companies[i]; await saveShootToDB(s); }
+      renderSettings();
     }
 
     async function addLocation() {
       const el = document.getElementById('new-loc-input');
-      const val = el.value.trim(); if (!val) return;
-      _locs.push(val); await saveSettingToDB('locations', _locs);
+      const val = el.value.trim(); if (!val || DEFAULT_LOCS.includes(val)) return;
+      if (!_locs.includes(val)) { _locs.push(val); await saveSettingToDB('locations', _locs); }
       el.value = ''; renderSettings();
     }
     async function deleteLocation(i) {
@@ -950,103 +1214,95 @@
     async function renameLocation(i) {
       const input = prompt('Enter revised location name:', _locs[i]);
       if (!input || input.trim() === _locs[i]) return;
-      _locs[i] = input.trim();
+      const original = _locs[i]; _locs[i] = input.trim();
       await saveSettingToDB('locations', _locs);
-      renderSettings(); renderShootsList();
+      for (let s of _shoots.filter(x => x.location === original)) { s.location = _locs[i]; await saveShootToDB(s); }
+      renderSettings();
     }
 
-    function applyPrivacyUIVisibility() {
-      const targets = document.querySelectorAll('.privacy-target');
-      targets.forEach(t => {
-        if (_privacyModeActive) {
-          t.classList.add('blur-financial');
-        } else {
-          t.classList.remove('blur-financial');
-        }
-      });
+    function confirmClearData() {
+      document.getElementById('confirm-title').textContent = 'Reset Database?';
+      document.getElementById('confirm-sub-text').textContent = 'This action will completely delete all records from the cloud database.';
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = executeTotalClearPurge;
+      openModal('confirm-modal-backdrop');
     }
 
-    function togglePrivacyMode() {
-      _privacyModeActive = !_privacyModeActive;
-      applyPrivacyUIVisibility();
-      const icon = document.getElementById('privacy-icon');
-      icon.className = _privacyModeActive ? 'ti ti-eye text-lg' : 'ti ti-eye-off text-lg';
-    }
-
-    function closePrivacyPrompt() { closeModal('privacy-prompt-backdrop'); }
-    function verifyPrivacyPassword() {
-      const input = document.getElementById('privacy-pass-input').value;
-      const errorLabel = document.getElementById('privacy-error-lbl');
-      if (input === '1234') {
-        _privacyModeActive = false;
-        applyPrivacyUIVisibility();
-        closePrivacyPrompt();
-      } else {
-        errorLabel.classList.remove('hidden');
+    async function executeTotalClearPurge() {
+      closeConfirmModal();
+      setSyncStatus('syncing', 'Resetting database...');
+      try {
+        await sbFetch('shoots?id=neq.___null___', { method: 'DELETE' });
+        await sbFetch('settings?key=neq.___null___', { method: 'DELETE' });
+        _shoots = []; _companies = [...DEFAULT_COMPANIES]; _locs = [];
+        setSyncStatus('synced', 'Database Reset');
+        showToast('All data has been deleted');
+        refreshCurrentView();
+      } catch (e) {
+        setSyncStatus('error', 'Reset Failed');
+        showToast('Error resetting: ' + e.message, 'error');
       }
     }
 
-    function showToast(msg, type = 'info') {
-      const container = document.getElementById('toast-container');
-      const toast = document.createElement('div');
-      const bgClass = type === 'error' ? 'bg-red-900/20 border border-red-900' : type === 'success' ? 'bg-emerald-900/20 border border-emerald-900' : 'bg-neutral-900 border border-neutral-800';
-      const textClass = type === 'error' ? 'text-red-400' : type === 'success' ? 'text-emerald-400' : 'text-neutral-300';
-      
-      toast.innerHTML = `<div class="flex items-center gap-2 px-4 py-3 rounded-lg ${bgClass} ${textClass} text-xs font-medium">${msg}</div>`;
-      container.appendChild(toast);
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    function openAddShootModal(dateStr) {
-      document.getElementById('edit-shoot-id').value = '';
-      document.getElementById('shoot-modal-title').textContent = 'New Shoot';
+    function openAddShootModal(targetDate) {
+      clearModalFields();
+      document.getElementById('shoot-modal-title').textContent = 'Add New Shoot';
       document.getElementById('modal-delete-btn').classList.add('hidden');
       document.getElementById('modal-whatsapp-btn').classList.add('hidden');
-      clearModalFields();
-      if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
+      document.getElementById('f-shoot-date').value = targetDate || today();
+      hydrateModalDropdownObjects();
       openModal('shoot-modal-backdrop');
     }
 
     function openEditShootModal(id) {
       const s = _shoots.find(x => x.id === id); if (!s) return;
-      document.getElementById('edit-shoot-id').value = id;
+      clearModalFields();
       document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
       document.getElementById('modal-delete-btn').classList.remove('hidden');
-      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
+      document.getElementById('modal-delete-btn').className = "flex items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition";
       
-      document.getElementById('f-shoot-name').value = s.name;
-      document.getElementById('f-shoot-date').value = s.date;
+      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
+
+      document.getElementById('edit-shoot-id').value = id;
+      hydrateModalDropdownObjects(s);
+
+      document.getElementById('f-shoot-name').value = s.name || '';
+      document.getElementById('f-shoot-date').value = s.date || '';
       document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
       document.getElementById('f-shoot-notes').value = s.notes || '';
       document.getElementById('f-shoot-amount').value = s.amount || '';
-      document.getElementById('f-shoot-expense').value = s.expense || '';
-      document.getElementById('f-shoot-expense-status').value = s.expenseStatus || 'pending';
+      document.getElementById('f-shoot-expense').value = s.expense || ''; 
       document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
       document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
-      
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && s.event) {
-        if (['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'].includes(s.event)) {
-          eSel.value = s.event;
-          document.getElementById('f-event-other-wrap').classList.add('hidden');
-        } else {
-          eSel.value = 'Other';
-          document.getElementById('f-shoot-event-other').value = s.event;
-          document.getElementById('f-event-other-wrap').classList.remove('hidden');
-        }
-      }
+      document.getElementById('f-part-pay-wrap').style.display = s.payStatus === 'part' ? 'flex' : 'none';
 
+      const explicitTypes = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming','Other'];
+      if (s.event && !explicitTypes.includes(s.event)) {
+        document.getElementById('f-shoot-event').value = 'Other';
+        document.getElementById('f-shoot-event-other').value = s.event;
+        document.getElementById('f-event-other-wrap').classList.remove('hidden');
+      } else {
+        document.getElementById('f-shoot-event').value = s.event || 'Wedding';
+        document.getElementById('f-event-other-wrap').classList.add('hidden');
+      }
+      openModal('shoot-modal-backdrop');
+    }
+
+    function hydrateModalDropdownObjects(s) {
+      const comps = _companies;
+      const locales = [...DEFAULT_LOCS, ..._locs];
+      
       const cSel = document.getElementById('f-shoot-company');
       if (cSel) {
-        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
+        cSel.innerHTML = comps.map(c => `<option value="${c}">${c}</option>`).join('');
         if (s && s.company) cSel.value = s.company;
       }
 
       const lSel = document.getElementById('f-shoot-loc');
       if (lSel) {
-        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
+        lSel.innerHTML = locales.map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
         if (s && s.location) {
-          if ([...DEFAULT_LOCS, ..._locs].includes(s.location)) {
+          if (locales.includes(s.location)) {
             lSel.value = s.location;
             document.getElementById('f-loc-other-wrap').classList.add('hidden');
           } else {
@@ -1056,9 +1312,6 @@
           }
         }
       }
-
-      handlePayStatusChange();
-      openModal('shoot-modal-backdrop');
     }
 
     function clearModalFields() {
@@ -1073,8 +1326,7 @@
       document.getElementById('f-loc-other-wrap').classList.add('hidden');
       document.getElementById('f-shoot-notes').value = '';
       document.getElementById('f-shoot-amount').value = '';
-      document.getElementById('f-shoot-expense').value = '';
-      document.getElementById('f-shoot-expense-status').value = 'pending';
+      document.getElementById('f-shoot-expense').value = ''; 
       document.getElementById('f-shoot-pay-status').value = 'pending';
       document.getElementById('f-shoot-part-paid').value = '';
       document.getElementById('f-part-pay-wrap').style.display = 'none';
@@ -1115,9 +1367,8 @@
       }
 
       const payStatus = document.getElementById('f-shoot-pay-status').value;
-      const expenseStatus = document.getElementById('f-shoot-expense-status').value;
       const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0;
+      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0; 
       const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
 
       const editId = document.getElementById('edit-shoot-id').value;
@@ -1128,7 +1379,7 @@
         location,
         company: document.getElementById('f-shoot-company').value,
         notes: document.getElementById('f-shoot-notes').value.trim(),
-        amount, expense, expenseStatus, payStatus, partPaid,
+        amount, expense, payStatus, partPaid,
         created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString()
       };
 
@@ -1178,40 +1429,6 @@
     }
     function closeShootModal() { closeModal('shoot-modal-backdrop'); }
     function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-
-    function triggerRowWhatsApp(id, event) {
-      event.stopPropagation();
-      const s = _shoots.find(x => x.id === id);
-      if (!s) return;
-      const msg = `Hi, I wanted to check on the shoot details:\n📸 ${s.name}\n📅 ${s.date}\n💰 Amount: ₹${s.amount || '0'}`;
-      const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
-    }
-
-    function triggerModalWhatsApp() {
-      const id = document.getElementById('edit-shoot-id').value;
-      triggerRowWhatsApp(id, { stopPropagation: () => {} });
-    }
-
-    function forceSync() { showToast('Syncing...', 'info'); loadAll(); }
-    function confirmClearData() {
-      _pendingDropTargetId = '__clear_all__';
-      document.getElementById('confirm-title').textContent = 'Clear All Data?';
-      document.getElementById('confirm-sub-text').textContent = 'This will permanently delete all shoots and settings. This cannot be undone.';
-      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
-      document.getElementById('confirm-action-btn').onclick = async function() {
-        try {
-          await fetch(`${SUPABASE_URL}/rest/v1/${TABLE_NAME}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-          await fetch(`${SUPABASE_URL}/rest/v1/${SETTINGS_TABLE}`, { method: 'DELETE', headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` } });
-          _shoots = []; _companies = []; _locs = [];
-          _pendingDropTargetId = null;
-          closeConfirmModal();
-          refreshCurrentView();
-          showToast('All data cleared.', 'success');
-        } catch (e) { showToast('Error clearing data', 'error'); }
-      };
-      openModal('confirm-modal-backdrop');
-    }
 
     function refreshCurrentView() {
       const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
