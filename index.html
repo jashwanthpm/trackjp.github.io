@@ -842,11 +842,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const monthLabel = MONTHS[calMonth] + ' ' + calYear;
       document.getElementById('cal-month-label').textContent = monthLabel;
 
-      // Calculate month stats
-      const firstDayOfMonth = new Date(calYear, calMonth, 1);
-      const lastDayOfMonth = new Date(calYear, calMonth + 1, 0);
-      const monthStart = firstDayOfMonth.toISOString().split('T')[0];
-      const monthEnd = lastDayOfMonth.toISOString().split('T')[0];
+      // Calculate month stats - Fixed to count shoots in the current calendar month
+      const monthStart = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-01';
+      const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
+      const monthEnd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
       
       const shootsThisMonth = _shoots.filter(s => s.date >= monthStart && s.date <= monthEnd);
       const completedThisMonth = shootsThisMonth.filter(s => s.date < today()).length;
