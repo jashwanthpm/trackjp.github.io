@@ -996,6 +996,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const expenseStateStyle = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
         const expenseStateLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
 
+        const badgeStyles = {
+          'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
+          'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
+          'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
+          'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
+          'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
+          'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
+          'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
+        }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
+
         return `
           <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
             <div class="flex items-center gap-3 min-w-0">
@@ -1005,7 +1015,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               </div>
               <div class="min-w-0">
                 <div class="text-sm font-semibold text-white truncate">${s.name}</div>
-                <div class="text-xs text-neutral-500 truncate mt-0.5">${s.company || 'Direct Client'}</div>
+                <div class="flex items-center gap-2 mt-0.5">
+                  <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
+                  <span class="text-xs text-neutral-500 truncate">${s.company || 'Direct Client'}</span>
+                </div>
               </div>
             </div>
 
