@@ -1611,28 +1611,30 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       
       const pageWidth = doc.internal.pageSize.getWidth();
       const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 12;
-      let yPos = margin;
+      const margin = 14;
+      let yPos = 14;
 
       // Dark background
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
 
-      // Header
+      // Header with border
       doc.setFillColor(15, 15, 15);
-      doc.rect(0, 0, pageWidth, 28, 'F');
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(80, 80, 80);
+      doc.line(0, 26, pageWidth, 26);
       
-      doc.setFontSize(22);
+      doc.setFontSize(20);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
-      doc.text('SAKKHI', margin, yPos + 9);
+      doc.text('JASHWANTH JP', margin, yPos + 5);
       
       doc.setFontSize(8);
-      doc.setTextColor(100, 100, 100);
+      doc.setTextColor(120, 120, 120);
       doc.setFont(undefined, 'normal');
-      doc.text('by Jashwanth JP', margin, yPos + 15);
+      doc.text('Professional Photography', margin, yPos + 12);
       
-      yPos = 32;
+      yPos = 34;
       
       // Get current company filter
       const companyFilter = document.getElementById('pay-filter-company')?.value || '';
