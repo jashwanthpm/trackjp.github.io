@@ -1518,9 +1518,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       triggerRowWhatsApp(id, { stopPropagation: () => {} });
     }
 
-    function forceSync() { setSyncStatus('syncing', 'Syncing...');     }
-
-    loadAll(); }
+    function forceSync() { setSyncStatus('syncing', 'Syncing...'); loadAll(); }
     function confirmClearData() {
       _pendingDropTargetId = '__clear_all__';
       document.getElementById('confirm-title').textContent = 'Clear All Data?';
@@ -1607,6 +1605,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('date-picker-dropdown').classList.add('hidden');
     }
 
+
     function downloadCompanyViewPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -1614,98 +1613,71 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
-
-      // Full background
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
-      // Header
       doc.setFillColor(15, 15, 15);
       doc.rect(0, 0, pageWidth, 26, 'F');
       doc.setDrawColor(201, 169, 110);
       doc.setLineWidth(0.5);
       doc.line(0, 26, pageWidth, 26);
-      
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
       doc.text('JASHWANTH JP', margin, yPos + 6);
-      
       yPos = 32;
-      
       const companyFilter = document.getElementById('pay-filter-company')?.value || '';
-      
       if (!companyFilter) {
         doc.setFontSize(10);
         doc.setTextColor(220, 53, 69);
-        doc.text('Please select a company to download', margin, yPos);
+        doc.text('Please select a company', margin, yPos);
         doc.save(`JP_Report_${new Date().toISOString().split('T')[0]}.pdf`);
         showToast('Please select a company', 'error');
         return;
       }
-      
-      // Info
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text('Client Report - ' + companyFilter, margin, yPos);
-      
+      doc.text('Client - ' + companyFilter, margin, yPos);
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(150, 150, 150);
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      
       yPos += 14;
-      
       let filtered = _shoots.filter(s => s.company === companyFilter && s.amount);
-      
       if (filtered.length === 0) {
         doc.setFontSize(10);
         doc.setTextColor(220, 53, 69);
-        doc.text('No records for this company', margin, yPos);
+        doc.text('No data', margin, yPos);
         doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('No data to download', 'error');
+        showToast('No data', 'error');
         return;
       }
-      
       const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
       const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const due = total - received;
-      
-      // Summary boxes
       const boxW = (pageWidth - 2 * margin - 4) / 2;
-      const summaries = [
-        { label: 'TOTAL', value: total, color: [201, 169, 110] },
-        { label: 'DUE', value: due, color: [220, 53, 69] }
-      ];
-      
-      summaries.forEach((s, i) => {
+      [{ label: 'TOTAL', value: total, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }].forEach((s, i) => {
         const x = margin + i * (boxW + 4);
         doc.setFillColor(20, 20, 20);
         doc.rect(x, yPos, boxW, 15, 'F');
         doc.setDrawColor(50, 50, 50);
         doc.rect(x, yPos, boxW, 15);
-        
         doc.setFontSize(7);
         doc.setTextColor(120, 120, 120);
         doc.text(s.label, x + 3, yPos + 4);
-        
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(...s.color);
         doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
       });
-      
       yPos += 20;
-      
       const grouped = {};
       filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(s => {
         const k = s.date.slice(0, 7);
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(s);
       });
-      
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -1713,28 +1685,22 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
-        
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
         doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(201, 169, 110);
         doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        
         doc.setFontSize(7);
         doc.setTextColor(150, 150, 150);
         doc.text('Rs. ' + monthTotal.toLocaleString('en-IN'), pageWidth - margin - 30, yPos + 6);
-        
         yPos += 11;
-        
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -1742,54 +1708,43 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
-          
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
           doc.text(s.event, margin + 3, yPos + 7.5);
-          
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(201, 169, 110);
           doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
-          
           doc.setFontSize(6);
           const statusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus];
           doc.setTextColor(...statusColor);
           const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
           doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
-          
           yPos += 12;
         });
-        
         yPos += 2;
       });
-      
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
       doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text(companyFilter, margin, pageHeight - 3);
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      
       doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Company Report Downloaded', 'success');
+      showToast('Downloaded', 'success');
     }
 
     function downloadFullReportPDF() {
@@ -1799,65 +1754,46 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
-
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
       doc.setFillColor(15, 15, 15);
       doc.rect(0, 0, pageWidth, 26, 'F');
       doc.setDrawColor(201, 169, 110);
       doc.setLineWidth(0.5);
       doc.line(0, 26, pageWidth, 26);
-      
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
       doc.text('JASHWANTH JP', margin, yPos + 6);
-      
       yPos = 32;
-      
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(255, 255, 255);
       doc.text('Full Financial Report', margin, yPos);
-      
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(150, 150, 150);
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      
       yPos += 14;
-      
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const outstanding = gross - captured;
       const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      
-      const stats = [
-        { label: 'TOTAL', value: gross, color: [201, 169, 110] },
-        { label: 'RECEIVED', value: captured, color: [76, 175, 80] },
-        { label: 'DUE', value: outstanding, color: [220, 53, 69] },
-        { label: 'EXPENSES', value: expenses, color: [255, 152, 0] }
-      ];
-      
+      const stats = [{ label: 'TOTAL', value: gross, color: [201, 169, 110] }, { label: 'RECEIVED', value: captured, color: [76, 175, 80] }, { label: 'DUE', value: outstanding, color: [220, 53, 69] }, { label: 'EXPENSES', value: expenses, color: [255, 152, 0] }];
       const boxW = (pageWidth - 2 * margin - 4) / 2;
-      
       for (let i = 0; i < stats.length; i += 2) {
         for (let j = 0; j < 2; j++) {
           if (!stats[i + j]) continue;
           const s = stats[i + j];
           const x = margin + j * (boxW + 4);
-          
           doc.setFillColor(20, 20, 20);
           doc.rect(x, yPos, boxW, 15, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(x, yPos, boxW, 15);
-          
           doc.setFontSize(7);
           doc.setTextColor(120, 120, 120);
           doc.text(s.label, x + 3, yPos + 4);
-          
           doc.setFontSize(10);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(...s.color);
@@ -1865,28 +1801,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         }
         yPos += 17;
       }
-      
       yPos += 2;
-      
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      
-      const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
-      const fs = document.getElementById('pay-filter-status')?.value || '';
-      const fc = document.getElementById('pay-filter-company')?.value || '';
-      const fe = document.getElementById('pay-filter-expenses')?.value || '';
-      
-      if (q) filtered = filtered.filter(s => s.name.toLowerCase().includes(q));
-      if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fs) filtered = filtered.filter(s => s.payStatus === fs);
-      if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
-      
       const grouped = {};
       filtered.forEach(s => {
         const k = s.date.slice(0, 7);
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(s);
       });
-      
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -1894,29 +1816,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
-        
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
         const monthExp = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-        
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
         doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(201, 169, 110);
         doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        
         doc.setFontSize(7);
         doc.setTextColor(150, 150, 150);
         doc.text('Rs. ' + monthTotal.toLocaleString('en-IN') + ' | Exp: Rs. ' + monthExp.toLocaleString('en-IN'), pageWidth - margin - 80, yPos + 6);
-        
         yPos += 11;
-        
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -1924,53 +1840,43 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
-          
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
           doc.text(s.event + ' • ' + (s.company || 'Direct'), margin + 3, yPos + 7.5);
-          
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(201, 169, 110);
-          let rightX = pageWidth - margin - 70;
-          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), rightX, yPos + 3);
-          
+          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 70, yPos + 3);
           if (s.expense) {
             doc.setTextColor(255, 152, 0);
             doc.text('Rs. ' + Number(s.expense).toLocaleString('en-IN'), pageWidth - margin - 25, yPos + 3);
           }
-          
           yPos += 12;
         });
-        
         yPos += 2;
       });
-      
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
       doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Full Report', margin, pageHeight - 3);
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      
       doc.save(`JP_FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Downloaded', 'success');
+    }
 
     function downloadShootsListPDF() {
       const { jsPDF } = window.jspdf;
@@ -1979,85 +1885,54 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
-
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
-
       doc.setFillColor(15, 15, 15);
       doc.rect(0, 0, pageWidth, 26, 'F');
       doc.setDrawColor(201, 169, 110);
       doc.setLineWidth(0.5);
       doc.line(0, 26, pageWidth, 26);
-      
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
       doc.text('JASHWANTH JP', margin, yPos + 6);
-      
       yPos = 32;
-      
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(255, 255, 255);
       doc.text('Shoots List', margin, yPos);
-      
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(150, 150, 150);
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      
       yPos += 14;
-      
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      
-      const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
-      const ft = document.getElementById('filter-timeline')?.value || '';
-      const fc = document.getElementById('filter-company')?.value || '';
-      const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
-      
-      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
-      if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fl) filtered = filtered.filter(s => s.location === fl);
-      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
-      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
-      
       const upcoming = filtered.filter(s => s.date >= td).length;
-      
-      const summaries = [
-        { label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] },
-        { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }
-      ];
-      
+      const stats = [{ label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] }, { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }];
       const boxW = (pageWidth - 2 * margin - 4) / 2;
-      
-      summaries.forEach((s, i) => {
+      stats.forEach((s, i) => {
         const x = margin + i * (boxW + 4);
         doc.setFillColor(20, 20, 20);
         doc.rect(x, yPos, boxW, 15, 'F');
         doc.setDrawColor(50, 50, 50);
         doc.rect(x, yPos, boxW, 15);
-        
         doc.setFontSize(7);
         doc.setTextColor(120, 120, 120);
         doc.text(s.label, x + 3, yPos + 4);
-        
         doc.setFontSize(10);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(...s.color);
         doc.text(s.value, x + 3, yPos + 12);
       });
-      
       yPos += 20;
-      
       const grouped = {};
       filtered.forEach(s => {
         const k = s.date.slice(0, 7);
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(s);
       });
-      
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -2065,27 +1940,21 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
-        
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
-        
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
         doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(201, 169, 110);
         doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        
         doc.setFontSize(7);
         doc.setTextColor(150, 150, 150);
         doc.text(shoots.length + ' shoots', pageWidth - margin - 30, yPos + 6);
-        
         yPos += 11;
-        
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -2093,52 +1962,41 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
-          
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
           doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
-          
           if (s.amount) {
             doc.setFontSize(8);
             doc.setFont(undefined, 'bold');
             doc.setTextColor(201, 169, 110);
             doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
           }
-          
           yPos += 12;
         });
-        
         yPos += 2;
       });
-      
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
       doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Shoots Report', margin, pageHeight - 3);
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      
       doc.save(`JP_Shoots_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Shoots List Downloaded', 'success');
+      showToast('Downloaded', 'success');
     }
-
 
     loadAll();
   </script>
