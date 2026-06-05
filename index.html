@@ -1934,6 +1934,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       yPos += 14;
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       const td = today();
+      
+      // Apply filters
+      const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
+      const ft = document.getElementById('filter-timeline')?.value || '';
+      const fc = document.getElementById('filter-company')?.value || '';
+      const fl = document.getElementById('filter-loc')?.value || '';
+      
+      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
+      if (fc) filtered = filtered.filter(s => s.company === fc);
+      if (fl) filtered = filtered.filter(s => s.location === fl);
+      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
+      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
+      
       const upcoming = filtered.filter(s => s.date >= td).length;
       const stats = [{ label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] }, { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }];
       const boxW = (pageWidth - 2 * margin - 4) / 2;
