@@ -1654,11 +1654,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         return;
       }
       const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const due = total - received;
       const totalExpenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const grossTotal = total + totalExpenses;
+      const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const due = (total + totalExpenses) - received;
       const boxW = (pageWidth - 2 * margin - 8) / 3;
-      [{ label: 'TOTAL', value: total, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }, { label: 'EXPENSES', value: totalExpenses, color: [255, 152, 0] }].forEach((s, i) => {
+      [{ label: 'TOTAL', value: grossTotal, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }, { label: 'EXPENSES', value: totalExpenses, color: [255, 152, 0] }].forEach((s, i) => {
         const x = margin + i * (boxW + 4);
         doc.setFillColor(20, 20, 20);
         doc.rect(x, yPos, boxW, 15, 'F');
@@ -2000,12 +2001,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
           doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
-          if (s.amount) {
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(201, 169, 110);
-            doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
-          }
           let nextY = yPos + 12;
           if (s.notes) {
             doc.setFontSize(6);
