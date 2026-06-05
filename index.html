@@ -74,31 +74,45 @@
     <section id="section-dashboard" class="app-section space-y-6">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-900 pb-4">
         <div>
-          <h2 class="text-xl font-bold tracking-tight text-white">Dashboard</h2>
-          <p id="dash-date" class="text-xs text-neutral-400 mt-0.5"></p>
+          <h2 class="text-2xl font-bold tracking-tight text-white">Dashboard</h2>
+          <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
         </div>
       </div>
 
+      <!-- Stats Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
+      <!-- Main Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-7 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm">
-          <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
-            <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i> Upcoming Shoots
+        <!-- Upcoming Shoots -->
+        <div class="lg:col-span-7 space-y-4">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2.5 mb-4">
+              <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i>
+              <h3 class="text-base font-bold text-white">Upcoming Shoots</h3>
+              <span class="ml-auto text-xs text-neutral-500" id="dash-upcoming-count">0 shoots</span>
+            </div>
+            <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
-          <div class="space-y-2 overflow-y-auto max-h-[420px] pr-1" id="dash-upcoming"></div>
         </div>
-        
-        <div class="lg:col-span-5 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 shadow-sm flex flex-col justify-between">
-          <div>
-            <div class="flex items-center gap-2 text-sm font-semibold text-white mb-4">
-              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i> Payment Status
+
+        <!-- Right Column -->
+        <div class="lg:col-span-5 space-y-4">
+          <!-- Payment Status -->
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2.5 mb-4">
+              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
+              <h3 class="text-base font-bold text-white">Payment Status</h3>
             </div>
             <div id="dash-payments" class="space-y-3"></div>
           </div>
-          <div class="mt-6 pt-4 border-t border-neutral-900">
-            <div class="text-xs font-semibold text-neutral-400 uppercase tracking-wider mb-2">Monthly Trends</div>
-            <div class="relative w-full h-44 bg-neutral-950 rounded-lg p-2 border border-neutral-900">
+
+          <!-- Chart -->
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+            <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+              <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
+            </h3>
+            <div class="relative w-full h-56 bg-neutral-950 rounded-lg border border-neutral-900 p-3">
               <canvas id="revenueAnalyticsChart"></canvas>
             </div>
           </div>
@@ -659,58 +673,108 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const trueOutstanding = totalGross - realizedReceived;
 
+      // Stats Cards with better design
       document.getElementById('dash-stats').innerHTML = `
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Total Amount</div>
-          <div class="text-xl md:text-2xl font-bold tracking-tight text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalGross)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Gross worth of shoots</div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Total Amount</p>
+              <p class="text-xl md:text-2xl font-bold text-[#c9a96e] privacy-target tracking-tight">${fmtAmt(totalGross)}</p>
+              <p class="text-[11px] text-neutral-600 mt-2">Gross worth of shoots</p>
+            </div>
+            <i class="ti ti-cash text-2xl text-[#c9a96e] opacity-20"></i>
+          </div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500/80">Total Expenses</div>
-          <div class="text-xl md:text-2xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(totalExpenses)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Total run costs</div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Expenses</p>
+              <p class="text-xl md:text-2xl font-bold text-orange-500 privacy-target tracking-tight">${fmtAmt(totalExpenses)}</p>
+              <p class="text-[11px] text-neutral-600 mt-2">Total run costs</p>
+            </div>
+            <i class="ti ti-receipt text-2xl text-orange-500 opacity-20"></i>
+          </div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Amount Received</div>
-          <div class="text-xl md:text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(realizedReceived)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Cash in hand</div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p>
+              <p class="text-xl md:text-2xl font-bold text-emerald-400 privacy-target tracking-tight">${fmtAmt(realizedReceived)}</p>
+              <p class="text-[11px] text-neutral-600 mt-2">Cash in hand</p>
+            </div>
+            <i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i>
+          </div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 flex flex-col justify-between">
-          <div class="text-[10px] uppercase font-bold tracking-wider text-red-400">Amount Due</div>
-          <div class="text-xl md:text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(trueOutstanding)}</div>
-          <div class="text-[10px] text-neutral-500 mt-1">Outstanding collections</div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between">
+            <div class="flex-1">
+              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
+              <p class="text-xl md:text-2xl font-bold text-red-400 privacy-target tracking-tight">${fmtAmt(trueOutstanding)}</p>
+              <p class="text-[11px] text-neutral-600 mt-2">Outstanding</p>
+            </div>
+            <i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i>
+          </div>
         </div>`;
 
       const upcoming = shoots.filter(s => s.date >= td).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
+      document.getElementById('dash-upcoming-count').textContent = upcoming.length + ' shoot' + (upcoming.length !== 1 ? 's' : '');
+      
       const ul = document.getElementById('dash-upcoming');
       if (!upcoming.length) {
-        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No pending shoots found.</div>';
+        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No upcoming shoots</div>';
       } else {
-        ul.innerHTML = upcoming.map(s => getShootRowHtmlTemplate(s, true)).join('');
+        ul.innerHTML = upcoming.map(s => {
+          const { dd, mmm } = ddMmm(s.date);
+          return `
+            <div onclick="openEditShootModal('${s.id}')" class="flex items-start gap-3 p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer group">
+              <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0 group-hover:border-neutral-700 transition">
+                <span class="text-sm font-bold text-[#c9a96e] leading-none">${dd}</span>
+                <span class="text-[8px] uppercase text-neutral-500">${mmm}</span>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-sm font-semibold text-white truncate">${s.name}</p>
+                <p class="text-xs text-neutral-500">${s.event} • ${s.location || 'N/A'}</p>
+              </div>
+            </div>
+          `;
+        }).join('');
       }
 
       const verifiedSettledCount = shoots.filter(s => s.payStatus === 'done').length;
       const allocatedTrancheCount = shoots.filter(s => s.payStatus === 'part').length;
       const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending').length;
 
+      const settledPct = totalGross ? (realizedReceived / totalGross * 100).toFixed(0) : 0;
+      const duePct = totalGross ? (trueOutstanding / totalGross * 100).toFixed(0) : 0;
+
       document.getElementById('dash-payments').innerHTML = `
-        <div class="space-y-2 text-xs">
-          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Gross Amount</span>
-            <span class="font-bold text-white privacy-target">${fmtAmt(totalGross)}</span>
+        <div class="space-y-3">
+          <div class="space-y-1.5">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-neutral-400 font-medium">Settled</span>
+              <span class="text-xs font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
+            </div>
+            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
+              <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: ${settledPct}%"></div>
+            </div>
+            <div class="text-[11px] text-neutral-600">${settledPct}% of total</div>
           </div>
-          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Received Amount</span>
-            <span class="font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
+
+          <div class="space-y-1.5 pt-2">
+            <div class="flex items-center justify-between">
+              <span class="text-xs text-neutral-400 font-medium">Due</span>
+              <span class="text-xs font-bold text-red-400 privacy-target">${fmtAmt(trueOutstanding)}</span>
+            </div>
+            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
+              <div class="h-full bg-red-500 rounded-full transition-all" style="width: ${duePct}%"></div>
+            </div>
+            <div class="text-[11px] text-neutral-600">${duePct}% pending</div>
           </div>
-          <div class="flex items-center justify-between p-2 rounded-lg bg-neutral-950 border border-neutral-900">
-            <span class="text-neutral-500">Due Amount</span>
-            <span class="font-bold text-amber-500 privacy-target">${fmtAmt(trueOutstanding)}</span>
-          </div>
-          <div class="flex flex-wrap gap-1.5 pt-2">
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
-            <span class="px-2 py-0.5 rounded text-[10px] font-bold bg-amber-950/40 border border-amber-900/60 text-amber-400">${unliquidatedCount} Pending</span>
+
+          <div class="flex flex-wrap gap-2 pt-3 border-t border-neutral-900">
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400">${unliquidatedCount} Pending</span>
           </div>
         </div>`;
 
