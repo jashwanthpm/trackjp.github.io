@@ -1637,7 +1637,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text('Client - ' + companyFilter, margin, yPos);
+      doc.text('Company - ' + companyFilter, margin, yPos);
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(150, 150, 150);
@@ -1731,7 +1731,21 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.setTextColor(...statusColor);
           const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
           doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
-          yPos += 12;
+          let nextY = yPos + 12;
+          if (s.expense) {
+            doc.setFontSize(7);
+            doc.setTextColor(255, 152, 0);
+            doc.text('Exp: Rs. ' + Number(s.expense).toLocaleString('en-IN'), margin + 3, nextY);
+            nextY += 4;
+          }
+          if (s.notes) {
+            doc.setFontSize(6);
+            doc.setTextColor(150, 150, 150);
+            const noteText = s.notes.substring(0, 50);
+            doc.text('Note: ' + noteText, margin + 3, nextY);
+            nextY += 4;
+          }
+          yPos = nextY;
         });
         yPos += 2;
       });
@@ -1862,7 +1876,15 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.setTextColor(255, 152, 0);
             doc.text('Rs. ' + Number(s.expense).toLocaleString('en-IN'), pageWidth - margin - 25, yPos + 3);
           }
-          yPos += 12;
+          let nextY = yPos + 12;
+          if (s.notes) {
+            doc.setFontSize(6);
+            doc.setTextColor(150, 150, 150);
+            const noteText = s.notes.substring(0, 50);
+            doc.text('Note: ' + noteText, margin + 3, nextY);
+            nextY += 4;
+          }
+          yPos = nextY;
         });
         yPos += 2;
       });
@@ -1982,7 +2004,15 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.setTextColor(201, 169, 110);
             doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
           }
-          yPos += 12;
+          let nextY = yPos + 12;
+          if (s.notes) {
+            doc.setFontSize(6);
+            doc.setTextColor(150, 150, 150);
+            const noteText = s.notes.substring(0, 50);
+            doc.text('Note: ' + noteText, margin + 3, nextY);
+            nextY += 4;
+          }
+          yPos = nextY;
         });
         yPos += 2;
       });
