@@ -1517,8 +1517,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const id = document.getElementById('edit-shoot-id').value;
       triggerRowWhatsApp(id, { stopPropagation: () => {} });
     }
-
-    function forceSync() { setSyncStatus('syncing', 'Syncing...'); loadAll(); }
     function confirmClearData() {
       _pendingDropTargetId = '__clear_all__';
       document.getElementById('confirm-title').textContent = 'Clear All Data?';
