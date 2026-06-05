@@ -1969,8 +1969,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
       
       doc.save(`JP_FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Full Report Downloaded', 'success');
-    }
 
     function downloadShootsListPDF() {
       const { jsPDF } = window.jspdf;
@@ -2139,8 +2137,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('Shoots List Downloaded', 'success');
     }
 
-      showToast('Full Report Downloaded', 'success');
-    }
 
     loadAll();
   </script>
