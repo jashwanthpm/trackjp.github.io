@@ -965,125 +965,132 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const monthlyData = {};
       _shoots.forEach(s => {
         if (!s.date) return;
-        const monthKey = s.date.slice(0, 7); 
+        const monthKey = s.date.slice(0, 7);
         if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { gross: 0, expense: 0 };
+          monthlyData[monthKey] = { revenue: 0, expenses: 0 };
         }
-        monthlyData[monthKey].gross += Number(s.amount || 0);
-        monthlyData[monthKey].expense += Number(s.expense || 0);
+        monthlyData[monthKey].revenue += Number(s.amount || 0);
+        monthlyData[monthKey].expenses += Number(s.expense || 0);
       });
 
-      const sortedTimelineKeys = Object.keys(monthlyData).sort();
-      const labels = sortedTimelineKeys.map(k => {
-        const parts = k.split('-');
-        return `${MONTHS[parseInt(parts[1]) - 1].slice(0, 3)}`;
+      const sortedKeys = Object.keys(monthlyData).sort();
+      const labels = sortedKeys.map(k => {
+        const [y, m] = k.split('-');
+        return MONTHS[parseInt(m) - 1].slice(0, 3);
       });
-      
-      const grossDataset = sortedTimelineKeys.map(k => monthlyData[k].gross);
-      const expenseDataset = sortedTimelineKeys.map(k => monthlyData[k].expense);
-
-      const configurationLabels = labels.length ? labels : ["No Data"];
-      const finalGrossDataset = grossDataset.length ? grossDataset : [0];
-      const finalExpenseDataset = expenseDataset.length ? expenseDataset : [0];
+      const revenueData = sortedKeys.map(k => monthlyData[k].revenue);
+      const expenseData = sortedKeys.map(k => monthlyData[k].expenses);
 
       _analyticsChartInstance = new Chart(ctx, {
         type: 'bar',
         data: {
-          labels: configurationLabels,
+          labels: labels.length ? labels : ['No Data'],
           datasets: [
             {
               label: 'Revenue',
-              data: finalGrossDataset,
-              backgroundColor: '#c9a96e',
+              data: revenueData.length ? revenueData : [0],
+              backgroundColor: ['#c9a96e'],
               borderColor: '#c9a96e',
               borderWidth: 0,
-              borderRadius: 6,
-              borderSkipped: false,
-              barThickness: 'flex',
-              maxBarThickness: 35
+              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+              barThickness: 28,
+              maxBarThickness: 40
             },
             {
               label: 'Expenses',
-              data: finalExpenseDataset,
-              backgroundColor: '#ef4444',
-              borderColor: '#ef4444',
+              data: expenseData.length ? expenseData : [0],
+              backgroundColor: ['#dc2626'],
+              borderColor: '#dc2626',
               borderWidth: 0,
-              borderRadius: 6,
-              borderSkipped: false,
-              barThickness: 'flex',
-              maxBarThickness: 35
+              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
+              barThickness: 28,
+              maxBarThickness: 40
             }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
+          layout: { padding: { top: 30, bottom: 10 } },
           interaction: { intersect: false, mode: 'index' },
           plugins: {
-            legend: { 
-              display: true, 
+            legend: {
+              display: true,
               position: 'top',
-              labels: { 
-                color: '#a0a0a0', 
-                font: { size: 12, weight: '600' },
-                padding: 20,
+              labels: {
+                color: '#a0a0a0',
+                font: { size: 12, weight: '600', family: "'Segoe UI', sans-serif" },
+                padding: 25,
                 usePointStyle: true,
                 pointStyle: 'circle'
               }
             },
             tooltip: {
               enabled: !_privacyModeActive,
-              backgroundColor: 'rgba(15, 15, 15, 0.95)',
+              backgroundColor: 'rgba(20, 20, 20, 0.98)',
               titleColor: '#ffffff',
-              bodyColor: '#e5e7eb',
+              bodyColor: '#e0e0e0',
               borderColor: '#404040',
               borderWidth: 1,
-              padding: 12,
+              padding: 15,
               displayColors: true,
+              cornerRadius: 8,
+              titleFont: { size: 13, weight: 'bold' },
+              bodyFont: { size: 12 },
               callbacks: {
-                label: ctx => `  ${ctx.dataset.label}: Rs. ${Math.floor(ctx.parsed.y).toLocaleString('en-IN')}`
+                label: ctx => {
+                  const val = Math.floor(ctx.parsed.y);
+                  return `  ${ctx.dataset.label}: Rs. ${val.toLocaleString('en-IN')}`;
+                }
               }
             }
           },
           scales: {
-            y: { 
+            y: {
               beginAtZero: true,
-              grid: { 
-                color: 'rgba(100, 100, 100, 0.15)',
-                drawBorder: false
+              grid: {
+                color: 'rgba(100, 100, 100, 0.12)',
+                drawBorder: false,
+                drawTicks: false
               },
-              ticks: { 
+              ticks: {
                 color: '#808080',
                 font: { size: 11, weight: '500' },
-                callback: val => val >= 1000 ? 'Rs. ' + (val / 1000).toFixed(0) + 'K' : 'Rs. ' + val
+                padding: 10,
+                callback: val => val >= 100000 ? 'Rs. ' + (val / 100000).toFixed(1) + 'L' : val >= 1000 ? 'Rs. ' + (val / 1000).toFixed(0) + 'K' : 'Rs. ' + val
               }
             },
             x: {
               grid: { display: false, drawBorder: false },
-              ticks: { 
-                color: '#808080', 
-                font: { size: 11, weight: '500' }
+              ticks: {
+                color: '#808080',
+                font: { size: 11, weight: '500' },
+                padding: 10
               }
             }
           }
         },
         plugins: [{
-          id: 'datalabels',
+          id: 'chartDataLabels',
           afterDatasetsDraw(chart) {
             const { ctx: c } = chart;
-            chart.data.datasets.forEach((dataset, i) => {
-              const meta = chart.getDatasetMeta(i);
+            chart.data.datasets.forEach((dataset, datasetIndex) => {
+              const meta = chart.getDatasetMeta(datasetIndex);
               meta.data.forEach((datapoint, index) => {
                 const { x, y } = datapoint.getProps(['x', 'y']);
                 const value = dataset.data[index];
-                if (value === 0) return;
-                
-                c.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI"';
+                if (value === 0 || value === undefined) return;
+
+                c.save();
+                c.font = 'bold 12px "Segoe UI", sans-serif';
                 c.fillStyle = '#ffffff';
                 c.textAlign = 'center';
                 c.textBaseline = 'bottom';
-                const displayValue = value >= 1000 ? 'Rs. ' + (value / 1000).toFixed(0) + 'K' : 'Rs. ' + value;
-                c.fillText(displayValue, x, y - 8);
+
+                const displayVal = value >= 100000 ? (value / 100000).toFixed(1) + 'L' : value >= 1000 ? (value / 1000).toFixed(0) + 'K' : value;
+                const labelText = 'Rs. ' + displayVal;
+                c.fillText(labelText, x, y - 8);
+                c.restore();
               });
             });
           }
@@ -1312,12 +1319,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         </div>
         <div class="bg-gradient-to-br from-emerald-950 to-emerald-900/30 border border-emerald-900/50 rounded-xl p-4 hover:border-emerald-700 transition lg:col-span-1">
           <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
-          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(received)}</div>
+          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
           <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
         </div>
         <div class="bg-gradient-to-br from-red-950 to-red-900/30 border border-red-900/50 rounded-xl p-4 hover:border-red-700 transition lg:col-span-1">
           <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
-          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(due)}</div>
+          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
           <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
         </div>
         <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition lg:col-span-1">
@@ -1336,119 +1343,67 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
 
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      if (q) filtered = filtered.filter(s => s.name.toLowerCase().includes(q));
-      
-      const companyDropdown = document.getElementById('pay-filter-company');
-      if (companyDropdown) {
-        const cur = companyDropdown.value;
-        companyDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cur ? 'selected' : ''}>${c}</option>`).join('');
-      }
+      if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
       if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
 
       const rootList = document.getElementById('payments-list');
       if (!rootList) return;
+      
       if (!filtered.length) {
-        rootList.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No active ledgers found.</div>';
+        rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found.</div>';
         return;
       }
 
-      // Group by month
       const grouped = {};
       filtered.forEach(s => {
-        const monthKey = s.date.slice(0, 7); // YYYY-MM
+        const monthKey = s.date?.slice(0, 7);
+        if (!monthKey) return;
         if (!grouped[monthKey]) grouped[monthKey] = [];
         grouped[monthKey].push(s);
       });
 
       let html = '';
-      const sortedMonths = Object.keys(grouped).sort().reverse();
-      sortedMonths.forEach(monthKey => {
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1];
-        const monthLabel = `${monthName} ${year}`;
-        
-        // Calculate monthly totals
+        const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        const monthExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
         
-        html += `<div class="mb-6">
-          <div class="flex items-center justify-between gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-            <div class="flex items-center gap-2">
-              <i class="ti ti-calendar text-[#c9a96e]"></i>
-              <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
+        html += `
+          <div class="mb-6">
+            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
+                <span class="text-xs text-neutral-500 privacy-target">${shoots.length} • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
+              </div>
             </div>
-            <div class="flex items-center gap-4 text-xs">
-              <span class="text-neutral-500">${shoots.length} payments</span>
-              <span class="font-semibold text-white privacy-target">₹${monthTotal.toLocaleString('en-IN')}</span>
-              <span class="font-semibold text-amber-400 privacy-target">₹${monthExpenses.toLocaleString('en-IN')}</span>
-            </div>
-          </div>
-          <div class="space-y-2">
-            ${shoots.map(s => {
-              const { dd, mmm } = ddMmm(s.date);
-              const remainder = Number(s.amount || 0) - Number(s.partPaid || 0);
-              
-              const stateStyle = {
-                'pending':'bg-neutral-900 text-neutral-500 border border-neutral-800',
-                'part':'bg-purple-950 text-purple-400 border border-purple-900',
-                'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
-              }[s.payStatus];
-
-              const expenseStateStyle = (s.expenseStatus === 'settled') ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
-              const expenseStateLabel = { 'settled': 'Settled', 'pending': 'Pending' }[s.expenseStatus] || 'Pending';
-
-              const badgeStyles = {
-                'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
-                'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
-                'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
-                'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
-                'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
-                'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
-                'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
-              }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
-
-              return `
-                <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-4">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-11 h-11 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                      <span class="text-base font-bold text-[#c9a96e] leading-none">${dd}</span>
-                      <span class="text-[9px] uppercase tracking-wider text-neutral-500 font-medium mt-0.5">${mmm}</span>
+            <div class="space-y-2">
+              ${shoots.map(s => {
+                const dateObj = new Date(s.date + 'T00:00:00');
+                const dateStr = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                return `
+                  <div class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer" onclick="openEditShootModal('${s.id}')">
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-white">${s.name}</p>
+                      <p class="text-xs text-neutral-500">${dateStr} • ${s.event} ${s.company ? '• ' + s.company : ''}</p>
                     </div>
-                    <div class="min-w-0">
-                      <div class="text-sm font-semibold text-white truncate">${s.name}</div>
-                      <div class="flex items-center gap-2 mt-0.5">
-                        <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                        <span class="text-xs text-neutral-500 truncate">${s.company || 'Direct Client'}</span>
+                    <div class="flex items-center gap-3">
+                      <div class="text-right">
+                        <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
+                        <span class="text-[9px] font-bold px-2 py-0.5 rounded ${s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500'}">${s.payStatus.toUpperCase()}</span>
                       </div>
+                      <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20">
+                        <i class="ti ti-brand-whatsapp"></i>
+                      </button>
                     </div>
                   </div>
-
-                  <div class="flex items-center gap-3 flex-shrink-0">
-                    <div class="text-right">
-                      <div class="text-xs font-bold text-neutral-400">Amount</div>
-                      <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
-                      <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
-                    </div>
-
-                    ${s.expense ? `
-                    <div class="text-right">
-                      <div class="text-xs font-bold text-amber-400">Expenses</div>
-                      <div class="text-sm font-bold text-amber-400 privacy-target">${fmtAmt(s.expense)}</div>
-                      <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${expenseStateStyle}">${expenseStateLabel.toUpperCase()}</span></div>
-                    </div>
-                    ` : ''}
-                    
-                    <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 border border-emerald-950 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
-                      <i class="ti ti-brand-whatsapp text-base"></i>
-                    </button>
-                  </div>
-                </div>`;
-            }).join('')}
+                `;
+              }).join('')}
+            </div>
           </div>
-        </div>`;
+        `;
       });
       
       rootList.innerHTML = html;
