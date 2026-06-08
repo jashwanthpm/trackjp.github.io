@@ -148,6 +148,24 @@
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
         <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
+
+      <!-- Stat Cards -->
+      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+          <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
+          <div class="text-2xl font-bold text-white mt-2" id="stat-total">0</div>
+        </div>
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+          <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Upcoming</div>
+          <div class="text-2xl font-bold text-[#c9a96e] mt-2" id="stat-upcoming">0</div>
+        </div>
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+          <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">Completed</div>
+          <div class="text-2xl font-bold text-emerald-500 mt-2" id="stat-completed">0</div>
+        </div>
+      </div>
+
+      <!-- Filters -->
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
@@ -912,17 +930,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
       }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
 
-      const paymentBadge = {
-        'pending':'bg-neutral-950 text-neutral-400 border border-neutral-800',
-        'part':'bg-purple-950 text-purple-400 border border-purple-900',
-        'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
-      }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
-
-      const paymentLabel = { 'pending':'Pending','part':'Partial','done':'Settled' }[s.payStatus] || 'Unknown';
-
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3">
-          <div class="flex items-center gap-3 min-w-0">
+        <div onclick="openEditShootModal('${s.id}')" class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3 flex-wrap sm:flex-nowrap">
+          <div class="flex items-center gap-3 min-w-0 flex-1">
             <!-- Date Box -->
             <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
@@ -930,28 +940,20 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
             
             <!-- Details -->
-            <div class="min-w-0">
+            <div class="min-w-0 flex-1">
               <div class="text-sm font-semibold text-white">${s.name}</div>
-              <div class="flex items-center gap-2 mt-1">
+              <div class="flex flex-wrap items-center gap-2 mt-1">
                 <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
                 <span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>
-                ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
+                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${s.company}</span>` : ''}
               </div>
             </div>
           </div>
 
-          <!-- Amount & Status -->
-          <div class="flex items-center gap-3 flex-shrink-0">
-            ${s.amount ? `
-              <div class="text-right">
-                <div class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount).toLocaleString('en-IN')}</div>
-                <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadge}">${paymentLabel}</span>
-              </div>` : ''}
-
-            <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
-              <i class="ti ti-brand-whatsapp text-sm"></i>
-            </button>
-          </div>
+          <!-- WhatsApp Button -->
+          <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
+            <i class="ti ti-brand-whatsapp text-sm"></i>
+          </button>
         </div>`;
     }
 
@@ -1243,6 +1245,15 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
 
+      // Calculate stats
+      const totalShoots = _shoots.length;
+      const upcomingShoots = _shoots.filter(s => s.date >= td).length;
+      const completedShoots = _shoots.filter(s => s.date < td).length;
+      
+      document.getElementById('stat-total').textContent = totalShoots;
+      document.getElementById('stat-upcoming').textContent = upcomingShoots;
+      document.getElementById('stat-completed').textContent = completedShoots;
+
       const compDropdown = document.getElementById('filter-company');
       if (compDropdown) {
         const cachedSelection = compDropdown.value;
@@ -1382,26 +1393,43 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
             <div class="space-y-2">
               ${shoots.map(s => {
-                const dateObj = new Date(s.date + 'T00:00:00');
-                const dateStr = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short' });
+                const { dd, mmm } = ddMmm(s.date);
+                const paymentBadgeColor = s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500';
+                const paymentLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
+                const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
+                const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
                 return `
-                  <div class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer" onclick="openEditShootModal('${s.id}')">
-                    <div class="flex-1">
-                      <p class="text-sm font-semibold text-white">${s.name}</p>
-                      <p class="text-xs text-neutral-500">${dateStr} • ${s.event} ${s.company ? '• ' + s.company : ''}</p>
+                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3" onclick="openEditShootModal('${s.id}')">
+                    <div class="flex items-center gap-3 min-w-0 flex-1">
+                      <!-- Date Box -->
+                      <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                        <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
+                        <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+                      </div>
+                      
+                      <!-- Details -->
+                      <div class="min-w-0 flex-1">
+                        <div class="text-sm font-semibold text-white">${s.name}</div>
+                        <div class="flex flex-wrap items-center gap-2 mt-1">
+                          <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${s.event}</span>
+                          ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
+                        </div>
+                      </div>
                     </div>
-                    <div class="flex items-center gap-3">
+
+                    <!-- Amount & Status -->
+                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
                       <div class="text-right">
                         <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] font-bold px-2 py-1 rounded mt-1 inline-block ${s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500'}">${{ 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || s.payStatus.toUpperCase()}</span>
+                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadgeColor}">${paymentLabel}</span>
                       </div>
                       ${s.expense ? `
                       <div class="text-right">
                         <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] font-bold px-2 py-1 rounded mt-1 inline-block ${s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</span>
+                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
                       </div>` : ''}
-                      <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20">
-                        <i class="ti ti-brand-whatsapp"></i>
+                      <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
+                        <i class="ti ti-brand-whatsapp text-sm"></i>
                       </button>
                     </div>
                   </div>
