@@ -118,7 +118,7 @@
           </div>
 
           <!-- Chart -->
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm hidden">
             <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
               <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
             </h3>
@@ -918,50 +918,38 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         'done':'bg-emerald-950 text-emerald-400 border border-emerald-900'
       }[s.payStatus] || 'bg-neutral-950 text-neutral-400 border border-neutral-800';
 
-      const expenseBadge = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400 border border-emerald-900' : 'bg-amber-950 text-amber-400 border border-amber-900';
-      const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
       const paymentLabel = { 'pending':'Pending','part':'Partial','done':'Settled' }[s.payStatus] || 'Unknown';
 
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-4 bg-neutral-950 border border-neutral-900 rounded-xl hover:border-neutral-700 transition cursor-pointer gap-3">
-          <div class="flex items-center gap-4 min-w-0">
-            <!-- Large Date Box -->
-            <div class="w-16 h-16 bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-2xl font-bold text-[#c9a96e] leading-none">${dd}</span>
-              <span class="text-[10px] uppercase tracking-wider text-neutral-400 font-semibold mt-1">${mmm}</span>
+        <div onclick="openEditShootModal('${s.id}')" class="group relative flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3">
+          <div class="flex items-center gap-3 min-w-0">
+            <!-- Date Box -->
+            <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+              <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
+              <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
             </div>
             
             <!-- Details -->
             <div class="min-w-0">
-              <div class="text-base font-bold text-white">${s.name}</div>
-              <div class="text-sm text-neutral-400 mt-1">
-                <span class="text-[10px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                ${s.location ? `<span class="ml-2 text-xs text-neutral-500">${s.location}</span>` : ''}
-                ${s.company ? `<span class="ml-2 text-xs text-neutral-500">${s.company}</span>` : ''}
+              <div class="text-sm font-semibold text-white">${s.name}</div>
+              <div class="flex items-center gap-2 mt-1">
+                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
+                <span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>
+                ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
               </div>
             </div>
           </div>
 
           <!-- Amount & Status -->
-          <div class="flex items-center gap-4 flex-shrink-0">
+          <div class="flex items-center gap-3 flex-shrink-0">
             ${s.amount ? `
               <div class="text-right">
-                <div class="text-lg font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount).toLocaleString('en-IN')}</div>
-                <div class="mt-1 flex gap-1">
-                  <span class="text-[9px] px-2 py-1 font-bold rounded ${paymentBadge}">${paymentLabel}</span>
-                </div>
-              </div>` : ''}
-
-            ${s.expense ? `
-              <div class="text-right">
-                <div class="text-sm font-bold text-amber-500 privacy-target">Exp: Rs. ${Number(s.expense).toLocaleString('en-IN')}</div>
-                <div class="mt-1">
-                  <span class="text-[9px] px-2 py-1 font-bold rounded ${expenseBadge}">${expenseLabel}</span>
-                </div>
+                <div class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount).toLocaleString('en-IN')}</div>
+                <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadge}">${paymentLabel}</span>
               </div>` : ''}
 
             <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
-              <i class="ti ti-brand-whatsapp"></i>
+              <i class="ti ti-brand-whatsapp text-sm"></i>
             </button>
           </div>
         </div>`;
@@ -1405,8 +1393,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                     <div class="flex items-center gap-3">
                       <div class="text-right">
                         <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] font-bold px-2 py-0.5 rounded ${s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500'}">${s.payStatus.toUpperCase()}</span>
+                        <span class="text-[9px] font-bold px-2 py-1 rounded mt-1 inline-block ${s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500'}">${{ 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || s.payStatus.toUpperCase()}</span>
                       </div>
+                      ${s.expense ? `
+                      <div class="text-right">
+                        <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
+                        <span class="text-[9px] font-bold px-2 py-1 rounded mt-1 inline-block ${s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400'}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</span>
+                      </div>` : ''}
                       <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20">
                         <i class="ti ti-brand-whatsapp"></i>
                       </button>
