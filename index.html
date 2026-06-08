@@ -94,6 +94,16 @@
             </div>
             <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
+
+          <!-- Top Companies -->
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+            <div class="flex items-center gap-2.5 mb-4">
+              <i class="ti ti-building text-[#c9a96e] text-lg"></i>
+              <h3 class="text-base font-bold text-white">Top Companies</h3>
+              <button onclick="showAllCompanies()" class="ml-auto text-xs px-2.5 py-1 rounded-lg bg-[#c9a96e]/10 text-[#c9a96e] hover:bg-[#c9a96e]/20 transition border border-[#c9a96e]/30">View All</button>
+            </div>
+            <div class="space-y-2.5" id="dash-top-companies"></div>
+          </div>
         </div>
 
         <!-- Right Column -->
@@ -640,6 +650,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function getDaysPending(shootDate) {
+      const today = new Date();
+      const shootDay = new Date(shootDate + 'T00:00:00');
+      const diffMs = today - shootDay;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return Math.max(0, diffDays);
+    }
+    function getDaysPendingColor(days) {
+      if (days <= 30) return 'text-emerald-400 bg-emerald-950/40';
+      if (days <= 60) return 'text-amber-400 bg-amber-950/40';
+      return 'text-red-400 bg-red-950/40';
+    }
     function uid() { return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
@@ -780,6 +802,101 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       applyPrivacyUIVisibility();
       setTimeout(buildInteractiveRevenueGrowthChart, 50);
+      renderTopCompanies();
+    }
+
+    function renderTopCompanies() {
+      const companyStats = {};
+      _shoots.forEach(s => {
+        const comp = s.company || 'Direct';
+        if (!companyStats[comp]) {
+          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
+        }
+        companyStats[comp].shoots++;
+        companyStats[comp].revenue += Number(s.amount || 0);
+        if (s.payStatus !== 'done') {
+          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+        }
+      });
+
+      const topCompanies = Object.entries(companyStats)
+        .map(([name, data]) => ({ name, ...data }))
+        .sort((a, b) => b.revenue - a.revenue)
+        .slice(0, 5);
+
+      const container = document.getElementById('dash-top-companies');
+      if (!topCompanies.length) {
+        container.innerHTML = '<div class="text-center py-4 text-xs text-neutral-500">No company data</div>';
+        return;
+      }
+
+      container.innerHTML = topCompanies.map((c, i) => `
+        <div class="p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between mb-2">
+            <div class="flex-1">
+              <p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p>
+              <p class="text-xs text-neutral-500">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
+            </div>
+            <div class="text-right">
+              <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
+              <p class="text-xs text-red-400 privacy-target" style="display: ${c.pending > 0 ? 'block' : 'none'}">${fmtAmt(c.pending)} due</p>
+            </div>
+          </div>
+        </div>
+      `).join('');
+
+      applyPrivacyUIVisibility();
+    }
+
+    function showAllCompanies() {
+      const companyStats = {};
+      _shoots.forEach(s => {
+        const comp = s.company || 'Direct';
+        if (!companyStats[comp]) {
+          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
+        }
+        companyStats[comp].shoots++;
+        companyStats[comp].revenue += Number(s.amount || 0);
+        if (s.payStatus !== 'done') {
+          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+        }
+      });
+
+      const allCompanies = Object.entries(companyStats)
+        .map(([name, data]) => ({ name, ...data }))
+        .sort((a, b) => b.revenue - a.revenue);
+
+      const modalContent = `
+        <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onclick="if(event.target === this) this.remove()">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
+            <div class="sticky top-0 bg-[#0f0f0f] border-b border-neutral-900 p-5 flex items-center justify-between">
+              <h2 class="text-xl font-bold text-white">All Companies (${allCompanies.length})</h2>
+              <button onclick="this.closest('.fixed').remove()" class="text-neutral-500 hover:text-white text-2xl">&times;</button>
+            </div>
+            <div class="p-5 space-y-3">
+              ${allCompanies.map((c, i) => `
+                <div class="p-4 bg-neutral-950 border border-neutral-900 rounded-lg">
+                  <div class="flex items-start justify-between mb-2">
+                    <div class="flex-1">
+                      <p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p>
+                      <p class="text-xs text-neutral-500 mt-1">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
+                    </div>
+                    <div class="text-right">
+                      <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
+                      <p class="text-xs text-red-400 privacy-target">${c.pending > 0 ? fmtAmt(c.pending) + ' due' : 'Settled'}</p>
+                    </div>
+                  </div>
+                  <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
+                    <div class="h-full bg-[#c9a96e]" style="width: ${(c.revenue / (allCompanies[0]?.revenue || 1) * 100)}%"></div>
+                  </div>
+                </div>
+              `).join('')}
+            </div>
+          </div>
+        </div>
+      `;
+      document.body.insertAdjacentHTML('beforeend', modalContent);
+      applyPrivacyUIVisibility();
     }
 
     function getShootRowHtmlTemplate(s, isDashboardFrame) {
@@ -1277,6 +1394,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                       <div class="text-xs font-bold text-neutral-400">Amount</div>
                       <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
                       <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
+                    </div>
+
+                    <div class="text-right">
+                      <div class="text-xs font-bold text-neutral-400">Days Pending</div>
+                      <div class="text-sm font-bold ${getDaysPendingColor(getDaysPending(s.date))}">${getDaysPending(s.date)}d</div>
                     </div>
 
                     ${s.expense ? `
