@@ -976,7 +976,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const sortedTimelineKeys = Object.keys(monthlyData).sort();
       const labels = sortedTimelineKeys.map(k => {
         const parts = k.split('-');
-        return `${MONTHS[parseInt(parts[1]) - 1].slice(0, 3)} ${parts[0].slice(2)}`;
+        return `${MONTHS[parseInt(parts[1]) - 1].slice(0, 3)}`;
       });
       
       const grossDataset = sortedTimelineKeys.map(k => monthlyData[k].gross);
@@ -992,53 +992,85 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           labels: configurationLabels,
           datasets: [
             {
-              label: 'Amount',
+              label: 'Revenue',
               data: finalGrossDataset,
               backgroundColor: '#c9a96e',
-              borderRadius: 4
+              borderColor: '#c9a96e',
+              borderWidth: 0,
+              borderRadius: 6,
+              borderSkipped: false,
+              barThickness: 'flex',
+              maxBarThickness: 35
             },
             {
               label: 'Expenses',
               data: finalExpenseDataset,
               backgroundColor: '#ef4444',
-              borderRadius: 4
+              borderColor: '#ef4444',
+              borderWidth: 0,
+              borderRadius: 6,
+              borderSkipped: false,
+              barThickness: 'flex',
+              maxBarThickness: 35
             }
           ]
         },
         options: {
           responsive: true,
           maintainAspectRatio: false,
-          indexAxis: undefined,
+          interaction: { intersect: false, mode: 'index' },
           plugins: {
-            legend: { display: true, labels: { color: '#808080', font: { size: 11 } } },
+            legend: { 
+              display: true, 
+              position: 'top',
+              labels: { 
+                color: '#a0a0a0', 
+                font: { size: 12, weight: '600' },
+                padding: 20,
+                usePointStyle: true,
+                pointStyle: 'circle'
+              }
+            },
             tooltip: {
-              enabled: !_privacyModeActive, 
-              backgroundColor: 'rgba(0,0,0,0.8)',
+              enabled: !_privacyModeActive,
+              backgroundColor: 'rgba(15, 15, 15, 0.95)',
+              titleColor: '#ffffff',
+              bodyColor: '#e5e7eb',
+              borderColor: '#404040',
+              borderWidth: 1,
+              padding: 12,
+              displayColors: true,
               callbacks: {
-                label: ctx => `${ctx.dataset.label}: Rs. ${Math.floor(ctx.parsed.y).toLocaleString('en-IN')}`
+                label: ctx => `  ${ctx.dataset.label}: Rs. ${Math.floor(ctx.parsed.y).toLocaleString('en-IN')}`
               }
             }
           },
           scales: {
             y: { 
-              beginAtZero: true, 
-              grid: { color: 'rgba(100,100,100,0.1)' },
+              beginAtZero: true,
+              grid: { 
+                color: 'rgba(100, 100, 100, 0.15)',
+                drawBorder: false
+              },
               ticks: { 
                 color: '#808080',
-                font: { size: 10 },
-                callback: val => 'Rs. ' + (val / 1000).toFixed(0) + 'K'
+                font: { size: 11, weight: '500' },
+                callback: val => val >= 1000 ? 'Rs. ' + (val / 1000).toFixed(0) + 'K' : 'Rs. ' + val
               }
             },
             x: {
-              grid: { display: false },
-              ticks: { color: '#808080', font: { size: 10 } }
+              grid: { display: false, drawBorder: false },
+              ticks: { 
+                color: '#808080', 
+                font: { size: 11, weight: '500' }
+              }
             }
           }
         },
         plugins: [{
           id: 'datalabels',
           afterDatasetsDraw(chart) {
-            const { ctx: c, chartArea: { top, left, width, height } } = chart;
+            const { ctx: c } = chart;
             chart.data.datasets.forEach((dataset, i) => {
               const meta = chart.getDatasetMeta(i);
               meta.data.forEach((datapoint, index) => {
@@ -1046,11 +1078,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                 const value = dataset.data[index];
                 if (value === 0) return;
                 
-                c.font = 'bold 10px Arial';
+                c.font = 'bold 11px -apple-system, BlinkMacSystemFont, "Segoe UI"';
                 c.fillStyle = '#ffffff';
                 c.textAlign = 'center';
                 c.textBaseline = 'bottom';
-                c.fillText('Rs. ' + Math.floor(value).toLocaleString('en-IN'), x, y - 5);
+                const displayValue = value >= 1000 ? 'Rs. ' + (value / 1000).toFixed(0) + 'K' : 'Rs. ' + value;
+                c.fillText(displayValue, x, y - 8);
               });
             });
           }
@@ -1272,21 +1305,25 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const outstanding = gross - captured;
 
       document.getElementById('pay-stats').innerHTML = `
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider">Total Amount</div>
-          <div class="text-xl font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition lg:col-span-1">
+          <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
+          <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
+          <div class="text-[10px] text-neutral-600 mt-1">All shoots</div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+        <div class="bg-gradient-to-br from-emerald-950 to-emerald-900/30 border border-emerald-900/50 rounded-xl p-4 hover:border-emerald-700 transition lg:col-span-1">
+          <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
+          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(received)}</div>
+          <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
+        </div>
+        <div class="bg-gradient-to-br from-red-950 to-red-900/30 border border-red-900/50 rounded-xl p-4 hover:border-red-700 transition lg:col-span-1">
+          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
+          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(due)}</div>
+          <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
+        </div>
+        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition lg:col-span-1">
           <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
-          <div class="text-xl font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
-        </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-emerald-500 uppercase tracking-wider">Expenses Received</div>
-          <div class="text-xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(expensesSettled)}</div>
-        </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Expenses Pending</div>
-          <div class="text-xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(expensesPending)}</div>
+          <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
+          <div class="text-[10px] text-neutral-600 mt-1">Run costs</div>
         </div>`;
 
       renderPaymentsList();
@@ -1394,11 +1431,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                       <div class="text-xs font-bold text-neutral-400">Amount</div>
                       <div class="text-sm font-bold text-white privacy-target">${fmtAmt(s.amount)}</div>
                       <div class="mt-1"><span class="text-[9px] font-bold px-2 py-0.2 rounded ${stateStyle}">${s.payStatus.toUpperCase()}</span></div>
-                    </div>
-
-                    <div class="text-right">
-                      <div class="text-xs font-bold text-neutral-400">Days Pending</div>
-                      <div class="text-sm font-bold ${getDaysPendingColor(getDaysPending(s.date))}">${getDaysPending(s.date)}d</div>
                     </div>
 
                     ${s.expense ? `
