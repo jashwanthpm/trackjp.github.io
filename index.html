@@ -696,16 +696,20 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     async function saveSettingToDB(key, value) {
       try {
-        const payload = { key, value };
-        try {
+        // 1. Check if the setting already exists in the database
+        const checkExisting = await sbFetch(`settings?key=eq.${key}&select=key`);
+        
+        if (checkExisting && checkExisting.length > 0) {
+          // 2. If it exists, update it (PATCH)
           await sbFetch(`settings?key=eq.${key}`, {
             method: 'PATCH',
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ value })
           });
-        } catch (e) {
+        } else {
+          // 3. If it doesn't exist, create it (POST)
           await sbFetch('settings', {
             method: 'POST',
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ key, value })
           });
         }
       } catch (e) {
