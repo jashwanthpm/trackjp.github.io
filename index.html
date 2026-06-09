@@ -36,32 +36,26 @@
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <body class="min-h-screen pb-24 md:pb-6">
 
-  <!-- Auth Login Overlay -->
   <div id="auth-overlay" class="fixed inset-0 bg-[#050505] z-[9999] flex flex-col items-center justify-center">
     <div class="max-w-md w-full px-6 py-12 text-center">
-      <!-- Logo -->
       <div class="mb-12">
         <h1 class="brand-serif text-4xl font-bold tracking-wider text-[#c9a96e] mb-2">SAKKHI</h1>
         <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 font-light">Photography Management</p>
       </div>
 
-      <!-- Welcome Text -->
       <div class="mb-8">
         <h2 class="text-2xl font-bold text-white mb-2">Welcome Back</h2>
         <p class="text-sm text-neutral-400">Sign in with your Google account to access your studio dashboard</p>
       </div>
 
-      <!-- Google Sign In Button -->
       <button onclick="signInWithGoogle()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 mb-4">
         <i class="ti ti-brand-google text-lg"></i> Continue with Google
       </button>
 
-      <!-- Loading Indicator -->
       <div id="auth-loading" class="hidden">
         <p class="text-xs text-neutral-500">Authenticating...</p>
       </div>
 
-      <!-- Terms -->
       <p class="text-[10px] text-neutral-600 mt-8">By signing in, you agree to our privacy policy</p>
     </div>
   </div>
@@ -109,12 +103,9 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-      <!-- Main Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Upcoming Shoots -->
         <div class="lg:col-span-7 space-y-4">
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
@@ -125,7 +116,6 @@
             <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
 
-          <!-- Top Companies -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-building text-[#c9a96e] text-lg"></i>
@@ -136,9 +126,7 @@
           </div>
         </div>
 
-        <!-- Right Column -->
         <div class="lg:col-span-5 space-y-4">
-          <!-- Payment Status -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
@@ -147,7 +135,6 @@
             <div id="dash-payments" class="space-y-3"></div>
           </div>
 
-          <!-- Chart -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm hidden">
             <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
               <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
@@ -179,7 +166,6 @@
         <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
 
-      <!-- Stat Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
         <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
           <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
@@ -195,7 +181,6 @@
         </div>
       </div>
 
-      <!-- Filters -->
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
@@ -255,7 +240,6 @@
         </button>
       </div>
 
-      <!-- Privacy PIN Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
           <div class="flex items-center gap-2 mb-4">
@@ -274,7 +258,6 @@
           </div>
         </div>
 
-        <!-- Brand & Payment Details -->
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
           <div class="flex items-center gap-2 mb-4">
             <i class="ti ti-briefcase text-[#c9a96e] text-lg"></i>
@@ -302,7 +285,6 @@
         </div>
       </div>
 
-      <!-- WhatsApp Template -->
       <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
         <div class="flex items-center gap-2 mb-4">
           <i class="ti ti-brand-whatsapp text-green-500 text-lg"></i>
@@ -313,7 +295,6 @@
         <button onclick="saveWhatsAppTemplate()" class="mt-3 w-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-2 rounded-lg transition text-sm">Save Template</button>
       </div>
 
-      <!-- Studio Companies & Locations -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
           <div class="flex items-center gap-2 mb-4">
@@ -340,14 +321,12 @@
         </div>
       </div>
 
-      <!-- Data Management & Sync -->
       <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
         <div class="flex items-center gap-2 mb-4">
           <i class="ti ti-database text-[#c9a96e] text-lg"></i>
           <h3 class="text-sm font-bold text-white">Data Management & Cloud Sync</h3>
         </div>
         
-        <!-- Sync Status -->
         <div class="bg-neutral-950 border border-neutral-800 rounded-lg p-4 mb-4">
           <div class="flex items-center justify-between mb-3">
             <span class="text-xs text-neutral-400">Supabase Connection</span>
@@ -359,7 +338,6 @@
           <p id="last-sync-time" class="text-[10px] text-neutral-600">Last synced: Just now</p>
         </div>
 
-        <!-- Action Buttons -->
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
           <button onclick="forceSync()" class="flex items-center justify-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition">
             <i class="ti ti-refresh"></i> Force Sync
@@ -623,22 +601,8 @@
       setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
-    // ====== SUPABASE INITIALIZATION (After all utility functions) ======
-    let supabase;
-    
-    // Wait for Supabase SDK to load
-    if (typeof window.supabase !== 'undefined') {
-      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-    }
-    
-    // Retry if Supabase not loaded yet
-    if (!supabase) {
-      setTimeout(() => {
-        if (typeof window.supabase !== 'undefined') {
-          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-        }
-      }, 100);
-    }
+    // ====== SUPABASE INITIALIZATION ======
+    window.supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
     // ====== AUTHENTICATION FUNCTIONS ======
     async function signInWithGoogle() {
@@ -647,7 +611,7 @@
         const { data, error } = await supabase.auth.signInWithOAuth({
           provider: 'google',
           options: {
-            redirectTo: window.location.origin
+            redirectTo: window.location.href
           }
         });
         if (error) throw error;
@@ -1058,13 +1022,11 @@
       return `
         <div onclick="openEditShootModal('${s.id}')" class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3 flex-wrap sm:flex-nowrap">
           <div class="flex items-center gap-3 min-w-0 flex-1">
-            <!-- Date Box -->
             <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
               <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
             </div>
             
-            <!-- Details -->
             <div class="min-w-0 flex-1">
               <div class="text-sm font-semibold text-white">${s.name}</div>
               <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -1075,7 +1037,6 @@
             </div>
           </div>
 
-          <!-- WhatsApp Button -->
           <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
             <i class="ti ti-brand-whatsapp text-sm"></i>
           </button>
@@ -1526,13 +1487,11 @@
                 return `
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3" onclick="openEditShootModal('${s.id}')">
                     <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <!-- Date Box -->
                       <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                         <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
                         <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
                       </div>
                       
-                      <!-- Details -->
                       <div class="min-w-0 flex-1">
                         <div class="text-sm font-semibold text-white">${s.name}</div>
                         <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -1542,7 +1501,6 @@
                       </div>
                     </div>
 
-                    <!-- Amount & Status -->
                     <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
                       <div class="text-right">
                         <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
