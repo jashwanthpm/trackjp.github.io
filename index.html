@@ -33,10 +33,40 @@
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <body class="min-h-screen pb-24 md:pb-6">
 
-  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
+  <!-- Auth Login Overlay -->
+  <div id="auth-overlay" class="fixed inset-0 bg-[#050505] z-[9999] flex flex-col items-center justify-center">
+    <div class="max-w-md w-full px-6 py-12 text-center">
+      <!-- Logo -->
+      <div class="mb-12">
+        <h1 class="brand-serif text-4xl font-bold tracking-wider text-[#c9a96e] mb-2">SAKKHI</h1>
+        <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 font-light">Photography Management</p>
+      </div>
+
+      <!-- Welcome Text -->
+      <div class="mb-8">
+        <h2 class="text-2xl font-bold text-white mb-2">Welcome Back</h2>
+        <p class="text-sm text-neutral-400">Sign in with your Google account to access your studio dashboard</p>
+      </div>
+
+      <!-- Google Sign In Button -->
+      <button onclick="signInWithGoogle()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold py-3 px-4 rounded-lg transition duration-200 flex items-center justify-center gap-2 mb-4">
+        <i class="ti ti-brand-google text-lg"></i> Continue with Google
+      </button>
+
+      <!-- Loading Indicator -->
+      <div id="auth-loading" class="hidden">
+        <p class="text-xs text-neutral-500">Authenticating...</p>
+      </div>
+
+      <!-- Terms -->
+      <p class="text-[10px] text-neutral-600 mt-8">By signing in, you agree to our privacy policy</p>
+    </div>
+  </div>
+
+  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6 hidden">
     <div class="text-center">
       <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
       <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 mt-1 font-light">by Jashwanth JP</p>
@@ -215,34 +245,131 @@
     </section>
 
     <section id="section-settings" class="app-section hidden space-y-6">
-      <div class="border-b border-neutral-900 pb-3">
-        <h2 class="text-xl font-bold text-white">System Settings</h2>
+      <div class="border-b border-neutral-900 pb-4 flex items-center justify-between">
+        <div>
+          <h2 class="text-2xl font-bold text-white">Account & Settings</h2>
+          <p class="text-xs text-neutral-500 mt-1" id="account-email"></p>
+        </div>
+        <button onclick="signOut()" class="flex items-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-950/40 rounded-lg text-xs font-semibold transition">
+          <i class="ti ti-logout"></i> Sign Out
+        </button>
       </div>
+
+      <!-- Privacy PIN Section -->
       <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="ti ti-lock text-[#c9a96e] text-lg"></i>
+            <h3 class="text-sm font-bold text-white">Financial Privacy PIN</h3>
+          </div>
+          <p class="text-xs text-neutral-500 mb-4">Set a 4-6 digit PIN to control access to sensitive financial data</p>
+          <div id="pin-status" class="bg-neutral-950 border border-neutral-800 rounded-lg p-3 mb-4">
+            <p class="text-xs text-neutral-500 mb-2">Current Status</p>
+            <p id="pin-set-status" class="text-sm font-semibold text-amber-500">No PIN Set</p>
+          </div>
+          <div id="pin-form">
+            <input type="password" id="new-pin" placeholder="Enter new PIN (4-6 digits)" maxlength="6" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e] mb-2" oninput="validatePINInput(this)"/>
+            <input type="password" id="confirm-pin" placeholder="Confirm PIN" maxlength="6" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e] mb-3" oninput="validatePINInput(this)"/>
+            <button onclick="savePIN()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold py-2 rounded-lg transition text-sm">Save PIN</button>
+          </div>
+        </div>
+
+        <!-- Brand & Payment Details -->
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="ti ti-briefcase text-[#c9a96e] text-lg"></i>
+            <h3 class="text-sm font-bold text-white">Business Details</h3>
+          </div>
+          <div class="space-y-3">
+            <div>
+              <label class="text-xs text-neutral-400 block mb-1">Business Name</label>
+              <input type="text" id="business-name" placeholder="e.g., Jashwanth JP Photography" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            </div>
+            <div>
+              <label class="text-xs text-neutral-400 block mb-1">Phone Number</label>
+              <input type="tel" id="phone-number" placeholder="+91 9876543210" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            </div>
+            <div>
+              <label class="text-xs text-neutral-400 block mb-1">Instagram Handle</label>
+              <input type="text" id="instagram-handle" placeholder="@yourinstagram" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            </div>
+            <div>
+              <label class="text-xs text-neutral-400 block mb-1">UPI ID / Bank Details</label>
+              <input type="text" id="upi-id" placeholder="yourname@upi or bank account details" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            </div>
+            <button onclick="saveBusinessDetails()" class="w-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-2 rounded-lg transition text-sm mt-4">Save Details</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- WhatsApp Template -->
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="ti ti-brand-whatsapp text-green-500 text-lg"></i>
+          <h3 class="text-sm font-bold text-white">WhatsApp Message Template</h3>
+        </div>
+        <p class="text-xs text-neutral-500 mb-3">Define your default WhatsApp message. Use [Client Name], [Event], [Date] as placeholders</p>
+        <textarea id="whatsapp-template" placeholder="Hi [Client Name], confirming our [Event] on [Date]..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e] h-24 resize-none"></textarea>
+        <button onclick="saveWhatsAppTemplate()" class="mt-3 w-full bg-neutral-800 hover:bg-neutral-700 text-white font-semibold py-2 rounded-lg transition text-sm">Save Template</button>
+      </div>
+
+      <!-- Studio Companies & Locations -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="ti ti-building text-[#c9a96e] text-lg"></i>
+            <h3 class="text-sm font-bold text-white">Studio Companies</h3>
+          </div>
           <div id="settings-companies" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
-            <input type="text" id="new-company-input" placeholder="New company name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
-            <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+            <input type="text" id="new-company-input" placeholder="New company..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <button onclick="addCompany()" class="bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="flex items-center gap-2 mb-4">
+            <i class="ti ti-map-pin text-[#c9a96e] text-lg"></i>
+            <h3 class="text-sm font-bold text-white">Shoot Locations</h3>
+          </div>
           <div id="settings-locations" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
-            <input type="text" id="new-loc-input" placeholder="New location name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
-            <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+            <input type="text" id="new-loc-input" placeholder="New location..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+            <button onclick="addLocation()" class="bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
+      </div>
 
-        <div class="md:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Cloud Sync Layer</div>
-          <p class="text-xs text-neutral-500 mb-4">Direct sync link with active Supabase server.</p>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync Loop</button>
+      <!-- Data Management & Sync -->
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+        <div class="flex items-center gap-2 mb-4">
+          <i class="ti ti-database text-[#c9a96e] text-lg"></i>
+          <h3 class="text-sm font-bold text-white">Data Management & Cloud Sync</h3>
+        </div>
+        
+        <!-- Sync Status -->
+        <div class="bg-neutral-950 border border-neutral-800 rounded-lg p-4 mb-4">
+          <div class="flex items-center justify-between mb-3">
+            <span class="text-xs text-neutral-400">Supabase Connection</span>
+            <div class="flex items-center gap-2">
+              <span id="sync-status-dot" class="w-2 h-2 rounded-full bg-green-500"></span>
+              <span id="sync-status-text" class="text-xs font-semibold text-green-500">Connected</span>
+            </div>
           </div>
+          <p id="last-sync-time" class="text-[10px] text-neutral-600">Last synced: Just now</p>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <button onclick="forceSync()" class="flex items-center justify-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition">
+            <i class="ti ti-refresh"></i> Force Sync
+          </button>
+          <button onclick="downloadLedgerCSV()" class="flex items-center justify-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition">
+            <i class="ti ti-download"></i> Export CSV
+          </button>
+          <button onclick="clearLocalData()" class="flex items-center justify-center gap-1.5 px-4 py-2 bg-red-950/20 border border-red-900/50 text-red-400 rounded-lg hover:bg-red-950/40 text-xs font-semibold transition">
+            <i class="ti ti-trash"></i> Clear Local
+          </button>
         </div>
       </div>
     </section>
@@ -425,33 +552,14 @@
   <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
+    // ====== CONSTANTS (Must be at top) ======
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
-
-    const HEADERS = {
-      'Content-Type': 'application/json',
-      'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Prefer': 'return=representation'
-    };
-
-    async function sbFetch(path, opts = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        ...opts,
-        headers: { ...HEADERS, ...(opts.headers || {}) }
-      });
-      if (!res.ok) {
-        const err = await res.text();
-        throw new Error(err);
-      }
-      const text = await res.text();
-      return text ? JSON.parse(text) : [];
-    }
-
     const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
     const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+    // Global Variables
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
@@ -459,7 +567,41 @@
     let _privacyModeActive = true;
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
-    let calSelected = today();
+    let calSelected = null; // Will be set by today() function
+    
+    // ====== UTILITY FUNCTIONS ======
+    function today() { 
+      const d = new Date(); 
+      calSelected = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+      return calSelected;
+    }
+    
+    function getDaysPending(shootDate) {
+      const today = new Date();
+      const shootDay = new Date(shootDate + 'T00:00:00');
+      const diffMs = today - shootDay;
+      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+      return Math.max(0, diffDays);
+    }
+    
+    function getDaysPendingColor(days) {
+      if (days <= 30) return 'text-emerald-400 bg-emerald-950/40';
+      if (days <= 60) return 'text-amber-400 bg-amber-950/40';
+      return 'text-red-400 bg-red-950/40';
+    }
+    
+    function uid() { 
+      return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); 
+    }
+    
+    function fmtAmt(n) { 
+      return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; 
+    }
+    
+    function ddMmm(d) { 
+      const dt = new Date(d + 'T00:00:00'); 
+      return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; 
+    }
 
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
@@ -481,208 +623,191 @@
       setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
-    async function ensureTables() {
-      try {
-        await sbFetch('shoots?limit=1');
-        return true;
-      } catch (e) {
-        if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
-          setSyncStatus('error', 'Schema Needed');
-          injectCloudTables();
-          return false;
+    // ====== SUPABASE INITIALIZATION (After all utility functions) ======
+    let supabase;
+    
+    // Wait for Supabase SDK to load
+    if (typeof window.supabase !== 'undefined') {
+      supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+    }
+    
+    // Retry if Supabase not loaded yet
+    if (!supabase) {
+      setTimeout(() => {
+        if (typeof window.supabase !== 'undefined') {
+          supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
         }
-        throw e;
+      }, 100);
+    }
+
+    // ====== AUTHENTICATION FUNCTIONS ======
+    async function signInWithGoogle() {
+      try {
+        document.getElementById('auth-loading').classList.remove('hidden');
+        const { data, error } = await supabase.auth.signInWithOAuth({
+          provider: 'google',
+          options: {
+            redirectTo: window.location.origin
+          }
+        });
+        if (error) throw error;
+      } catch (error) {
+        console.error('Auth error:', error.message);
+        showToast('Authentication failed: ' + error.message, 'error');
+        document.getElementById('auth-loading').classList.add('hidden');
       }
     }
 
-    function injectCloudTables() {
-      document.getElementById('loading-screen').innerHTML = `
-        <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
-          <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Database Setup Protocol</div>
-          <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and run this SQL query block directly:</p>
-          <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
-          <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Check Database Sync Again</button>
-        </div>`;
+    async function signOut() {
+      try {
+        const { error } = await supabase.auth.signOut();
+        if (error) throw error;
+        window.location.reload();
+      } catch (error) {
+        showToast('Sign out failed', 'error');
+      }
     }
 
-    function getSqlSetupScript() {
-      return `create table if not exists shoots (
-  id text primary key,
-  name text,
-  date text,
-  event text,
-  session text,
-  location text,
-  company text,
-  notes text,
-  amount numeric default 0,
-  expense numeric default 0,
-  expense_status text default 'pending',
-  pay_status text default 'pending',
-  part_paid numeric default 0,
-  created timestamptz default now()
-);
-
-create table if not exists settings (
-  key text primary key,
-  value jsonb
-);
-
-alter table shoots enable row level security;
-alter table settings enable row level security;
-create policy "Allow all" on shoots for all using (true) with check (true);
-create policy "Allow all" on settings for all using (true) with check (true);`;
+    async function checkAuthSession() {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession();
+        if (error) throw error;
+        
+        if (session) {
+          // User is logged in
+          document.getElementById('auth-overlay').style.display = 'none';
+          document.getElementById('loading-screen').classList.remove('hidden');
+          document.getElementById('account-email').textContent = session.user.email;
+          await loadAll();
+          document.getElementById('loading-screen').classList.add('hidden');
+        } else {
+          // User is not logged in, show auth overlay
+          document.getElementById('auth-overlay').style.display = 'flex';
+        }
+      } catch (error) {
+        console.error('Session check error:', error);
+        document.getElementById('auth-overlay').style.display = 'flex';
+      }
     }
 
-    function dbToShoot(r) {
-      return {
-        id: r.id,
-        name: r.name || '',
-        date: r.date || '',
-        event: r.event || 'Wedding',
-        session: r.session || 'Morning Session',
-        location: r.location || '',
-        company: r.company || '',
-        notes: r.notes || '',
-        amount: Number(r.amount || 0),
-        expense: Number(r.expense || 0),
-        expenseStatus: r.expense_status || 'pending',
-        payStatus: r.pay_status || 'pending',
-        partPaid: Number(r.part_paid || 0),
-        created: r.created
-      };
-    }
+    // Listen for auth changes
+    supabase.auth.onAuthStateChanged((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        window.location.href = window.location.pathname;
+      } else if (event === 'SIGNED_OUT') {
+        window.location.href = window.location.pathname;
+      }
+    });
 
-    function shootToDb(s) {
-      return {
-        id: s.id,
-        name: s.name,
-        date: s.date,
-        event: s.event,
-        session: s.session,
-        location: s.location,
-        company: s.company,
-        notes: s.notes,
-        amount: s.amount || 0,
-        expense: s.expense || 0,
-        expense_status: s.expenseStatus || 'pending',
-        pay_status: s.payStatus || 'pending',
-        part_paid: s.partPaid || 0,
-        created: s.created || new Date().toISOString()
-      };
-    }
+    // ====== UPDATED DATA FUNCTIONS (Using Supabase SDK) ======
 
     async function loadAll() {
-      setSyncStatus('syncing', 'Connecting');
-      const isConfigured = await ensureTables();
-      if (!isConfigured) return;
-
       try {
-        const bar = document.getElementById('load-progress');
-        if(bar) bar.style.width = "60%";
+        setSyncStatus('syncing', 'Loading...');
         
-        const raw = await sbFetch('shoots?select=*&order=date.desc');
-        _shoots = raw.map(dbToShoot);
+        // Fetch shoots
+        const { data: shoots, error: shootsError } = await supabase
+          .from('shoots')
+          .select('*');
+        if (shootsError) throw shootsError;
+        _shoots = shoots || [];
 
-        const configurations = await sbFetch('settings?select=*');
-        const cRow = configurations.find(r => r.key === 'companies');
-        const lRow = configurations.find(r => r.key === 'locations');
-        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
-        _locs = lRow ? lRow.value : [];
+        // Fetch settings
+        const { data: settings, error: settingsError } = await supabase
+          .from('settings')
+          .select('*')
+          .single();
+        if (!settingsError && settings) {
+          _companies = [...DEFAULT_COMPANIES, ...(settings.companies || [])];
+          _locs = settings.locations || [];
+          _privacyModeActive = settings.privacyMode !== false;
+          
+          // Load account settings
+          if (settings.businessName) document.getElementById('business-name').value = settings.businessName;
+          if (settings.phoneNumber) document.getElementById('phone-number').value = settings.phoneNumber;
+          if (settings.instagramHandle) document.getElementById('instagram-handle').value = settings.instagramHandle;
+          if (settings.upiId) document.getElementById('upi-id').value = settings.upiId;
+          if (settings.whatsappTemplate) document.getElementById('whatsapp-template').value = settings.whatsappTemplate;
+          if (settings.privacyPin) document.getElementById('pin-set-status').textContent = '✓ PIN Set';
+        }
 
-        if(bar) bar.style.width = "100%";
-        setTimeout(() => {
-          setSyncStatus('synced', 'Synced with Cloud');
-          document.getElementById('loading-screen').classList.add('hidden');
-          applyPrivacyUIVisibility();
-          renderDashboard();
-        }, 400);
-
-      } catch (e) {
-        setSyncStatus('error', 'Sync Lost');
-        showToast('Load Error: ' + e.message, 'error');
-        document.getElementById('loading-screen').classList.add('hidden');
+        // Render all sections
+        renderDashboard();
+        renderShootsList();
+        renderCalendar();
+        renderPaymentsList();
+        renderSettings();
+        
+        setSyncStatus('synced', 'Synced');
+        document.getElementById('last-sync-time').textContent = `Last synced: ${new Date().toLocaleTimeString()}`;
+      } catch (error) {
+        console.error('Load error:', error);
+        setSyncStatus('error', 'Error');
+        showToast('Sync failed: ' + error.message, 'error');
       }
     }
 
     async function saveShootToDB(shoot) {
-      setSyncStatus('syncing', 'Saving Record...');
       try {
-        const existing = _shoots.find(s => s.id === shoot.id);
-        if (existing) {
-          await sbFetch(`shoots?id=eq.${shoot.id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(shootToDb(shoot))
-          });
-          const idx = _shoots.findIndex(s => s.id === shoot.id);
-          if (idx >= 0) _shoots[idx] = shoot;
+        if (shoot.id) {
+          const { error } = await supabase
+            .from('shoots')
+            .update(shoot)
+            .eq('id', shoot.id);
+          if (error) throw error;
         } else {
-          await sbFetch('shoots', {
-            method: 'POST',
-            body: JSON.stringify(shootToDb(shoot))
-          });
-          _shoots.push(shoot);
+          const { error } = await supabase
+            .from('shoots')
+            .insert([shoot]);
+          if (error) throw error;
         }
-        setSyncStatus('synced', 'Saved Successfully');
-        showToast('Shoot record saved successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Save Failed');
-        showToast('Push Error: ' + e.message, 'error');
-        throw e;
+        await loadAll();
+        showToast('Shoot saved successfully', 'success');
+      } catch (error) {
+        console.error('Save error:', error);
+        showToast('Failed to save: ' + error.message, 'error');
       }
     }
 
-    async function deleteShootFromDB(id) {
-      setSyncStatus('syncing', 'Deleting Record...');
+    async function deleteShootFromDB(shootId) {
       try {
-        await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
-        _shoots = _shoots.filter(s => s.id !== id);
-        setSyncStatus('synced', 'Deleted Successfully');
-        showToast('Shoot record deleted successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Delete Failed');
-        showToast('Delete Error: ' + e.message, 'error');
-        throw e;
+        const { error } = await supabase
+          .from('shoots')
+          .delete()
+          .eq('id', shootId);
+        if (error) throw error;
+        await loadAll();
+        showToast('Shoot deleted', 'success');
+      } catch (error) {
+        console.error('Delete error:', error);
+        showToast('Failed to delete: ' + error.message, 'error');
       }
     }
 
-    async function saveSettingToDB(key, value) {
+    async function updateSettings() {
       try {
-        const existing = _shoots.find(s => s.key === key);
-        const payload = { key, value };
-        
-        try {
-          await sbFetch(`settings?key=eq.${key}`, {
-            method: 'PATCH',
-            body: JSON.stringify(payload)
-          });
-        } catch (e) {
-          await sbFetch('settings', {
-            method: 'POST',
-            body: JSON.stringify(payload)
-          });
-        }
-      } catch (e) {
-        showToast('Settings Save Error: ' + e.message, 'error');
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { error } = await supabase
+          .from('settings')
+          .upsert({
+            id: user.id,
+            companies: _companies.filter(c => !DEFAULT_COMPANIES.includes(c)),
+            locations: _locs,
+            privacyMode: _privacyModeActive
+          }, { onConflict: 'id' });
+        if (error) throw error;
+      } catch (error) {
+        console.error('Settings update error:', error);
       }
     }
 
-    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function getDaysPending(shootDate) {
-      const today = new Date();
-      const shootDay = new Date(shootDate + 'T00:00:00');
-      const diffMs = today - shootDay;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      return Math.max(0, diffDays);
+    async function forceSync() {
+      await loadAll();
     }
-    function getDaysPendingColor(days) {
-      if (days <= 30) return 'text-emerald-400 bg-emerald-950/40';
-      if (days <= 60) return 'text-amber-400 bg-amber-950/40';
-      return 'text-red-400 bg-red-950/40';
-    }
-    function uid() { return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
-    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
-    function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
+
+    // Old database functions removed - now using Supabase JS SDK above
 
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
@@ -2277,7 +2402,134 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('Downloaded', 'success');
     }
 
-    loadAll();
+    // ====== ACCOUNT & SETTINGS FUNCTIONS ======
+
+    function validatePINInput(input) {
+      input.value = input.value.replace(/[^0-9]/g, '').slice(0, 6);
+    }
+
+    async function savePIN() {
+      try {
+        const newPin = document.getElementById('new-pin').value;
+        const confirmPin = document.getElementById('confirm-pin').value;
+
+        if (!newPin || newPin.length < 4) {
+          showToast('PIN must be 4-6 digits', 'error');
+          return;
+        }
+        if (newPin !== confirmPin) {
+          showToast('PINs do not match', 'error');
+          return;
+        }
+
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        // Hash the PIN (simple hash for demo - use bcrypt in production)
+        const hashedPin = btoa(newPin);
+
+        const { error } = await supabase
+          .from('settings')
+          .upsert({
+            id: user.id,
+            privacyPin: hashedPin
+          }, { onConflict: 'id' });
+        if (error) throw error;
+
+        document.getElementById('new-pin').value = '';
+        document.getElementById('confirm-pin').value = '';
+        document.getElementById('pin-set-status').textContent = '✓ PIN Set';
+        showToast('Privacy PIN saved', 'success');
+      } catch (error) {
+        showToast('Error saving PIN: ' + error.message, 'error');
+      }
+    }
+
+    async function saveBusinessDetails() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const details = {
+          id: user.id,
+          businessName: document.getElementById('business-name').value,
+          phoneNumber: document.getElementById('phone-number').value,
+          instagramHandle: document.getElementById('instagram-handle').value,
+          upiId: document.getElementById('upi-id').value
+        };
+
+        const { error } = await supabase
+          .from('settings')
+          .upsert(details, { onConflict: 'id' });
+        if (error) throw error;
+
+        showToast('Business details saved', 'success');
+      } catch (error) {
+        showToast('Error saving details: ' + error.message, 'error');
+      }
+    }
+
+    async function saveWhatsAppTemplate() {
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (!user) throw new Error('Not authenticated');
+
+        const { error } = await supabase
+          .from('settings')
+          .upsert({
+            id: user.id,
+            whatsappTemplate: document.getElementById('whatsapp-template').value
+          }, { onConflict: 'id' });
+        if (error) throw error;
+
+        showToast('WhatsApp template saved', 'success');
+      } catch (error) {
+        showToast('Error saving template: ' + error.message, 'error');
+      }
+    }
+
+    function downloadLedgerCSV() {
+      try {
+        let csv = 'Date,Name,Event,Company,Location,Amount,Expenses,Payment Status,Expense Status\n';
+        
+        _shoots.forEach(s => {
+          const row = [
+            s.date || '',
+            s.name || '',
+            s.event || '',
+            s.company || '',
+            s.location || '',
+            s.amount || 0,
+            s.expense || 0,
+            s.payStatus || 'pending',
+            s.expenseStatus || 'pending'
+          ].map(v => `"${String(v).replace(/"/g, '""')}"`).join(',');
+          csv += row + '\n';
+        });
+
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Sakkhi_Ledger_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+        showToast('Ledger exported', 'success');
+      } catch (error) {
+        showToast('Export failed: ' + error.message, 'error');
+      }
+    }
+
+    function clearLocalData() {
+      if (confirm('Clear all local app data? This cannot be undone.')) {
+        localStorage.clear();
+        showToast('Local data cleared', 'success');
+        setTimeout(() => location.reload(), 500);
+      }
+    }
+
+    // ====== PAGE INITIALIZATION ======
+    checkAuthSession();
   </script>
 </body>
 </html>
