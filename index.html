@@ -227,7 +227,7 @@
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">UPI ID / Bank Details</label>
-              <input type="text" id="acc-upi" placeholder="e.g., name@okicici" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+              <textarea id="acc-upi" placeholder="Bank Name:&#10;Account No:&#10;IFSC Code:&#10;UPI ID: " class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-28 resize-none"></textarea>
             </div>
           </div>
         </div>
@@ -251,21 +251,32 @@
           </div>
         </div>
 
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-          <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
-          <div id="settings-companies" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
-          <div class="flex gap-2">
-            <input type="text" id="new-company-input" placeholder="New company name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
-            <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
+            <div id="settings-companies" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
+            <div class="flex gap-2">
+              <input type="text" id="new-company-input" placeholder="New company..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+            </div>
           </div>
-        </div>
 
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-          <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
-          <div id="settings-locations" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
-          <div class="flex gap-2">
-            <input type="text" id="new-loc-input" placeholder="New location name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
-            <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
+            <div id="settings-locations" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
+            <div class="flex gap-2">
+              <input type="text" id="new-loc-input" placeholder="New location..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+            </div>
+          </div>
+
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories</div>
+            <div id="settings-events" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
+            <div class="flex gap-2">
+              <input type="text" id="new-event-input" placeholder="New event..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+            </div>
           </div>
         </div>
 
@@ -330,15 +341,7 @@
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
             <select id="f-shoot-event" onchange="handleEventOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
-              <option value="Wedding">Wedding</option>
-              <option value="Reception">Reception</option>
-              <option value="Sangeet">Sangeet</option>
-              <option value="Haldi">Haldi</option>
-              <option value="Pellikoduku">Pellikoduku</option>
-              <option value="Pellikuthuru">Pellikuthuru</option>
-              <option value="House Warming">House Warming</option>
-              <option value="Other">Other</option>
-            </select>
+              </select>
           </div>
           <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
@@ -485,11 +488,13 @@
 
     const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
     const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
+    const DEFAULT_EVENTS = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'];
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
+    let _events = [...DEFAULT_EVENTS];
     let _analyticsChartInstance = null;
     let _privacyModeActive = true;
     let calYear = new Date().getFullYear();
@@ -628,13 +633,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         _shoots = raw.map(dbToShoot);
 
         const configurations = await sbFetch('settings?select=*');
+        
         const cRow = configurations.find(r => r.key === 'companies');
+        if (cRow) _companies = cRow.value;
+        
         const lRow = configurations.find(r => r.key === 'locations');
-        _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
-        _locs = lRow ? lRow.value : [];
+        if (lRow) _locs = lRow.value;
+        
+        const eRow = configurations.find(r => r.key === 'events');
+        if (eRow) _events = eRow.value;
         
         const pinRow = configurations.find(r => r.key === 'app_pin');
         if (pinRow) _appPin = pinRow.value;
+        
         const profileRow = configurations.find(r => r.key === 'profile');
         if (profileRow) _profile = { ..._profile, ...profileRow.value };
 
@@ -696,17 +707,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     async function saveSettingToDB(key, value) {
       try {
-        // 1. Check if the setting already exists in the database
         const checkExisting = await sbFetch(`settings?key=eq.${key}&select=key`);
         
         if (checkExisting && checkExisting.length > 0) {
-          // 2. If it exists, update it (PATCH)
           await sbFetch(`settings?key=eq.${key}`, {
             method: 'PATCH',
             body: JSON.stringify({ value })
           });
         } else {
-          // 3. If it doesn't exist, create it (POST)
           await sbFetch('settings', {
             method: 'POST',
             body: JSON.stringify({ key, value })
@@ -1489,6 +1497,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function renderSettings() {
+      // Companies
       const compTarget = document.getElementById('settings-companies');
       if (compTarget) {
         compTarget.innerHTML = _companies.map((c, i) => `
@@ -1501,6 +1510,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           </div>`).join('');
       }
 
+      // Locations
       const locTarget = document.getElementById('settings-locations');
       if (locTarget) {
         locTarget.innerHTML = DEFAULT_LOCS.map(l => `
@@ -1514,6 +1524,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             <div class="flex gap-1">
               <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
               <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+            </div>
+          </div>`).join('');
+      }
+
+      // Events
+      const eventTarget = document.getElementById('settings-events');
+      if (eventTarget) {
+        eventTarget.innerHTML = _events.map((e, i) => `
+          <div class="flex items-center justify-between py-2 text-xs">
+            <span class="text-neutral-300 font-medium">${e}</span>
+            <div class="flex gap-1">
+              <button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1587,6 +1610,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('CSV file generated and downloaded.', 'success');
     }
 
+    // Management Actions
     async function addCompany() {
       const el = document.getElementById('new-company-input');
       const val = el.value.trim(); if (!val) return;
@@ -1618,6 +1642,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (!input || input.trim() === _locs[i]) return;
       _locs[i] = input.trim();
       await saveSettingToDB('locations', _locs);
+      renderSettings(); renderShootsList();
+    }
+
+    async function addEvent() {
+      const el = document.getElementById('new-event-input');
+      const val = el.value.trim(); if (!val) return;
+      _events.push(val); await saveSettingToDB('events', _events);
+      el.value = ''; renderSettings();
+    }
+    async function deleteEvent(i) {
+      _events.splice(i, 1); await saveSettingToDB('events', _events); renderSettings();
+    }
+    async function renameEvent(i) {
+      const input = prompt('Enter revised event category name:', _events[i]);
+      if (!input || input.trim() === _events[i]) return;
+      _events[i] = input.trim();
+      await saveSettingToDB('events', _events);
       renderSettings(); renderShootsList();
     }
 
@@ -1676,6 +1717,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (lSel) {
         lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
       }
+
+      const eSel = document.getElementById('f-shoot-event');
+      if (eSel) {
+        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
+      }
       
       if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
       openModal('shoot-modal-backdrop');
@@ -1721,7 +1767,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const eSel = document.getElementById('f-shoot-event');
       if (eSel && s.event) {
-        if (['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'].includes(s.event)) {
+        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
+        if (_events.includes(s.event)) {
           eSel.value = s.event;
           document.getElementById('f-event-other-wrap').classList.add('hidden');
         } else {
@@ -1739,7 +1786,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('edit-shoot-id').value = '';
       document.getElementById('f-shoot-name').value = '';
       document.getElementById('f-shoot-date').value = '';
-      document.getElementById('f-shoot-event').value = 'Wedding';
+      
+      const eSel = document.getElementById('f-shoot-event');
+      if (eSel && _events.length) eSel.value = _events[0];
+
       document.getElementById('f-shoot-event-other').value = '';
       document.getElementById('f-event-other-wrap').classList.add('hidden');
       document.getElementById('f-shoot-session').value = 'Morning Session';
@@ -1778,7 +1828,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
 
       let event = document.getElementById('f-shoot-event').value;
-      if (event === 'Other') event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
+      if (event === 'Other') {
+        event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
+        if (event !== 'Other' && !_events.includes(event)) {
+          _events.push(event); await saveSettingToDB('events', _events);
+        }
+      }
 
       let location = document.getElementById('f-shoot-loc').value;
       if (location === '__other__') {
