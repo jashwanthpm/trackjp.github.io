@@ -79,12 +79,9 @@
         </div>
       </div>
 
-      <!-- Stats Cards -->
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-      <!-- Main Content -->
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <!-- Upcoming Shoots -->
         <div class="lg:col-span-7 space-y-4">
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
@@ -95,7 +92,6 @@
             <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
 
-          <!-- Top Companies -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-building text-[#c9a96e] text-lg"></i>
@@ -106,9 +102,7 @@
           </div>
         </div>
 
-        <!-- Right Column -->
         <div class="lg:col-span-5 space-y-4">
-          <!-- Payment Status -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
@@ -117,7 +111,6 @@
             <div id="dash-payments" class="space-y-3"></div>
           </div>
 
-          <!-- Chart -->
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm hidden">
             <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
               <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
@@ -149,7 +142,6 @@
         <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
 
-      <!-- Stat Cards -->
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
         <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
           <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
@@ -165,7 +157,6 @@
         </div>
       </div>
 
-      <!-- Filters -->
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
@@ -214,34 +205,78 @@
       <div class="space-y-2" id="payments-list"></div>
     </section>
 
-    <section id="section-settings" class="app-section hidden space-y-6">
-      <div class="border-b border-neutral-900 pb-3">
-        <h2 class="text-xl font-bold text-white">System Settings</h2>
+    <section id="section-account" class="app-section hidden space-y-6">
+      <div class="border-b border-neutral-900 pb-3 flex justify-between items-center">
+        <h2 class="text-xl font-bold text-white">Account & Profile</h2>
+        <button onclick="saveProfileSettings()" class="bg-[#c9a96e] text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-[#e6c98a] shadow-lg transition flex items-center gap-1.5">
+          <i class="ti ti-device-floppy"></i> Save Profile
+        </button>
       </div>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
-          <div id="settings-companies" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-4">
+          <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-2"><i class="ti ti-id"></i> Brand & Payments</h3>
+          <div class="space-y-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Business Name</label>
+              <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Phone Number</label>
+              <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">UPI ID / Bank Details</label>
+              <input type="text" id="acc-upi" placeholder="e.g., name@okicici" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            </div>
+          </div>
+        </div>
+
+        <div class="space-y-6">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-4">
+            <h3 class="text-sm font-bold text-amber-500 flex items-center gap-2"><i class="ti ti-lock"></i> Financial Privacy PIN</h3>
+            <p class="text-xs text-neutral-500">Set a secure 4-6 digit PIN to lock ledger visibility.</p>
+            <div class="flex gap-2">
+              <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN" class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500 text-center tracking-widest"/>
+              <button onclick="updatePrivacyPIN()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Update PIN</button>
+            </div>
+          </div>
+
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-2"><i class="ti ti-brand-whatsapp"></i> WhatsApp Template</h3>
+            </div>
+            <p class="text-[10px] text-neutral-500">Placeholders: <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Client Name]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Event]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Date]</span></p>
+            <textarea id="acc-wa-template" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-24 resize-none"></textarea>
+          </div>
+        </div>
+
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
+          <div id="settings-companies" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
             <input type="text" id="new-company-input" placeholder="New company name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
             <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
-          <div id="settings-locations" class="divide-y divide-neutral-900 max-h-56 overflow-y-auto mb-4 pr-1"></div>
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+          <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
+          <div id="settings-locations" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
           <div class="flex gap-2">
             <input type="text" id="new-loc-input" placeholder="New location name..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
             <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
           </div>
         </div>
 
-        <div class="md:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
-          <div class="text-sm font-semibold text-white mb-1 flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Cloud Sync Layer</div>
-          <p class="text-xs text-neutral-500 mb-4">Direct sync link with active Supabase server.</p>
+        <div class="lg:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Data Management</h3>
+            <p class="text-xs text-neutral-500 mt-1">Export your data or force a cloud sync loop.</p>
+          </div>
           <div class="flex flex-wrap gap-2">
-            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync Loop</button>
+            <button onclick="exportShootsToCSV()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-file-spreadsheet"></i> Export CSV</button>
+            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync</button>
           </div>
         </div>
       </div>
@@ -253,7 +288,7 @@
     <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
     <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
     <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
-    <button onclick="switchTab('settings')" id="tab-settings" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-settings text-xl"></i>System</button>
+    <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
   </nav>
 
   <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
@@ -461,6 +496,14 @@
     let calMonth = new Date().getMonth();
     let calSelected = today();
 
+    let _appPin = '1234jp'; 
+    let _profile = { 
+      bizName: '', 
+      phone: '', 
+      upi: '', 
+      waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!' 
+    };
+
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
       const lbl = document.getElementById('sync-label');
@@ -589,6 +632,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const lRow = configurations.find(r => r.key === 'locations');
         _companies = cRow ? cRow.value : [...DEFAULT_COMPANIES];
         _locs = lRow ? lRow.value : [];
+        
+        const pinRow = configurations.find(r => r.key === 'app_pin');
+        if (pinRow) _appPin = pinRow.value;
+        const profileRow = configurations.find(r => r.key === 'profile');
+        if (profileRow) _profile = { ..._profile, ...profileRow.value };
 
         if(bar) bar.style.width = "100%";
         setTimeout(() => {
@@ -648,9 +696,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     async function saveSettingToDB(key, value) {
       try {
-        const existing = _shoots.find(s => s.key === key);
         const payload = { key, value };
-        
         try {
           await sbFetch(`settings?key=eq.${key}`, {
             method: 'PATCH',
@@ -692,13 +738,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       
       document.getElementById('section-' + tab).classList.remove('hidden');
       const targetTab = document.getElementById('tab-' + tab);
-      targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+      if (targetTab) {
+        targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+      }
       
       if (tab === 'dashboard') renderDashboard();
       if (tab === 'calendar') renderCalendar();
       if (tab === 'shoots') renderShootsList();
       if (tab === 'payments') renderPayments();
-      if (tab === 'settings') renderSettings();
+      if (tab === 'account') {
+        renderSettings(); 
+        populateProfileUI(); 
+      }
     }
 
     function renderDashboard() {
@@ -713,7 +764,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const trueOutstanding = totalGross - realizedReceived;
 
-      // Stats Cards with better design
       document.getElementById('dash-stats').innerHTML = `
         <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="flex items-start justify-between">
@@ -933,13 +983,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       return `
         <div onclick="openEditShootModal('${s.id}')" class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3 flex-wrap sm:flex-nowrap">
           <div class="flex items-center gap-3 min-w-0 flex-1">
-            <!-- Date Box -->
             <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
               <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
             </div>
             
-            <!-- Details -->
             <div class="min-w-0 flex-1">
               <div class="text-sm font-semibold text-white">${s.name}</div>
               <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -950,7 +998,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
           </div>
 
-          <!-- WhatsApp Button -->
           <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
             <i class="ti ti-brand-whatsapp text-sm"></i>
           </button>
@@ -1105,7 +1152,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const monthLabel = MONTHS[calMonth] + ' ' + calYear;
       document.getElementById('cal-month-label').textContent = monthLabel;
 
-      // Calculate month stats - Fixed to count shoots in the current calendar month
       const monthStart = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-01';
       const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
       const monthEnd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
@@ -1128,7 +1174,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         else daysUntilNext = `in ${diffDays} days`;
       }
 
-      // Add stats section
       const existingStats = document.getElementById('cal-stats');
       if (!existingStats) {
         const borderDiv = document.querySelector('#section-calendar .border-b');
@@ -1245,7 +1290,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
 
-      // Calculate stats
       const totalShoots = _shoots.length;
       const upcomingShoots = _shoots.filter(s => s.date >= td).length;
       const completedShoots = _shoots.filter(s => s.date < td).length;
@@ -1278,10 +1322,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         filtered = filtered.filter(s => s.date < td);
       }
 
-      // Group by month
       const grouped = {};
       filtered.forEach(s => {
-        const monthKey = s.date.slice(0, 7); // YYYY-MM
+        const monthKey = s.date.slice(0, 7);
         if (!grouped[monthKey]) grouped[monthKey] = [];
         grouped[monthKey].push(s);
       });
@@ -1401,13 +1444,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                 return `
                   <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3" onclick="openEditShootModal('${s.id}')">
                     <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <!-- Date Box -->
                       <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                         <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
                         <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
                       </div>
                       
-                      <!-- Details -->
                       <div class="min-w-0 flex-1">
                         <div class="text-sm font-semibold text-white">${s.name}</div>
                         <div class="flex flex-wrap items-center gap-2 mt-1">
@@ -1417,7 +1458,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                       </div>
                     </div>
 
-                    <!-- Amount & Status -->
                     <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
                       <div class="text-right">
                         <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
@@ -1473,6 +1513,74 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
           </div>`).join('');
       }
+    }
+
+    // --- Account & Profile Logic ---
+    function populateProfileUI() {
+      document.getElementById('acc-biz-name').value = _profile.bizName || '';
+      document.getElementById('acc-phone').value = _profile.phone || '';
+      document.getElementById('acc-upi').value = _profile.upi || '';
+      document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
+    }
+
+    async function saveProfileSettings() {
+      _profile.bizName = document.getElementById('acc-biz-name').value.trim();
+      _profile.phone = document.getElementById('acc-phone').value.trim();
+      _profile.upi = document.getElementById('acc-upi').value.trim();
+      _profile.waTemplate = document.getElementById('acc-wa-template').value.trim();
+      
+      await saveSettingToDB('profile', _profile);
+      showToast('Profile settings saved successfully.');
+    }
+
+    async function updatePrivacyPIN() {
+      const newPin = document.getElementById('acc-pin').value.trim();
+      if (!/^\d{4,6}$/.test(newPin)) {
+        showToast('PIN must be between 4 to 6 digits.', 'error');
+        return;
+      }
+      _appPin = newPin;
+      await saveSettingToDB('app_pin', _appPin);
+      document.getElementById('acc-pin').value = ''; 
+      showToast('Financial Privacy PIN updated securely.');
+    }
+
+    // --- CSV Export Logic ---
+    function exportShootsToCSV() {
+      if (!_shoots.length) {
+        showToast('No shoots available to export.', 'error');
+        return;
+      }
+      
+      const headers = ['ID', 'Name', 'Date', 'Event', 'Session', 'Location', 'Company', 'Amount (Rs)', 'Expense (Rs)', 'Expense Status', 'Pay Status', 'Part Paid (Rs)', 'Notes'];
+      
+      const rows = _shoots.map(s => [
+        s.id,
+        `"${(s.name || '').replace(/"/g, '""')}"`,
+        s.date,
+        s.event,
+        s.session,
+        `"${(s.location || '').replace(/"/g, '""')}"`,
+        `"${(s.company || '').replace(/"/g, '""')}"`,
+        s.amount || 0,
+        s.expense || 0,
+        s.expenseStatus,
+        s.payStatus,
+        s.partPaid || 0,
+        `"${(s.notes || '').replace(/"/g, '""')}"`
+      ]);
+      
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
+      const encodedUri = encodeURI(csvContent);
+      const link = document.createElement("a");
+      
+      link.setAttribute("href", encodedUri);
+      link.setAttribute("download", `Sakkhi_Export_${new Date().toISOString().split('T')[0]}.csv`);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      
+      showToast('CSV file generated and downloaded.', 'success');
     }
 
     async function addCompany() {
@@ -1537,7 +1645,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function verifyPrivacyPassword() {
       const input = document.getElementById('privacy-pass-input').value;
       const errorLabel = document.getElementById('privacy-error-lbl');
-      if (input === '1234jp') {
+      if (input === _appPin) {
         _privacyModeActive = false;
         applyPrivacyUIVisibility();
         const icon = document.getElementById('privacy-icon');
@@ -1555,7 +1663,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('modal-whatsapp-btn').classList.add('hidden');
       clearModalFields();
       
-      // Populate dropdowns
       const cSel = document.getElementById('f-shoot-company');
       if (cSel) {
         cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
@@ -1587,14 +1694,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
       document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
       
-      // Populate company dropdown
       const cSel = document.getElementById('f-shoot-company');
       if (cSel) {
         cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
         if (s && s.company) cSel.value = s.company;
       }
 
-      // Populate location dropdown
       const lSel = document.getElementById('f-shoot-loc');
       if (lSel) {
         lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
@@ -1610,7 +1715,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         }
       }
 
-      // Populate event dropdown
       const eSel = document.getElementById('f-shoot-event');
       if (eSel && s.event) {
         if (['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'].includes(s.event)) {
@@ -1749,7 +1853,17 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       event.stopPropagation();
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
-      const msg = `Hi ${s.name},\nThis is Jashwanth JP. Just confirming our schedule for the ${s.event} shoot on ${s.date} at ${s.location}.\nLooking forward to working with you!`;
+      
+      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
+      
+      const dateObj = new Date(s.date + 'T00:00:00');
+      const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const msg = msgTemplate
+        .replace(/\[Client Name\]/gi, s.name)
+        .replace(/\[Event\]/gi, s.event)
+        .replace(/\[Date\]/gi, dateFormatted);
+        
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
     }
@@ -1843,7 +1957,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('f-shoot-date').value = dateStr;
       document.getElementById('date-picker-dropdown').classList.add('hidden');
     }
-
 
     function downloadCompanyViewPDF() {
       const { jsPDF } = window.jspdf;
@@ -2174,7 +2287,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       const td = today();
       
-      // Apply filters
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
       const ft = document.getElementById('filter-timeline')?.value || '';
       const fc = document.getElementById('filter-company')?.value || '';
