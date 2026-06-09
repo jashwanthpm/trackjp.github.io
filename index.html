@@ -34,6 +34,7 @@
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
 <body class="min-h-screen pb-24 md:pb-6">
 
   <div id="auth-overlay" class="fixed inset-0 bg-[#050505] z-[9999] flex flex-col items-center justify-center">
@@ -654,12 +655,25 @@
       }
     }
 
-    // Listen for auth changes
+    // Listen for auth changes - WITH ENDLESS LOOP FIX
     supabase.auth.onAuthStateChanged((event, session) => {
       if (event === 'SIGNED_IN' && session) {
-        window.location.href = window.location.pathname;
+        // 1. Hide the login screen immediately
+        document.getElementById('auth-overlay').style.display = 'none';
+        document.getElementById('loading-screen').classList.remove('hidden');
+        document.getElementById('account-email').textContent = session.user.email;
+        
+        // 2. Load the dashboard data
+        loadAll().then(() => {
+            document.getElementById('loading-screen').classList.add('hidden');
+        });
+
+        // 3. Clean up the URL quietly without reloading the page
+        window.history.replaceState({}, document.title, window.location.pathname);
+        
       } else if (event === 'SIGNED_OUT') {
-        window.location.href = window.location.pathname;
+        // Show login screen if signed out
+        document.getElementById('auth-overlay').style.display = 'flex';
       }
     });
 
@@ -770,8 +784,6 @@
     async function forceSync() {
       await loadAll();
     }
-
-    // Old database functions removed - now using Supabase JS SDK above
 
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
