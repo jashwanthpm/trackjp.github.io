@@ -505,7 +505,7 @@
       bizName: '', 
       phone: '', 
       upi: '', 
-      waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!' 
+      waTemplate: 'Hi [Client Name],\\nJust confirming our schedule for the [Event] shoot on [Date].\\nLooking forward to working with you!' 
     };
 
     function setSyncStatus(state, label) {
@@ -1131,7 +1131,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             }
           }
         },
-        plugins: [{\n          id: 'chartDataLabels',
+        plugins: [{
+          id: 'chartDataLabels',
           afterDatasetsDraw(chart) {
             const { ctx: c } = chart;
             chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -1209,7 +1210,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
               <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
             </div>
-            `}\n            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            `}
+            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
               <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
               <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
               <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
@@ -1589,7 +1591,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         `"${(s.notes || '').replace(/\"/g, '""')}\"`
       ]);
       
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\\n");
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       
@@ -1904,7 +1906,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
       
-      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
+      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\\nJust confirming our schedule for the [Event] shoot on [Date].\\nLooking forward to working with you!";
       
       const dateObj = new Date(s.date + 'T00:00:00');
       const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
