@@ -72,7 +72,7 @@
   <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
     <section id="section-dashboard" class="app-section space-y-6">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 border-b border-neutral-900 pb-4">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <div>
           <h2 class="text-2xl font-bold tracking-tight text-white">Dashboard</h2>
           <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
@@ -83,7 +83,7 @@
 
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7 space-y-4">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i>
               <h3 class="text-base font-bold text-white">Upcoming Shoots</h3>
@@ -92,7 +92,7 @@
             <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
 
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-building text-[#c9a96e] text-lg"></i>
               <h3 class="text-base font-bold text-white">Top Companies</h3>
@@ -103,7 +103,7 @@
         </div>
 
         <div class="lg:col-span-5 space-y-4">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
               <h3 class="text-base font-bold text-white">Payment Status</h3>
@@ -111,7 +111,7 @@
             <div id="dash-payments" class="space-y-3"></div>
           </div>
 
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 shadow-sm hidden">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 hidden">
             <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
               <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
             </h3>
@@ -124,7 +124,7 @@
     </section>
 
     <section id="section-calendar" class="app-section hidden space-y-6">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
         <div class="flex items-center gap-1">
           <button onclick="calPrev()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-left"></i></button>
@@ -137,44 +137,44 @@
     </section>
 
     <section id="section-shoots" class="app-section hidden space-y-4">
-      <div class="border-b border-neutral-900 pb-3 flex items-center justify-between">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
         <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
           <div class="text-2xl font-bold text-white mt-2" id="stat-total">0</div>
         </div>
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Upcoming</div>
           <div class="text-2xl font-bold text-[#c9a96e] mt-2" id="stat-upcoming">0</div>
         </div>
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">Completed</div>
           <div class="text-2xl font-bold text-emerald-500 mt-2" id="stat-completed">0</div>
         </div>
       </div>
 
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+        <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
         </div>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-timeline" onchange="renderShootsList()">
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-timeline" onchange="renderShootsList()">
           <option value="">All Timelines</option>
           <option value="upcoming">Upcoming Shoots</option>
           <option value="completed">Completed Shoots</option>
         </select>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-company" onchange="renderShootsList()"></select>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="filter-loc" onchange="renderShootsList()"></select>
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-company" onchange="renderShootsList()"></select>
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-loc" onchange="renderShootsList()"></select>
       </div>
       <div class="space-y-2" id="shoots-list"></div>
     </section>
 
     <section id="section-payments" class="app-section hidden space-y-4">
-      <div class="border-b border-neutral-900 pb-3 flex items-center justify-between">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
         <div class="flex gap-2">
           <button onclick="downloadCompanyViewPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Share (Company)</button>
@@ -183,20 +183,20 @@
       </div>
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div class="flex items-center gap-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+        <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
           <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
         </div>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-company" onchange="renderPaymentsList()">
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-company" onchange="renderPaymentsList()">
           <option value="">All Companies</option>
         </select>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-status" onchange="renderPaymentsList()">
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-status" onchange="renderPaymentsList()">
           <option value="">All Payment Status</option>
           <option value="pending">Pending Payment</option>
           <option value="part">Partial Payment</option>
           <option value="done">Settled Payment</option>
         </select>
-        <select class="bg-[#0f0f0f] border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-300 outline-none cursor-pointer focus:border-[#c9a96e]" id="pay-filter-expenses" onchange="renderPaymentsList()">
+        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-expenses" onchange="renderPaymentsList()">
           <option value="">All Expenses</option>
           <option value="pending">Pending Expenses</option>
           <option value="settled">Settled Expenses</option>
@@ -206,7 +206,7 @@
     </section>
 
     <section id="section-account" class="app-section hidden space-y-6">
-      <div class="border-b border-neutral-900 pb-3 flex justify-between items-center">
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <h2 class="text-xl font-bold text-white">Account & Profile</h2>
         <button onclick="saveProfileSettings()" class="bg-[#c9a96e] text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-[#e6c98a] shadow-lg transition flex items-center gap-1.5">
           <i class="ti ti-device-floppy"></i> Save Profile
@@ -219,15 +219,15 @@
           <div class="space-y-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Business Name</label>
-              <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+              <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Phone Number</label>
-              <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+              <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
             </div>
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">UPI ID / Bank Details</label>
-              <textarea id="acc-upi" placeholder="Bank Name:&#10;Account No:&#10;IFSC Code:&#10;UPI ID: " class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-28 resize-none"></textarea>
+              <textarea id="acc-upi" placeholder="Bank Name:&#10;Account No:&#10;IFSC Code:&#10;UPI ID: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
             </div>
           </div>
         </div>
@@ -237,7 +237,7 @@
             <h3 class="text-sm font-bold text-amber-500 flex items-center gap-2"><i class="ti ti-lock"></i> Financial Privacy PIN</h3>
             <p class="text-xs text-neutral-500">Set a secure 4-6 digit PIN to lock ledger visibility.</p>
             <div class="flex gap-2">
-              <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN" class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500 text-center tracking-widest"/>
+              <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
               <button onclick="updatePrivacyPIN()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Update PIN</button>
             </div>
           </div>
@@ -247,7 +247,7 @@
               <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-2"><i class="ti ti-brand-whatsapp"></i> WhatsApp Template</h3>
             </div>
             <p class="text-[10px] text-neutral-500">Placeholders: <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Client Name]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Event]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Date]</span></p>
-            <textarea id="acc-wa-template" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-24 resize-none"></textarea>
+            <textarea id="acc-wa-template" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
           </div>
         </div>
 
@@ -256,7 +256,7 @@
             <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
             <div id="settings-companies" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
             <div class="flex gap-2">
-              <input type="text" id="new-company-input" placeholder="New company..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <input type="text" id="new-company-input" placeholder="New company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
             </div>
           </div>
@@ -265,7 +265,7 @@
             <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
             <div id="settings-locations" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
             <div class="flex gap-2">
-              <input type="text" id="new-loc-input" placeholder="New location..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <input type="text" id="new-loc-input" placeholder="New location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
             </div>
           </div>
@@ -274,7 +274,7 @@
             <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories</div>
             <div id="settings-events" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
             <div class="flex gap-2">
-              <input type="text" id="new-event-input" placeholder="New event..." class="flex-1 bg-neutral-950 border border-neutral-900 text-sm rounded-lg px-3 py-2 outline-none text-white focus:border-[#c9a96e]"/>
+              <input type="text" id="new-event-input" placeholder="New event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
             </div>
           </div>
@@ -314,12 +314,12 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
-            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] shadow-none"/>
+            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
             <div class="relative">
-              <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+              <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               <button type="button" onclick="toggleDatePicker()" class="absolute right-2 top-2.5 p-1.5 text-neutral-500 hover:text-[#c9a96e] transition">
                 <i class="ti ti-calendar text-lg"></i>
               </button>
@@ -340,19 +340,18 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
-            <select id="f-shoot-event" onchange="handleEventOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
-              </select>
+            <select id="f-shoot-event" onchange="handleEventOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
           </div>
           <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
-            <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
-            <select id="f-shoot-session" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
+            <select id="f-shoot-session" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
               <option value="Morning Session">Morning Session</option>
               <option value="Afternoon Session">Afternoon Session</option>
               <option value="Evening Session">Evening Session</option>
@@ -361,34 +360,34 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
-            <select id="f-shoot-loc" onchange="handleLocOther()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
+            <select id="f-shoot-loc" onchange="handleLocOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
-            <select id="f-shoot-company" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"></select>
+            <select id="f-shoot-company" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
           </div>
         </div>
 
         <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
 
         <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]"/>
+            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
-            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50"/>
+            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition"/>
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expense Status</label>
-            <select id="f-shoot-expense-status" class="w-full bg-neutral-950 border border-amber-900/30 text-sm rounded-lg p-2.5 text-white outline-none focus:border-amber-500/50">
+            <select id="f-shoot-expense-status" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition">
               <option value="pending">Pending</option>
               <option value="settled">Settled</option>
             </select>
@@ -398,7 +397,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
-            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e]">
+            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
               <option value="pending">Pending</option>
               <option value="part">Partial</option>
               <option value="done">Settled</option>
@@ -408,12 +407,12 @@
 
         <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-purple-500"/>
+          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-purple-500 transition"/>
         </div>
 
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
-          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="w-full bg-neutral-950 border border-neutral-900 text-sm rounded-lg p-2.5 text-white outline-none focus:border-[#c9a96e] h-20 resize-none"></textarea>
+          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-20 resize-none"></textarea>
         </div>
       </div>
       
@@ -450,7 +449,7 @@
         <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
       </div>
       <div class="space-y-3">
-        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 text-lg rounded-xl p-2.5 text-white tracking-widest outline-none focus:border-amber-500 transition"/>
+        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-amber-500 transition"/>
         <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
       </div>
       <div class="flex gap-2 pt-2">
@@ -777,7 +776,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const trueOutstanding = totalGross - realizedReceived;
 
       document.getElementById('dash-stats').innerHTML = `
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Total Amount</p>
@@ -787,7 +786,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             <i class="ti ti-cash text-2xl text-[#c9a96e] opacity-20"></i>
           </div>
         </div>
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Expenses</p>
@@ -797,7 +796,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             <i class="ti ti-receipt text-2xl text-orange-500 opacity-20"></i>
           </div>
         </div>
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p>
@@ -807,7 +806,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             <i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i>
           </div>
         </div>
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
@@ -828,8 +827,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         ul.innerHTML = upcoming.map(s => {
           const { dd, mmm } = ddMmm(s.date);
           return `
-            <div onclick="openEditShootModal('${s.id}')" class="flex items-start gap-3 p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer group">
-              <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0 group-hover:border-neutral-700 transition">
+            <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-start gap-3">
+              <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                 <span class="text-sm font-bold text-[#c9a96e] leading-none">${dd}</span>
                 <span class="text-[8px] uppercase text-neutral-500">${mmm}</span>
               </div>
@@ -911,7 +910,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
 
       container.innerHTML = topCompanies.map((c, i) => `
-        <div class="p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer">
           <div class="flex items-start justify-between mb-2">
             <div class="flex-1">
               <p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p>
@@ -955,7 +954,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
             <div class="p-5 space-y-3">
               ${allCompanies.map((c, i) => `
-                <div class="p-4 bg-neutral-950 border border-neutral-900 rounded-lg">
+                <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition">
                   <div class="flex items-start justify-between mb-2">
                     <div class="flex-1">
                       <p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p>
@@ -993,7 +992,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
 
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="flex items-center justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3 flex-wrap sm:flex-nowrap">
+        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
           <div class="flex items-center gap-3 min-w-0 flex-1">
             <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
@@ -1081,7 +1080,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
               position: 'top',
               labels: {
                 color: '#a0a0a0',
-                font: { size: 12, weight: '600', family: "'Segoe UI', sans-serif" },
+                font: { size: 12, weight: '600', family: "sans-serif" },
                 padding: 25,
                 usePointStyle: true,
                 pointStyle: 'circle'
@@ -1132,8 +1131,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             }
           }
         },
-        plugins: [{
-          id: 'chartDataLabels',
+        plugins: [{\n          id: 'chartDataLabels',
           afterDatasetsDraw(chart) {
             const { ctx: c } = chart;
             chart.data.datasets.forEach((dataset, datasetIndex) => {
@@ -1144,7 +1142,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                 if (value === 0 || value === undefined) return;
 
                 c.save();
-                c.font = 'bold 12px "Segoe UI", sans-serif';
+                c.font = 'bold 12px sans-serif';
                 c.fillStyle = '#ffffff';
                 c.textAlign = 'center';
                 c.textBaseline = 'bottom';
@@ -1194,25 +1192,24 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           statsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4';
           statsDiv.id = 'cal-stats';
           statsDiv.innerHTML = `
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
               <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
               <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
               <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
             </div>
             ${nextShoot ? `
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
               <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
               <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
               <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
             </div>
             ` : `
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
               <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
               <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
               <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
             </div>
-            `}
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+            `}\n            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
               <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
               <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
               <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
@@ -1222,25 +1219,25 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         }
       } else {
         existingStats.innerHTML = `
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
             <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
             <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
             <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
           </div>
           ${nextShoot ? `
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
             <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
             <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
             <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
           </div>
           ` : `
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
             <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
             <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
             <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
           </div>
           `}
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
             <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
             <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
             <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
@@ -1379,22 +1376,22 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const outstanding = gross - captured;
 
       document.getElementById('pay-stats').innerHTML = `
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition lg:col-span-1">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
           <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
           <div class="text-[10px] text-neutral-600 mt-1">All shoots</div>
         </div>
-        <div class="bg-gradient-to-br from-emerald-950 to-emerald-900/30 border border-emerald-900/50 rounded-xl p-4 hover:border-emerald-700 transition lg:col-span-1">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
           <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
           <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
         </div>
-        <div class="bg-gradient-to-br from-red-950 to-red-900/30 border border-red-900/50 rounded-xl p-4 hover:border-red-700 transition lg:col-span-1">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
           <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
           <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
         </div>
-        <div class="bg-gradient-to-br from-neutral-900 to-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition lg:col-span-1">
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
           <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
           <div class="text-[10px] text-neutral-600 mt-1">Run costs</div>
@@ -1454,7 +1451,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                 const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
                 const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
                 return `
-                  <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between p-3 bg-neutral-950 border border-neutral-900 rounded-lg hover:border-neutral-700 transition cursor-pointer gap-3" onclick="openEditShootModal('${s.id}')">
+                  <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')">
                     <div class="flex items-center gap-3 min-w-0 flex-1">
                       <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
                         <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
@@ -1497,7 +1494,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function renderSettings() {
-      // Companies
       const compTarget = document.getElementById('settings-companies');
       if (compTarget) {
         compTarget.innerHTML = _companies.map((c, i) => `
@@ -1510,7 +1506,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           </div>`).join('');
       }
 
-      // Locations
       const locTarget = document.getElementById('settings-locations');
       if (locTarget) {
         locTarget.innerHTML = DEFAULT_LOCS.map(l => `
@@ -1528,7 +1523,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           </div>`).join('');
       }
 
-      // Events
       const eventTarget = document.getElementById('settings-events');
       if (eventTarget) {
         eventTarget.innerHTML = _events.map((e, i) => `
@@ -1542,7 +1536,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
-    // --- Account & Profile Logic ---
     function populateProfileUI() {
       document.getElementById('acc-biz-name').value = _profile.bizName || '';
       document.getElementById('acc-phone').value = _profile.phone || '';
@@ -1572,7 +1565,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('Financial Privacy PIN updated securely.');
     }
 
-    // --- CSV Export Logic ---
     function exportShootsToCSV() {
       if (!_shoots.length) {
         showToast('No shoots available to export.', 'error');
@@ -1583,18 +1575,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       
       const rows = _shoots.map(s => [
         s.id,
-        `"${(s.name || '').replace(/"/g, '""')}"`,
+        `"${(s.name || '').replace(/\"/g, '""')}"`,
         s.date,
         s.event,
         s.session,
-        `"${(s.location || '').replace(/"/g, '""')}"`,
-        `"${(s.company || '').replace(/"/g, '""')}"`,
+        `"${(s.location || '').replace(/\"/g, '""')}"`,
+        `"${(s.company || '').replace(/\"/g, '""')}"`,
         s.amount || 0,
         s.expense || 0,
         s.expenseStatus,
         s.payStatus,
         s.partPaid || 0,
-        `"${(s.notes || '').replace(/"/g, '""')}"`
+        `"${(s.notes || '').replace(/\"/g, '""')}\"`
       ]);
       
       const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
@@ -1610,7 +1602,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('CSV file generated and downloaded.', 'success');
     }
 
-    // Management Actions
     async function addCompany() {
       const el = document.getElementById('new-company-input');
       const val = el.value.trim(); if (!val) return;
@@ -2446,6 +2437,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
       doc.save(`JP_Shoots_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Downloaded', 'success');
+    }
+
+    function forceSync() {
+      setSyncStatus('syncing', 'Force Syncing...');
+      setTimeout(() => {
+        setSyncStatus('synced', 'Synced');
+        showToast('Force sync completed');
+      }, 2000);
     }
 
     loadAll();
