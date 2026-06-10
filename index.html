@@ -1818,7 +1818,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7); 
       doc.setTextColor(100, 100, 100);
       doc.text('Complete Database Export', margin, pageHeight - 3);
-      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
       
       doc.save(`Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Database report successfully generated as a PDF file.', 'success');
