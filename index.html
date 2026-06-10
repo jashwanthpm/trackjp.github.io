@@ -32,21 +32,52 @@
       transition: filter 0.2s ease-in-out;
     }
 
+    /* Fixed Account Tab CSS (Replaced failing @apply) */
     .account-sidebar-item {
-      @apply flex items-center gap-3 px-4 py-3 text-sm rounded-lg cursor-pointer transition-all border;
-      @apply border-transparent text-neutral-400 hover:text-white hover:bg-neutral-900/50;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .account-sidebar-item:hover {
+      color: white;
+      background-color: rgba(23, 23, 23, 0.5);
     }
 
     .account-sidebar-item.active {
-      @apply bg-neutral-950 border-neutral-800 text-[#c9a96e] font-semibold;
+      background-color: #0a0a0a;
+      border-color: #262626;
+      color: #c9a96e;
+      font-weight: 600;
     }
 
     .account-content-section {
-      @apply hidden;
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
     }
 
     .account-content-section.active {
-      @apply block;
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hide-scrollbar {
+      scrollbar-width: none;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -228,9 +259,8 @@
       </div>
 
       <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Sidebar Navigation -->
         <div class="lg:col-span-1">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-3 space-y-2 sticky top-20">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-2 md:p-3 flex overflow-x-auto lg:flex-col gap-2 md:space-y-2 sticky top-20 hide-scrollbar" style="scrollbar-width: none;">
             <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
               <i class="ti ti-user text-lg"></i>
               <span>Profile</span>
@@ -254,10 +284,8 @@
           </div>
         </div>
 
-        <!-- Content Area -->
         <div class="lg:col-span-3 space-y-6">
           
-          <!-- Profile Section -->
           <div id="account-profile" class="account-content-section active">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
               <div class="border-b border-neutral-800 pb-4">
@@ -292,7 +320,6 @@
             </div>
           </div>
 
-          <!-- Payment Details Section -->
           <div id="account-payment" class="account-content-section active">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
               <div class="border-b border-neutral-800 pb-4">
@@ -322,7 +349,6 @@
             </div>
           </div>
 
-          <!-- Security Section -->
           <div id="account-security" class="account-content-section">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
               <div class="border-b border-neutral-800 pb-4">
@@ -347,7 +373,6 @@
             </div>
           </div>
 
-          <!-- WhatsApp Section -->
           <div id="account-whatsapp" class="account-content-section">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
               <div class="border-b border-neutral-800 pb-4">
@@ -380,10 +405,8 @@
             </div>
           </div>
 
-          <!-- Settings Management Section -->
           <div id="account-settings" class="account-content-section">
             <div class="space-y-5">
-              <!-- Companies -->
               <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
                 <div class="border-b border-neutral-800 pb-4 mb-4">
                   <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -397,7 +420,6 @@
                 </div>
               </div>
 
-              <!-- Locations -->
               <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
                 <div class="border-b border-neutral-800 pb-4 mb-4">
                   <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -411,7 +433,6 @@
                 </div>
               </div>
 
-              <!-- Event Categories -->
               <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
                 <div class="border-b border-neutral-800 pb-4 mb-4">
                   <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -427,7 +448,6 @@
             </div>
           </div>
 
-          <!-- Data Management Section -->
           <div id="account-data" class="account-content-section">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
               <div class="border-b border-neutral-800 pb-4">
@@ -440,11 +460,11 @@
               <div class="space-y-3">
                 <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                   <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Export Your Data</p>
-                    <p class="text-xs text-neutral-500">Download all your shoots as a CSV file for backup or analysis.</p>
+                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export</p>
+                    <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all your data points.</p>
                   </div>
-                  <button onclick="exportShootsToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-file-spreadsheet"></i> Export as CSV
+                  <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
+                    <i class="ti ti-file-type-pdf text-lg"></i> Export Full Database (PDF)
                   </button>
                 </div>
 
@@ -938,8 +958,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
+    // Fixed Switch Tab code for Account Section
     function switchAccountTab(tab) {
       _currentAccountTab = tab;
+      
       document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
       
@@ -956,7 +978,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         if (el) el.classList.add('active');
       });
 
-      document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+      const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
+      if(activeBtn) {
+        activeBtn.classList.add('active');
+        // Scroll horizontal menu to bring active button into view on mobile
+        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
     }
 
     function renderDashboard() {
@@ -1566,6 +1593,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function renderPayments() {
+      // Fix for Company Dropdown in Payments Ledger
+      const payCompDropdown = document.getElementById('pay-filter-company');
+      if (payCompDropdown) {
+        const cachedSelection = payCompDropdown.value;
+        payCompDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
+      }
+
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
@@ -1767,41 +1801,153 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('Financial Privacy PIN updated securely.');
     }
 
-    function exportShootsToCSV() {
+    // Fixed PDF Database Export functionality (Replaced basic CSV script)
+    function exportAllDataToPDF() {
       if (!_shoots.length) {
-        showToast('No shoots available to export.', 'error');
+        showToast('No data to export', 'error');
         return;
       }
       
-      const headers = ['ID', 'Name', 'Date', 'Event', 'Session', 'Location', 'Company', 'Amount (Rs)', 'Expense (Rs)', 'Expense Status', 'Pay Status', 'Part Paid (Rs)', 'Notes'];
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      let yPos = 12;
+
+      // Header styling
+      doc.setFillColor(5, 5, 5); 
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(15, 15, 15); 
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(201, 169, 110); 
+      doc.setLineWidth(0.5); 
+      doc.line(0, 26, pageWidth, 26);
       
-      const rows = _shoots.map(s => [
-        s.id,
-        `"${(s.name || '').replace(/\"/g, '""')}"`,
-        s.date,
-        s.event,
-        s.session,
-        `"${(s.location || '').replace(/\"/g, '""')}"`,
-        `"${(s.company || '').replace(/\"/g, '""')}"`,
-        s.amount || 0,
-        s.expense || 0,
-        s.expenseStatus,
-        s.payStatus,
-        s.partPaid || 0,
-        `"${(s.notes || '').replace(/\"/g, '""')}\"`
-      ]);
+      doc.setFontSize(18); 
+      doc.setTextColor(201, 169, 110); 
+      doc.setFont(undefined, 'bold');
+      doc.text('SAKKHI - DATABASE EXPORT', margin, yPos + 6);
+      yPos = 32;
+
+      doc.setFontSize(9); 
+      doc.setTextColor(255, 255, 255);
+      doc.text('Complete Detailed Shoot Records', margin, yPos);
+      doc.setFontSize(7); 
+      doc.setFont(undefined, 'normal'); 
+      doc.setTextColor(150, 150, 150);
+      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute:'2-digit' });
+      doc.text('Generated: ' + dateStr, margin, yPos + 6);
+      yPos += 14;
+
+      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      // Loop months
+      const grouped = {};
+      filtered.forEach(s => {
+        const k = (s.date || 'Unknown').slice(0, 7);
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(s);
+      });
+
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage(); 
+          doc.setFillColor(5, 5, 5); 
+          doc.rect(0, 0, pageWidth, pageHeight, 'F'); 
+          yPos = margin;
+        }
+        
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = month ? MONTHS[parseInt(month) - 1] : 'Unknown';
+
+        doc.setFillColor(20, 20, 20); 
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+        doc.setDrawColor(80, 80, 80); 
+        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
+        doc.setFontSize(9); 
+        doc.setFont(undefined, 'bold'); 
+        doc.setTextColor(201, 169, 110);
+        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
+        yPos += 11;
+
+        shoots.forEach(s => {
+          // Dynamic height calculation based on fields present
+          let cardH = 14;
+          if (s.expense || s.notes) cardH += 5;
+          let splitNotes = [];
+          if (s.notes) {
+              splitNotes = doc.splitTextToSize('Notes: ' + s.notes, pageWidth - 2 * margin - 10);
+              cardH += (splitNotes.length * 3);
+          }
+
+          if (yPos + cardH > pageHeight - 10) {
+            doc.addPage(); 
+            doc.setFillColor(5, 5, 5); 
+            doc.rect(0, 0, pageWidth, pageHeight, 'F'); 
+            yPos = margin;
+          }
+
+          doc.setFillColor(15, 15, 15); 
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH, 'F');
+          doc.setDrawColor(50, 50, 50); 
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH);
+
+          const dateObj = new Date(s.date + 'T00:00:00');
+          const dateFormatted = isNaN(dateObj) ? s.date : dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+
+          doc.setFontSize(8); 
+          doc.setFont(undefined, 'bold'); 
+          doc.setTextColor(255, 255, 255);
+          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 4);
+
+          doc.setFontSize(6.5); 
+          doc.setFont(undefined, 'normal'); 
+          doc.setTextColor(150, 150, 150);
+          doc.text(`Event: ${s.event} | Session: ${s.session} | Loc: ${s.location || 'N/A'} | Co: ${s.company || 'Direct'}`, margin + 3, yPos + 8);
+
+          doc.setFontSize(8); 
+          doc.setFont(undefined, 'bold'); 
+          doc.setTextColor(201, 169, 110);
+          doc.text('Rs. ' + Number(s.amount || 0).toLocaleString('en-IN'), pageWidth - margin - 40, yPos + 4);
+
+          const payStatusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus] || 'PENDING';
+          const payStatusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus] || [220, 53, 69];
+          doc.setFontSize(6); 
+          doc.setTextColor(...payStatusColor);
+          doc.text(`${payStatusLabel} ${s.payStatus === 'part' ? '(Rs. '+Number(s.partPaid||0).toLocaleString()+')' : ''}`, pageWidth - margin - 40, yPos + 8);
+
+          let nextY = yPos + 13;
+          if (s.expense) {
+            doc.setFontSize(7); 
+            doc.setTextColor(255, 152, 0);
+            const expLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
+            doc.text(`Exp: Rs. ${Number(s.expense).toLocaleString('en-IN')} (${expLabel})`, margin + 3, nextY);
+            nextY += 4;
+          }
+
+          if (s.notes && splitNotes.length) {
+            doc.setFontSize(6); 
+            doc.setTextColor(120, 120, 120);
+            doc.text(splitNotes, margin + 3, nextY);
+          }
+
+          yPos = yPos + cardH + 2;
+        });
+      });
+
+      doc.setFillColor(15, 15, 15); 
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50); 
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+      doc.setFontSize(7); 
+      doc.setTextColor(100, 100, 100);
+      doc.text('Complete Database Export', margin, pageHeight - 3);
+      doc.text('SAKKHI by Jashwanth JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
       
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Sakkhi_Export_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      showToast('CSV file generated and downloaded.', 'success');
+      doc.save(`Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Database exported as PDF successfully.', 'success');
     }
 
     async function addCompany() {
@@ -2185,11 +2331,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         html += `<button type="button" onclick="selectDateFromPicker('${dateStr}')" class="text-xs p-1.5 rounded hover:bg-[#c9a96e] hover:text-black transition">${d}</button>`;
       }
       grid.innerHTML = html;
-    }
-
-    function selectDateFromPicker(dateStr) {
-      document.getElementById('f-shoot-date').value = dateStr;
-      document.getElementById('date-picker-dropdown').classList.add('hidden');
     }
 
     function downloadCompanyViewPDF() {
