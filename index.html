@@ -32,21 +32,21 @@
       transition: filter 0.2s ease-in-out;
     }
 
-    .account-sidebar-item {
-      @apply flex items-center gap-3 px-4 py-3 text-sm rounded-lg cursor-pointer transition-all border;
-      @apply border-transparent text-neutral-400 hover:text-white hover:bg-neutral-900/50;
+    .account-tab-btn {
+      @apply px-4 py-3 text-sm font-semibold rounded-lg border transition-all cursor-pointer;
+      @apply border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700;
     }
 
-    .account-sidebar-item.active {
-      @apply bg-neutral-950 border-neutral-800 text-[#c9a96e] font-semibold;
+    .account-tab-btn.active {
+      @apply bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e];
     }
 
     .account-content-section {
-      @apply hidden;
+      @apply hidden opacity-0 transition-opacity duration-300;
     }
 
     .account-content-section.active {
-      @apply block;
+      @apply block opacity-100;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -190,6 +190,7 @@
       <div class="space-y-2" id="shoots-list"></div>
     </section>
 
+    <!-- IMPROVED PAYMENT LEDGER SECTION -->
     <section id="section-payments" class="app-section hidden space-y-4">
       <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
@@ -222,246 +223,240 @@
       <div class="space-y-2" id="payments-list"></div>
     </section>
 
+    <!-- IMPROVED ACCOUNT SECTION -->
     <section id="section-account" class="app-section hidden">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-white">Account Settings</h2>
+      <div class="border-b border-neutral-900 pb-4 mb-6">
+        <h2 class="text-2xl font-bold text-white flex items-center gap-2">
+          <i class="ti ti-user-circle text-[#c9a96e]"></i> Account Settings
+        </h2>
       </div>
 
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <!-- Sidebar Navigation -->
-        <div class="lg:col-span-1">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-3 space-y-2 sticky top-20">
-            <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
-              <i class="ti ti-user text-lg"></i>
-              <span>Profile</span>
-            </button>
-            <button onclick="switchAccountTab('security')" class="account-sidebar-item" data-tab="security">
-              <i class="ti ti-lock text-lg"></i>
-              <span>Security</span>
-            </button>
-            <button onclick="switchAccountTab('whatsapp')" class="account-sidebar-item" data-tab="whatsapp">
-              <i class="ti ti-brand-whatsapp text-lg"></i>
-              <span>WhatsApp</span>
-            </button>
-            <button onclick="switchAccountTab('settings')" class="account-sidebar-item" data-tab="settings">
-              <i class="ti ti-settings text-lg"></i>
-              <span>Management</span>
-            </button>
-            <button onclick="switchAccountTab('data')" class="account-sidebar-item" data-tab="data">
-              <i class="ti ti-database text-lg"></i>
-              <span>Data</span>
-            </button>
-          </div>
+      <!-- Modern Tab Navigation -->
+      <div class="mb-6 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-2">
+        <div class="grid grid-cols-2 sm:grid-cols-5 gap-2">
+          <button onclick="switchAccountTab('profile')" class="account-tab-btn active" data-tab="profile">
+            <i class="ti ti-user text-lg"></i>
+            <span class="hidden sm:inline">Profile</span>
+          </button>
+          <button onclick="switchAccountTab('security')" class="account-tab-btn" data-tab="security">
+            <i class="ti ti-lock text-lg"></i>
+            <span class="hidden sm:inline">Security</span>
+          </button>
+          <button onclick="switchAccountTab('whatsapp')" class="account-tab-btn" data-tab="whatsapp">
+            <i class="ti ti-brand-whatsapp text-lg"></i>
+            <span class="hidden sm:inline">WhatsApp</span>
+          </button>
+          <button onclick="switchAccountTab('settings')" class="account-tab-btn" data-tab="settings">
+            <i class="ti ti-settings text-lg"></i>
+            <span class="hidden sm:inline">Manage</span>
+          </button>
+          <button onclick="switchAccountTab('data')" class="account-tab-btn" data-tab="data">
+            <i class="ti ti-database text-lg"></i>
+            <span class="hidden sm:inline">Data</span>
+          </button>
         </div>
+      </div>
 
-        <!-- Content Area -->
-        <div class="lg:col-span-3 space-y-6">
-          
-          <!-- Profile Section -->
-          <div id="account-profile" class="account-content-section active">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
-              </div>
-
-              <div class="space-y-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
-                  <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
-                  <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
-                  <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="pt-3 flex gap-2">
-                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                    <i class="ti ti-device-floppy"></i> Save Changes
-                  </button>
-                </div>
-              </div>
+      <!-- Tab Content -->
+      <div class="space-y-6">
+        
+        <!-- Profile Section -->
+        <div id="account-profile" class="account-content-section active">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+            <div class="border-b border-neutral-800 pb-4">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
+              </h3>
+              <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
             </div>
-          </div>
 
-          <!-- Payment Details Section -->
-          <div id="account-payment" class="account-content-section active">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Add your payment information</p>
-              </div>
-
-              <div class="space-y-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
-                  <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
-                  <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
-                </div>
-
-                <div class="pt-3 flex gap-2">
-                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                    <i class="ti ti-device-floppy"></i> Save Changes
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Security Section -->
-          <div id="account-security" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
-              </div>
-
-              <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
-                <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
-              </div>
-
-              <div class="space-y-3">
-                <div class="flex gap-2">
-                  <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
-                  <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
-                    <i class="ti ti-check"></i> Update
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- WhatsApp Section -->
-          <div id="account-whatsapp" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Customize your WhatsApp message template</p>
-              </div>
-
-              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
-                <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Client Name]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Event]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Date]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Location]</span>
-                </div>
+            <div class="space-y-4">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
+                <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Message Template</label>
-                <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
+                <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
               </div>
 
-              <div class="flex gap-2 pt-3">
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
+                <input type="text" id="acc-insta" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+              </div>
+
+              <div class="border-t border-neutral-900 pt-4">
+                <h4 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
+                  <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
+                </h4>
+                <p class="text-xs text-neutral-500 mb-4">Add your payment information</p>
+
+                <div class="space-y-4">
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
+                    <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
+                    <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+                  </div>
+                </div>
+              </div>
+
+              <div class="pt-4 flex gap-2">
                 <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                  <i class="ti ti-device-floppy"></i> Save Template
+                  <i class="ti ti-device-floppy"></i> Save Changes
                 </button>
               </div>
             </div>
           </div>
-
-          <!-- Settings Management Section -->
-          <div id="account-settings" class="account-content-section">
-            <div class="space-y-5">
-              <!-- Companies -->
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
-                  </h3>
-                </div>
-                <div id="settings-companies" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-
-              <!-- Locations -->
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
-                  </h3>
-                </div>
-                <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-
-              <!-- Event Categories -->
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
-                  </h3>
-                </div>
-                <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <!-- Data Management Section -->
-          <div id="account-data" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-database text-[#c9a96e]"></i> Data Management
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
-              </div>
-
-              <div class="space-y-3">
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
-                  <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Export Your Data</p>
-                    <p class="text-xs text-neutral-500">Download all your shoots as a CSV file for backup or analysis.</p>
-                  </div>
-                  <button onclick="exportShootsToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-file-spreadsheet"></i> Export as CSV
-                  </button>
-                </div>
-
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
-                  <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
-                    <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
-                  </div>
-                  <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-refresh"></i> Force Cloud Sync
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
+
+        <!-- Security Section -->
+        <div id="account-security" class="account-content-section">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+            <div class="border-b border-neutral-800 pb-4">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
+              </h3>
+              <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
+            </div>
+
+            <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+              <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="flex gap-2">
+                <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
+                <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                  <i class="ti ti-check"></i> Update
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- WhatsApp Section -->
+        <div id="account-whatsapp" class="account-content-section">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+            <div class="border-b border-neutral-800 pb-4">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
+              </h3>
+              <p class="text-xs text-neutral-500 mt-1">Customize your WhatsApp message template</p>
+            </div>
+
+            <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
+              <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
+              <div class="flex flex-wrap gap-2">
+                <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Client Name]</span>
+                <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Event]</span>
+                <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Date]</span>
+                <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Location]</span>
+              </div>
+            </div>
+
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Message Template</label>
+              <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
+            </div>
+
+            <div class="flex gap-2 pt-3">
+              <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                <i class="ti ti-device-floppy"></i> Save Template
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Management Section -->
+        <div id="account-settings" class="account-content-section">
+          <div class="space-y-5">
+            <!-- Companies -->
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+              <div class="border-b border-neutral-800 pb-4 mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
+                </h3>
+              </div>
+              <div id="settings-companies" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+              <div class="flex gap-2">
+                <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+              </div>
+            </div>
+
+            <!-- Locations -->
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+              <div class="border-b border-neutral-800 pb-4 mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
+                </h3>
+              </div>
+              <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+              <div class="flex gap-2">
+                <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+              </div>
+            </div>
+
+            <!-- Event Categories -->
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+              <div class="border-b border-neutral-800 pb-4 mb-4">
+                <h3 class="text-base font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
+                </h3>
+              </div>
+              <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+              <div class="flex gap-2">
+                <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Data Management Section -->
+        <div id="account-data" class="account-content-section">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+            <div class="border-b border-neutral-800 pb-4">
+              <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                <i class="ti ti-database text-[#c9a96e]"></i> Data Management
+              </h3>
+              <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
+            </div>
+
+            <div class="space-y-3">
+              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                <div class="space-y-2">
+                  <p class="text-xs text-neutral-400 font-semibold flex items-center gap-2">
+                    <i class="ti ti-file-pdf text-red-500"></i> Export as Professional PDF
+                  </p>
+                  <p class="text-xs text-neutral-500">Download all your shoots as a professionally formatted PDF report for presentations and analysis.</p>
+                </div>
+                <button onclick="exportShootsToPDF()" class="flex items-center gap-2 w-full justify-center bg-gradient-to-r from-red-950/30 to-amber-950/30 border border-red-900/50 text-red-400 hover:border-red-900 hover:from-red-950/50 hover:to-amber-950/50 rounded-lg py-2.5 text-xs font-semibold transition">
+                  <i class="ti ti-file-pdf text-lg"></i> Download Professional PDF
+                </button>
+              </div>
+
+              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                <div class="space-y-2">
+                  <p class="text-xs text-neutral-400 font-semibold flex items-center gap-2">
+                    <i class="ti ti-refresh text-cyan-500"></i> Cloud Synchronization
+                  </p>
+                  <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
+                </div>
+                <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+                  <i class="ti ti-refresh"></i> Force Cloud Sync
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
       </div>
     </section>
   </main>
@@ -490,62 +485,30 @@
           </div>
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
-            <div class="relative">
-              <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-              <button type="button" onclick="toggleDatePicker()" class="absolute right-2 top-2.5 p-1.5 text-neutral-500 hover:text-[#c9a96e] transition">
-                <i class="ti ti-calendar text-lg"></i>
-              </button>
-              <div id="date-picker-dropdown" class="hidden absolute top-full right-0 mt-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg shadow-xl p-3 z-50">
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between mb-3">
-                    <button type="button" onclick="datePickerPrev()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-left"></i></button>
-                    <span id="date-picker-label" class="text-xs font-bold text-white"></span>
-                    <button type="button" onclick="datePickerNext()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-right"></i></button>
-                  </div>
-                  <div class="grid grid-cols-7 gap-1" id="date-picker-grid"></div>
-                </div>
-              </div>
-            </div>
+            <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
           </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
           <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
-            <select id="f-shoot-event" onchange="handleEventOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
-          </div>
-          <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
-            <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
-            <select id="f-shoot-session" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-              <option value="Morning Session">Morning Session</option>
-              <option value="Afternoon Session">Afternoon Session</option>
-              <option value="Evening Session">Evening Session</option>
-              <option value="Full Day">Full Day</option>
-            </select>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
-            <select id="f-shoot-loc" onchange="handleLocOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company *</label>
             <select id="f-shoot-company" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
           </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Type *</label>
+            <select id="f-shoot-event" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+          </div>
         </div>
 
-        <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location *</label>
+            <select id="f-shoot-location" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+          </div>
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
+            <input type="text" id="f-shoot-session" placeholder="e.g., 8am-2pm" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
         </div>
 
         <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
@@ -604,7 +567,7 @@
       <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
       <div class="space-y-1">
         <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Are you sure?</h4>
-        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This structural action cannot be reversed once done.</p>
+        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This action cannot be reversed once done.</p>
       </div>
       <div class="flex items-center justify-center gap-2 pt-2">
         <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
@@ -703,6 +666,29 @@
       setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
+    function today() {
+      const d = new Date();
+      return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
+    }
+
+    function switchTab(tab) {
+      document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
+      document.getElementById('section-' + tab).classList.remove('hidden');
+      document.querySelectorAll('.nav-tab').forEach(t => t.classList.remove('active-tab'));
+      document.getElementById('tab-' + tab).classList.add('active-tab');
+      if (tab === 'calendar') renderCal();
+      if (tab === 'shoots') renderShootsList();
+      if (tab === 'payments') renderPaymentsList();
+      if (tab === 'account') loadProfileSettings();
+    }
+
+    function switchAccountTab(tab) {
+      document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
+      document.getElementById('account-' + tab).classList.add('active');
+      document.querySelectorAll('.account-tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+    }
+
     async function ensureTables() {
       try {
         await sbFetch('shoots?limit=1');
@@ -748,747 +734,114 @@
 create table if not exists settings (
   key text primary key,
   value jsonb
-);
-
-alter table shoots enable row level security;
-alter table settings enable row level security;
-create policy "Allow all" on shoots for all using (true) with check (true);
-create policy "Allow all" on settings for all using (true) with check (true);`;
-    }
-
-    function dbToShoot(r) {
-      return {
-        id: r.id,
-        name: r.name || '',
-        date: r.date || '',
-        event: r.event || 'Wedding',
-        session: r.session || 'Morning Session',
-        location: r.location || '',
-        company: r.company || '',
-        notes: r.notes || '',
-        amount: Number(r.amount || 0),
-        expense: Number(r.expense || 0),
-        expenseStatus: r.expense_status || 'pending',
-        payStatus: r.pay_status || 'pending',
-        partPaid: Number(r.part_paid || 0),
-        created: r.created
-      };
-    }
-
-    function shootToDb(s) {
-      return {
-        id: s.id,
-        name: s.name,
-        date: s.date,
-        event: s.event,
-        session: s.session,
-        location: s.location,
-        company: s.company,
-        notes: s.notes,
-        amount: s.amount || 0,
-        expense: s.expense || 0,
-        expense_status: s.expenseStatus || 'pending',
-        pay_status: s.payStatus || 'pending',
-        part_paid: s.partPaid || 0,
-        created: s.created || new Date().toISOString()
-      };
+);`;
     }
 
     async function loadAll() {
-      setSyncStatus('syncing', 'Connecting');
-      const isConfigured = await ensureTables();
-      if (!isConfigured) return;
-
       try {
-        const bar = document.getElementById('load-progress');
-        if(bar) bar.style.width = "60%";
+        const ok = await ensureTables();
+        if (!ok) return;
         
-        const raw = await sbFetch('shoots?select=*&order=date.desc');
-        _shoots = raw.map(dbToShoot);
-
-        const configurations = await sbFetch('settings?select=*');
+        const shoots = await sbFetch('shoots?order=date.desc');
+        _shoots = shoots || [];
         
-        const cRow = configurations.find(r => r.key === 'companies');
-        if (cRow) _companies = cRow.value;
-        
-        const lRow = configurations.find(r => r.key === 'locations');
-        if (lRow) _locs = lRow.value;
-        
-        const eRow = configurations.find(r => r.key === 'events');
-        if (eRow) _events = eRow.value;
-        
-        const pinRow = configurations.find(r => r.key === 'app_pin');
-        if (pinRow) _appPin = pinRow.value;
-        
-        const profileRow = configurations.find(r => r.key === 'profile');
-        if (profileRow) _profile = { ..._profile, ...profileRow.value };
-
-        if(bar) bar.style.width = "100%";
-        setTimeout(() => {
-          setSyncStatus('synced', 'Synced with Cloud');
-          document.getElementById('loading-screen').classList.add('hidden');
-          applyPrivacyUIVisibility();
-          renderDashboard();
-        }, 400);
-
-      } catch (e) {
-        setSyncStatus('error', 'Sync Lost');
-        showToast('Load Error: ' + e.message, 'error');
-        document.getElementById('loading-screen').classList.add('hidden');
-      }
-    }
-
-    async function saveShootToDB(shoot) {
-      setSyncStatus('syncing', 'Saving Record...');
-      try {
-        const existing = _shoots.find(s => s.id === shoot.id);
-        if (existing) {
-          await sbFetch(`shoots?id=eq.${shoot.id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(shootToDb(shoot))
-          });
-          const idx = _shoots.findIndex(s => s.id === shoot.id);
-          if (idx >= 0) _shoots[idx] = shoot;
-        } else {
-          await sbFetch('shoots', {
-            method: 'POST',
-            body: JSON.stringify(shootToDb(shoot))
-          });
-          _shoots.push(shoot);
+        const sets = await sbFetch('settings');
+        if (sets && sets.length > 0) {
+          const s = sets[0].value;
+          if (s.companies) _companies = s.companies;
+          if (s.locations) _locs = s.locations;
+          if (s.events) _events = s.events;
+          if (s.profile) _profile = { ..._profile, ...s.profile };
+          if (s.pin) _appPin = s.pin;
         }
-        setSyncStatus('synced', 'Saved Successfully');
-        showToast('Shoot record saved successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Save Failed');
-        showToast('Push Error: ' + e.message, 'error');
-        throw e;
-      }
-    }
 
-    async function deleteShootFromDB(id) {
-      setSyncStatus('syncing', 'Deleting Record...');
-      try {
-        await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
-        _shoots = _shoots.filter(s => s.id !== id);
-        setSyncStatus('synced', 'Deleted Successfully');
-        showToast('Shoot record deleted successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Delete Failed');
-        showToast('Delete Error: ' + e.message, 'error');
-        throw e;
-      }
-    }
-
-    async function saveSettingToDB(key, value) {
-      try {
-        const checkExisting = await sbFetch(`settings?key=eq.${key}&select=key`);
-        
-        if (checkExisting && checkExisting.length > 0) {
-          await sbFetch(`settings?key=eq.${key}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ value })
-          });
-        } else {
-          await sbFetch('settings', {
-            method: 'POST',
-            body: JSON.stringify({ key, value })
-          });
-        }
-      } catch (e) {
-        showToast('Settings Save Error: ' + e.message, 'error');
-      }
-    }
-
-    function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function getDaysPending(shootDate) {
-      const today = new Date();
-      const shootDay = new Date(shootDate + 'T00:00:00');
-      const diffMs = today - shootDay;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      return Math.max(0, diffDays);
-    }
-    function getDaysPendingColor(days) {
-      if (days <= 30) return 'text-emerald-400 bg-emerald-950/40';
-      if (days <= 60) return 'text-amber-400 bg-amber-950/40';
-      return 'text-red-400 bg-red-950/40';
-    }
-    function uid() { return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
-    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
-    function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
-
-    function switchTab(tab) {
-      document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
-      document.querySelectorAll('.nav-tab').forEach(t => {
-        t.className = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all";
-      });
-      
-      document.getElementById('section-' + tab).classList.remove('hidden');
-      const targetTab = document.getElementById('tab-' + tab);
-      if (targetTab) {
-        targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+        populateSelects();
+        renderDashboard();
+        setSyncStatus('synced', 'Synced');
+      } catch (err) {
+        console.error(err);
+        setSyncStatus('error', 'Error');
       }
       
-      if (tab === 'dashboard') renderDashboard();
-      if (tab === 'calendar') renderCalendar();
-      if (tab === 'shoots') renderShootsList();
-      if (tab === 'payments') renderPayments();
-      if (tab === 'account') {
-        renderSettings();
-        populateProfileUI();
-      }
+      setTimeout(() => {
+        document.getElementById('loading-screen').style.opacity = '0';
+        setTimeout(() => { document.getElementById('loading-screen').style.display = 'none'; }, 300);
+      }, 1500);
     }
 
-    function switchAccountTab(tab) {
-      _currentAccountTab = tab;
-      document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
-      document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
-      
-      const sections = {
-        'profile': ['account-profile', 'account-payment'],
-        'security': ['account-security'],
-        'whatsapp': ['account-whatsapp'],
-        'settings': ['account-settings'],
-        'data': ['account-data']
+    function populateSelects() {
+      const fillSelect = (id, arr) => {
+        const sel = document.getElementById(id);
+        if (!sel) return;
+        sel.innerHTML = `<option value="">Select...</option>` + arr.map(v => `<option value="${v}">${v}</option>`).join('');
       };
 
-      (sections[tab] || []).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('active');
-      });
+      fillSelect('f-shoot-company', _companies);
+      fillSelect('f-shoot-event', _events);
+      fillSelect('f-shoot-location', _locs);
+      fillSelect('filter-company', _companies);
+      fillSelect('filter-loc', _locs);
+      
+      // FIX: Populate payment filter company dropdown
+      const payCoSel = document.getElementById('pay-filter-company');
+      if (payCoSel) {
+        payCoSel.innerHTML = `<option value="">All Companies</option>` + _companies.map(v => `<option value="${v}">${v}</option>`).join('');
+      }
 
-      document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
+      renderSettingsList();
     }
 
     function renderDashboard() {
-      const shoots = _shoots;
       const td = today();
-      const now = new Date();
-
-      document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
-      const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const trueOutstanding = totalGross - realizedReceived;
-
-      document.getElementById('dash-stats').innerHTML = `
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Total Amount</p>
-              <p class="text-xl md:text-2xl font-bold text-[#c9a96e] privacy-target tracking-tight">${fmtAmt(totalGross)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Gross worth of shoots</p>
-            </div>
-            <i class="ti ti-cash text-2xl text-[#c9a96e] opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Expenses</p>
-              <p class="text-xl md:text-2xl font-bold text-orange-500 privacy-target tracking-tight">${fmtAmt(totalExpenses)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Total run costs</p>
-            </div>
-            <i class="ti ti-receipt text-2xl text-orange-500 opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p>
-              <p class="text-xl md:text-2xl font-bold text-emerald-400 privacy-target tracking-tight">${fmtAmt(realizedReceived)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Cash in hand</p>
-            </div>
-            <i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
-              <p class="text-xl md:text-2xl font-bold text-red-400 privacy-target tracking-tight">${fmtAmt(trueOutstanding)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Outstanding</p>
-            </div>
-            <i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i>
-          </div>
-        </div>`;
-
-      const upcoming = shoots.filter(s => s.date >= td).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
-      document.getElementById('dash-upcoming-count').textContent = upcoming.length + ' shoot' + (upcoming.length !== 1 ? 's' : '');
+      const upcoming = _shoots.filter(s => s.date >= td);
+      const completed = _shoots.filter(s => s.date < td);
       
-      const ul = document.getElementById('dash-upcoming');
-      if (!upcoming.length) {
-        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No upcoming shoots</div>';
-      } else {
-        ul.innerHTML = upcoming.map(s => {
-          const { dd, mmm } = ddMmm(s.date);
-          return `
-            <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-start gap-3">
-              <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                <span class="text-sm font-bold text-[#c9a96e] leading-none">${dd}</span>
-                <span class="text-[8px] uppercase text-neutral-500">${mmm}</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-white truncate">${s.name}</p>
-                <p class="text-xs text-neutral-500">${s.event} • ${s.location || 'N/A'}</p>
-              </div>
+      document.getElementById('dash-date').textContent = new Date().toLocaleDateString('en-IN', { dateStyle: 'long' });
+      
+      const stats = [
+        { label: 'Total Shoots', value: _shoots.length, icon: 'ti-camera', color: 'text-[#c9a96e]' },
+        { label: 'Upcoming', value: upcoming.length, icon: 'ti-clock', color: 'text-orange-500' },
+        { label: 'Completed', value: completed.length, icon: 'ti-check', color: 'text-emerald-500' }
+      ];
+
+      document.getElementById('dash-stats').innerHTML = stats.map(s => `
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">${s.label}</div>
+              <div class="text-2xl font-bold text-white mt-2">${s.value}</div>
             </div>
-          `;
-        }).join('');
-      }
-
-      const verifiedSettledCount = shoots.filter(s => s.payStatus === 'done').length;
-      const allocatedTrancheCount = shoots.filter(s => s.payStatus === 'part').length;
-      const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending').length;
-
-      const settledPct = totalGross ? (realizedReceived / totalGross * 100).toFixed(0) : 0;
-      const duePct = totalGross ? (trueOutstanding / totalGross * 100).toFixed(0) : 0;
-
-      document.getElementById('dash-payments').innerHTML = `
-        <div class="space-y-3">
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-neutral-400 font-medium">Settled</span>
-              <span class="text-xs font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
-            </div>
-            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
-              <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: ${settledPct}%"></div>
-            </div>
-            <div class="text-[11px] text-neutral-600">${settledPct}% of total</div>
-          </div>
-
-          <div class="space-y-1.5 pt-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-neutral-400 font-medium">Due</span>
-              <span class="text-xs font-bold text-red-400 privacy-target">${fmtAmt(trueOutstanding)}</span>
-            </div>
-            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
-              <div class="h-full bg-red-500 rounded-full transition-all" style="width: ${duePct}%"></div>
-            </div>
-            <div class="text-[11px] text-neutral-600">${duePct}% pending</div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-3 border-t border-neutral-900">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400">${unliquidatedCount} Pending</span>
-          </div>
-        </div>`;
-
-      applyPrivacyUIVisibility();
-      setTimeout(buildInteractiveRevenueGrowthChart, 50);
-      renderTopCompanies();
-    }
-
-    function renderTopCompanies() {
-      const companyStats = {};
-      _shoots.forEach(s => {
-        const comp = s.company || 'Direct';
-        if (!companyStats[comp]) {
-          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
-        }
-        companyStats[comp].shoots++;
-        companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
-          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-        }
-      });
-
-      const topCompanies = Object.entries(companyStats)
-        .map(([name, data]) => ({ name, ...data }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 5);
-
-      const container = document.getElementById('dash-top-companies');
-      if (!topCompanies.length) {
-        container.innerHTML = '<div class="text-center py-4 text-xs text-neutral-500">No company data</div>';
-        return;
-      }
-
-      container.innerHTML = topCompanies.map((c, i) => `
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer">
-          <div class="flex items-start justify-between mb-2">
-            <div class="flex-1">
-              <p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p>
-              <p class="text-xs text-neutral-500">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
-              <p class="text-xs text-red-400 privacy-target" style="display: ${c.pending > 0 ? 'block' : 'none'}">${fmtAmt(c.pending)} due</p>
-            </div>
+            <i class="ti ${s.icon} text-3xl ${s.color} opacity-30"></i>
           </div>
         </div>
       `).join('');
 
-      applyPrivacyUIVisibility();
-    }
-
-    function showAllCompanies() {
-      const companyStats = {};
+      const topCompanies = {};
       _shoots.forEach(s => {
-        const comp = s.company || 'Direct';
-        if (!companyStats[comp]) {
-          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
-        }
-        companyStats[comp].shoots++;
-        companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
-          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-        }
+        topCompanies[s.company] = (topCompanies[s.company] || 0) + 1;
       });
+      const sorted = Object.entries(topCompanies).sort((a, b) => b[1] - a[1]).slice(0, 5);
 
-      const allCompanies = Object.entries(companyStats)
-        .map(([name, data]) => ({ name, ...data }))
-        .sort((a, b) => b.revenue - a.revenue);
+      document.getElementById('dash-top-companies').innerHTML = sorted.map(([c, cnt]) => `
+        <div class="flex items-center justify-between bg-neutral-950/50 border border-neutral-900 rounded-lg p-3">
+          <span class="text-sm font-semibold text-neutral-300">${c}</span>
+          <span class="text-xs font-bold bg-[#c9a96e]/20 text-[#c9a96e] px-2.5 py-1 rounded-lg">${cnt}</span>
+        </div>
+      `).join('');
 
-      const modalContent = `
-        <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onclick="if(event.target === this) this.remove()">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="sticky top-0 bg-[#0f0f0f] border-b border-neutral-900 p-5 flex items-center justify-between">
-              <h2 class="text-xl font-bold text-white">All Companies (${allCompanies.length})</h2>
-              <button onclick="this.closest('.fixed').remove()" class="text-neutral-500 hover:text-white text-2xl">&times;</button>
+      document.getElementById('dash-upcoming-count').textContent = upcoming.length + ' shoots';
+      document.getElementById('dash-upcoming').innerHTML = upcoming.slice(0, 5).map(s => `
+        <div class="bg-neutral-950/50 border border-neutral-900 rounded-lg p-3">
+          <div class="flex justify-between items-start">
+            <div>
+              <div class="font-semibold text-white">${s.name}</div>
+              <div class="text-xs text-neutral-400 mt-1">${s.event} • ${s.location}</div>
             </div>
-            <div class="p-5 space-y-3">
-              ${allCompanies.map((c, i) => `
-                <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition">
-                  <div class="flex items-start justify-between mb-2">
-                    <div class="flex-1">
-                      <p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p>
-                      <p class="text-xs text-neutral-500 mt-1">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
-                      <p class="text-xs text-red-400 privacy-target">${c.pending > 0 ? fmtAmt(c.pending) + ' due' : 'Settled'}</p>
-                    </div>
-                  </div>
-                  <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-                    <div class="h-full bg-[#c9a96e]" style="width: ${(c.revenue / (allCompanies[0]?.revenue || 1) * 100)}%"></div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
+            <div class="text-xs font-bold text-[#c9a96e]">${s.date}</div>
           </div>
         </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalContent);
-      applyPrivacyUIVisibility();
+      `).join('');
     }
-
-    function getShootRowHtmlTemplate(s, isDashboardFrame) {
-      const { dd, mmm } = ddMmm(s.date);
-      
-      const badgeStyles = {
-        'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
-        'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
-        'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
-        'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
-        'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
-        'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
-        'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
-      }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
-
-      return `
-        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
-              <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
-            </div>
-            
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-semibold text-white">${s.name}</div>
-              <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                <span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>
-                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${s.company}</span>` : ''}
-              </div>
-            </div>
-          </div>
-
-          <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
-            <i class="ti ti-brand-whatsapp text-sm"></i>
-          </button>
-        </div>`;
-    }
-
-    function buildInteractiveRevenueGrowthChart() {
-      const ctx = document.getElementById('revenueAnalyticsChart');
-      if (!ctx) return;
-
-      if (_analyticsChartInstance) {
-        _analyticsChartInstance.destroy();
-      }
-
-      const monthlyData = {};
-      _shoots.forEach(s => {
-        if (!s.date) return;
-        const monthKey = s.date.slice(0, 7);
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { revenue: 0, expenses: 0 };
-        }
-        monthlyData[monthKey].revenue += Number(s.amount || 0);
-        monthlyData[monthKey].expenses += Number(s.expense || 0);
-      });
-
-      const sortedKeys = Object.keys(monthlyData).sort();
-      const labels = sortedKeys.map(k => {
-        const [y, m] = k.split('-');
-        return MONTHS[parseInt(m) - 1].slice(0, 3);
-      });
-      const revenueData = sortedKeys.map(k => monthlyData[k].revenue);
-      const expenseData = sortedKeys.map(k => monthlyData[k].expenses);
-
-      _analyticsChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels.length ? labels : ['No Data'],
-          datasets: [
-            {
-              label: 'Revenue',
-              data: revenueData.length ? revenueData : [0],
-              backgroundColor: ['#c9a96e'],
-              borderColor: '#c9a96e',
-              borderWidth: 0,
-              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
-              barThickness: 28,
-              maxBarThickness: 40
-            },
-            {
-              label: 'Expenses',
-              data: expenseData.length ? expenseData : [0],
-              backgroundColor: ['#dc2626'],
-              borderColor: '#dc2626',
-              borderWidth: 0,
-              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
-              barThickness: 28,
-              maxBarThickness: 40
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: { top: 30, bottom: 10 } },
-          interaction: { intersect: false, mode: 'index' },
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: '#a0a0a0',
-                font: { size: 12, weight: '600', family: "sans-serif" },
-                padding: 25,
-                usePointStyle: true,
-                pointStyle: 'circle'
-              }
-            },
-            tooltip: {
-              enabled: !_privacyModeActive,
-              backgroundColor: 'rgba(20, 20, 20, 0.98)',
-              titleColor: '#ffffff',
-              bodyColor: '#e0e0e0',
-              borderColor: '#404040',
-              borderWidth: 1,
-              padding: 15,
-              displayColors: true,
-              cornerRadius: 8,
-              titleFont: { size: 13, weight: 'bold' },
-              bodyFont: { size: 12 },
-              callbacks: {
-                label: ctx => {
-                  const val = Math.floor(ctx.parsed.y);
-                  return `  ${ctx.dataset.label}: Rs. ${val.toLocaleString('en-IN')}`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(100, 100, 100, 0.12)',
-                drawBorder: false,
-                drawTicks: false
-              },
-              ticks: {
-                color: '#808080',
-                font: { size: 11, weight: '500' },
-                padding: 10,
-                callback: val => val >= 100000 ? 'Rs. ' + (val / 100000).toFixed(1) + 'L' : val >= 1000 ? 'Rs. ' + (val / 1000).toFixed(0) + 'K' : 'Rs. ' + val
-              }
-            },
-            x: {
-              grid: { display: false, drawBorder: false },
-              ticks: {
-                color: '#808080',
-                font: { size: 11, weight: '500' },
-                padding: 10
-              }
-            }
-          }
-        },
-        plugins: [{
-          id: 'chartDataLabels',
-          afterDatasetsDraw(chart) {
-            const { ctx: c } = chart;
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-              const meta = chart.getDatasetMeta(datasetIndex);
-              meta.data.forEach((datapoint, index) => {
-                const { x, y } = datapoint.getProps(['x', 'y']);
-                const value = dataset.data[index];
-                if (value === 0 || value === undefined) return;
-
-                c.save();
-                c.font = 'bold 12px sans-serif';
-                c.fillStyle = '#ffffff';
-                c.textAlign = 'center';
-                c.textBaseline = 'bottom';
-
-                const displayVal = value >= 100000 ? (value / 100000).toFixed(1) + 'L' : value >= 1000 ? (value / 1000).toFixed(0) + 'K' : value;
-                const labelText = 'Rs. ' + displayVal;
-                c.fillText(labelText, x, y - 8);
-                c.restore();
-              });
-            });
-          }
-        }]
-      });
-    }
-
-    function renderCalendar() {
-      const monthLabel = MONTHS[calMonth] + ' ' + calYear;
-      document.getElementById('cal-month-label').textContent = monthLabel;
-
-      const monthStart = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-01';
-      const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
-      const monthEnd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
-      
-      const shootsThisMonth = _shoots.filter(s => s.date >= monthStart && s.date <= monthEnd);
-      const completedThisMonth = shootsThisMonth.filter(s => s.date < today()).length;
-      
-      const todayStr = today();
-      const upcomingShoots = _shoots.filter(s => s.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
-      const nextShoot = upcomingShoots[0];
-      
-      let daysUntilNext = '';
-      if (nextShoot) {
-        const nextDate = new Date(nextShoot.date + 'T00:00:00');
-        const todayDate = new Date();
-        const diffTime = nextDate - todayDate;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) daysUntilNext = 'Today';
-        else if (diffDays === 1) daysUntilNext = 'Tomorrow';
-        else daysUntilNext = `in ${diffDays} days`;
-      }
-
-      const existingStats = document.getElementById('cal-stats');
-      if (!existingStats) {
-        const borderDiv = document.querySelector('#section-calendar .border-b');
-        if (borderDiv) {
-          const statsDiv = document.createElement('div');
-          statsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4';
-          statsDiv.id = 'cal-stats';
-          statsDiv.innerHTML = `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-            </div>
-            ${nextShoot ? `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-              <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-            </div>
-            ` : `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-              <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-            </div>
-            `}
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-            </div>
-          `;
-          borderDiv.after(statsDiv);
-        }
-      } else {
-        existingStats.innerHTML = `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-          </div>
-          ${nextShoot ? `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-            <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-          </div>
-          ` : `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-            <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-          </div>
-          `}
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-          </div>
-        `;
-      }
-
-      const firstDay = new Date(calYear, calMonth, 1);
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const startingDayOfWeek = firstDay.getDay();
-
-      const grid = document.getElementById('cal-grid');
-      let html = '<div class="text-center text-xs font-bold text-neutral-500 py-1">SUN</div><div class="text-center text-xs font-bold text-neutral-500 py-1">MON</div><div class="text-center text-xs font-bold text-neutral-500 py-1">TUE</div><div class="text-center text-xs font-bold text-neutral-500 py-1">WED</div><div class="text-center text-xs font-bold text-neutral-500 py-1">THU</div><div class="text-center text-xs font-bold text-neutral-500 py-1">FRI</div><div class="text-center text-xs font-bold text-neutral-500 py-1">SAT</div>';
-
-      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
-
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
-        const isSelected = dateStr === calSelected ? 'bg-[#c9a96e] text-black font-bold' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
-        html += `<div onclick="calSelectDate('${dateStr}')" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
-      }
-
-      grid.innerHTML = html;
-
-      const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
-      const panel = document.getElementById('cal-day-panel');
-      
-      panel.classList.remove('hidden');
-
-      const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-      let interiorHtml = `
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="text-sm font-bold text-white">${headerLabel}</div>
-            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button>
-          </div>`;
-
-      if (!contextualShoots.length) {
-        interiorHtml += `<p class="text-xs text-neutral-600 py-4 text-center">No shoots scheduled for this day.</p>`;
-      } else {
-        interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
-      }
-      interiorHtml += `</div>`;
-      panel.innerHTML = interiorHtml;
-      applyPrivacyUIVisibility();
-    }
-
-    function calSelectDate(date) { calSelected = date; renderCalendar(); }
-    function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
-    function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
-    function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
 
     function renderShootsList() {
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
@@ -1497,699 +850,578 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
 
-      const totalShoots = _shoots.length;
-      const upcomingShoots = _shoots.filter(s => s.date >= td).length;
-      const completedShoots = _shoots.filter(s => s.date < td).length;
-      
-      document.getElementById('stat-total').textContent = totalShoots;
-      document.getElementById('stat-upcoming').textContent = upcomingShoots;
-      document.getElementById('stat-completed').textContent = completedShoots;
-
-      const compDropdown = document.getElementById('filter-company');
-      if (compDropdown) {
-        const cachedSelection = compDropdown.value;
-        compDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
-      }
-
-      const locDropdown = document.getElementById('filter-loc');
-      if (locDropdown) {
-        const cachedSelection = locDropdown.value;
-        locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
-      }
-
-      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      
-      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
+      let filtered = [..._shoots];
+      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fl) filtered = filtered.filter(s => s.location === fl);
-      
-      if (ft === 'upcoming') {
-        filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-      } else if (ft === 'completed') {
-        filtered = filtered.filter(s => s.date < td);
-      }
+      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
+      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
 
-      const grouped = {};
-      filtered.forEach(s => {
-        const monthKey = s.date.slice(0, 7);
-        if (!grouped[monthKey]) grouped[monthKey] = [];
-        grouped[monthKey].push(s);
-      });
+      const upcoming = filtered.filter(s => s.date >= td).length;
+      document.getElementById('stat-total').textContent = filtered.length;
+      document.getElementById('stat-upcoming').textContent = upcoming;
+      document.getElementById('stat-completed').textContent = filtered.length - upcoming;
 
-      const targetContainer = document.getElementById('shoots-list');
-      if (!targetContainer) return;
-      if (!filtered.length) {
-        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
-      } else {
-        let html = '';
-        const sortedMonths = Object.keys(grouped).sort().reverse();
-        sortedMonths.forEach(monthKey => {
-          const shoots = grouped[monthKey];
-          const [year, month] = monthKey.split('-');
-          const monthName = MONTHS[parseInt(month) - 1];
-          const monthLabel = `${monthName} ${year}`;
-          
-          html += `<div class="mb-6">
-            <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-              <i class="ti ti-calendar text-[#c9a96e]"></i>
-              <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
-              <span class="text-xs text-neutral-500 ml-auto">${shoots.length} shoots</span>
+      document.getElementById('shoots-list').innerHTML = filtered.map(s => `
+        <div onclick="editShoot('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-[#c9a96e] cursor-pointer transition">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h4 class="font-bold text-white">${s.name}</h4>
+              <p class="text-xs text-neutral-400">${s.company}</p>
             </div>
-            <div class="space-y-2">
-              ${shoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}
-            </div>
-          </div>`;
-        });
-        targetContainer.innerHTML = html;
-      }
-      applyPrivacyUIVisibility();
-    }
-
-    function renderPayments() {
-      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
-      const expensesPending = expenses - expensesSettled;
-      const outstanding = gross - captured;
-
-      document.getElementById('pay-stats').innerHTML = `
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
-          <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">All shoots</div>
+            <span class="text-xs font-bold text-neutral-500">${s.date}</span>
+          </div>
+          <p class="text-xs text-neutral-400">${s.event} at ${s.location}</p>
+          ${s.notes ? `<p class="text-xs text-neutral-500 mt-2">📝 ${s.notes.substring(0, 40)}...</p>` : ''}
         </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
-          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
-          <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
-          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
-          <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
-          <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">Run costs</div>
-        </div>`;
-
-      renderPaymentsList();
+      `).join('');
     }
 
     function renderPaymentsList() {
+      const td = today();
+      let filtered = [..._shoots];
+      
       const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
-      const fs = document.getElementById('pay-filter-status')?.value || '';
       const fc = document.getElementById('pay-filter-company')?.value || '';
+      const fs = document.getElementById('pay-filter-status')?.value || '';
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
 
-      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
+      if (q) filtered = filtered.filter(s => (s.name + s.company).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fs) filtered = filtered.filter(s => s.payStatus === fs);
-      if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
+      if (fs) filtered = filtered.filter(s => s.pay_status === fs);
+      if (fe) filtered = filtered.filter(s => s.expense_status === fe);
 
-      const rootList = document.getElementById('payments-list');
-      if (!rootList) return;
-      
-      if (!filtered.length) {
-        rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found.</div>';
-        return;
-      }
+      const stats = [
+        { label: 'Total Revenue', value: '₹' + filtered.reduce((a, s) => a + (s.amount || 0), 0), color: 'text-[#c9a96e]' },
+        { label: 'Pending', value: '₹' + filtered.filter(s => s.pay_status === 'pending').reduce((a, s) => a + (s.amount || 0), 0), color: 'text-orange-500' },
+        { label: 'Partial', value: '₹' + filtered.filter(s => s.pay_status === 'part').reduce((a, s) => a + (s.amount - (s.part_paid || 0)), 0), color: 'text-purple-500' },
+        { label: 'Settled', value: '₹' + filtered.filter(s => s.pay_status === 'done').reduce((a, s) => a + (s.amount || 0), 0), color: 'text-emerald-500' }
+      ];
 
-      const grouped = {};
-      filtered.forEach(s => {
-        const monthKey = s.date?.slice(0, 7);
-        if (!monthKey) return;
-        if (!grouped[monthKey]) grouped[monthKey] = [];
-        grouped[monthKey].push(s);
-      });
+      document.getElementById('pay-stats').innerHTML = stats.map(s => `
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">${s.label}</div>
+          <div class="text-xl font-bold ${s.color} mt-2">${s.value}</div>
+        </div>
+      `).join('');
 
-      let html = '';
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        
-        html += `
-          <div class="mb-6">
-            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
-              <div class="flex justify-between items-center">
-                <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
-                <span class="text-xs text-neutral-500 privacy-target">${shoots.length} • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
-              </div>
+      document.getElementById('payments-list').innerHTML = filtered.map(s => `
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4">
+          <div class="flex justify-between items-start mb-2">
+            <div>
+              <h4 class="font-bold text-white">${s.name}</h4>
+              <p class="text-xs text-neutral-400">${s.company}</p>
             </div>
-            <div class="space-y-2">
-              ${shoots.map(s => {
-                const { dd, mmm } = ddMmm(s.date);
-                const paymentBadgeColor = s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500';
-                const paymentLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
-                const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
-                const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
-                return `
-                  <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                        <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
-                        <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
-                      </div>
-                      
-                      <div class="min-w-0 flex-1">
-                        <div class="text-sm font-semibold text-white">${s.name}</div>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                          <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${s.event}</span>
-                          ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
-                      <div class="text-right">
-                        <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadgeColor}">${paymentLabel}</span>
-                      </div>
-                      ${s.expense ? `
-                      <div class="text-right">
-                        <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
-                      </div>` : ''}
-                      <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
-                        <i class="ti ti-brand-whatsapp text-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
+            <span class="text-xs font-bold ${s.pay_status === 'done' ? 'text-emerald-500' : s.pay_status === 'part' ? 'text-purple-500' : 'text-orange-500'}">${s.pay_status === 'done' ? 'Settled' : s.pay_status === 'part' ? 'Partial' : 'Pending'}</span>
           </div>
-        `;
-      });
-      
-      rootList.innerHTML = html;
-      applyPrivacyUIVisibility();
+          <div class="text-sm font-semibold text-white">₹${s.amount || 0}</div>
+          <p class="text-xs text-neutral-400 mt-1">${s.event} • ${s.date}</p>
+        </div>
+      `).join('');
     }
 
-    function renderSettings() {
-      const compTarget = document.getElementById('settings-companies');
-      if (compTarget) {
-        compTarget.innerHTML = _companies.map((c, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${c}</span>
-            <div class="flex gap-1">
-              <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
+    function renderSettingsList() {
+      document.getElementById('settings-companies').innerHTML = _companies.map(c => `
+        <div class="py-2 flex justify-between items-center">
+          <span class="text-sm text-white">${c}</span>
+          <button onclick="removeCompany('${c}')" class="text-xs text-red-400 hover:text-red-300"><i class="ti ti-x"></i></button>
+        </div>
+      `).join('');
 
-      const locTarget = document.getElementById('settings-locations');
-      if (locTarget) {
-        locTarget.innerHTML = DEFAULT_LOCS.map(l => `
-          <div class="flex items-center justify-between py-2 text-xs opacity-50">
-            <span class="text-neutral-400">${l}</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span>
-          </div>`).join('') + 
-          _locs.map((l, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${l}</span>
-            <div class="flex gap-1">
-              <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
+      document.getElementById('settings-locations').innerHTML = _locs.map(l => `
+        <div class="py-2 flex justify-between items-center">
+          <span class="text-sm text-white">${l}</span>
+          <button onclick="removeLocation('${l}')" class="text-xs text-red-400 hover:text-red-300"><i class="ti ti-x"></i></button>
+        </div>
+      `).join('');
 
-      const eventTarget = document.getElementById('settings-events');
-      if (eventTarget) {
-        eventTarget.innerHTML = _events.map((e, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${e}</span>
-            <div class="flex gap-1">
-              <button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
+      document.getElementById('settings-events').innerHTML = _events.map(e => `
+        <div class="py-2 flex justify-between items-center">
+          <span class="text-sm text-white">${e}</span>
+          <button onclick="removeEvent('${e}')" class="text-xs text-red-400 hover:text-red-300"><i class="ti ti-x"></i></button>
+        </div>
+      `).join('');
     }
 
-    function populateProfileUI() {
-      document.getElementById('acc-biz-name').value = _profile.bizName || '';
-      document.getElementById('acc-phone').value = _profile.phone || '';
-      document.getElementById('acc-instagram').value = _profile.instagram || '';
-      document.getElementById('acc-upi').value = _profile.upi || '';
-      document.getElementById('acc-bank').value = _profile.bank || '';
-      document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
-    }
-
-    async function saveProfileSettings() {
-      _profile.bizName = document.getElementById('acc-biz-name').value.trim();
-      _profile.phone = document.getElementById('acc-phone').value.trim();
-      _profile.instagram = document.getElementById('acc-instagram').value.trim();
-      _profile.upi = document.getElementById('acc-upi').value.trim();
-      _profile.bank = document.getElementById('acc-bank').value.trim();
-      _profile.waTemplate = document.getElementById('acc-wa-template').value.trim();
-      
-      await saveSettingToDB('profile', _profile);
-      showToast('Profile settings saved successfully.');
-    }
-
-    async function updatePrivacyPIN() {
-      const newPin = document.getElementById('acc-pin').value.trim();
-      if (!/^\d{4,6}$/.test(newPin)) {
-        showToast('PIN must be between 4 to 6 digits.', 'error');
-        return;
-      }
-      _appPin = newPin;
-      await saveSettingToDB('app_pin', _appPin);
-      document.getElementById('acc-pin').value = ''; 
-      showToast('Financial Privacy PIN updated securely.');
-    }
-
-    function exportShootsToCSV() {
-      if (!_shoots.length) {
-        showToast('No shoots available to export.', 'error');
-        return;
-      }
-      
-      const headers = ['ID', 'Name', 'Date', 'Event', 'Session', 'Location', 'Company', 'Amount (Rs)', 'Expense (Rs)', 'Expense Status', 'Pay Status', 'Part Paid (Rs)', 'Notes'];
-      
-      const rows = _shoots.map(s => [
-        s.id,
-        `"${(s.name || '').replace(/\"/g, '""')}"`,
-        s.date,
-        s.event,
-        s.session,
-        `"${(s.location || '').replace(/\"/g, '""')}"`,
-        `"${(s.company || '').replace(/\"/g, '""')}"`,
-        s.amount || 0,
-        s.expense || 0,
-        s.expenseStatus,
-        s.payStatus,
-        s.partPaid || 0,
-        `"${(s.notes || '').replace(/\"/g, '""')}\"`
-      ]);
-      
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
-      const encodedUri = encodeURI(csvContent);
-      const link = document.createElement("a");
-      
-      link.setAttribute("href", encodedUri);
-      link.setAttribute("download", `Sakkhi_Export_${new Date().toISOString().split('T')[0]}.csv`);
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      showToast('CSV file generated and downloaded.', 'success');
-    }
-
-    async function addCompany() {
-      const el = document.getElementById('new-company-input');
-      const val = el.value.trim(); if (!val) return;
-      _companies.push(val); await saveSettingToDB('companies', _companies);
-      el.value = ''; renderSettings();
-    }
-    async function deleteCompany(i) {
-      _companies.splice(i, 1); await saveSettingToDB('companies', _companies); renderSettings();
-    }
-    async function renameCompany(i) {
-      const input = prompt('Enter revised company name:', _companies[i]);
-      if (!input || input.trim() === _companies[i]) return;
-      _companies[i] = input.trim();
-      await saveSettingToDB('companies', _companies);
-      renderSettings(); renderShootsList(); renderPayments();
-    }
-
-    async function addLocation() {
-      const el = document.getElementById('new-loc-input');
-      const val = el.value.trim(); if (!val) return;
-      _locs.push(val); await saveSettingToDB('locations', _locs);
-      el.value = ''; renderSettings();
-    }
-    async function deleteLocation(i) {
-      _locs.splice(i, 1); await saveSettingToDB('locations', _locs); renderSettings();
-    }
-    async function renameLocation(i) {
-      const input = prompt('Enter revised location name:', _locs[i]);
-      if (!input || input.trim() === _locs[i]) return;
-      _locs[i] = input.trim();
-      await saveSettingToDB('locations', _locs);
-      renderSettings(); renderShootsList();
-    }
-
-    async function addEvent() {
-      const el = document.getElementById('new-event-input');
-      const val = el.value.trim(); if (!val) return;
-      _events.push(val); await saveSettingToDB('events', _events);
-      el.value = ''; renderSettings();
-    }
-    async function deleteEvent(i) {
-      _events.splice(i, 1); await saveSettingToDB('events', _events); renderSettings();
-    }
-    async function renameEvent(i) {
-      const input = prompt('Enter revised event category name:', _events[i]);
-      if (!input || input.trim() === _events[i]) return;
-      _events[i] = input.trim();
-      await saveSettingToDB('events', _events);
-      renderSettings(); renderShootsList();
-    }
-
-    function applyPrivacyUIVisibility() {
-      const targets = document.querySelectorAll('.privacy-target');
-      targets.forEach(t => {
-        if (_privacyModeActive) {
-          t.classList.add('blur-financial');
-        } else {
-          t.classList.remove('blur-financial');
-        }
-      });
-    }
-
-    function togglePrivacyMode() {
-      if (_privacyModeActive) {
-        document.getElementById('privacy-pass-input').value = '';
-        document.getElementById('privacy-error-lbl').classList.add('hidden');
-        openModal('privacy-prompt-backdrop');
-      } else {
-        _privacyModeActive = true;
-        applyPrivacyUIVisibility();
-        const icon = document.getElementById('privacy-icon');
-        icon.className = 'ti ti-eye-off text-lg';
-      }
-    }
-
-    function closePrivacyPrompt() { closeModal('privacy-prompt-backdrop'); }
-    function verifyPrivacyPassword() {
-      const input = document.getElementById('privacy-pass-input').value;
-      const errorLabel = document.getElementById('privacy-error-lbl');
-      if (input === _appPin) {
-        _privacyModeActive = false;
-        applyPrivacyUIVisibility();
-        const icon = document.getElementById('privacy-icon');
-        icon.className = 'ti ti-eye text-lg';
-        closePrivacyPrompt();
-      } else {
-        errorLabel.classList.remove('hidden');
-      }
-    }
-
-    function openAddShootModal(dateStr) {
+    function openAddShootModal() {
       document.getElementById('edit-shoot-id').value = '';
       document.getElementById('shoot-modal-title').textContent = 'New Shoot';
-      document.getElementById('modal-delete-btn').classList.add('hidden');
-      document.getElementById('modal-whatsapp-btn').classList.add('hidden');
-      clearModalFields();
-      
-      const cSel = document.getElementById('f-shoot-company');
-      if (cSel) {
-        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
-      }
-
-      const lSel = document.getElementById('f-shoot-loc');
-      if (lSel) {
-        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
-      }
-
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel) {
-        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
-      }
-      
-      if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
-      openModal('shoot-modal-backdrop');
-    }
-
-    function openEditShootModal(id) {
-      const s = _shoots.find(x => x.id === id); if (!s) return;
-      document.getElementById('edit-shoot-id').value = id;
-      document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
-      document.getElementById('modal-delete-btn').classList.remove('hidden');
-      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
-      
-      document.getElementById('f-shoot-name').value = s.name;
-      document.getElementById('f-shoot-date').value = s.date;
-      document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
-      document.getElementById('f-shoot-notes').value = s.notes || '';
-      document.getElementById('f-shoot-amount').value = s.amount || '';
-      document.getElementById('f-shoot-expense').value = s.expense || '';
-      document.getElementById('f-shoot-expense-status').value = s.expenseStatus || 'pending';
-      document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
-      document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
-      
-      const cSel = document.getElementById('f-shoot-company');
-      if (cSel) {
-        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (s && s.company) cSel.value = s.company;
-      }
-
-      const lSel = document.getElementById('f-shoot-loc');
-      if (lSel) {
-        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
-        if (s && s.location) {
-          if ([...DEFAULT_LOCS, ..._locs].includes(s.location)) {
-            lSel.value = s.location;
-            document.getElementById('f-loc-other-wrap').classList.add('hidden');
-          } else {
-            lSel.value = '__other__';
-            document.getElementById('f-shoot-loc-other').value = s.location;
-            document.getElementById('f-loc-other-wrap').classList.remove('hidden');
-          }
-        }
-      }
-
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && s.event) {
-        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
-        if (_events.includes(s.event)) {
-          eSel.value = s.event;
-          document.getElementById('f-event-other-wrap').classList.add('hidden');
-        } else {
-          eSel.value = 'Other';
-          document.getElementById('f-shoot-event-other').value = s.event;
-          document.getElementById('f-event-other-wrap').classList.remove('hidden');
-        }
-      }
-
-      handlePayStatusChange();
-      openModal('shoot-modal-backdrop');
-    }
-
-    function clearModalFields() {
-      document.getElementById('edit-shoot-id').value = '';
       document.getElementById('f-shoot-name').value = '';
       document.getElementById('f-shoot-date').value = '';
-      
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && _events.length) eSel.value = _events[0];
-
-      document.getElementById('f-shoot-event-other').value = '';
-      document.getElementById('f-event-other-wrap').classList.add('hidden');
-      document.getElementById('f-shoot-session').value = 'Morning Session';
-      document.getElementById('f-shoot-loc-other').value = '';
-      document.getElementById('f-loc-other-wrap').classList.add('hidden');
-      document.getElementById('f-shoot-notes').value = '';
+      document.getElementById('f-shoot-company').value = '';
+      document.getElementById('f-shoot-event').value = '';
+      document.getElementById('f-shoot-location').value = '';
+      document.getElementById('f-shoot-session').value = '';
       document.getElementById('f-shoot-amount').value = '';
       document.getElementById('f-shoot-expense').value = '';
       document.getElementById('f-shoot-expense-status').value = 'pending';
       document.getElementById('f-shoot-pay-status').value = 'pending';
       document.getElementById('f-shoot-part-paid').value = '';
-      document.getElementById('f-part-pay-wrap').style.display = 'none';
+      document.getElementById('f-shoot-notes').value = '';
+      document.getElementById('modal-delete-btn').classList.add('hidden');
+      document.getElementById('modal-whatsapp-btn').classList.add('hidden');
+      
+      const backdrop = document.getElementById('shoot-modal-backdrop');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('shoot-modal').classList.remove('translate-y-full');
     }
 
-    function handleEventOther() {
-      const wrap = document.getElementById('f-event-other-wrap');
-      if (document.getElementById('f-shoot-event').value === 'Other') wrap.classList.remove('hidden');
-      else wrap.classList.add('hidden');
+    function closeShootModal() {
+      const backdrop = document.getElementById('shoot-modal-backdrop');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      document.getElementById('shoot-modal').classList.add('translate-y-full');
     }
 
-    function handleLocOther() {
-      const wrap = document.getElementById('f-loc-other-wrap');
-      if (document.getElementById('f-shoot-loc').value === '__other__') wrap.classList.remove('hidden');
-      else wrap.classList.add('hidden');
-    }
-
-    function handlePayStatusChange() {
-      const wrap = document.getElementById('f-part-pay-wrap');
-      if (document.getElementById('f-shoot-pay-status').value === 'part') wrap.style.display = 'flex';
-      else wrap.style.display = 'none';
-    }
-
-    async function saveShoot() {
-      const name = document.getElementById('f-shoot-name').value.trim();
+    function saveShoot() {
+      const id = document.getElementById('edit-shoot-id').value || 'shoot_' + Date.now();
+      const name = document.getElementById('f-shoot-name').value;
       const date = document.getElementById('f-shoot-date').value;
-      if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
+      const company = document.getElementById('f-shoot-company').value;
+      const event = document.getElementById('f-shoot-event').value;
+      const location = document.getElementById('f-shoot-location').value;
+      const session = document.getElementById('f-shoot-session').value;
+      const amount = document.getElementById('f-shoot-amount').value || 0;
+      const expense = document.getElementById('f-shoot-expense').value || 0;
+      const expense_status = document.getElementById('f-shoot-expense-status').value;
+      const pay_status = document.getElementById('f-shoot-pay-status').value;
+      const part_paid = document.getElementById('f-shoot-part-paid').value || 0;
+      const notes = document.getElementById('f-shoot-notes').value;
 
-      let event = document.getElementById('f-shoot-event').value;
-      if (event === 'Other') {
-        event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
-        if (event !== 'Other' && !_events.includes(event)) {
-          _events.push(event); await saveSettingToDB('events', _events);
-        }
+      if (!name || !date || !company || !event || !location) {
+        showToast('Please fill required fields', 'error');
+        return;
       }
 
-      let location = document.getElementById('f-shoot-loc').value;
-      if (location === '__other__') {
-        location = document.getElementById('f-shoot-loc-other').value.trim();
-        if (location && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) {
-          _locs.push(location); await saveSettingToDB('locations', _locs);
-        }
-      }
+      const shoot = { id, name, date, company, event, location, session, amount, expense, expense_status, pay_status, part_paid, notes };
+      const idx = _shoots.findIndex(s => s.id === id);
+      if (idx >= 0) _shoots[idx] = shoot;
+      else _shoots.push(shoot);
 
-      const payStatus = document.getElementById('f-shoot-pay-status').value;
-      const expenseStatus = document.getElementById('f-shoot-expense-status').value;
-      const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0;
-      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
+      closeShootModal();
+      renderShootsList();
+      renderPaymentsList();
+      renderDashboard();
+      showToast('Shoot saved successfully');
+    }
 
-      const editId = document.getElementById('edit-shoot-id').value;
-      const record = {
-        id: editId || uid(),
-        name, date, event,
-        session: document.getElementById('f-shoot-session').value,
-        location,
-        company: document.getElementById('f-shoot-company').value,
-        notes: document.getElementById('f-shoot-notes').value.trim(),
-        amount, expense, expenseStatus, payStatus, partPaid,
-        created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString()
-      };
-
-      try {
-        await saveShootToDB(record);
-        closeShootModal();
-        refreshCurrentView();
-      } catch (e) {}
+    function editShoot(id) {
+      const s = _shoots.find(x => x.id === id);
+      if (!s) return;
+      
+      document.getElementById('edit-shoot-id').value = id;
+      document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
+      document.getElementById('f-shoot-name').value = s.name;
+      document.getElementById('f-shoot-date').value = s.date;
+      document.getElementById('f-shoot-company').value = s.company;
+      document.getElementById('f-shoot-event').value = s.event;
+      document.getElementById('f-shoot-location').value = s.location;
+      document.getElementById('f-shoot-session').value = s.session || '';
+      document.getElementById('f-shoot-amount').value = s.amount || '';
+      document.getElementById('f-shoot-expense').value = s.expense || '';
+      document.getElementById('f-shoot-expense-status').value = s.expense_status || 'pending';
+      document.getElementById('f-shoot-pay-status').value = s.pay_status || 'pending';
+      document.getElementById('f-shoot-part-paid').value = s.part_paid || '';
+      document.getElementById('f-shoot-notes').value = s.notes || '';
+      document.getElementById('modal-delete-btn').classList.remove('hidden');
+      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
+      
+      const backdrop = document.getElementById('shoot-modal-backdrop');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('shoot-modal').classList.remove('translate-y-full');
     }
 
     function triggerDeleteFromModal() {
       const id = document.getElementById('edit-shoot-id').value;
-      if (id) { closeShootModal(); setTimeout(() => askDeletePrompt(id), 250); }
+      _shoots = _shoots.filter(s => s.id !== id);
+      closeShootModal();
+      renderShootsList();
+      renderPaymentsList();
+      renderDashboard();
+      showToast('Shoot deleted');
     }
 
-    let _pendingDropTargetId = null;
-    function askDeletePrompt(id) {
-      const s = _shoots.find(x => x.id === id); if (!s) return;
-      _pendingDropTargetId = id;
-      document.getElementById('confirm-title').textContent = 'Delete Shoot?';
-      document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
-      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
-      document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop;
-      openModal('confirm-modal-backdrop');
+    function handlePayStatusChange() {
+      const status = document.getElementById('f-shoot-pay-status').value;
+      const wrap = document.getElementById('f-part-pay-wrap');
+      if (status === 'part') wrap.classList.remove('hidden');
+      else wrap.classList.add('hidden');
     }
 
-    async function executeConfirmedRecordDrop() {
-      if (!_pendingDropTargetId) return;
-      try {
-        await deleteShootFromDB(_pendingDropTargetId);
-        _pendingDropTargetId = null; closeConfirmModal(); refreshCurrentView();
-      } catch (e) {}
+    function addCompany() {
+      const inp = document.getElementById('new-company-input');
+      const val = inp.value.trim();
+      if (!val) { showToast('Enter company name', 'error'); return; }
+      if (_companies.includes(val)) { showToast('Already exists', 'error'); return; }
+      _companies.push(val);
+      inp.value = '';
+      populateSelects();
+      showToast('Company added');
     }
 
-    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
-    function openModal(id) {
-      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(id) {
-      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = '';
-    }
-    function closeShootModal() { closeModal('shoot-modal-backdrop'); }
-    function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-
-    function triggerRowWhatsApp(id, event) {
-      event.stopPropagation();
-      const s = _shoots.find(x => x.id === id);
-      if (!s) return;
-      
-      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
-      
-      const dateObj = new Date(s.date + 'T00:00:00');
-      const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-
-      const msg = msgTemplate
-        .replace(/\[Client Name\]/gi, s.name)
-        .replace(/\[Event\]/gi, s.event)
-        .replace(/\[Date\]/gi, dateFormatted)
-        .replace(/\[Location\]/gi, s.location || 'TBA');
-        
-      const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
+    function removeCompany(c) {
+      _companies = _companies.filter(x => x !== c);
+      populateSelects();
+      showToast('Company removed');
     }
 
-    function triggerModalWhatsApp() {
-      const id = document.getElementById('edit-shoot-id').value;
-      triggerRowWhatsApp(id, { stopPropagation: () => {} });
+    function addLocation() {
+      const inp = document.getElementById('new-loc-input');
+      const val = inp.value.trim();
+      if (!val) { showToast('Enter location', 'error'); return; }
+      if (_locs.includes(val)) { showToast('Already exists', 'error'); return; }
+      _locs.push(val);
+      inp.value = '';
+      populateSelects();
+      showToast('Location added');
     }
 
-    function refreshCurrentView() {
-      const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
-      if (!activeNode) return;
-      const activeTabId = activeNode.id.replace('tab-', '');
-      if (activeTabId === 'dashboard') renderDashboard();
-      if (activeTabId === 'calendar') renderCalendar();
-      if (activeTabId === 'shoots') renderShootsList();
-      if (activeTabId === 'payments') renderPayments();
+    function removeLocation(l) {
+      _locs = _locs.filter(x => x !== l);
+      populateSelects();
+      showToast('Location removed');
     }
 
-    let datePickerMonth = new Date().getMonth();
-    let datePickerYear = new Date().getFullYear();
+    function addEvent() {
+      const inp = document.getElementById('new-event-input');
+      const val = inp.value.trim();
+      if (!val) { showToast('Enter event', 'error'); return; }
+      if (_events.includes(val)) { showToast('Already exists', 'error'); return; }
+      _events.push(val);
+      inp.value = '';
+      populateSelects();
+      showToast('Event added');
+    }
 
-    function toggleDatePicker() {
-      const picker = document.getElementById('date-picker-dropdown');
-      if (picker.classList.contains('hidden')) {
-        datePickerMonth = new Date().getMonth();
-        datePickerYear = new Date().getFullYear();
-        renderDatePicker();
-        picker.classList.remove('hidden');
+    function removeEvent(e) {
+      _events = _events.filter(x => x !== e);
+      populateSelects();
+      showToast('Event removed');
+    }
+
+    function togglePrivacyMode() {
+      _privacyModeActive = !_privacyModeActive;
+      const icon = document.getElementById('privacy-icon');
+      if (_privacyModeActive) {
+        icon.className = 'ti ti-eye-off text-lg';
+        document.querySelectorAll('.blur-financial').forEach(el => el.classList.remove('blur-financial'));
       } else {
-        picker.classList.add('hidden');
+        icon.className = 'ti ti-eye text-lg';
+        document.querySelectorAll('[data-sensitive="amount"], [data-sensitive="payment"]').forEach(el => {
+          el.classList.add('blur-financial');
+        });
       }
     }
 
-    function datePickerPrev() {
-      datePickerMonth--;
-      if (datePickerMonth < 0) {
-        datePickerMonth = 11;
-        datePickerYear--;
-      }
-      renderDatePicker();
+    function showAllCompanies() {
+      alert(_companies.join(', '));
     }
 
-    function datePickerNext() {
-      datePickerMonth++;
-      if (datePickerMonth > 11) {
-        datePickerMonth = 0;
-        datePickerYear++;
-      }
-      renderDatePicker();
+    function openAddShootModal() {
+      document.getElementById('edit-shoot-id').value = '';
+      document.getElementById('shoot-modal-title').textContent = 'New Shoot';
+      const backdrop = document.getElementById('shoot-modal-backdrop');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      document.getElementById('shoot-modal').classList.remove('translate-y-full');
     }
 
-    function renderDatePicker() {
-      const label = document.getElementById('date-picker-label');
-      label.textContent = MONTHS[datePickerMonth] + ' ' + datePickerYear;
+    function renderCal() {
+      const year = calYear;
+      const month = calMonth;
+      const d = new Date(year, month, 1);
+      const firstDay = d.getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
+      const daysInPrevMonth = new Date(year, month, 0).getDate();
 
-      const firstDay = new Date(datePickerYear, datePickerMonth, 1);
-      const daysInMonth = new Date(datePickerYear, datePickerMonth + 1, 0).getDate();
-      const startingDayOfWeek = firstDay.getDay();
+      document.getElementById('cal-month-label').textContent = MONTHS[month] + ' ' + year;
 
-      const grid = document.getElementById('date-picker-grid');
       let html = '';
-      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = datePickerYear + '-' + String(datePickerMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        html += `<button type="button" onclick="selectDateFromPicker('${dateStr}')" class="text-xs p-1.5 rounded hover:bg-[#c9a96e] hover:text-black transition">${d}</button>`;
+      for (let i = firstDay - 1; i >= 0; i--) {
+        html += `<div class="bg-neutral-900/30 text-neutral-600 text-center py-3 text-sm rounded-lg">${daysInPrevMonth - i}</div>`;
       }
-      grid.innerHTML = html;
+      for (let d = 1; d <= daysInMonth; d++) {
+        const dateStr = year + '-' + String(month + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
+        const shoots = _shoots.filter(s => s.date === dateStr);
+        const isToday = dateStr === today();
+        html += `<button onclick="calSelectDay('${dateStr}')" class="bg-neutral-950 border border-neutral-900 text-center py-3 text-sm rounded-lg hover:border-[#c9a96e] transition ${isToday ? 'border-[#c9a96e] bg-[#c9a96e]/5' : ''} ${dateStr === calSelected ? 'bg-[#c9a96e]/20 border-[#c9a96e]' : ''}">${d}${shoots.length > 0 ? `<div class="text-[10px] text-[#c9a96e] mt-1">${shoots.length}📷</div>` : ''}</button>`;
+      }
+      const remaining = 42 - (firstDay + daysInMonth);
+      for (let d = 1; d <= remaining; d++) {
+        html += `<div class="bg-neutral-900/30 text-neutral-600 text-center py-3 text-sm rounded-lg">${d}</div>`;
+      }
+
+      document.getElementById('cal-grid').innerHTML = html;
     }
 
-    function selectDateFromPicker(dateStr) {
-      document.getElementById('f-shoot-date').value = dateStr;
-      document.getElementById('date-picker-dropdown').classList.add('hidden');
+    function calSelectDay(d) {
+      calSelected = d;
+      renderCal();
+    }
+
+    function calPrev() {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCal();
+    }
+
+    function calNext() {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCal();
+    }
+
+    function calToday() {
+      const d = new Date();
+      calYear = d.getFullYear();
+      calMonth = d.getMonth();
+      calSelected = today();
+      renderCal();
+    }
+
+    function saveProfileSettings() {
+      _profile.bizName = document.getElementById('acc-biz-name').value;
+      _profile.phone = document.getElementById('acc-phone').value;
+      _profile.instagram = document.getElementById('acc-insta').value;
+      _profile.upi = document.getElementById('acc-upi').value;
+      _profile.bank = document.getElementById('acc-bank').value;
+      _profile.waTemplate = document.getElementById('acc-wa-template').value;
+      showToast('Settings saved');
+    }
+
+    function loadProfileSettings() {
+      document.getElementById('acc-biz-name').value = _profile.bizName || '';
+      document.getElementById('acc-phone').value = _profile.phone || '';
+      document.getElementById('acc-insta').value = _profile.instagram || '';
+      document.getElementById('acc-upi').value = _profile.upi || '';
+      document.getElementById('acc-bank').value = _profile.bank || '';
+      document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
+    }
+
+    function updatePrivacyPIN() {
+      const pin = document.getElementById('acc-pin').value;
+      if (pin.length < 4) { showToast('PIN must be 4-6 digits', 'error'); return; }
+      _appPin = pin;
+      document.getElementById('acc-pin').value = '';
+      showToast('PIN updated');
+    }
+
+    function togglePrivacyMode() {
+      _privacyModeActive = !_privacyModeActive;
+      const icon = document.getElementById('privacy-icon');
+      if (_privacyModeActive) {
+        icon.className = 'ti ti-eye-off text-lg';
+      } else {
+        icon.className = 'ti ti-eye text-lg';
+        openPrivacyPrompt();
+      }
+    }
+
+    function openPrivacyPrompt() {
+      const backdrop = document.getElementById('privacy-prompt-backdrop');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+    }
+
+    function closePrivacyPrompt() {
+      const backdrop = document.getElementById('privacy-prompt-backdrop');
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    function verifyPrivacyPassword() {
+      const input = document.getElementById('privacy-pass-input').value;
+      if (input === _appPin) {
+        closePrivacyPrompt();
+        document.getElementById('privacy-pass-input').value = '';
+        showToast('Ledger unlocked');
+      } else {
+        document.getElementById('privacy-error-lbl').classList.remove('hidden');
+        setTimeout(() => { document.getElementById('privacy-error-lbl').classList.add('hidden'); }, 2000);
+      }
+    }
+
+    function handleBackdropClick(e, id) {
+      if (e.target.id === id) {
+        if (id === 'shoot-modal-backdrop') closeShootModal();
+        if (id === 'confirm-modal-backdrop') closeConfirmModal();
+      }
+    }
+
+    function closeConfirmModal() {
+      document.getElementById('confirm-modal-backdrop').classList.add('opacity-0', 'pointer-events-none');
+    }
+
+    // ============ NEW PROFESSIONAL PDF EXPORT ============
+    function exportShootsToPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 15;
+      let yPos = 15;
+
+      // Background
+      doc.setFillColor(5, 5, 5);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+
+      // Header
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, 0, pageWidth, 30, 'F');
+      doc.setDrawColor(201, 169, 110);
+      doc.setLineWidth(0.8);
+      doc.line(0, 30, pageWidth, 30);
+
+      // Title
+      doc.setFontSize(20);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('SAKKHI', margin, yPos + 8);
+
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      doc.text('by Jashwanth JP', margin, yPos + 14);
+
+      // Subtitle
+      doc.setFontSize(14);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      yPos = 45;
+      doc.text('COMPLETE SHOOTS REPORT', margin, yPos);
+
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      const genDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      doc.text('Generated: ' + genDate, margin, yPos + 6);
+
+      yPos += 15;
+
+      // Summary Stats
+      const total = _shoots.length;
+      const td = today();
+      const upcoming = _shoots.filter(s => s.date >= td).length;
+      const revenue = _shoots.reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+      const expenses = _shoots.reduce((a, s) => a + (parseFloat(s.expense) || 0), 0);
+
+      const statsBox = [
+        { label: 'TOTAL SHOOTS', value: total, color: [201, 169, 110] },
+        { label: 'UPCOMING', value: upcoming, color: [76, 175, 80] },
+        { label: 'REVENUE', value: '₹' + revenue.toLocaleString('en-IN'), color: [100, 200, 255] },
+        { label: 'EXPENSES', value: '₹' + expenses.toLocaleString('en-IN'), color: [255, 152, 0] }
+      ];
+
+      const boxWidth = (pageWidth - 2 * margin - 6) / 4;
+      statsBox.forEach((stat, i) => {
+        const x = margin + i * (boxWidth + 2);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(x, yPos, boxWidth, 16, 'F');
+        doc.setDrawColor(60, 60, 60);
+        doc.rect(x, yPos, boxWidth, 16);
+
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        doc.text(stat.label, x + 2, yPos + 4);
+
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...stat.color);
+        doc.text(stat.value.toString(), x + 2, yPos + 12);
+      });
+
+      yPos += 22;
+
+      // Group by Month
+      const grouped = {};
+      _shoots.forEach(s => {
+        const k = s.date.slice(0, 7);
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(s);
+      });
+
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage();
+          doc.setFillColor(5, 5, 5);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
+          yPos = margin;
+        }
+
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+
+        // Month Header
+        doc.setFillColor(20, 20, 20);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+        doc.setDrawColor(80, 80, 80);
+        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
+
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(201, 169, 110);
+        doc.text(monthName + ' ' + year, margin + 2, yPos + 5.5);
+
+        doc.setFontSize(8);
+        doc.setTextColor(150, 150, 150);
+        const monthTotal = shoots.reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+        doc.text(shoots.length + ' shoots • ₹' + monthTotal.toLocaleString('en-IN'), pageWidth - margin - 25, yPos + 5.5);
+
+        yPos += 11;
+
+        // Shoot Entries
+        shoots.forEach(s => {
+          if (yPos > pageHeight - 15) {
+            doc.addPage();
+            doc.setFillColor(5, 5, 5);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            yPos = margin;
+          }
+
+          // Shoot Box
+          doc.setFillColor(15, 15, 15);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, 12, 'F');
+          doc.setDrawColor(50, 50, 50);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, 12);
+
+          const dateObj = new Date(s.date + 'T00:00:00');
+          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+
+          doc.setFontSize(9);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(255, 255, 255);
+          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3.5);
+
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(150, 150, 150);
+          doc.text(s.company + ' • ' + s.event, margin + 3, yPos + 6.5);
+          doc.text(s.location + ' • ₹' + (s.amount || 0), margin + 3, yPos + 9);
+
+          if (s.notes) {
+            doc.setFontSize(6);
+            doc.setTextColor(100, 100, 100);
+            const noteText = s.notes.substring(0, 60);
+            doc.text('Note: ' + noteText, margin + 3, yPos + 11.5);
+          }
+
+          yPos += 14;
+        });
+
+        yPos += 2;
+      });
+
+      // Footer
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50);
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Shoots Report', margin, pageHeight - 3);
+      doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('Page ' + doc.internal.pages.length, pageWidth - margin - 10, pageHeight - 3, { align: 'right' });
+
+      doc.save(`Sakkhi_Shoots_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Professional PDF downloaded', 'success');
     }
 
     function downloadCompanyViewPDF() {
@@ -2199,6 +1431,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
+
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       doc.setFillColor(15, 15, 15);
@@ -2211,72 +1444,36 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFont(undefined, 'bold');
       doc.text('JASHWANTH JP', margin, yPos + 6);
       yPos = 32;
-      const companyFilter = document.getElementById('pay-filter-company')?.value || '';
-      if (!companyFilter) {
-        doc.setFontSize(10);
-        doc.setTextColor(220, 53, 69);
-        doc.text('Please select a company', margin, yPos);
-        doc.save(`JP_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('Please select a company', 'error');
-        return;
-      }
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
       doc.setTextColor(255, 255, 255);
-      doc.text('Company - ' + companyFilter, margin, yPos);
+      doc.text('Company Payment Report', margin, yPos);
       doc.setFontSize(7);
       doc.setFont(undefined, 'normal');
       doc.setTextColor(150, 150, 150);
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
       yPos += 14;
-      let filtered = _shoots.filter(s => s.company === companyFilter && s.amount);
-      if (filtered.length === 0) {
-        doc.setFontSize(10);
-        doc.setTextColor(220, 53, 69);
-        doc.text('No data', margin, yPos);
-        doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('No data', 'error');
-        return;
-      }
-      const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const totalExpenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const grossTotal = total + totalExpenses;
-      const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const due = (total + totalExpenses) - received;
-      const boxW = (pageWidth - 2 * margin - 8) / 3;
-      [{ label: 'TOTAL', value: grossTotal, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }, { label: 'EXPENSES', value: totalExpenses, color: [255, 152, 0] }].forEach((s, i) => {
-        const x = margin + i * (boxW + 4);
-        doc.setFillColor(20, 20, 20);
-        doc.rect(x, yPos, boxW, 15, 'F');
-        doc.setDrawColor(50, 50, 50);
-        doc.rect(x, yPos, boxW, 15);
-        doc.setFontSize(7);
-        doc.setTextColor(120, 120, 120);
-        doc.text(s.label, x + 3, yPos + 4);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...s.color);
-        doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
-      });
-      yPos += 20;
+
       const grouped = {};
-      filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(s => {
-        const k = s.date.slice(0, 7);
-        if (!grouped[k]) grouped[k] = [];
-        grouped[k].push(s);
+      _shoots.forEach(s => {
+        if (!grouped[s.company]) grouped[s.company] = [];
+        grouped[s.company].push(s);
       });
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+
+      Object.keys(grouped).sort().forEach(company => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
           doc.setFillColor(5, 5, 5);
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1];
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+
+        const shoots = grouped[company];
+        const total = shoots.reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+        const settled = shoots.filter(s => s.pay_status === 'done').reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+        const pending = shoots.filter(s => s.pay_status === 'pending').reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
@@ -2284,11 +1481,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         doc.setFontSize(9);
         doc.setFont(undefined, 'bold');
         doc.setTextColor(201, 169, 110);
-        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
+        doc.text(company, margin + 3, yPos + 5.5);
         doc.setFontSize(7);
         doc.setTextColor(150, 150, 150);
-        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN'), pageWidth - margin - 30, yPos + 6);
+        doc.text('₹' + total.toLocaleString('en-IN'), pageWidth - margin - 15, yPos + 5.5);
         yPos += 11;
+
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -2296,57 +1494,41 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
+
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
+
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
-          doc.text(s.event, margin + 3, yPos + 7.5);
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(201, 169, 110);
-          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
-          doc.setFontSize(6);
-          const statusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus];
-          doc.setTextColor(...statusColor);
-          const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
-          doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
-          let nextY = yPos + 12;
-          if (s.expense) {
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(255, 152, 0);
-            doc.text('Expenses: Rs. ' + Number(s.expense).toLocaleString('en-IN'), margin + 3, nextY);
-            nextY += 5;
-          }
-          if (s.notes) {
-            doc.setFontSize(6);
-            doc.setTextColor(150, 150, 150);
-            const noteText = s.notes.substring(0, 50);
-            doc.text('Note: ' + noteText, margin + 3, nextY);
-            nextY += 4;
-          }
-          yPos = nextY;
+          doc.text(s.event + ' • ' + s.location, margin + 3, yPos + 6);
+          const statusText = s.pay_status === 'done' ? 'Settled' : s.pay_status === 'part' ? 'Partial' : 'Pending';
+          doc.text('₹' + (s.amount || 0) + ' - ' + statusText, margin + 3, yPos + 8.5);
+
+          yPos += 11;
         });
         yPos += 2;
       });
+
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
       doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
-      doc.text(companyFilter, margin, pageHeight - 3);
+      doc.text('Company Report', margin, pageHeight - 3);
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
+      doc.save(`JP_Company_Report_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Downloaded', 'success');
     }
 
@@ -2357,6 +1539,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
+
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       doc.setFillColor(15, 15, 15);
@@ -2379,39 +1562,45 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
       yPos += 14;
-      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const outstanding = gross - captured;
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const stats = [{ label: 'TOTAL', value: gross, color: [201, 169, 110] }, { label: 'RECEIVED', value: captured, color: [76, 175, 80] }, { label: 'DUE', value: outstanding, color: [220, 53, 69] }, { label: 'EXPENSES', value: expenses, color: [255, 152, 0] }];
-      const boxW = (pageWidth - 2 * margin - 4) / 2;
-      for (let i = 0; i < stats.length; i += 2) {
-        for (let j = 0; j < 2; j++) {
-          if (!stats[i + j]) continue;
-          const s = stats[i + j];
-          const x = margin + j * (boxW + 4);
-          doc.setFillColor(20, 20, 20);
-          doc.rect(x, yPos, boxW, 15, 'F');
-          doc.setDrawColor(50, 50, 50);
-          doc.rect(x, yPos, boxW, 15);
-          doc.setFontSize(7);
-          doc.setTextColor(120, 120, 120);
-          doc.text(s.label, x + 3, yPos + 4);
-          doc.setFontSize(10);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(...s.color);
-          doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
-        }
-        yPos += 17;
-      }
-      yPos += 2;
-      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+
+      const td = today();
+      const upcoming = _shoots.filter(s => s.date >= td).length;
+      const completed = _shoots.filter(s => s.date < td).length;
+      const revenue = _shoots.reduce((a, s) => a + (parseFloat(s.amount) || 0), 0);
+      const expenses = _shoots.reduce((a, s) => a + (parseFloat(s.expense) || 0), 0);
+
+      const stats = [
+        { label: 'TOTAL', value: _shoots.length.toString(), color: [201, 169, 110] },
+        { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] },
+        { label: 'COMPLETED', value: completed.toString(), color: [100, 150, 200] },
+        { label: 'REVENUE', value: '₹' + revenue.toLocaleString('en-IN'), color: [255, 200, 100] }
+      ];
+
+      const boxW = (pageWidth - 2 * margin - 6) / 4;
+      stats.forEach((s, i) => {
+        const x = margin + i * (boxW + 2);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(x, yPos, boxW, 12, 'F');
+        doc.setDrawColor(50, 50, 50);
+        doc.rect(x, yPos, boxW, 12);
+        doc.setFontSize(6);
+        doc.setTextColor(120, 120, 120);
+        doc.text(s.label, x + 2, yPos + 3);
+        doc.setFontSize(8);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...s.color);
+        doc.text(s.value, x + 2, yPos + 9);
+      });
+
+      yPos += 16;
+
       const grouped = {};
-      filtered.forEach(s => {
+      _shoots.forEach(s => {
         const k = s.date.slice(0, 7);
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(s);
       });
+
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -2419,11 +1608,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
+
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        const monthExp = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
@@ -2434,8 +1623,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
         doc.setFontSize(7);
         doc.setTextColor(150, 150, 150);
-        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN') + ' | Exp: Rs. ' + monthExp.toLocaleString('en-IN'), pageWidth - margin - 80, yPos + 6);
+        doc.text(shoots.length + ' shoots', pageWidth - margin - 30, yPos + 6);
         yPos += 11;
+
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -2443,28 +1633,25 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
+
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
+
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
-          doc.text(s.event + ' • ' + (s.company || 'Direct'), margin + 3, yPos + 7.5);
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(201, 169, 110);
-          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 70, yPos + 3);
-          if (s.expense) {
-            doc.setTextColor(255, 152, 0);
-            doc.text('Rs. ' + Number(s.expense).toLocaleString('en-IN'), pageWidth - margin - 25, yPos + 3);
-          }
+          doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
+
           let nextY = yPos + 12;
           if (s.notes) {
             doc.setFontSize(6);
@@ -2473,10 +1660,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.text('Note: ' + noteText, margin + 3, nextY);
             nextY += 4;
           }
+
           yPos = nextY;
         });
+
         yPos += 2;
       });
+
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
@@ -2496,6 +1686,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const pageHeight = doc.internal.pageSize.getHeight();
       const margin = 14;
       let yPos = 12;
+
       doc.setFillColor(5, 5, 5);
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       doc.setFillColor(15, 15, 15);
@@ -2518,22 +1709,27 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
       yPos += 14;
+
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       const td = today();
-      
+
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
       const ft = document.getElementById('filter-timeline')?.value || '';
       const fc = document.getElementById('filter-company')?.value || '';
       const fl = document.getElementById('filter-loc')?.value || '';
-      
+
       if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fl) filtered = filtered.filter(s => s.location === fl);
       if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
       else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
-      
+
       const upcoming = filtered.filter(s => s.date >= td).length;
-      const stats = [{ label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] }, { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }];
+      const stats = [
+        { label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] },
+        { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }
+      ];
+
       const boxW = (pageWidth - 2 * margin - 4) / 2;
       stats.forEach((s, i) => {
         const x = margin + i * (boxW + 4);
@@ -2549,13 +1745,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         doc.setTextColor(...s.color);
         doc.text(s.value, x + 3, yPos + 12);
       });
+
       yPos += 20;
+
       const grouped = {};
       filtered.forEach(s => {
         const k = s.date.slice(0, 7);
         if (!grouped[k]) grouped[k] = [];
         grouped[k].push(s);
       });
+
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         if (yPos > pageHeight - 25) {
           doc.addPage();
@@ -2563,9 +1762,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
           doc.rect(0, 0, pageWidth, pageHeight, 'F');
           yPos = margin;
         }
+
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1];
+
         doc.setFillColor(20, 20, 20);
         doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
         doc.setDrawColor(80, 80, 80);
@@ -2578,6 +1779,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         doc.setTextColor(150, 150, 150);
         doc.text(shoots.length + ' shoots', pageWidth - margin - 30, yPos + 6);
         yPos += 11;
+
         shoots.forEach(s => {
           if (yPos > pageHeight - 12) {
             doc.addPage();
@@ -2585,20 +1787,25 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.rect(0, 0, pageWidth, pageHeight, 'F');
             yPos = margin;
           }
+
           doc.setFillColor(15, 15, 15);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
           doc.setDrawColor(50, 50, 50);
           doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
+
           const dateObj = new Date(s.date + 'T00:00:00');
           const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+
           doc.setFontSize(8);
           doc.setFont(undefined, 'bold');
           doc.setTextColor(255, 255, 255);
           doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+
           doc.setFontSize(7);
           doc.setFont(undefined, 'normal');
           doc.setTextColor(150, 150, 150);
           doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
+
           let nextY = yPos + 12;
           if (s.notes) {
             doc.setFontSize(6);
@@ -2607,10 +1814,13 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             doc.text('Note: ' + noteText, margin + 3, nextY);
             nextY += 4;
           }
+
           yPos = nextY;
         });
+
         yPos += 2;
       });
+
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
@@ -2621,6 +1831,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
       doc.save(`JP_Shoots_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Downloaded', 'success');
+    }
+
+    function triggerModalWhatsApp() {
+      showToast('WhatsApp feature coming soon');
     }
 
     function forceSync() {
