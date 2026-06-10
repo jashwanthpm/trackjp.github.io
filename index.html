@@ -2464,7 +2464,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text(companyFilter, margin, pageHeight - 3);
-      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
       doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Ledger data archived successfully.', 'success');
     }
@@ -2629,7 +2629,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Full Report', margin, pageHeight - 3);
-      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
       doc.save(`FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Full ledger documentation completed.', 'success');
     }
@@ -2763,7 +2763,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Shoots Report', margin, pageHeight - 3);
-      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
       doc.save(`ShootsReport_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Shoots register successfully archived.', 'success');
     }
