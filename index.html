@@ -31,6 +31,15 @@
       pointer-events: none;
       transition: filter 0.2s ease-in-out;
     }
+
+    /* Hide scrollbar for smooth internal scrolling */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;  /* IE and Edge */
+      scrollbar-width: none;  /* Firefox */
+    }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -205,93 +214,129 @@
       <div class="space-y-2" id="payments-list"></div>
     </section>
 
-    <section id="section-account" class="app-section hidden space-y-6">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-white">Account & Profile</h2>
-        <button onclick="saveProfileSettings()" class="bg-[#c9a96e] text-black px-4 py-1.5 rounded-lg text-xs font-bold hover:bg-[#e6c98a] shadow-lg transition flex items-center gap-1.5">
-          <i class="ti ti-device-floppy"></i> Save Profile
-        </button>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-4">
-          <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-2"><i class="ti ti-id"></i> Brand & Payments</h3>
-          <div class="space-y-3">
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Business Name</label>
-              <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-            </div>
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Phone Number</label>
-              <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-            </div>
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">UPI ID / Bank Details</label>
-              <textarea id="acc-upi" placeholder="Bank Name:&#10;Account No:&#10;IFSC Code:&#10;UPI ID: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
-            </div>
+    <section id="section-account" class="app-section hidden">
+      <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto pt-4">
+        
+        <div class="md:w-64 flex-shrink-0 relative">
+          <div class="md:sticky md:top-24 flex flex-row md:flex-col gap-1 overflow-x-auto no-scrollbar pb-2 md:pb-0">
+            <button onclick="scrollToAccountSec('acc-brand')" data-target="acc-brand" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-white text-white font-bold bg-white/5 transition-all">Edit profile</button>
+            <button onclick="scrollToAccountSec('acc-privacy')" data-target="acc-privacy" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Privacy and data</button>
+            <button onclick="scrollToAccountSec('acc-studio')" data-target="acc-studio" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Studio Settings</button>
+            <button onclick="scrollToAccountSec('acc-data')" data-target="acc-data" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Data Management</button>
           </div>
         </div>
 
-        <div class="space-y-6">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-4">
-            <h3 class="text-sm font-bold text-amber-500 flex items-center gap-2"><i class="ti ti-lock"></i> Financial Privacy PIN</h3>
-            <p class="text-xs text-neutral-500">Set a secure 4-6 digit PIN to lock ledger visibility.</p>
-            <div class="flex gap-2">
-              <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
-              <button onclick="updatePrivacyPIN()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Update PIN</button>
+        <div class="flex-1 space-y-16 pb-20">
+          
+          <div class="flex items-center justify-end border-b border-neutral-900 pb-6 mb-8">
+             <button onclick="saveProfileSettings()" class="bg-white text-black px-6 py-2.5 rounded-full text-[15px] font-bold hover:bg-neutral-200 transition shadow-lg">Save changes</button>
+          </div>
+
+          <div id="acc-brand" class="space-y-8 scroll-mt-24">
+            <div class="space-y-2">
+              <h3 class="text-3xl font-bold text-white tracking-tight">Edit profile</h3>
+              <p class="text-base text-neutral-400 leading-relaxed">Keep your brand details up to date. Information you add here is used to auto-generate your communications and invoices.</p>
+            </div>
+            
+            <div class="space-y-5">
+              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
+                <label class="text-xs font-medium text-neutral-400 block mb-1">Business Name</label>
+                <input type="text" id="acc-biz-name" class="w-full bg-transparent text-base text-white outline-none" />
+              </div>
+
+              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
+                <label class="text-xs font-medium text-neutral-400 block mb-1">Phone Number</label>
+                <input type="tel" id="acc-phone" class="w-full bg-transparent text-base text-white outline-none" />
+              </div>
+
+              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
+                <label class="text-xs font-medium text-neutral-400 block mb-1">UPI ID / Bank Details</label>
+                <textarea id="acc-upi" class="w-full bg-transparent text-base text-white outline-none resize-none h-24 pt-1"></textarea>
+              </div>
+
+              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
+                <label class="text-xs font-medium text-neutral-400 block mb-1">WhatsApp Template</label>
+                <textarea id="acc-wa-template" class="w-full bg-transparent text-base text-white outline-none resize-none h-20 pt-1"></textarea>
+                <p class="text-[11px] text-neutral-500 mt-2">Variables available: [Client Name], [Event], [Date]</p>
+              </div>
             </div>
           </div>
 
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 space-y-3">
-            <div class="flex items-center justify-between">
-              <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-2"><i class="ti ti-brand-whatsapp"></i> WhatsApp Template</h3>
-            </div>
-            <p class="text-[10px] text-neutral-500">Placeholders: <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Client Name]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Event]</span> <span class="text-neutral-300 bg-neutral-800 px-1 py-0.5 rounded">[Date]</span></p>
-            <textarea id="acc-wa-template" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
-          </div>
-        </div>
+          <hr class="border-neutral-900" />
 
-        <div class="lg:col-span-2 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-building text-[#c9a96e]"></i> Studio Companies</div>
-            <div id="settings-companies" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
-            <div class="flex gap-2">
-              <input type="text" id="new-company-input" placeholder="New company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-              <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+          <div id="acc-privacy" class="space-y-8 scroll-mt-24">
+            <div class="space-y-2">
+              <h3 class="text-3xl font-bold text-white tracking-tight">Privacy and data</h3>
+              <p class="text-base text-neutral-400 leading-relaxed">Secure your financial ledgers and dashboard amounts by setting a required PIN code.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
+              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent flex-1">
+                <label class="text-xs font-medium text-neutral-400 block mb-1">Financial Privacy PIN</label>
+                <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter 4-6 digit PIN" class="w-full bg-transparent text-base text-white outline-none tracking-widest" />
+              </div>
+              <button onclick="updatePrivacyPIN()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-8 py-4 sm:py-0 sm:h-[72px] rounded-3xl text-[15px] font-bold transition flex-shrink-0">Update PIN</button>
             </div>
           </div>
 
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-map-pin text-[#c9a96e]"></i> Locations</div>
-            <div id="settings-locations" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
-            <div class="flex gap-2">
-              <input type="text" id="new-loc-input" placeholder="New location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-              <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+          <hr class="border-neutral-900" />
+
+          <div id="acc-studio" class="space-y-8 scroll-mt-24">
+             <div class="space-y-2">
+              <h3 class="text-3xl font-bold text-white tracking-tight">Studio Settings</h3>
+              <p class="text-base text-neutral-400 leading-relaxed">Customize your dynamic dropdown lists for fast shoot entries.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6">
+                 <h4 class="font-bold text-white mb-5 text-lg">Companies</h4>
+                 <div id="settings-companies" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
+                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent">
+                   <input type="text" id="new-company-input" placeholder="Add company..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
+                   <button onclick="addCompany()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
+                 </div>
+               </div>
+
+               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6">
+                 <h4 class="font-bold text-white mb-5 text-lg">Locations</h4>
+                 <div id="settings-locations" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
+                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent">
+                   <input type="text" id="new-loc-input" placeholder="Add location..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
+                   <button onclick="addLocation()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
+                 </div>
+               </div>
+
+               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6 md:col-span-2">
+                 <h4 class="font-bold text-white mb-5 text-lg">Event Categories</h4>
+                 <div id="settings-events" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
+                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent max-w-sm">
+                   <input type="text" id="new-event-input" placeholder="Add event type..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
+                   <button onclick="addEvent()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
+                 </div>
+               </div>
             </div>
           </div>
 
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="text-sm font-bold text-white mb-3 flex items-center gap-2"><i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories</div>
-            <div id="settings-events" class="divide-y divide-neutral-900 max-h-48 overflow-y-auto mb-4 pr-1"></div>
-            <div class="flex gap-2">
-              <input type="text" id="new-event-input" placeholder="New event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-              <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition">Add</button>
+          <hr class="border-neutral-900" />
+
+          <div id="acc-data" class="space-y-8 scroll-mt-24">
+            <div class="space-y-2">
+              <h3 class="text-3xl font-bold text-white tracking-tight">Data Management</h3>
+              <p class="text-base text-neutral-400 leading-relaxed">Download a backup of your entire ledger or reset the local application state.</p>
+            </div>
+            
+            <div class="flex flex-col sm:flex-row flex-wrap gap-4 pt-2">
+               <button onclick="exportShootsToCSV()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2"><i class="ti ti-file-spreadsheet text-lg"></i> Export CSV</button>
+               <button onclick="forceSync()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2"><i class="ti ti-refresh text-lg"></i> Force Sync</button>
+               <div class="flex-1"></div>
+               <button onclick="confirmClearData()" class="bg-red-950/40 text-red-400 hover:bg-red-900/60 border border-red-900/50 px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2 mt-4 sm:mt-0"><i class="ti ti-trash text-lg"></i> Wipe Application Data</button>
             </div>
           </div>
-        </div>
 
-        <div class="lg:col-span-2 bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div>
-            <h3 class="text-sm font-bold text-white flex items-center gap-2"><i class="ti ti-database text-[#c9a96e]"></i> Data Management</h3>
-            <p class="text-xs text-neutral-500 mt-1">Export your data or force a cloud sync loop.</p>
-          </div>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="exportShootsToCSV()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-file-spreadsheet"></i> Export CSV</button>
-            <button onclick="forceSync()" class="flex items-center gap-1.5 px-4 py-2 bg-neutral-950 border border-neutral-800 text-neutral-300 rounded-lg hover:border-neutral-700 hover:text-white text-xs font-semibold transition"><i class="ti ti-refresh"></i> Force Sync</button>
-          </div>
         </div>
       </div>
     </section>
+
   </main>
 
   <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
@@ -760,6 +805,19 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (tab === 'account') {
         renderSettings(); 
         populateProfileUI(); 
+      }
+    }
+
+    function scrollToAccountSec(id) {
+      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
+      document.querySelectorAll('.acc-nav-btn').forEach(btn => {
+        btn.classList.remove('md:border-white', 'text-white', 'bg-white/5', 'font-bold');
+        btn.classList.add('md:border-transparent', 'text-neutral-400', 'font-medium');
+      });
+      const activeBtn = document.querySelector(`[data-target="${id}"]`);
+      if(activeBtn) {
+        activeBtn.classList.add('md:border-white', 'text-white', 'bg-white/5', 'font-bold');
+        activeBtn.classList.remove('md:border-transparent', 'text-neutral-400', 'font-medium');
       }
     }
 
@@ -1499,11 +1557,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const compTarget = document.getElementById('settings-companies');
       if (compTarget) {
         compTarget.innerHTML = _companies.map((c, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
+          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
             <span class="text-neutral-300 font-medium">${c}</span>
             <div class="flex gap-1">
-              <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameCompany(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteCompany(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1511,16 +1569,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const locTarget = document.getElementById('settings-locations');
       if (locTarget) {
         locTarget.innerHTML = DEFAULT_LOCS.map(l => `
-          <div class="flex items-center justify-between py-2 text-xs opacity-50">
+          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 opacity-50">
             <span class="text-neutral-400">${l}</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span>
+            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600 mr-2">Default</span>
           </div>`).join('') + 
           _locs.map((l, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
+          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
             <span class="text-neutral-300 font-medium">${l}</span>
             <div class="flex gap-1">
-              <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameLocation(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteLocation(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1528,11 +1586,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const eventTarget = document.getElementById('settings-events');
       if (eventTarget) {
         eventTarget.innerHTML = _events.map((e, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
+          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
             <span class="text-neutral-300 font-medium">${e}</span>
             <div class="flex gap-1">
-              <button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameEvent(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
+              <button onclick="deleteEvent(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
             </div>
           </div>`).join('');
       }
