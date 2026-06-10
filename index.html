@@ -32,7 +32,7 @@
       transition: filter 0.2s ease-in-out;
     }
 
-    /* Fixed Account Tab CSS (Replaced failing @apply) */
+    /* Fixed Account Tab CSS */
     .account-sidebar-item {
       display: flex;
       align-items: center;
@@ -157,15 +157,6 @@
               <h3 class="text-base font-bold text-white">Payment Status</h3>
             </div>
             <div id="dash-payments" class="space-y-3"></div>
-          </div>
-
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 hidden">
-            <h3 class="text-sm font-bold text-white mb-4 flex items-center gap-2">
-              <i class="ti ti-chart-column text-[#c9a96e]"></i> Monthly Trends
-            </h3>
-            <div class="relative w-full h-56 bg-neutral-950 rounded-lg border border-neutral-900 p-3">
-              <canvas id="revenueAnalyticsChart"></canvas>
-            </div>
           </div>
         </div>
       </div>
@@ -379,27 +370,36 @@
                 <h3 class="text-lg font-bold text-white flex items-center gap-2">
                   <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
                 </h3>
-                <p class="text-xs text-neutral-500 mt-1">Customize your WhatsApp message template</p>
+                <p class="text-xs text-neutral-500 mt-1">Customize your communication templates</p>
               </div>
 
               <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
                 <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
-                <div class="flex flex-wrap gap-2">
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Client Name]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Event]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Date]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Location]</span>
+                <div class="flex flex-wrap gap-1.5">
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Client Name]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Event]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Date]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Location]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Total Amount]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Amount Paid]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Pending Balance]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Payment Details]</span>
                 </div>
               </div>
 
               <div class="flex flex-col gap-1.5">
-                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Message Template</label>
-                <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
+                <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
+                <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
               </div>
 
               <div class="flex gap-2 pt-3">
                 <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                  <i class="ti ti-device-floppy"></i> Save Template
+                  <i class="ti ti-device-floppy"></i> Save Templates
                 </button>
               </div>
             </div>
@@ -460,11 +460,21 @@
               <div class="space-y-3">
                 <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                   <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export</p>
-                    <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all your data points.</p>
+                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
+                    <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all data points.</p>
                   </div>
                   <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
                     <i class="ti ti-file-type-pdf text-lg"></i> Export Full Database (PDF)
+                  </button>
+                </div>
+
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                  <div class="space-y-2">
+                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
+                    <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records.</p>
+                  </div>
+                  <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
+                    <i class="ti ti-file-spreadsheet text-lg"></i> Export Full Database (CSV)
                   </button>
                 </div>
 
@@ -624,7 +634,7 @@
       <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
       <div class="space-y-1">
         <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Are you sure?</h4>
-        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This structural action cannot be reversed once done.</p>
+        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This action cannot be reversed.</p>
       </div>
       <div class="flex items-center justify-center gap-2 pt-2">
         <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
@@ -700,7 +710,8 @@
       instagram: '',
       upi: '',
       bank: '',
-      waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!' 
+      waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
+      waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
 
     function setSyncStatus(state, label) {
@@ -920,19 +931,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function getDaysPending(shootDate) {
-      const today = new Date();
-      const shootDay = new Date(shootDate + 'T00:00:00');
-      const diffMs = today - shootDay;
-      const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
-      return Math.max(0, diffDays);
-    }
-    function getDaysPendingColor(days) {
-      if (days <= 30) return 'text-emerald-400 bg-emerald-950/40';
-      if (days <= 60) return 'text-amber-400 bg-amber-950/40';
-      return 'text-red-400 bg-red-950/40';
-    }
-    function uid() { return 'shoot_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
@@ -958,10 +956,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
-    // Fixed Switch Tab code for Account Section
     function switchAccountTab(tab) {
       _currentAccountTab = tab;
-      
       document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
       
@@ -981,7 +977,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
       if(activeBtn) {
         activeBtn.classList.add('active');
-        // Scroll horizontal menu to bring active button into view on mobile
         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
       }
     }
@@ -1103,7 +1098,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         </div>`;
 
       applyPrivacyUIVisibility();
-      setTimeout(buildInteractiveRevenueGrowthChart, 50);
       renderTopCompanies();
     }
 
@@ -1232,154 +1226,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             </div>
           </div>
 
-          <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
+          <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
             <i class="ti ti-brand-whatsapp text-sm"></i>
           </button>
         </div>`;
-    }
-
-    function buildInteractiveRevenueGrowthChart() {
-      const ctx = document.getElementById('revenueAnalyticsChart');
-      if (!ctx) return;
-
-      if (_analyticsChartInstance) {
-        _analyticsChartInstance.destroy();
-      }
-
-      const monthlyData = {};
-      _shoots.forEach(s => {
-        if (!s.date) return;
-        const monthKey = s.date.slice(0, 7);
-        if (!monthlyData[monthKey]) {
-          monthlyData[monthKey] = { revenue: 0, expenses: 0 };
-        }
-        monthlyData[monthKey].revenue += Number(s.amount || 0);
-        monthlyData[monthKey].expenses += Number(s.expense || 0);
-      });
-
-      const sortedKeys = Object.keys(monthlyData).sort();
-      const labels = sortedKeys.map(k => {
-        const [y, m] = k.split('-');
-        return MONTHS[parseInt(m) - 1].slice(0, 3);
-      });
-      const revenueData = sortedKeys.map(k => monthlyData[k].revenue);
-      const expenseData = sortedKeys.map(k => monthlyData[k].expenses);
-
-      _analyticsChartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-          labels: labels.length ? labels : ['No Data'],
-          datasets: [
-            {
-              label: 'Revenue',
-              data: revenueData.length ? revenueData : [0],
-              backgroundColor: ['#c9a96e'],
-              borderColor: '#c9a96e',
-              borderWidth: 0,
-              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
-              barThickness: 28,
-              maxBarThickness: 40
-            },
-            {
-              label: 'Expenses',
-              data: expenseData.length ? expenseData : [0],
-              backgroundColor: ['#dc2626'],
-              borderColor: '#dc2626',
-              borderWidth: 0,
-              borderRadius: { topLeft: 8, topRight: 8, bottomLeft: 0, bottomRight: 0 },
-              barThickness: 28,
-              maxBarThickness: 40
-            }
-          ]
-        },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          layout: { padding: { top: 30, bottom: 10 } },
-          interaction: { intersect: false, mode: 'index' },
-          plugins: {
-            legend: {
-              display: true,
-              position: 'top',
-              labels: {
-                color: '#a0a0a0',
-                font: { size: 12, weight: '600', family: "sans-serif" },
-                padding: 25,
-                usePointStyle: true,
-                pointStyle: 'circle'
-              }
-            },
-            tooltip: {
-              enabled: !_privacyModeActive,
-              backgroundColor: 'rgba(20, 20, 20, 0.98)',
-              titleColor: '#ffffff',
-              bodyColor: '#e0e0e0',
-              borderColor: '#404040',
-              borderWidth: 1,
-              padding: 15,
-              displayColors: true,
-              cornerRadius: 8,
-              titleFont: { size: 13, weight: 'bold' },
-              bodyFont: { size: 12 },
-              callbacks: {
-                label: ctx => {
-                  const val = Math.floor(ctx.parsed.y);
-                  return `  ${ctx.dataset.label}: Rs. ${val.toLocaleString('en-IN')}`;
-                }
-              }
-            }
-          },
-          scales: {
-            y: {
-              beginAtZero: true,
-              grid: {
-                color: 'rgba(100, 100, 100, 0.12)',
-                drawBorder: false,
-                drawTicks: false
-              },
-              ticks: {
-                color: '#808080',
-                font: { size: 11, weight: '500' },
-                padding: 10,
-                callback: val => val >= 100000 ? 'Rs. ' + (val / 100000).toFixed(1) + 'L' : val >= 1000 ? 'Rs. ' + (val / 1000).toFixed(0) + 'K' : 'Rs. ' + val
-              }
-            },
-            x: {
-              grid: { display: false, drawBorder: false },
-              ticks: {
-                color: '#808080',
-                font: { size: 11, weight: '500' },
-                padding: 10
-              }
-            }
-          }
-        },
-        plugins: [{
-          id: 'chartDataLabels',
-          afterDatasetsDraw(chart) {
-            const { ctx: c } = chart;
-            chart.data.datasets.forEach((dataset, datasetIndex) => {
-              const meta = chart.getDatasetMeta(datasetIndex);
-              meta.data.forEach((datapoint, index) => {
-                const { x, y } = datapoint.getProps(['x', 'y']);
-                const value = dataset.data[index];
-                if (value === 0 || value === undefined) return;
-
-                c.save();
-                c.font = 'bold 12px sans-serif';
-                c.fillStyle = '#ffffff';
-                c.textAlign = 'center';
-                c.textBaseline = 'bottom';
-
-                const displayVal = value >= 100000 ? (value / 100000).toFixed(1) + 'L' : value >= 1000 ? (value / 1000).toFixed(0) + 'K' : value;
-                const labelText = 'Rs. ' + displayVal;
-                c.fillText(labelText, x, y - 8);
-                c.restore();
-              });
-            });
-          }
-        }]
-      });
     }
 
     function renderCalendar() {
@@ -1490,7 +1340,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
       const panel = document.getElementById('cal-day-panel');
-      
       panel.classList.remove('hidden');
 
       const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
@@ -1593,7 +1442,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function renderPayments() {
-      // Fix for Company Dropdown in Payments Ledger
       const payCompDropdown = document.getElementById('pay-filter-company');
       if (payCompDropdown) {
         const cachedSelection = payCompDropdown.value;
@@ -1604,7 +1452,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
-      const expensesPending = expenses - expensesSettled;
       const outstanding = gross - captured;
 
       document.getElementById('pay-stats').innerHTML = `
@@ -1709,7 +1556,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
                         <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
                         <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
                       </div>` : ''}
-                      <button onclick="triggerRowWhatsApp('${s.id}', event)" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
+                      <button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
                         <i class="ti ti-brand-whatsapp text-sm"></i>
                       </button>
                     </div>
@@ -1775,6 +1622,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('acc-upi').value = _profile.upi || '';
       document.getElementById('acc-bank').value = _profile.bank || '';
       document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
+      if (document.getElementById('acc-wa-template-payment')) {
+        document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
+      }
     }
 
     async function saveProfileSettings() {
@@ -1784,9 +1634,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       _profile.upi = document.getElementById('acc-upi').value.trim();
       _profile.bank = document.getElementById('acc-bank').value.trim();
       _profile.waTemplate = document.getElementById('acc-wa-template').value.trim();
+      if (document.getElementById('acc-wa-template-payment')) {
+        _profile.waTemplatePayment = document.getElementById('acc-wa-template-payment').value.trim();
+      }
       
       await saveSettingToDB('profile', _profile);
-      showToast('Profile settings saved successfully.');
+      showToast('Profile configuration records updated successfully.');
     }
 
     async function updatePrivacyPIN() {
@@ -1801,7 +1654,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       showToast('Financial Privacy PIN updated securely.');
     }
 
-    // Fixed PDF Database Export functionality (Replaced basic CSV script)
     function exportAllDataToPDF() {
       if (!_shoots.length) {
         showToast('No data to export', 'error');
@@ -1815,7 +1667,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const margin = 14;
       let yPos = 12;
 
-      // Header styling
       doc.setFillColor(5, 5, 5); 
       doc.rect(0, 0, pageWidth, pageHeight, 'F');
       doc.setFillColor(15, 15, 15); 
@@ -1827,7 +1678,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(18); 
       doc.setTextColor(201, 169, 110); 
       doc.setFont(undefined, 'bold');
-      doc.text('SAKKHI - DATABASE EXPORT', margin, yPos + 6);
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
       yPos = 32;
 
       doc.setFontSize(9); 
@@ -1842,7 +1693,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
 
-      // Loop months
       const grouped = {};
       filtered.forEach(s => {
         const k = (s.date || 'Unknown').slice(0, 7);
@@ -1873,7 +1723,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         yPos += 11;
 
         shoots.forEach(s => {
-          // Dynamic height calculation based on fields present
           let cardH = 14;
           if (s.expense || s.notes) cardH += 5;
           let splitNotes = [];
@@ -1937,6 +1786,31 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         });
       });
 
+      if (yPos > pageHeight - 35) {
+        doc.addPage();
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        yPos = margin;
+      }
+      doc.setDrawColor(50, 50, 50);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('PAYMENT DETAILS', margin, yPos);
+      yPos += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
+      yPos += 4;
+      if (_profile.bank) {
+        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
+        doc.text(splitBank, margin, yPos);
+        yPos += splitBank.length * 3.5;
+      }
+
       doc.setFillColor(15, 15, 15); 
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50); 
@@ -1944,10 +1818,62 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7); 
       doc.setTextColor(100, 100, 100);
       doc.text('Complete Database Export', margin, pageHeight - 3);
-      doc.text('SAKKHI by Jashwanth JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
       
       doc.save(`Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Database exported as PDF successfully.', 'success');
+      showToast('Database report successfully generated as a PDF file.', 'success');
+    }
+
+    function exportAllDataToCSV() {
+      if (!_shoots.length) {
+        showToast('No structured data found to package.', 'error');
+        return;
+      }
+      
+      const headers = ['ID', 'Client Name', 'Date', 'Event Category', 'Session', 'Location', 'Company', 'Amount', 'Expenses', 'Expense Status', 'Payment Status', 'Part Paid', 'Notes'];
+      let csvRows = [headers.join(',')];
+      
+      const escapeCSV = (str) => {
+        if (str === null || str === undefined) return '';
+        let s = String(str).replace(/"/g, '""');
+        if (s.includes(',') || s.includes('\n') || s.includes('"')) {
+          s = `"${s}"`;
+        }
+        return s;
+      };
+
+      const sortedShoots = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
+      sortedShoots.forEach(s => {
+        const row = [
+          escapeCSV(s.id),
+          escapeCSV(s.name),
+          escapeCSV(s.date),
+          escapeCSV(s.event),
+          escapeCSV(s.session),
+          escapeCSV(s.location),
+          escapeCSV(s.company),
+          s.amount || 0,
+          s.expense || 0,
+          escapeCSV(s.expenseStatus),
+          escapeCSV(s.payStatus),
+          s.partPaid || 0,
+          escapeCSV(s.notes)
+        ];
+        csvRows.push(row.join(','));
+      });
+      
+      const csvString = csvRows.join('\n');
+      const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.setAttribute('href', url);
+      link.setAttribute('download', `Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      showToast('Database logs successfully compiled and saved as a CSV asset.', 'success');
     }
 
     async function addCompany() {
@@ -2247,21 +2173,39 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function closeShootModal() { closeModal('shoot-modal-backdrop'); }
     function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
-    function triggerRowWhatsApp(id, event) {
-      event.stopPropagation();
+    function triggerRowWhatsApp(id, event, mode = 'reminder') {
+      if (event && event.stopPropagation) event.stopPropagation();
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
       
-      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
+      let msgTemplate = '';
+      if (mode === 'payment') {
+        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!";
+      } else {
+        msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
+      }
       
       const dateObj = new Date(s.date + 'T00:00:00');
       const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+
+      const totalAmt = Number(s.amount || 0);
+      const amtPaid = s.payStatus === 'done' ? totalAmt : (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+      const pendingBal = totalAmt - amtPaid;
+
+      let paymentDetailsStr = `UPI ID: ${_profile.upi || 'N/A'}`;
+      if (_profile.bank) {
+        paymentDetailsStr += `\nBank Details:\n${_profile.bank}`;
+      }
 
       const msg = msgTemplate
         .replace(/\[Client Name\]/gi, s.name)
         .replace(/\[Event\]/gi, s.event)
         .replace(/\[Date\]/gi, dateFormatted)
-        .replace(/\[Location\]/gi, s.location || 'TBA');
+        .replace(/\[Location\]/gi, s.location || 'TBA')
+        .replace(/\[Total Amount\]/gi, fmtAmt(totalAmt))
+        .replace(/\[Amount Paid\]/gi, fmtAmt(amtPaid))
+        .replace(/\[Pending Balance\]/gi, fmtAmt(pendingBal))
+        .replace(/\[Payment Details\]/gi, paymentDetailsStr);
         
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
@@ -2269,7 +2213,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     function triggerModalWhatsApp() {
       const id = document.getElementById('edit-shoot-id').value;
-      triggerRowWhatsApp(id, { stopPropagation: () => {} });
+      const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
+      const activeTabId = activeNode ? activeNode.id.replace('tab-', '') : '';
+      const contextMode = (activeTabId === 'payments') ? 'payment' : 'reminder';
+      triggerRowWhatsApp(id, { stopPropagation: () => {} }, contextMode);
     }
 
     function refreshCurrentView() {
@@ -2333,6 +2280,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       grid.innerHTML = html;
     }
 
+    function selectDateFromPicker(dateStr) {
+      document.getElementById('f-shoot-date').value = dateStr;
+      document.getElementById('date-picker-dropdown').classList.add('hidden');
+    }
+
     function downloadCompanyViewPDF() {
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
@@ -2350,15 +2302,15 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
-      doc.text('JASHWANTH JP', margin, yPos + 6);
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
       yPos = 32;
       const companyFilter = document.getElementById('pay-filter-company')?.value || '';
       if (!companyFilter) {
         doc.setFontSize(10);
         doc.setTextColor(220, 53, 69);
         doc.text('Please select a company', margin, yPos);
-        doc.save(`JP_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('Please select a company', 'error');
+        doc.save(`Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('Please select a targeted company context first.', 'error');
         return;
       }
       doc.setFontSize(9);
@@ -2376,8 +2328,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         doc.setFontSize(10);
         doc.setTextColor(220, 53, 69);
         doc.text('No data', margin, yPos);
-        doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('No data', 'error');
+        doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+        showToast('No logged data rows matching this context.', 'error');
         return;
       }
       const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
@@ -2479,6 +2431,32 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         });
         yPos += 2;
       });
+
+      if (yPos > pageHeight - 35) {
+        doc.addPage();
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        yPos = margin;
+      }
+      doc.setDrawColor(50, 50, 50);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('PAYMENT DETAILS', margin, yPos);
+      yPos += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
+      yPos += 4;
+      if (_profile.bank) {
+        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
+        doc.text(splitBank, margin, yPos);
+        yPos += splitBank.length * 3.5;
+      }
+
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
@@ -2486,9 +2464,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text(companyFilter, margin, pageHeight - 3);
-      doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`JP_${companyFilter}_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Downloaded', 'success');
+      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Ledger data archived successfully.', 'success');
     }
 
     function downloadFullReportPDF() {
@@ -2508,7 +2486,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
-      doc.text('JASHWANTH JP', margin, yPos + 6);
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
       yPos = 32;
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
@@ -2618,6 +2596,32 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         });
         yPos += 2;
       });
+
+      if (yPos > pageHeight - 35) {
+        doc.addPage();
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        yPos = margin;
+      }
+      doc.setDrawColor(50, 50, 50);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('PAYMENT DETAILS', margin, yPos);
+      yPos += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
+      yPos += 4;
+      if (_profile.bank) {
+        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
+        doc.text(splitBank, margin, yPos);
+        yPos += splitBank.length * 3.5;
+      }
+
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
       doc.setDrawColor(50, 50, 50);
@@ -2625,9 +2629,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Full Report', margin, pageHeight - 3);
-      doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`JP_FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Downloaded', 'success');
+      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.save(`FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Full ledger documentation completed.', 'success');
     }
 
     function downloadShootsListPDF() {
@@ -2647,7 +2651,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(18);
       doc.setTextColor(201, 169, 110);
       doc.setFont(undefined, 'bold');
-      doc.text('JASHWANTH JP', margin, yPos + 6);
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
       yPos = 32;
       doc.setFontSize(9);
       doc.setFont(undefined, 'bold');
@@ -2759,16 +2763,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
       doc.text('Shoots Report', margin, pageHeight - 3);
-      doc.text('JASHWANTH JP', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`JP_Shoots_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Downloaded', 'success');
+      doc.text('SAKKHI Web App', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.save(`ShootsReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Shoots register successfully archived.', 'success');
     }
 
     function forceSync() {
       setSyncStatus('syncing', 'Force Syncing...');
       setTimeout(() => {
         setSyncStatus('synced', 'Synced');
-        showToast('Force sync completed');
+        showToast('Force cloud database sync synchronization completed.');
       }, 2000);
     }
 
