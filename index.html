@@ -32,13 +32,21 @@
       transition: filter 0.2s ease-in-out;
     }
 
-    /* Hide scrollbar for smooth internal scrolling */
-    .no-scrollbar::-webkit-scrollbar {
-      display: none;
+    .account-sidebar-item {
+      @apply flex items-center gap-3 px-4 py-3 text-sm rounded-lg cursor-pointer transition-all border;
+      @apply border-transparent text-neutral-400 hover:text-white hover:bg-neutral-900/50;
     }
-    .no-scrollbar {
-      -ms-overflow-style: none;  /* IE and Edge */
-      scrollbar-width: none;  /* Firefox */
+
+    .account-sidebar-item.active {
+      @apply bg-neutral-950 border-neutral-800 text-[#c9a96e] font-semibold;
+    }
+
+    .account-content-section {
+      @apply hidden;
+    }
+
+    .account-content-section.active {
+      @apply block;
     }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
@@ -215,128 +223,247 @@
     </section>
 
     <section id="section-account" class="app-section hidden">
-      <div class="flex flex-col md:flex-row gap-8 max-w-6xl mx-auto pt-4">
-        
-        <div class="md:w-64 flex-shrink-0 relative">
-          <div class="md:sticky md:top-24 flex flex-row md:flex-col gap-1 overflow-x-auto no-scrollbar pb-2 md:pb-0">
-            <button onclick="scrollToAccountSec('acc-brand')" data-target="acc-brand" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-white text-white font-bold bg-white/5 transition-all">Edit profile</button>
-            <button onclick="scrollToAccountSec('acc-privacy')" data-target="acc-privacy" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Privacy and data</button>
-            <button onclick="scrollToAccountSec('acc-studio')" data-target="acc-studio" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Studio Settings</button>
-            <button onclick="scrollToAccountSec('acc-data')" data-target="acc-data" class="acc-nav-btn whitespace-nowrap text-left px-5 py-3 md:py-4 text-[15px] rounded-lg md:rounded-none md:border-l-[3px] border-transparent text-neutral-400 font-medium hover:bg-white/5 transition-all">Data Management</button>
+      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+        <h2 class="text-xl font-bold text-white">Account Settings</h2>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Sidebar Navigation -->
+        <div class="lg:col-span-1">
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-3 space-y-2 sticky top-20">
+            <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
+              <i class="ti ti-user text-lg"></i>
+              <span>Profile</span>
+            </button>
+            <button onclick="switchAccountTab('security')" class="account-sidebar-item" data-tab="security">
+              <i class="ti ti-lock text-lg"></i>
+              <span>Security</span>
+            </button>
+            <button onclick="switchAccountTab('whatsapp')" class="account-sidebar-item" data-tab="whatsapp">
+              <i class="ti ti-brand-whatsapp text-lg"></i>
+              <span>WhatsApp</span>
+            </button>
+            <button onclick="switchAccountTab('settings')" class="account-sidebar-item" data-tab="settings">
+              <i class="ti ti-settings text-lg"></i>
+              <span>Management</span>
+            </button>
+            <button onclick="switchAccountTab('data')" class="account-sidebar-item" data-tab="data">
+              <i class="ti ti-database text-lg"></i>
+              <span>Data</span>
+            </button>
           </div>
         </div>
 
-        <div class="flex-1 space-y-16 pb-20">
+        <!-- Content Area -->
+        <div class="lg:col-span-3 space-y-6">
           
-          <div class="flex items-center justify-end border-b border-neutral-900 pb-6 mb-8">
-             <button onclick="saveProfileSettings()" class="bg-white text-black px-6 py-2.5 rounded-full text-[15px] font-bold hover:bg-neutral-200 transition shadow-lg">Save changes</button>
+          <!-- Profile Section -->
+          <div id="account-profile" class="account-content-section active">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
+                  <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
+                  <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
+                  <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                    <i class="ti ti-device-floppy"></i> Save Changes
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
 
-          <div id="acc-brand" class="space-y-8 scroll-mt-24">
-            <div class="space-y-2">
-              <h3 class="text-3xl font-bold text-white tracking-tight">Edit profile</h3>
-              <p class="text-base text-neutral-400 leading-relaxed">Keep your brand details up to date. Information you add here is used to auto-generate your communications and invoices.</p>
+          <!-- Payment Details Section -->
+          <div id="account-payment" class="account-content-section active">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Add your payment information</p>
+              </div>
+
+              <div class="space-y-4">
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
+                  <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
+                  <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+                </div>
+
+                <div class="pt-3 flex gap-2">
+                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                    <i class="ti ti-device-floppy"></i> Save Changes
+                  </button>
+                </div>
+              </div>
             </div>
-            
+          </div>
+
+          <!-- Security Section -->
+          <div id="account-security" class="account-content-section">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
+              </div>
+
+              <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
+              </div>
+
+              <div class="space-y-3">
+                <div class="flex gap-2">
+                  <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
+                  <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                    <i class="ti ti-check"></i> Update
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- WhatsApp Section -->
+          <div id="account-whatsapp" class="account-content-section">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Customize your WhatsApp message template</p>
+              </div>
+
+              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
+                <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
+                <div class="flex flex-wrap gap-2">
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Client Name]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Event]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Date]</span>
+                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2.5 py-1.5 rounded text-neutral-300">[Location]</span>
+                </div>
+              </div>
+
+              <div class="flex flex-col gap-1.5">
+                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Message Template</label>
+                <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-28 resize-none"></textarea>
+              </div>
+
+              <div class="flex gap-2 pt-3">
+                <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                  <i class="ti ti-device-floppy"></i> Save Template
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Settings Management Section -->
+          <div id="account-settings" class="account-content-section">
             <div class="space-y-5">
-              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
-                <label class="text-xs font-medium text-neutral-400 block mb-1">Business Name</label>
-                <input type="text" id="acc-biz-name" class="w-full bg-transparent text-base text-white outline-none" />
+              <!-- Companies -->
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                <div class="border-b border-neutral-800 pb-4 mb-4">
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
+                  </h3>
+                </div>
+                <div id="settings-companies" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                <div class="flex gap-2">
+                  <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                </div>
               </div>
 
-              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
-                <label class="text-xs font-medium text-neutral-400 block mb-1">Phone Number</label>
-                <input type="tel" id="acc-phone" class="w-full bg-transparent text-base text-white outline-none" />
+              <!-- Locations -->
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                <div class="border-b border-neutral-800 pb-4 mb-4">
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
+                  </h3>
+                </div>
+                <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                <div class="flex gap-2">
+                  <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                </div>
               </div>
 
-              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
-                <label class="text-xs font-medium text-neutral-400 block mb-1">UPI ID / Bank Details</label>
-                <textarea id="acc-upi" class="w-full bg-transparent text-base text-white outline-none resize-none h-24 pt-1"></textarea>
-              </div>
-
-              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent">
-                <label class="text-xs font-medium text-neutral-400 block mb-1">WhatsApp Template</label>
-                <textarea id="acc-wa-template" class="w-full bg-transparent text-base text-white outline-none resize-none h-20 pt-1"></textarea>
-                <p class="text-[11px] text-neutral-500 mt-2">Variables available: [Client Name], [Event], [Date]</p>
+              <!-- Event Categories -->
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                <div class="border-b border-neutral-800 pb-4 mb-4">
+                  <h3 class="text-base font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
+                  </h3>
+                </div>
+                <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                <div class="flex gap-2">
+                  <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                </div>
               </div>
             </div>
           </div>
 
-          <hr class="border-neutral-900" />
-
-          <div id="acc-privacy" class="space-y-8 scroll-mt-24">
-            <div class="space-y-2">
-              <h3 class="text-3xl font-bold text-white tracking-tight">Privacy and data</h3>
-              <p class="text-base text-neutral-400 leading-relaxed">Secure your financial ledgers and dashboard amounts by setting a required PIN code.</p>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-4">
-              <div class="border border-neutral-700 rounded-3xl p-4 focus-within:border-white focus-within:ring-1 focus-within:ring-white transition group bg-transparent flex-1">
-                <label class="text-xs font-medium text-neutral-400 block mb-1">Financial Privacy PIN</label>
-                <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter 4-6 digit PIN" class="w-full bg-transparent text-base text-white outline-none tracking-widest" />
+          <!-- Data Management Section -->
+          <div id="account-data" class="account-content-section">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-database text-[#c9a96e]"></i> Data Management
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
               </div>
-              <button onclick="updatePrivacyPIN()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-8 py-4 sm:py-0 sm:h-[72px] rounded-3xl text-[15px] font-bold transition flex-shrink-0">Update PIN</button>
-            </div>
-          </div>
 
-          <hr class="border-neutral-900" />
+              <div class="space-y-3">
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                  <div class="space-y-2">
+                    <p class="text-xs text-neutral-400 font-semibold">Export Your Data</p>
+                    <p class="text-xs text-neutral-500">Download all your shoots as a CSV file for backup or analysis.</p>
+                  </div>
+                  <button onclick="exportShootsToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+                    <i class="ti ti-file-spreadsheet"></i> Export as CSV
+                  </button>
+                </div>
 
-          <div id="acc-studio" class="space-y-8 scroll-mt-24">
-             <div class="space-y-2">
-              <h3 class="text-3xl font-bold text-white tracking-tight">Studio Settings</h3>
-              <p class="text-base text-neutral-400 leading-relaxed">Customize your dynamic dropdown lists for fast shoot entries.</p>
-            </div>
-
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6">
-                 <h4 class="font-bold text-white mb-5 text-lg">Companies</h4>
-                 <div id="settings-companies" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
-                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent">
-                   <input type="text" id="new-company-input" placeholder="Add company..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
-                   <button onclick="addCompany()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
-                 </div>
-               </div>
-
-               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6">
-                 <h4 class="font-bold text-white mb-5 text-lg">Locations</h4>
-                 <div id="settings-locations" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
-                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent">
-                   <input type="text" id="new-loc-input" placeholder="Add location..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
-                   <button onclick="addLocation()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
-                 </div>
-               </div>
-
-               <div class="border border-neutral-800 bg-[#0a0a0a] rounded-3xl p-6 md:col-span-2">
-                 <h4 class="font-bold text-white mb-5 text-lg">Event Categories</h4>
-                 <div id="settings-events" class="space-y-3 mb-6 max-h-48 overflow-y-auto pr-2 no-scrollbar"></div>
-                 <div class="flex gap-2 border border-neutral-700 focus-within:border-white transition rounded-2xl p-1 bg-transparent max-w-sm">
-                   <input type="text" id="new-event-input" placeholder="Add event type..." class="w-full bg-transparent text-sm text-white outline-none pl-3"/>
-                   <button onclick="addEvent()" class="bg-neutral-800 text-white px-4 py-2.5 rounded-xl text-sm font-bold hover:bg-neutral-700 transition">Add</button>
-                 </div>
-               </div>
-            </div>
-          </div>
-
-          <hr class="border-neutral-900" />
-
-          <div id="acc-data" class="space-y-8 scroll-mt-24">
-            <div class="space-y-2">
-              <h3 class="text-3xl font-bold text-white tracking-tight">Data Management</h3>
-              <p class="text-base text-neutral-400 leading-relaxed">Download a backup of your entire ledger or reset the local application state.</p>
-            </div>
-            
-            <div class="flex flex-col sm:flex-row flex-wrap gap-4 pt-2">
-               <button onclick="exportShootsToCSV()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2"><i class="ti ti-file-spreadsheet text-lg"></i> Export CSV</button>
-               <button onclick="forceSync()" class="bg-neutral-800 hover:bg-neutral-700 text-white px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2"><i class="ti ti-refresh text-lg"></i> Force Sync</button>
-               <div class="flex-1"></div>
-               <button onclick="confirmClearData()" class="bg-red-950/40 text-red-400 hover:bg-red-900/60 border border-red-900/50 px-6 py-4 rounded-full text-[15px] font-bold transition flex items-center justify-center gap-2 mt-4 sm:mt-0"><i class="ti ti-trash text-lg"></i> Wipe Application Data</button>
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                  <div class="space-y-2">
+                    <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
+                    <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
+                  </div>
+                  <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+                    <i class="ti ti-refresh"></i> Force Cloud Sync
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
 
         </div>
       </div>
     </section>
-
   </main>
 
   <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
@@ -544,13 +671,16 @@
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
     let calSelected = today();
+    let _currentAccountTab = 'profile';
 
     let _appPin = '1234jp'; 
     let _profile = { 
       bizName: '', 
-      phone: '', 
-      upi: '', 
-      waTemplate: 'Hi [Client Name],\\nJust confirming our schedule for the [Event] shoot on [Date].\\nLooking forward to working with you!' 
+      phone: '',
+      instagram: '',
+      upi: '',
+      bank: '',
+      waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!' 
     };
 
     function setSyncStatus(state, label) {
@@ -803,22 +933,30 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (tab === 'shoots') renderShootsList();
       if (tab === 'payments') renderPayments();
       if (tab === 'account') {
-        renderSettings(); 
-        populateProfileUI(); 
+        renderSettings();
+        populateProfileUI();
       }
     }
 
-    function scrollToAccountSec(id) {
-      document.getElementById(id).scrollIntoView({ behavior: 'smooth', block: 'start' });
-      document.querySelectorAll('.acc-nav-btn').forEach(btn => {
-        btn.classList.remove('md:border-white', 'text-white', 'bg-white/5', 'font-bold');
-        btn.classList.add('md:border-transparent', 'text-neutral-400', 'font-medium');
+    function switchAccountTab(tab) {
+      _currentAccountTab = tab;
+      document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
+      
+      const sections = {
+        'profile': ['account-profile', 'account-payment'],
+        'security': ['account-security'],
+        'whatsapp': ['account-whatsapp'],
+        'settings': ['account-settings'],
+        'data': ['account-data']
+      };
+
+      (sections[tab] || []).forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.classList.add('active');
       });
-      const activeBtn = document.querySelector(`[data-target="${id}"]`);
-      if(activeBtn) {
-        activeBtn.classList.add('md:border-white', 'text-white', 'bg-white/5', 'font-bold');
-        activeBtn.classList.remove('md:border-transparent', 'text-neutral-400', 'font-medium');
-      }
+
+      document.querySelector(`[data-tab="${tab}"]`)?.classList.add('active');
     }
 
     function renderDashboard() {
@@ -1557,11 +1695,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const compTarget = document.getElementById('settings-companies');
       if (compTarget) {
         compTarget.innerHTML = _companies.map((c, i) => `
-          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
+          <div class="flex items-center justify-between py-2 text-xs">
             <span class="text-neutral-300 font-medium">${c}</span>
             <div class="flex gap-1">
-              <button onclick="renameCompany(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteCompany(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
+              <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1569,16 +1707,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const locTarget = document.getElementById('settings-locations');
       if (locTarget) {
         locTarget.innerHTML = DEFAULT_LOCS.map(l => `
-          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 opacity-50">
+          <div class="flex items-center justify-between py-2 text-xs opacity-50">
             <span class="text-neutral-400">${l}</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600 mr-2">Default</span>
+            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span>
           </div>`).join('') + 
           _locs.map((l, i) => `
-          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
+          <div class="flex items-center justify-between py-2 text-xs">
             <span class="text-neutral-300 font-medium">${l}</span>
             <div class="flex gap-1">
-              <button onclick="renameLocation(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteLocation(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
+              <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1586,11 +1724,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const eventTarget = document.getElementById('settings-events');
       if (eventTarget) {
         eventTarget.innerHTML = _events.map((e, i) => `
-          <div class="flex items-center justify-between py-2 text-sm border-b border-neutral-800/50 last:border-0">
+          <div class="flex items-center justify-between py-2 text-xs">
             <span class="text-neutral-300 font-medium">${e}</span>
             <div class="flex gap-1">
-              <button onclick="renameEvent(${i})" class="p-2 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil"></i></button>
-              <button onclick="deleteEvent(${i})" class="p-2 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash"></i></button>
+              <button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
+              <button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
             </div>
           </div>`).join('');
       }
@@ -1599,14 +1737,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function populateProfileUI() {
       document.getElementById('acc-biz-name').value = _profile.bizName || '';
       document.getElementById('acc-phone').value = _profile.phone || '';
+      document.getElementById('acc-instagram').value = _profile.instagram || '';
       document.getElementById('acc-upi').value = _profile.upi || '';
+      document.getElementById('acc-bank').value = _profile.bank || '';
       document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
     }
 
     async function saveProfileSettings() {
       _profile.bizName = document.getElementById('acc-biz-name').value.trim();
       _profile.phone = document.getElementById('acc-phone').value.trim();
+      _profile.instagram = document.getElementById('acc-instagram').value.trim();
       _profile.upi = document.getElementById('acc-upi').value.trim();
+      _profile.bank = document.getElementById('acc-bank').value.trim();
       _profile.waTemplate = document.getElementById('acc-wa-template').value.trim();
       
       await saveSettingToDB('profile', _profile);
@@ -1649,7 +1791,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         `"${(s.notes || '').replace(/\"/g, '""')}\"`
       ]);
       
-      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\\n");
+      const csvContent = "data:text/csv;charset=utf-8," + [headers.join(','), ...rows.map(e => e.join(','))].join("\n");
       const encodedUri = encodeURI(csvContent);
       const link = document.createElement("a");
       
@@ -1964,7 +2106,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
       
-      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\\nJust confirming our schedule for the [Event] shoot on [Date].\\nLooking forward to working with you!";
+      let msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
       
       const dateObj = new Date(s.date + 'T00:00:00');
       const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
@@ -1972,7 +2114,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const msg = msgTemplate
         .replace(/\[Client Name\]/gi, s.name)
         .replace(/\[Event\]/gi, s.event)
-        .replace(/\[Date\]/gi, dateFormatted);
+        .replace(/\[Date\]/gi, dateFormatted)
+        .replace(/\[Location\]/gi, s.location || 'TBA');
         
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
@@ -1981,25 +2124,6 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function triggerModalWhatsApp() {
       const id = document.getElementById('edit-shoot-id').value;
       triggerRowWhatsApp(id, { stopPropagation: () => {} });
-    }
-    function confirmClearData() {
-      _pendingDropTargetId = '__clear_all__';
-      document.getElementById('confirm-title').textContent = 'Clear All Data?';
-      document.getElementById('confirm-sub-text').textContent = 'This will permanently delete all shoots and settings. This cannot be undone.';
-      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
-      document.getElementById('confirm-action-btn').onclick = async function() {
-        try {
-          await sbFetch('shoots', { method: 'DELETE' });
-          await sbFetch('settings', { method: 'DELETE' });
-          _shoots = []; _companies = [...DEFAULT_COMPANIES]; _locs = [];
-          _pendingDropTargetId = null;
-          setSyncStatus('synced', 'Data Cleared');
-          closeConfirmModal();
-          refreshCurrentView();
-          showToast('All data cleared.', 'success');
-        } catch (e) { showToast('Error clearing data: ' + e.message, 'error'); }
-      };
-      openModal('confirm-modal-backdrop');
     }
 
     function refreshCurrentView() {
