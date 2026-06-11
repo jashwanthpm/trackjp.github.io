@@ -86,6 +86,26 @@
     /* Google Sign-In Button Override */
     #g_id_onload { display: none; }
 
+    /* Mobile-optimized Google Sign-In Button */
+    #google-signin-button {
+      display: flex !important;
+      justify-content: center !important;
+      width: 100% !important;
+      margin: 0 auto !important;
+    }
+
+    #google-signin-button > div {
+      display: flex !important;
+      justify-content: center !important;
+    }
+
+    @media (max-width: 640px) {
+      #google-signin-button iframe {
+        max-width: 100% !important;
+        width: 100% !important;
+      }
+    }
+
     /* Login Modal Styles */
     .login-modal {
       display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -95,6 +115,13 @@
     .login-modal-content {
       background: #0a0a0a; border: 1px solid #262626; border-radius: 12px;
       padding: 40px; max-width: 400px; width: 90%;
+    }
+
+    @media (max-width: 480px) {
+      .login-modal-content {
+        padding: 30px 24px;
+        width: 95%;
+      }
     }
 
     /* =========================================
@@ -406,6 +433,20 @@
                   <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
                 </div>
 
+                <!-- ACCOUNT INFO BAR - SHOWS WHO IS SIGNED IN -->
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                  <div class="flex items-center gap-2">
+                    <i class="ti ti-login text-[#c9a96e]"></i>
+                    <p class="text-xs text-neutral-400 font-semibold">Signed In As</p>
+                  </div>
+                  <div class="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
+                    <p class="text-sm font-bold text-[#c9a96e] break-all" id="account-email-display">Loading account...</p>
+                  </div>
+                  <button onclick="logoutConfirm()" class="w-full flex items-center justify-center gap-2 bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-950/50 hover:text-red-300 px-4 py-2.5 rounded-lg text-xs font-bold transition duration-200">
+                    <i class="ti ti-logout"></i> Sign Out
+                  </button>
+                </div>
+
                 <div class="space-y-4">
                   <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
@@ -628,10 +669,11 @@
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-database text-[#c9a96e]"></i> Data Management
                   </h3>
-                  <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
+                  <p class="text-xs text-neutral-500 mt-1">Export, import, or synchronize your shoot data</p>
                 </div>
 
                 <div class="space-y-3">
+                  <!-- PDF Export -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
@@ -642,16 +684,33 @@
                     </button>
                   </div>
 
+                  <!-- CSV Export -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
-                      <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records.</p>
+                      <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records. Perfect for backup or external analysis.</p>
                     </div>
                     <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
                       <i class="ti ti-file-spreadsheet text-lg"></i> Export Full Database (CSV)
                     </button>
                   </div>
 
+                  <!-- CSV IMPORT - NEW FEATURE -->
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                    <div class="space-y-2">
+                      <p class="text-xs text-neutral-400 font-semibold">📥 Import Data from CSV</p>
+                      <p class="text-xs text-neutral-500">Upload a CSV file to import shoot records. Required columns: name, date, event. Optional: session, location, company, notes, amount, expense, expense_status, pay_status, part_paid</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2">
+                      <input type="file" id="csv-import-input" accept=".csv,.txt" class="flex-1 bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-400 cursor-pointer hover:border-neutral-700 transition file:bg-[#c9a96e] file:text-black file:border-0 file:px-3 file:py-1 file:rounded file:text-xs file:font-bold file:cursor-pointer file:mr-3 file:hover:bg-[#e6c98a]"/>
+                      <button onclick="importDataFromCSV()" class="flex items-center justify-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs px-4 py-2 rounded-lg transition whitespace-nowrap">
+                        <i class="ti ti-upload text-lg"></i> <span class="hidden sm:inline">Import CSV</span><span class="sm:hidden">Import</span>
+                      </button>
+                    </div>
+                    <div id="import-status" class="text-xs text-neutral-500 h-5"></div>
+                  </div>
+
+                  <!-- Cloud Sync -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
@@ -906,11 +965,18 @@
       const decoded = parseJwt(token);
       
       currentUser = {
-        id: decoded.sub, email: decoded.email, name: decoded.name, token: token
+        id: decoded.sub, 
+        email: decoded.email, 
+        name: decoded.name, 
+        token: token,
+        user_metadata: { name: decoded.name }
       };
 
       localStorage.setItem('currentUser', JSON.stringify(currentUser));
       showToast(`Welcome, ${currentUser.name}!`, 'success');
+      
+      // Update account display
+      updateAccountDisplay();
       
       // Hide login, show app, and load data
       document.getElementById('login-modal').classList.remove('active');
@@ -920,12 +986,32 @@
     }
 
     function logout() {
-      currentUser = null;
-      localStorage.removeItem('currentUser');
-      google.accounts.id.disableAutoSelect();
-      document.getElementById('main-app').style.display = 'none';
-      document.getElementById('login-modal').classList.add('active');
-      showToast('Logged out successfully');
+      try {
+        currentUser = null;
+        _shoots = [];
+        _companies = [...DEFAULT_COMPANIES];
+        _locs = [];
+        _events = [];
+        _profile = {};
+        _appPin = '';
+        
+        localStorage.removeItem('currentUser');
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        google.accounts.id.disableAutoSelect();
+        
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-modal').classList.add('active');
+        document.getElementById('csv-import-input').value = '';
+        document.getElementById('import-status').textContent = '';
+        
+        showToast('Signed out successfully', 'success');
+      } catch(e) {
+        console.error('Logout error:', e);
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-modal').classList.add('active');
+      }
     }
 
     function parseJwt(token) {
@@ -981,6 +1067,9 @@
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
+
+    // Current user information - stores Google Sign-In details
+    let currentUser = null;
 
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
@@ -1145,6 +1234,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       setSyncStatus('synced', 'Synced with Cloud');
       document.getElementById('loading-screen').classList.add('hidden');
       applyPrivacyUIVisibility();
+      updateAccountDisplay();
       renderDashboard();
     }, 400);
 
@@ -3109,6 +3199,192 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     // Function to generate unique ID for new records
     function uid() {
       return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
+
+    // ===== NEW FEATURES =====
+    
+    // Update account email display
+    function updateAccountDisplay() {
+      const emailDisplay = document.getElementById('account-email-display');
+      if (currentUser) {
+        const email = currentUser.email || currentUser.user_id || 'Account User';
+        const displayName = currentUser.user_metadata?.name || email;
+        emailDisplay.innerHTML = `<i class="ti ti-mail mr-2"></i>${displayName}`;
+      } else {
+        emailDisplay.textContent = 'Not signed in';
+      }
+    }
+
+    // Logout confirmation and cleanup
+    function logoutConfirm() {
+      const confirmed = confirm('Are you sure you want to sign out? All local data will be cleared.');
+      if (confirmed) {
+        logout();
+      }
+    }
+
+    // Main logout function
+    function logout() {
+      try {
+        currentUser = null;
+        _shoots = [];
+        _companies = [];
+        _locs = [];
+        _events = [];
+        _profile = {};
+        _appPin = '';
+        
+        // Clear all storage
+        localStorage.clear();
+        sessionStorage.clear();
+        
+        // Reset UI
+        document.getElementById('main-app').style.display = 'none';
+        document.getElementById('login-modal').classList.add('active');
+        document.getElementById('csv-import-input').value = '';
+        document.getElementById('import-status').textContent = '';
+        
+        showToast('Signed out successfully. See you next time!', 'success');
+        
+        // Redirect after delay
+        setTimeout(() => {
+          location.reload();
+        }, 1500);
+      } catch (e) {
+        console.error('Logout error:', e);
+        showToast('Error during logout', 'error');
+      }
+    }
+
+    // CSV Import function - IMPROVED
+    function importDataFromCSV() {
+      const fileInput = document.getElementById('csv-import-input');
+      const file = fileInput.files[0];
+      const statusDiv = document.getElementById('import-status');
+
+      if (!file) {
+        statusDiv.innerHTML = '<span class="text-red-400">❌ Please select a CSV file</span>';
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        try {
+          const csv = e.target.result;
+          const lines = csv.trim().split('\n');
+          
+          if (lines.length < 2) {
+            statusDiv.innerHTML = '<span class="text-red-400">❌ CSV file is empty</span>';
+            return;
+          }
+
+          // Parse headers (first row)
+          const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+          
+          // Validate required columns
+          const requiredColumns = ['name', 'date'];
+          const hasRequired = requiredColumns.every(col => headers.includes(col));
+          
+          if (!hasRequired) {
+            statusDiv.innerHTML = `<span class="text-red-400">❌ Missing required columns: ${requiredColumns.join(', ')}</span>`;
+            return;
+          }
+
+          let imported = 0;
+          let skipped = 0;
+          const errors = [];
+
+          // Parse data rows
+          for (let i = 1; i < lines.length; i++) {
+            if (!lines[i].trim()) continue;
+
+            try {
+              const values = lines[i].split(',').map(v => v.trim());
+              
+              // Get values by column index
+              const name = values[headers.indexOf('name')] || '';
+              const date = values[headers.indexOf('date')] || '';
+
+              // Skip if critical data missing
+              if (!name || !date) {
+                skipped++;
+                continue;
+              }
+
+              const shoot = {
+                id: uid(),
+                name: name,
+                date: date,
+                event: values[headers.indexOf('event')] || 'Wedding',
+                session: values[headers.indexOf('session')] || 'Morning Session',
+                location: values[headers.indexOf('location')] || '',
+                company: values[headers.indexOf('company')] || '',
+                notes: values[headers.indexOf('notes')] || '',
+                amount: parseFloat(values[headers.indexOf('amount')]) || 0,
+                expense: parseFloat(values[headers.indexOf('expense')]) || 0,
+                expenseStatus: values[headers.indexOf('expense_status')] || 'pending',
+                payStatus: values[headers.indexOf('pay_status')] || 'pending',
+                partPaid: parseFloat(values[headers.indexOf('part_paid')]) || 0,
+                created: new Date().toISOString()
+              };
+
+              _shoots.push(shoot);
+              imported++;
+            } catch (err) {
+              errors.push(`Row ${i + 1}`);
+            }
+          }
+
+          // Show status
+          if (imported > 0) {
+            statusDiv.innerHTML = `<span class="text-emerald-400">✅ Successfully imported ${imported} records${skipped > 0 ? ` (${skipped} skipped)` : ''}</span>`;
+            showToast(`Imported ${imported} shoot records successfully!`, 'success');
+            
+            // Clear input and re-render
+            fileInput.value = '';
+            renderShootsList();
+            renderCalendar();
+            renderPaymentsList();
+            renderDashboard();
+            
+            // Clear status after 5 seconds
+            setTimeout(() => {
+              statusDiv.textContent = '';
+            }, 5000);
+          } else {
+            statusDiv.innerHTML = `<span class="text-red-400">❌ No valid records found to import</span>`;
+            showToast('No records imported - check CSV format', 'error');
+          }
+        } catch (err) {
+          console.error('CSV Import Error:', err);
+          statusDiv.innerHTML = '<span class="text-red-400">❌ Error parsing CSV file</span>';
+          showToast('Error importing CSV file: ' + err.message, 'error');
+        }
+      };
+
+      reader.onerror = () => {
+        statusDiv.innerHTML = '<span class="text-red-400">❌ Error reading file</span>';
+        showToast('Error reading file', 'error');
+      };
+
+      reader.readAsText(file);
+    }
+
+    // Initialize account display on profile tab switch
+    function switchAccountTab(tab) {
+      const buttons = document.querySelectorAll('.account-sidebar-item');
+      const sections = document.querySelectorAll('.account-content-section');
+      
+      buttons.forEach(btn => btn.classList.remove('active'));
+      sections.forEach(sec => sec.classList.remove('active'));
+      
+      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
+      document.getElementById(`account-${tab}`).classList.add('active');
+
+      // Update account display when profile tab is opened
+      if (tab === 'profile') {
+        updateAccountDisplay();
+      }
     }
 
   </script>
