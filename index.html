@@ -872,7 +872,7 @@
     let currentUser = null;
 
     function initGoogleSignIn() {
-      const GOOGLE_CLIENT_ID = localStorage.getItem('83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com');
+      JSON.parse(localStorage.getItem('currentUser')).id;
       
       if (!GOOGLE_CLIENT_ID) {
         console.warn('Google Client ID not configured. Showing Setup Warning.');
@@ -882,7 +882,7 @@
       }
 
       google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
+        client_id: 83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com,
         callback: handleGoogleSignIn,
         auto_select: false
       });
