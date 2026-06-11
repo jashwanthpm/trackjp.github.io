@@ -10,12 +10,14 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #050505;
       color: #e8e8e8;
+      transition: background-color 0.3s ease, color 0.3s ease;
     }
     .brand-serif {
       font-family: 'Cinzel', serif;
@@ -78,10 +80,86 @@
     .hide-scrollbar::-webkit-scrollbar {
       display: none;
     }
+
+    /* =========================================
+       THEME OVERRIDE ENGINE
+       ========================================= */
+       
+    /* BOHO LOUNGE THEME */
+    body[data-theme="boho"] {
+      background-color: #f9f6f0 !important;
+      color: #3a332a !important;
+    }
+    body[data-theme="boho"] header, body[data-theme="boho"] nav, body[data-theme="boho"] .bg-\[\#0a0a0a\] {
+      background-color: rgba(242, 236, 228, 0.9) !important;
+    }
+    body[data-theme="boho"] .bg-\[\#0f0f0f\], body[data-theme="boho"] .bg-neutral-950, body[data-theme="boho"] #shoot-modal, body[data-theme="boho"] #date-picker-dropdown {
+      background-color: #ffffff !important;
+    }
+    body[data-theme="boho"] .border-neutral-900, body[data-theme="boho"] .border-neutral-800 {
+      border-color: #e6dfd5 !important;
+    }
+    body[data-theme="boho"] .text-white { color: #3a332a !important; }
+    body[data-theme="boho"] .text-neutral-500, body[data-theme="boho"] .text-neutral-400, body[data-theme="boho"] .text-neutral-300 {
+      color: #8c8273 !important;
+    }
+    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #d4a373 !important; }
+    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #d4a373 !important; color: white !important; }
+    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #d4a373 !important; }
+    body[data-theme="boho"] .bg-neutral-900 { background-color: #f2ece4 !important; }
+    body[data-theme="boho"] input, body[data-theme="boho"] select, body[data-theme="boho"] textarea {
+      color: #3a332a !important;
+    }
+    body[data-theme="boho"] input::placeholder, body[data-theme="boho"] textarea::placeholder {
+      color: #a3998b !important;
+    }
+    body[data-theme="boho"] input:focus, body[data-theme="boho"] select:focus, body[data-theme="boho"] textarea:focus {
+      border-color: #d4a373 !important;
+    }
+    body[data-theme="boho"] .account-sidebar-item:hover { color: #3a332a !important; background-color: rgba(242, 236, 228, 0.7) !important; }
+    body[data-theme="boho"] .account-sidebar-item.active { background-color: #f2ece4 !important; color: #d4a373 !important; border-color: #e6dfd5 !important; }
+
+    /* MODERN MINIMALIST THEME */
+    body[data-theme="minimal"] {
+      background-color: #ffffff !important;
+      color: #111827 !important;
+    }
+    body[data-theme="minimal"] header, body[data-theme="minimal"] nav, body[data-theme="minimal"] .bg-\[\#0a0a0a\] {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+    body[data-theme="minimal"] .bg-\[\#0f0f0f\] {
+      background-color: #ffffff !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    body[data-theme="minimal"] .bg-neutral-950, body[data-theme="minimal"] #shoot-modal, body[data-theme="minimal"] #date-picker-dropdown {
+      background-color: #f9fafb !important;
+    }
+    body[data-theme="minimal"] .border-neutral-900, body[data-theme="minimal"] .border-neutral-800 {
+      border-color: #e5e7eb !important;
+    }
+    body[data-theme="minimal"] .text-white { color: #111827 !important; }
+    body[data-theme="minimal"] .text-neutral-500, body[data-theme="minimal"] .text-neutral-400, body[data-theme="minimal"] .text-neutral-300 {
+      color: #6b7280 !important;
+    }
+    body[data-theme="minimal"] .text-\[\#c9a96e\] { color: #111827 !important; }
+    body[data-theme="minimal"] .bg-\[\#c9a96e\] { background-color: #111827 !important; color: white !important; }
+    body[data-theme="minimal"] .border-\[\#c9a96e\] { border-color: #111827 !important; }
+    body[data-theme="minimal"] .bg-neutral-900 { background-color: #f3f4f6 !important; }
+    body[data-theme="minimal"] input, body[data-theme="minimal"] select, body[data-theme="minimal"] textarea {
+      color: #111827 !important;
+    }
+    body[data-theme="minimal"] input::placeholder, body[data-theme="minimal"] textarea::placeholder {
+      color: #9ca3af !important;
+    }
+    body[data-theme="minimal"] input:focus, body[data-theme="minimal"] select:focus, body[data-theme="minimal"] textarea:focus {
+      border-color: #111827 !important;
+    }
+    body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
+    body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
   </style>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
-<body class="min-h-screen pb-24 md:pb-6">
+<body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
 
   <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
     <div class="text-center">
@@ -94,7 +172,7 @@
     <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
   </div>
 
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between">
+  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
     <div class="flex flex-col">
       <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
       <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
@@ -259,6 +337,10 @@
               <i class="ti ti-credit-card text-lg"></i>
               <span>Payment</span>
             </button>
+            <button onclick="switchAccountTab('appearance')" class="account-sidebar-item" data-tab="appearance">
+              <i class="ti ti-palette text-lg"></i>
+              <span>Appearance</span>
+            </button>
             <button onclick="switchAccountTab('security')" class="account-sidebar-item" data-tab="security">
               <i class="ti ti-lock text-lg"></i>
               <span>Security</span>
@@ -339,6 +421,60 @@
                     <i class="ti ti-device-floppy"></i> Save Changes
                   </button>
                 </div>
+              </div>
+            </div>
+          </div>
+
+          <div id="account-appearance" class="account-content-section">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+              <div class="border-b border-neutral-800 pb-4">
+                <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                  <i class="ti ti-palette text-[#c9a96e]"></i> UI Theme Selection
+                </h3>
+                <p class="text-xs text-neutral-500 mt-1">Customize the visual style of your workspace</p>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                
+                <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0f0f0f]" id="theme-btn-midnight">
+                  <div class="bg-[#050505] rounded-lg h-24 p-2 flex flex-col gap-2">
+                    <div class="w-full h-3 bg-[#0a0a0a] rounded flex justify-between items-center px-1">
+                      <div class="w-2 h-2 bg-[#c9a96e] rounded-full"></div>
+                    </div>
+                    <div class="flex gap-2 flex-1">
+                      <div class="w-1/3 h-full bg-[#0f0f0f] rounded"></div>
+                      <div class="w-2/3 h-full bg-[#0f0f0f] rounded"></div>
+                    </div>
+                  </div>
+                  <p class="text-center text-xs font-bold text-white mt-2">Midnight Studio</p>
+                </div>
+
+                <div onclick="setAppTheme('boho')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-boho">
+                  <div class="bg-[#f9f6f0] rounded-lg h-24 p-2 border border-[#e6dfd5] flex flex-col gap-2">
+                    <div class="w-full h-3 bg-[#f2ece4] rounded flex justify-between items-center px-1">
+                      <div class="w-2 h-2 bg-[#d4a373] rounded-full"></div>
+                    </div>
+                    <div class="flex gap-2 flex-1">
+                      <div class="w-1/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
+                      <div class="w-2/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
+                    </div>
+                  </div>
+                  <p class="text-center text-xs font-bold text-white mt-2">Boho Lounge</p>
+                </div>
+
+                <div onclick="setAppTheme('minimal')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-minimal">
+                  <div class="bg-[#ffffff] rounded-lg h-24 p-2 border border-[#e5e7eb] flex flex-col gap-2">
+                    <div class="w-full h-3 bg-[#ffffff] rounded flex justify-between items-center px-1">
+                      <div class="w-2 h-2 bg-[#111827] rounded-full"></div>
+                    </div>
+                    <div class="flex gap-2 flex-1">
+                      <div class="w-1/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
+                      <div class="w-2/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
+                    </div>
+                  </div>
+                  <p class="text-center text-xs font-bold text-white mt-2">Modern Minimal</p>
+                </div>
+
               </div>
             </div>
           </div>
@@ -509,7 +645,7 @@
 
   <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
     <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
+      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
         <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
         <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
       </div>
@@ -621,7 +757,7 @@
         </div>
       </div>
       
-      <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 bg-[#0f0f0f] gap-2 pb-safe-offset">
+      <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 gap-2 pb-safe-offset">
         <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Delete</button>
         <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Text via WhatsApp</button>
         <div class="flex items-center gap-2 ml-auto">
@@ -713,6 +849,7 @@
       instagram: '',
       upi: '',
       bank: '',
+      theme: 'midnight',
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
@@ -855,7 +992,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         if (pinRow) _appPin = pinRow.value;
         
         const profileRow = configurations.find(r => r.key === 'profile');
-        if (profileRow) _profile = { ..._profile, ...profileRow.value };
+        if (profileRow) {
+          _profile = { ..._profile, ...profileRow.value };
+          if (_profile.theme) {
+            setAppTheme(_profile.theme, true);
+          }
+        }
 
         if(bar) bar.style.width = "100%";
         setTimeout(() => {
@@ -967,6 +1109,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const sections = {
         'profile': ['account-profile'],
         'payment': ['account-payment'],
+        'appearance': ['account-appearance'],
         'security': ['account-security'],
         'whatsapp': ['account-whatsapp'],
         'settings': ['account-settings'],
@@ -982,6 +1125,26 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if(activeBtn) {
         activeBtn.classList.add('active');
         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+    }
+
+    function setAppTheme(theme, skipSave = false) {
+      document.body.setAttribute('data-theme', theme);
+      
+      document.querySelectorAll('.theme-option').forEach(el => {
+        el.classList.remove('ring-2', 'ring-[#c9a96e]', 'ring-neutral-700', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
+      });
+      
+      const activeBtn = document.getElementById('theme-btn-' + theme);
+      if(activeBtn) {
+        if (theme === 'midnight') activeBtn.classList.add('ring-2', 'ring-[#c9a96e]', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
+        else activeBtn.classList.add('ring-2', 'ring-neutral-700', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
+      }
+
+      if (!skipSave) {
+        _profile.theme = theme;
+        saveSettingToDB('profile', _profile);
+        showToast('UI theme changed to ' + theme);
       }
     }
 
