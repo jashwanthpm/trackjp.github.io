@@ -1186,18 +1186,27 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     async function saveSettingToDB(key, value) {
       try {
-        const checkExisting = await sbFetch(`settings?key=eq.${key}&select=key`);
+        const checkExisting = await sbFetch(
+  `settings?key=eq.${key}&user_id=eq.${currentUser?.id || currentUser?.email}&select=key`
+);
         
         if (checkExisting && checkExisting.length > 0) {
-          await sbFetch(`settings?key=eq.${key}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ value })
-          });
+          await sbFetch(
+  `settings?key=eq.${key}&user_id=eq.${currentUser?.id || currentUser?.email}`,
+  {
+    method: 'PATCH',
+    body: JSON.stringify({ value })
+  }
+);
         } else {
           await sbFetch('settings', {
-            method: 'POST',
-            body: JSON.stringify({ key, value })
-          });
+  method: 'POST',
+  body: JSON.stringify({
+    key,
+    value,
+    user_id: currentUser?.id || currentUser?.email || 'default_user'
+  })
+});
         }
       } catch (e) {
         showToast('Settings Save Error: ' + e.message, 'error');
