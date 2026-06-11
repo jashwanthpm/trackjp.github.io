@@ -10,6 +10,479 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <!-- Google Sign-In -->
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050505;
+      color: #e8e8e8;
+      transition: background-color 0.3s ease, color 0.3s ease;
+    }
+    .brand-serif {
+      font-family: 'Cinzel', serif;
+    }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    
+    .blur-financial {
+      filter: blur(5px);
+      user-select: none;
+      pointer-events: none;
+      transition: filter 0.2s ease-in-out;
+    }
+
+    /* Fixed Account Tab CSS */
+    .account-sidebar-item {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+      border-radius: 0.5rem;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+      color: #9ca3af;
+      white-space: nowrap;
+    }
+
+    .account-sidebar-item:hover {
+      color: white;
+      background-color: rgba(23, 23, 23, 0.5);
+    }
+
+    .account-sidebar-item.active {
+      background-color: #0a0a0a;
+      border-color: #262626;
+      color: #c9a96e;
+      font-weight: 600;
+    }
+
+    .account-content-section {
+      display: none;
+      animation: fadeIn 0.3s ease-in-out;
+    }
+
+    .account-content-section.active {
+      display: block;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(5px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .hide-scrollbar {
+      scrollbar-width: none;
+    }
+    .hide-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    /* Google Sign-In Button Override */
+    #g_id_onload {
+      display: none;
+    }
+
+    /* Login Modal Styles */
+    .login-modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0, 0, 0, 0.8);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .login-modal.active {
+      display: flex;
+    }
+
+    .login-modal-content {
+      background: #0a0a0a;
+      border: 1px solid #262626;
+      border-radius: 12px;
+      padding: 40px;
+      max-width: 400px;
+      width: 90%;
+    }
+
+    /* THEME OVERRIDE ENGINE */
+    /* BOHO LOUNGE THEME */
+    body[data-theme="boho"] {
+      background-color: #1a1a1a !important;
+      color: #e0e0e0 !important;
+    }
+    body[data-theme="boho"] header, body[data-theme="boho"] nav, body[data-theme="boho"] .bg-\[\#0a0a0a\] {
+      background-color: rgba(25, 25, 25, 0.9) !important;
+    }
+    body[data-theme="boho"] .bg-\[\#0f0f0f\], body[data-theme="boho"] .bg-neutral-950, body[data-theme="boho"] #shoot-modal, body[data-theme="boho"] #date-picker-dropdown {
+      background-color: #252525 !important;
+    }
+    body[data-theme="boho"] .border-neutral-900, body[data-theme="boho"] .border-neutral-800 {
+      border-color: #3a3a3a !important;
+    }
+    body[data-theme="boho"] .text-white { color: #e0e0e0 !important; }
+    body[data-theme="boho"] .text-neutral-500, body[data-theme="boho"] .text-neutral-400, body[data-theme="boho"] .text-neutral-300 {
+      color: #a0a0a0 !important;
+    }
+    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #ff6b6b !important; }
+    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #ff6b6b !important; color: white !important; }
+    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #ff6b6b !important; }
+    body[data-theme="boho"] .bg-neutral-900 { background-color: #2a2a2a !important; }
+    body[data-theme="boho"] input, body[data-theme="boho"] select, body[data-theme="boho"] textarea {
+      color: #e0e0e0 !important;
+      background-color: #2a2a2a !important;
+    }
+    body[data-theme="boho"] input::placeholder, body[data-theme="boho"] textarea::placeholder {
+      color: #7a7a7a !important;
+    }
+    body[data-theme="boho"] input:focus, body[data-theme="boho"] select:focus, body[data-theme="boho"] textarea:focus {
+      border-color: #ff6b6b !important;
+    }
+    body[data-theme="boho"] .account-sidebar-item:hover { color: #e0e0e0 !important; background-color: rgba(255, 107, 107, 0.1) !important; }
+    body[data-theme="boho"] .account-sidebar-item.active { background-color: rgba(255, 107, 107, 0.15) !important; color: #ff6b6b !important; border-color: #3a3a3a !important; }
+
+    /* MODERN MINIMALIST THEME */
+    body[data-theme="minimal"] {
+      background-color: #ffffff !important;
+      color: #111827 !important;
+    }
+    body[data-theme="minimal"] header, body[data-theme="minimal"] nav, body[data-theme="minimal"] .bg-\[\#0a0a0a\] {
+      background-color: rgba(255, 255, 255, 0.95) !important;
+    }
+    body[data-theme="minimal"] .bg-\[\#0f0f0f\] {
+      background-color: #ffffff !important;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+    }
+    body[data-theme="minimal"] .bg-neutral-950, body[data-theme="minimal"] #shoot-modal, body[data-theme="minimal"] #date-picker-dropdown {
+      background-color: #f9fafb !important;
+    }
+    body[data-theme="minimal"] .border-neutral-900, body[data-theme="minimal"] .border-neutral-800 {
+      border-color: #e5e7eb !important;
+    }
+    body[data-theme="minimal"] .text-white { color: #111827 !important; }
+    body[data-theme="minimal"] .text-neutral-500, body[data-theme="minimal"] .text-neutral-400, body[data-theme="minimal"] .text-neutral-300 {
+      color: #6b7280 !important;
+    }
+    body[data-theme="minimal"] .text-\[\#c9a96e\] { color: #111827 !important; }
+    body[data-theme="minimal"] .bg-\[\#c9a96e\] { background-color: #111827 !important; color: white !important; }
+    body[data-theme="minimal"] .border-\[\#c9a96e\] { border-color: #111827 !important; }
+    body[data-theme="minimal"] .bg-neutral-900 { background-color: #f3f4f6 !important; }
+    body[data-theme="minimal"] input, body[data-theme="minimal"] select, body[data-theme="minimal"] textarea {
+      color: #111827 !important;
+    }
+    body[data-theme="minimal"] input::placeholder, body[data-theme="minimal"] textarea::placeholder {
+      color: #9ca3af !important;
+    }
+    body[data-theme="minimal"] input:focus, body[data-theme="minimal"] select:focus, body[data-theme="minimal"] textarea:focus {
+      border-color: #111827 !important;
+    }
+    body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
+    body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
+
+  <!-- Login Modal -->
+  <div id="login-modal" class="login-modal">
+    <div class="login-modal-content">
+      <div class="text-center mb-8">
+        <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e] mb-2">SAKKHI</h1>
+        <p class="text-xs tracking-[0.3em] uppercase text-gray-500 font-light">by Jashwanth JP</p>
+      </div>
+      <div id="google-signin-button" class="mb-6"></div>
+      <p class="text-center text-xs text-gray-500 mt-4">Sign in to continue to your account</p>
+    </div>
+  </div>
+
+  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
+    <div class="text-center">
+      <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
+      <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 mt-1 font-light">by Jashwanth JP</p>
+    </div>
+    <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
+      <div id="load-progress" class="h-full bg-[#c9a96e] w-1/12 transition-all duration-500"></div>
+    </div>
+    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Initializing...</p>
+  </div>
+
+  <div id="main-app" style="display: none;">
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
+      <div class="flex flex-col">
+        <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
+        <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
+      </div>
+
+      <div class="flex items-center gap-2 md:gap-4">
+        <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
+          <i class="ti ti-eye-off"></i>
+        </button>
+        <button onclick="openThemePicker()" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:text-white transition">
+          <i class="ti ti-palette"></i>
+        </button>
+        <button onclick="logout()" class="flex items-center justify-center p-2 rounded-lg border border-red-900/50 bg-red-900/10 text-red-400 hover:text-red-300 transition" title="Logout">
+          <i class="ti ti-logout"></i>
+        </button>
+      </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6">
+      <div class="text-white">
+        <!-- Main content will be rendered here -->
+        <p>Welcome! Your app is ready to use with Google Login and Supabase.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // ===========================
+    // SUPABASE CONFIGURATION
+    // ===========================
+    let supabaseClient = null;
+    let currentUser = null;
+
+    // Initialize Supabase
+    function initSupabase() {
+      const SUPABASE_URL = localStorage.getItem('SUPABASE_URL');
+      const SUPABASE_ANON_KEY = localStorage.getItem('SUPABASE_ANON_KEY');
+
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        console.warn('Supabase credentials not configured. Using local storage only.');
+        return false;
+      }
+
+      try {
+        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        console.log('Supabase initialized successfully');
+        return true;
+      } catch (error) {
+        console.error('Supabase initialization error:', error);
+        return false;
+      }
+    }
+
+    // ===========================
+    // GOOGLE OAUTH CONFIGURATION
+    // ===========================
+    function initGoogleSignIn() {
+      const GOOGLE_CLIENT_ID = localStorage.getItem('GOOGLE_CLIENT_ID');
+      
+      if (!GOOGLE_CLIENT_ID) {
+        console.error('Google Client ID not configured');
+        showToast('Google Sign-In not configured. Please set up credentials.', 'error');
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSignIn,
+        auto_select: false
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        {
+          theme: 'outline',
+          size: 'large',
+          width: '100%'
+        }
+      );
+    }
+
+    // Handle Google Sign-In
+    async function handleGoogleSignIn(response) {
+      try {
+        const token = response.credential;
+        
+        // Verify token with backend (recommended)
+        // For now, decode basic info
+        const decoded = parseJwt(token);
+        
+        currentUser = {
+          id: decoded.sub,
+          email: decoded.email,
+          name: decoded.name,
+          picture: decoded.picture,
+          token: token
+        };
+
+        // Save to localStorage
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        localStorage.setItem('googleToken', token);
+
+        // If Supabase is configured, sync user
+        if (supabaseClient) {
+          await syncUserToSupabase(currentUser);
+        }
+
+        showToast(`Welcome, ${currentUser.name}!`, 'success');
+        showMainApp();
+      } catch (error) {
+        console.error('Google Sign-In error:', error);
+        showToast('Sign-in failed. Please try again.', 'error');
+      }
+    }
+
+    // Sync user to Supabase
+    async function syncUserToSupabase(user) {
+      try {
+        const { data, error } = await supabaseClient
+          .from('users')
+          .upsert(
+            {
+              id: user.id,
+              email: user.email,
+              name: user.name,
+              picture: user.picture,
+              last_login: new Date().toISOString()
+            },
+            { onConflict: 'id' }
+          );
+
+        if (error) throw error;
+        console.log('User synced to Supabase:', data);
+      } catch (error) {
+        console.error('Error syncing user to Supabase:', error);
+      }
+    }
+
+    // Logout
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      localStorage.removeItem('googleToken');
+      
+      // Sign out from Google
+      google.accounts.id.disableAutoSelect();
+      
+      // Show login modal
+      showLoginModal();
+      showToast('Logged out successfully', 'success');
+    }
+
+    // Show/Hide Login Modal
+    function showLoginModal() {
+      document.getElementById('login-modal').classList.add('active');
+      document.getElementById('main-app').style.display = 'none';
+    }
+
+    function showMainApp() {
+      document.getElementById('login-modal').classList.remove('active');
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('loading-screen').style.display = 'none';
+    }
+
+    // JWT Parser
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(
+          atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
+        );
+        return JSON.parse(jsonPayload);
+      } catch (error) {
+        console.error('JWT parsing error:', error);
+        return {};
+      }
+    }
+
+    // Toast Notification
+    function showToast(message, type = 'info') {
+      const toast = document.createElement('div');
+      toast.className = `fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white text-sm z-50 ${
+        type === 'success' ? 'bg-green-600' :
+        type === 'error' ? 'bg-red-600' :
+        'bg-blue-600'
+      }`;
+      toast.textContent = message;
+      document.body.appendChild(toast);
+
+      setTimeout(() => toast.remove(), 3000);
+    }
+
+    // Theme Picker
+    function openThemePicker() {
+      const themes = ['midnight', 'boho', 'minimal'];
+      const current = document.body.getAttribute('data-theme');
+      const next = themes[(themes.indexOf(current) + 1) % themes.length];
+      
+      document.body.setAttribute('data-theme', next);
+      localStorage.setItem('theme', next);
+      showToast(`Theme: ${next}`, 'success');
+    }
+
+    function togglePrivacyMode() {
+      const btn = document.getElementById('privacy-toggle-btn');
+      btn.classList.toggle('text-amber-500');
+      btn.classList.toggle('text-neutral-400');
+    }
+
+    // ===========================
+    // INITIALIZATION
+    // ===========================
+    async function initializeApp() {
+      try {
+        // Update loading text
+        document.getElementById('loading-text').textContent = 'Loading configuration...';
+
+        // Check for saved user
+        const savedUser = localStorage.getItem('currentUser');
+        
+        // Initialize Supabase
+        initSupabase();
+        
+        // Load theme
+        const savedTheme = localStorage.getItem('theme') || 'midnight';
+        document.body.setAttribute('data-theme', savedTheme);
+
+        if (savedUser) {
+          currentUser = JSON.parse(savedUser);
+          document.getElementById('loading-text').textContent = 'Syncing data...';
+          showMainApp();
+        } else {
+          document.getElementById('loading-text').textContent = 'Ready to sign in...';
+          setTimeout(() => {
+            document.getElementById('loading-screen').style.display = 'none';
+            initGoogleSignIn();
+            showLoginModal();
+          }, 1500);
+        }
+      } catch (error) {
+        console.error('Initialization error:', error);
+        showToast('Initialization error. Check console.', 'error');
+      }
+    }
+
+    // Start initialization when DOM is ready
+    document.addEventListener('DOMContentLoaded', initializeApp);
+  </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Sakkhi by Jashwanth JP</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
 
   <style>
     body {
