@@ -843,8 +843,8 @@
     // ==========================================
     // SUPABASE CONFIGURATION
     // ==========================================
-    const SUPABASE_URL = localStorage.getItem('SUPABASE_URL') || 'https://smyupcjfusgduaoxqfvu.supabase.co';
-    const SUPABASE_KEY = localStorage.getItem('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    const SUPABASE_URL = localStorage.getItem('https://smyupcjfusgduaoxqfvu.supabase.co');
+    const SUPABASE_KEY = localStorage.getItem('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo');
 
     const HEADERS = {
       'Content-Type': 'application/json',
@@ -872,17 +872,26 @@
     let currentUser = null;
 
     function initGoogleSignIn() {
-      JSON.parse(localStorage.getItem('currentUser')).id;
+      const savedUser = localStorage.getItem('currentUser');
+if (savedUser) {
+  try {
+    JSON.parse(savedUser);
+  } catch(e) {
+    localStorage.removeItem('currentUser');
+  }
+}
       
-      if (!GOOGLE_CLIENT_ID) {
-        console.warn('Google Client ID not configured. Showing Setup Warning.');
-        document.getElementById('google-signin-button').style.display = 'none';
-        document.getElementById('config-warning').classList.remove('hidden');
-        return;
-      }
+      const GOOGLE_CLIENT_ID = "83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com";
 
+if (!GOOGLE_CLIENT_ID) {
+  console.warn('Google Client ID not configured. Showing Setup Warning.');
+  document.getElementById('google-signin-button').style.display = 'none';
+  document.getElementById('config-warning').classList.remove('hidden');
+  return;
+}
+     
       google.accounts.id.initialize({
-        client_id: 83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com,
+        client_id: GOOGLE_CLIENT_ID,
         callback: handleGoogleSignIn,
         auto_select: false
       });
@@ -962,7 +971,7 @@
     let calSelected = today();
     let _currentAccountTab = 'profile';
 
-    let _appPin = '1234jp'; 
+    let _appPin = '1234'; 
     let _profile = { 
       bizName: '', 
       phone: '',
