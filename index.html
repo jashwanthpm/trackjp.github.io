@@ -86,37 +86,38 @@
        
     /* BOHO LOUNGE THEME */
     body[data-theme="boho"] {
-      background-color: #f9f6f0 !important;
-      color: #3a332a !important;
+      background-color: #1a1a1a !important;
+      color: #e0e0e0 !important;
     }
     body[data-theme="boho"] header, body[data-theme="boho"] nav, body[data-theme="boho"] .bg-\[\#0a0a0a\] {
-      background-color: rgba(242, 236, 228, 0.9) !important;
+      background-color: rgba(25, 25, 25, 0.9) !important;
     }
     body[data-theme="boho"] .bg-\[\#0f0f0f\], body[data-theme="boho"] .bg-neutral-950, body[data-theme="boho"] #shoot-modal, body[data-theme="boho"] #date-picker-dropdown {
-      background-color: #ffffff !important;
+      background-color: #252525 !important;
     }
     body[data-theme="boho"] .border-neutral-900, body[data-theme="boho"] .border-neutral-800 {
-      border-color: #e6dfd5 !important;
+      border-color: #3a3a3a !important;
     }
-    body[data-theme="boho"] .text-white { color: #3a332a !important; }
+    body[data-theme="boho"] .text-white { color: #e0e0e0 !important; }
     body[data-theme="boho"] .text-neutral-500, body[data-theme="boho"] .text-neutral-400, body[data-theme="boho"] .text-neutral-300 {
-      color: #8c8273 !important;
+      color: #a0a0a0 !important;
     }
-    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #d4a373 !important; }
-    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #d4a373 !important; color: white !important; }
-    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #d4a373 !important; }
-    body[data-theme="boho"] .bg-neutral-900 { background-color: #f2ece4 !important; }
+    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #ff6b6b !important; }
+    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #ff6b6b !important; color: white !important; }
+    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #ff6b6b !important; }
+    body[data-theme="boho"] .bg-neutral-900 { background-color: #2a2a2a !important; }
     body[data-theme="boho"] input, body[data-theme="boho"] select, body[data-theme="boho"] textarea {
-      color: #3a332a !important;
+      color: #e0e0e0 !important;
+      background-color: #2a2a2a !important;
     }
     body[data-theme="boho"] input::placeholder, body[data-theme="boho"] textarea::placeholder {
-      color: #a3998b !important;
+      color: #7a7a7a !important;
     }
     body[data-theme="boho"] input:focus, body[data-theme="boho"] select:focus, body[data-theme="boho"] textarea:focus {
-      border-color: #d4a373 !important;
+      border-color: #ff6b6b !important;
     }
-    body[data-theme="boho"] .account-sidebar-item:hover { color: #3a332a !important; background-color: rgba(242, 236, 228, 0.7) !important; }
-    body[data-theme="boho"] .account-sidebar-item.active { background-color: #f2ece4 !important; color: #d4a373 !important; border-color: #e6dfd5 !important; }
+    body[data-theme="boho"] .account-sidebar-item:hover { color: #e0e0e0 !important; background-color: rgba(255, 107, 107, 0.1) !important; }
+    body[data-theme="boho"] .account-sidebar-item.active { background-color: rgba(255, 107, 107, 0.15) !important; color: #ff6b6b !important; border-color: #3a3a3a !important; }
 
     /* MODERN MINIMALIST THEME */
     body[data-theme="minimal"] {
@@ -1499,16 +1500,30 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
         const isSelected = dateStr === calSelected ? 'bg-[#c9a96e] text-black font-bold' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
-        html += `<div onclick="calSelectDate('${dateStr}')" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
+        html += `<div data-date="${dateStr}" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
       }
 
       grid.innerHTML = html;
+
+      // Use Event Delegation to safely handle day clicks (bypasses browser sanitization blocks)
+      grid.onclick = function(e) {
+        const dayElement = e.target.closest('[data-date]');
+        if (dayElement) {
+          calSelectDate(dayElement.getAttribute('data-date'));
+        }
+      };
 
       const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
       const panel = document.getElementById('cal-day-panel');
       panel.classList.remove('hidden');
 
-      const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      // Use a Try-Catch block to prevent Locale string crashes in strict privacy browsers
+      let headerLabel = '';
+      try {
+        headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+      } catch (e) {
+        headerLabel = new Date(calSelected + 'T00:00:00').toDateString(); // Safe fallback for strict fingerprinting
+      }
 
       let interiorHtml = `
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
