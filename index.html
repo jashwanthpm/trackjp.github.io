@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Sakkhi by Jashwanth JP</title>
 
-
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -843,8 +842,8 @@
     // ==========================================
     // SUPABASE CONFIGURATION
     // ==========================================
-    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co' ;
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo' ;
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
     const HEADERS = {
       'Content-Type': 'application/json',
@@ -873,22 +872,22 @@
 
     function initGoogleSignIn() {
       const savedUser = localStorage.getItem('currentUser');
-if (savedUser) {
-  try {
-    JSON.parse(savedUser);
-  } catch(e) {
-    localStorage.removeItem('currentUser');
-  }
-}
+      if (savedUser) {
+        try {
+          JSON.parse(savedUser);
+        } catch(e) {
+          localStorage.removeItem('currentUser');
+        }
+      }
       
       const GOOGLE_CLIENT_ID = "83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com";
 
-if (!GOOGLE_CLIENT_ID) {
-  console.warn('Google Client ID not configured. Showing Setup Warning.');
-  document.getElementById('google-signin-button').style.display = 'none';
-  document.getElementById('config-warning').classList.remove('hidden');
-  return;
-}
+      if (!GOOGLE_CLIENT_ID) {
+        console.warn('Google Client ID not configured. Showing Setup Warning.');
+        document.getElementById('google-signin-button').style.display = 'none';
+        document.getElementById('config-warning').classList.remove('hidden');
+        return;
+      }
      
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
@@ -1005,15 +1004,13 @@ if (!GOOGLE_CLIENT_ID) {
 
     async function ensureTables() {
       try {
-        await sbFetch('shoots?limit=1');
+        // We now check if the user_id column exists. If it doesn't, this will throw an error and trigger the migration script.
+        await sbFetch('shoots?select=user_id&limit=1');
         return true;
       } catch (e) {
-        if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
-          setSyncStatus('error', 'Schema Needed');
-          injectCloudTables();
-          return false;
-        }
-        throw e;
+        setSyncStatus('error', 'Schema Needed');
+        injectCloudTables();
+        return false;
       }
     }
 
@@ -1021,15 +1018,20 @@ if (!GOOGLE_CLIENT_ID) {
       document.getElementById('loading-screen').innerHTML = `
         <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
           <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Database Setup Protocol</div>
-          <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and run this SQL query block directly:</p>
+          <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing or need updating for Multi-User Support. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console > SQL Editor</a> and run this SQL query block directly:</p>
           <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
           <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Check Database Sync Again</button>
         </div>`;
     }
 
     function getSqlSetupScript() {
-      return `create table if not exists shoots (
+      return `-- 1. ADD USER_ID COLUMN TO EXISTING TABLE (If you had older data)
+ALTER TABLE shoots ADD COLUMN IF NOT EXISTS user_id text;
+
+-- 2. CREATE NEW SHOOTS TABLE (If starting fresh)
+create table if not exists shoots (
   id text primary key,
+  user_id text not null,
   name text,
   date text,
   event text,
@@ -1045,11 +1047,13 @@ if (!GOOGLE_CLIENT_ID) {
   created timestamptz default now()
 );
 
+-- 3. CREATE SETTINGS TABLE
 create table if not exists settings (
   key text primary key,
   value jsonb
 );
 
+-- 4. ENABLE RLS
 alter table shoots enable row level security;
 alter table settings enable row level security;
 create policy "Allow all" on shoots for all using (true) with check (true);
@@ -1078,6 +1082,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     function shootToDb(s) {
       return {
         id: s.id,
+        user_id: currentUser.id, // Strictly attach to the logged in user
         name: s.name,
         date: s.date,
         event: s.event,
@@ -1103,10 +1108,18 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         const bar = document.getElementById('load-progress');
         if(bar) bar.style.width = "60%";
         
-        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        // Fetch only shoots belonging to currentUser
+        const raw = await sbFetch(`shoots?user_id=eq.${currentUser.id}&select=*&order=date.desc`);
         _shoots = raw.map(dbToShoot);
 
-        const configurations = await sbFetch('settings?select=*');
+        // Fetch only settings belonging to currentUser via our key prefix trick
+        const configurationsRaw = await sbFetch(`settings?key=like.${currentUser.id}_*&select=*`);
+        
+        // Map the prefixed keys back to normal app keys
+        const configurations = configurationsRaw.map(r => ({
+            key: r.key.replace(`${currentUser.id}_`, ''),
+            value: r.value
+        }));
         
         const cRow = configurations.find(r => r.key === 'companies');
         if (cRow) _companies = cRow.value;
@@ -1148,7 +1161,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       try {
         const existing = _shoots.find(s => s.id === shoot.id);
         if (existing) {
-          await sbFetch(`shoots?id=eq.${shoot.id}`, {
+          await sbFetch(`shoots?id=eq.${shoot.id}&user_id=eq.${currentUser.id}`, {
             method: 'PATCH',
             body: JSON.stringify(shootToDb(shoot))
           });
@@ -1173,7 +1186,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     async function deleteShootFromDB(id) {
       setSyncStatus('syncing', 'Deleting Record...');
       try {
-        await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
+        // Enforce deletion only if it matches current user
+        await sbFetch(`shoots?id=eq.${id}&user_id=eq.${currentUser.id}`, { method: 'DELETE' });
         _shoots = _shoots.filter(s => s.id !== id);
         setSyncStatus('synced', 'Deleted Successfully');
         showToast('Shoot record deleted successfully');
@@ -1185,28 +1199,21 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     async function saveSettingToDB(key, value) {
+      // Prepend user ID to the key to isolate settings per user without breaking Supabase constraints
+      const dbKey = `${currentUser.id}_${key}`;
       try {
-        const checkExisting = await sbFetch(
-  `settings?key=eq.${key}&user_id=eq.${currentUser?.id || currentUser?.email}&select=key`
-);
+        const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
         
         if (checkExisting && checkExisting.length > 0) {
-          await sbFetch(
-  `settings?key=eq.${key}&user_id=eq.${currentUser?.id || currentUser?.email}`,
-  {
-    method: 'PATCH',
-    body: JSON.stringify({ value })
-  }
-);
+          await sbFetch(`settings?key=eq.${dbKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value })
+          });
         } else {
           await sbFetch('settings', {
-  method: 'POST',
-  body: JSON.stringify({
-    key,
-    value,
-    user_id: currentUser?.id || currentUser?.email || 'default_user'
-  })
-});
+            method: 'POST',
+            body: JSON.stringify({ key: dbKey, value })
+          });
         }
       } catch (e) {
         showToast('Settings Save Error: ' + e.message, 'error');
