@@ -3333,7 +3333,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
 
       const reader = new FileReader();
-      reader.onload = (e) => {
+      reader.onload = async (e) => {
         try {
           const csv = e.target.result;
           const lines = csv.trim().split('\n');
