@@ -10,10 +10,9 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-  <!-- Google Sign-In -->
+  
   <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <!-- Supabase -->
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <style>
     body {
@@ -85,472 +84,17 @@
     }
 
     /* Google Sign-In Button Override */
-    #g_id_onload {
-      display: none;
-    }
+    #g_id_onload { display: none; }
 
     /* Login Modal Styles */
     .login-modal {
-      display: none;
-      position: fixed;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      background: rgba(0, 0, 0, 0.8);
-      z-index: 9999;
-      align-items: center;
-      justify-content: center;
+      display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0, 0, 0, 0.8); z-index: 9999; align-items: center; justify-content: center;
     }
-
-    .login-modal.active {
-      display: flex;
-    }
-
+    .login-modal.active { display: flex; }
     .login-modal-content {
-      background: #0a0a0a;
-      border: 1px solid #262626;
-      border-radius: 12px;
-      padding: 40px;
-      max-width: 400px;
-      width: 90%;
-    }
-
-    /* THEME OVERRIDE ENGINE */
-    /* BOHO LOUNGE THEME */
-    body[data-theme="boho"] {
-      background-color: #1a1a1a !important;
-      color: #e0e0e0 !important;
-    }
-    body[data-theme="boho"] header, body[data-theme="boho"] nav, body[data-theme="boho"] .bg-\[\#0a0a0a\] {
-      background-color: rgba(25, 25, 25, 0.9) !important;
-    }
-    body[data-theme="boho"] .bg-\[\#0f0f0f\], body[data-theme="boho"] .bg-neutral-950, body[data-theme="boho"] #shoot-modal, body[data-theme="boho"] #date-picker-dropdown {
-      background-color: #252525 !important;
-    }
-    body[data-theme="boho"] .border-neutral-900, body[data-theme="boho"] .border-neutral-800 {
-      border-color: #3a3a3a !important;
-    }
-    body[data-theme="boho"] .text-white { color: #e0e0e0 !important; }
-    body[data-theme="boho"] .text-neutral-500, body[data-theme="boho"] .text-neutral-400, body[data-theme="boho"] .text-neutral-300 {
-      color: #a0a0a0 !important;
-    }
-    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #ff6b6b !important; }
-    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #ff6b6b !important; color: white !important; }
-    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #ff6b6b !important; }
-    body[data-theme="boho"] .bg-neutral-900 { background-color: #2a2a2a !important; }
-    body[data-theme="boho"] input, body[data-theme="boho"] select, body[data-theme="boho"] textarea {
-      color: #e0e0e0 !important;
-      background-color: #2a2a2a !important;
-    }
-    body[data-theme="boho"] input::placeholder, body[data-theme="boho"] textarea::placeholder {
-      color: #7a7a7a !important;
-    }
-    body[data-theme="boho"] input:focus, body[data-theme="boho"] select:focus, body[data-theme="boho"] textarea:focus {
-      border-color: #ff6b6b !important;
-    }
-    body[data-theme="boho"] .account-sidebar-item:hover { color: #e0e0e0 !important; background-color: rgba(255, 107, 107, 0.1) !important; }
-    body[data-theme="boho"] .account-sidebar-item.active { background-color: rgba(255, 107, 107, 0.15) !important; color: #ff6b6b !important; border-color: #3a3a3a !important; }
-
-    /* MODERN MINIMALIST THEME */
-    body[data-theme="minimal"] {
-      background-color: #ffffff !important;
-      color: #111827 !important;
-    }
-    body[data-theme="minimal"] header, body[data-theme="minimal"] nav, body[data-theme="minimal"] .bg-\[\#0a0a0a\] {
-      background-color: rgba(255, 255, 255, 0.95) !important;
-    }
-    body[data-theme="minimal"] .bg-\[\#0f0f0f\] {
-      background-color: #ffffff !important;
-      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
-    }
-    body[data-theme="minimal"] .bg-neutral-950, body[data-theme="minimal"] #shoot-modal, body[data-theme="minimal"] #date-picker-dropdown {
-      background-color: #f9fafb !important;
-    }
-    body[data-theme="minimal"] .border-neutral-900, body[data-theme="minimal"] .border-neutral-800 {
-      border-color: #e5e7eb !important;
-    }
-    body[data-theme="minimal"] .text-white { color: #111827 !important; }
-    body[data-theme="minimal"] .text-neutral-500, body[data-theme="minimal"] .text-neutral-400, body[data-theme="minimal"] .text-neutral-300 {
-      color: #6b7280 !important;
-    }
-    body[data-theme="minimal"] .text-\[\#c9a96e\] { color: #111827 !important; }
-    body[data-theme="minimal"] .bg-\[\#c9a96e\] { background-color: #111827 !important; color: white !important; }
-    body[data-theme="minimal"] .border-\[\#c9a96e\] { border-color: #111827 !important; }
-    body[data-theme="minimal"] .bg-neutral-900 { background-color: #f3f4f6 !important; }
-    body[data-theme="minimal"] input, body[data-theme="minimal"] select, body[data-theme="minimal"] textarea {
-      color: #111827 !important;
-    }
-    body[data-theme="minimal"] input::placeholder, body[data-theme="minimal"] textarea::placeholder {
-      color: #9ca3af !important;
-    }
-    body[data-theme="minimal"] input:focus, body[data-theme="minimal"] select:focus, body[data-theme="minimal"] textarea:focus {
-      border-color: #111827 !important;
-    }
-    body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
-    body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-</head>
-<body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
-
-  <!-- Login Modal -->
-  <div id="login-modal" class="login-modal">
-    <div class="login-modal-content">
-      <div class="text-center mb-8">
-        <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e] mb-2">SAKKHI</h1>
-        <p class="text-xs tracking-[0.3em] uppercase text-gray-500 font-light">by Jashwanth JP</p>
-      </div>
-      <div id="google-signin-button" class="mb-6"></div>
-      <p class="text-center text-xs text-gray-500 mt-4">Sign in to continue to your account</p>
-    </div>
-  </div>
-
-  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
-    <div class="text-center">
-      <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
-      <p class="text-[10px] tracking-[0.3em] uppercase text-gray-500 mt-1 font-light">by Jashwanth JP</p>
-    </div>
-    <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
-      <div id="load-progress" class="h-full bg-[#c9a96e] w-1/12 transition-all duration-500"></div>
-    </div>
-    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Initializing...</p>
-  </div>
-
-  <div id="main-app" style="display: none;">
-    <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
-      <div class="flex flex-col">
-        <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
-        <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
-      </div>
-
-      <div class="flex items-center gap-2 md:gap-4">
-        <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
-          <i class="ti ti-eye-off"></i>
-        </button>
-        <button onclick="openThemePicker()" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:text-white transition">
-          <i class="ti ti-palette"></i>
-        </button>
-        <button onclick="logout()" class="flex items-center justify-center p-2 rounded-lg border border-red-900/50 bg-red-900/10 text-red-400 hover:text-red-300 transition" title="Logout">
-          <i class="ti ti-logout"></i>
-        </button>
-      </div>
-    </header>
-
-    <main class="container mx-auto px-4 py-6">
-      <div class="text-white">
-        <!-- Main content will be rendered here -->
-        <p>Welcome! Your app is ready to use with Google Login and Supabase.</p>
-      </div>
-    </main>
-  </div>
-
-  <script>
-    // ===========================
-    // SUPABASE CONFIGURATION
-    // ===========================
-    let supabaseClient = null;
-    let currentUser = null;
-
-    // Initialize Supabase
-    function initSupabase() {
-      const SUPABASE_URL = localStorage.getItem('SUPABASE_URL');
-      const SUPABASE_ANON_KEY = localStorage.getItem('SUPABASE_ANON_KEY');
-
-      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-        console.warn('Supabase credentials not configured. Using local storage only.');
-        return false;
-      }
-
-      try {
-        supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-        console.log('Supabase initialized successfully');
-        return true;
-      } catch (error) {
-        console.error('Supabase initialization error:', error);
-        return false;
-      }
-    }
-
-    // ===========================
-    // GOOGLE OAUTH CONFIGURATION
-    // ===========================
-    function initGoogleSignIn() {
-      const GOOGLE_CLIENT_ID = localStorage.getItem('GOOGLE_CLIENT_ID');
-      
-      if (!GOOGLE_CLIENT_ID) {
-        console.error('Google Client ID not configured');
-        showToast('Google Sign-In not configured. Please set up credentials.', 'error');
-        return;
-      }
-
-      google.accounts.id.initialize({
-        client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleSignIn,
-        auto_select: false
-      });
-
-      google.accounts.id.renderButton(
-        document.getElementById('google-signin-button'),
-        {
-          theme: 'outline',
-          size: 'large',
-          width: '100%'
-        }
-      );
-    }
-
-    // Handle Google Sign-In
-    async function handleGoogleSignIn(response) {
-      try {
-        const token = response.credential;
-        
-        // Verify token with backend (recommended)
-        // For now, decode basic info
-        const decoded = parseJwt(token);
-        
-        currentUser = {
-          id: decoded.sub,
-          email: decoded.email,
-          name: decoded.name,
-          picture: decoded.picture,
-          token: token
-        };
-
-        // Save to localStorage
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
-        localStorage.setItem('googleToken', token);
-
-        // If Supabase is configured, sync user
-        if (supabaseClient) {
-          await syncUserToSupabase(currentUser);
-        }
-
-        showToast(`Welcome, ${currentUser.name}!`, 'success');
-        showMainApp();
-      } catch (error) {
-        console.error('Google Sign-In error:', error);
-        showToast('Sign-in failed. Please try again.', 'error');
-      }
-    }
-
-    // Sync user to Supabase
-    async function syncUserToSupabase(user) {
-      try {
-        const { data, error } = await supabaseClient
-          .from('users')
-          .upsert(
-            {
-              id: user.id,
-              email: user.email,
-              name: user.name,
-              picture: user.picture,
-              last_login: new Date().toISOString()
-            },
-            { onConflict: 'id' }
-          );
-
-        if (error) throw error;
-        console.log('User synced to Supabase:', data);
-      } catch (error) {
-        console.error('Error syncing user to Supabase:', error);
-      }
-    }
-
-    // Logout
-    function logout() {
-      currentUser = null;
-      localStorage.removeItem('currentUser');
-      localStorage.removeItem('googleToken');
-      
-      // Sign out from Google
-      google.accounts.id.disableAutoSelect();
-      
-      // Show login modal
-      showLoginModal();
-      showToast('Logged out successfully', 'success');
-    }
-
-    // Show/Hide Login Modal
-    function showLoginModal() {
-      document.getElementById('login-modal').classList.add('active');
-      document.getElementById('main-app').style.display = 'none';
-    }
-
-    function showMainApp() {
-      document.getElementById('login-modal').classList.remove('active');
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').style.display = 'none';
-    }
-
-    // JWT Parser
-    function parseJwt(token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(
-          atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join('')
-        );
-        return JSON.parse(jsonPayload);
-      } catch (error) {
-        console.error('JWT parsing error:', error);
-        return {};
-      }
-    }
-
-    // Toast Notification
-    function showToast(message, type = 'info') {
-      const toast = document.createElement('div');
-      toast.className = `fixed bottom-4 right-4 px-4 py-3 rounded-lg text-white text-sm z-50 ${
-        type === 'success' ? 'bg-green-600' :
-        type === 'error' ? 'bg-red-600' :
-        'bg-blue-600'
-      }`;
-      toast.textContent = message;
-      document.body.appendChild(toast);
-
-      setTimeout(() => toast.remove(), 3000);
-    }
-
-    // Theme Picker
-    function openThemePicker() {
-      const themes = ['midnight', 'boho', 'minimal'];
-      const current = document.body.getAttribute('data-theme');
-      const next = themes[(themes.indexOf(current) + 1) % themes.length];
-      
-      document.body.setAttribute('data-theme', next);
-      localStorage.setItem('theme', next);
-      showToast(`Theme: ${next}`, 'success');
-    }
-
-    function togglePrivacyMode() {
-      const btn = document.getElementById('privacy-toggle-btn');
-      btn.classList.toggle('text-amber-500');
-      btn.classList.toggle('text-neutral-400');
-    }
-
-    // ===========================
-    // INITIALIZATION
-    // ===========================
-    async function initializeApp() {
-      try {
-        // Update loading text
-        document.getElementById('loading-text').textContent = 'Loading configuration...';
-
-        // Check for saved user
-        const savedUser = localStorage.getItem('currentUser');
-        
-        // Initialize Supabase
-        initSupabase();
-        
-        // Load theme
-        const savedTheme = localStorage.getItem('theme') || 'midnight';
-        document.body.setAttribute('data-theme', savedTheme);
-
-        if (savedUser) {
-          currentUser = JSON.parse(savedUser);
-          document.getElementById('loading-text').textContent = 'Syncing data...';
-          showMainApp();
-        } else {
-          document.getElementById('loading-text').textContent = 'Ready to sign in...';
-          setTimeout(() => {
-            document.getElementById('loading-screen').style.display = 'none';
-            initGoogleSignIn();
-            showLoginModal();
-          }, 1500);
-        }
-      } catch (error) {
-        console.error('Initialization error:', error);
-        showToast('Initialization error. Check console.', 'error');
-      }
-    }
-
-    // Start initialization when DOM is ready
-    document.addEventListener('DOMContentLoaded', initializeApp);
-  </script>
-</body>
-</html>
-
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
-  <title>Sakkhi by Jashwanth JP</title>
-  
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-
-  <style>
-    body {
-      font-family: 'Plus Jakarta Sans', sans-serif;
-      background-color: #050505;
-      color: #e8e8e8;
-      transition: background-color 0.3s ease, color 0.3s ease;
-    }
-    .brand-serif {
-      font-family: 'Cinzel', serif;
-    }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
-    
-    .blur-financial {
-      filter: blur(5px);
-      user-select: none;
-      pointer-events: none;
-      transition: filter 0.2s ease-in-out;
-    }
-
-    /* Fixed Account Tab CSS */
-    .account-sidebar-item {
-      display: flex;
-      align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      border-radius: 0.5rem;
-      cursor: pointer;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
-      color: #9ca3af;
-      white-space: nowrap;
-    }
-
-    .account-sidebar-item:hover {
-      color: white;
-      background-color: rgba(23, 23, 23, 0.5);
-    }
-
-    .account-sidebar-item.active {
-      background-color: #0a0a0a;
-      border-color: #262626;
-      color: #c9a96e;
-      font-weight: 600;
-    }
-
-    .account-content-section {
-      display: none;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    .account-content-section.active {
-      display: block;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(5px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-
-    .hide-scrollbar {
-      scrollbar-width: none;
-    }
-    .hide-scrollbar::-webkit-scrollbar {
-      display: none;
+      background: #0a0a0a; border: 1px solid #262626; border-radius: 12px;
+      padding: 40px; max-width: 400px; width: 90%;
     }
 
     /* =========================================
@@ -630,9 +174,23 @@
     body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
     body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
+
+  <div id="login-modal" class="login-modal">
+    <div class="login-modal-content">
+      <div class="text-center mb-8">
+        <h1 class="brand-serif text-3xl font-bold tracking-wider text-[#c9a96e] mb-2">SAKKHI</h1>
+        <p class="text-xs tracking-[0.3em] uppercase text-gray-500 font-light">by Jashwanth JP</p>
+      </div>
+      <div id="google-signin-button" class="mb-6"></div>
+      <div id="config-warning" class="hidden mb-6 bg-red-950/30 border border-red-900/50 p-4 rounded-xl text-center">
+        <p class="text-xs text-red-400 mb-3">Google Sign-In is not configured yet.</p>
+        <a href="config.html" class="inline-block px-4 py-2 bg-neutral-800 text-white text-xs font-semibold rounded-lg border border-neutral-700 hover:bg-neutral-700 transition">Go to Setup Config</a>
+      </div>
+      <p class="text-center text-xs text-gray-500 mt-4">Sign in securely to access your ledger</p>
+    </div>
+  </div>
 
   <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-6">
     <div class="text-center">
@@ -645,639 +203,647 @@
     <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
   </div>
 
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
-    <div class="flex flex-col">
-      <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
-      <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
-    </div>
-
-    <div class="flex items-center gap-2 md:gap-4">
-      <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
-        <i id="privacy-icon" class="ti ti-eye-off text-lg"></i>
-      </button>
-      
-      <div id="sync-status" class="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/30 text-xs font-medium text-neutral-400">
-        <span class="w-2 h-2 rounded-full bg-neutral-600 transition-colors duration-300" id="sync-dot"></span>
-        <span id="sync-label" class="hidden sm:inline">Connecting</span>
+  <div id="main-app" style="display: none;">
+    <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
+      <div class="flex flex-col">
+        <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
+        <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
       </div>
 
-      <button onclick="openAddShootModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
-        <i class="ti ti-plus text-base"></i> <span class="hidden sm:inline">New Shoot</span>
-      </button>
-    </div>
-  </header>
-
-  <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
-
-    <section id="section-dashboard" class="app-section space-y-6">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <div>
-          <h2 class="text-2xl font-bold tracking-tight text-white">Dashboard</h2>
-          <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
+      <div class="flex items-center gap-2 md:gap-4">
+        <button onclick="logout()" class="flex items-center justify-center p-2 rounded-lg border border-red-900/30 bg-red-950/20 text-red-400 hover:text-red-300 transition" title="Logout">
+          <i class="ti ti-logout text-lg"></i>
+        </button>
+        <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
+          <i id="privacy-icon" class="ti ti-eye-off text-lg"></i>
+        </button>
+        
+        <div id="sync-status" class="flex items-center gap-2 px-2.5 py-1.5 rounded-full border border-neutral-800 bg-neutral-900/30 text-xs font-medium text-neutral-400">
+          <span class="w-2 h-2 rounded-full bg-neutral-600 transition-colors duration-300" id="sync-dot"></span>
+          <span id="sync-label" class="hidden sm:inline">Connecting</span>
         </div>
+
+        <button onclick="openAddShootModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
+          <i class="ti ti-plus text-base"></i> <span class="hidden sm:inline">New Shoot</span>
+        </button>
       </div>
+    </header>
 
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
+    <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
-      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        <div class="lg:col-span-7 space-y-4">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="flex items-center gap-2.5 mb-4">
-              <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i>
-              <h3 class="text-base font-bold text-white">Upcoming Shoots</h3>
-              <span class="ml-auto text-xs text-neutral-500" id="dash-upcoming-count">0 shoots</span>
-            </div>
-            <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
-          </div>
-
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="flex items-center gap-2.5 mb-4">
-              <i class="ti ti-building text-[#c9a96e] text-lg"></i>
-              <h3 class="text-base font-bold text-white">Top Companies</h3>
-              <button onclick="showAllCompanies()" class="ml-auto text-xs px-2.5 py-1 rounded-lg bg-[#c9a96e]/10 text-[#c9a96e] hover:bg-[#c9a96e]/20 transition border border-[#c9a96e]/30">View All</button>
-            </div>
-            <div class="space-y-2.5" id="dash-top-companies"></div>
+      <section id="section-dashboard" class="app-section space-y-6">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+          <div>
+            <h2 class="text-2xl font-bold tracking-tight text-white">Dashboard</h2>
+            <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
           </div>
         </div>
 
-        <div class="lg:col-span-5 space-y-4">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-            <div class="flex items-center gap-2.5 mb-4">
-              <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
-              <h3 class="text-base font-bold text-white">Payment Status</h3>
-            </div>
-            <div id="dash-payments" class="space-y-3"></div>
-          </div>
-        </div>
-      </div>
-    </section>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-    <section id="section-calendar" class="app-section hidden space-y-6">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
-        <div class="flex items-center gap-1">
-          <button onclick="calPrev()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-left"></i></button>
-          <button onclick="calToday()" class="px-3 py-2 text-xs font-medium border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Today</button>
-          <button onclick="calNext()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-right"></i></button>
-        </div>
-      </div>
-      <div class="grid grid-cols-7 gap-1 bg-neutral-950 p-2 border border-neutral-900 rounded-xl shadow-inner" id="cal-grid"></div>
-      <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
-    </section>
-
-    <section id="section-shoots" class="app-section hidden space-y-4">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-white">Shoots List</h2>
-        <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
-          <div class="text-2xl font-bold text-white mt-2" id="stat-total">0</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Upcoming</div>
-          <div class="text-2xl font-bold text-[#c9a96e] mt-2" id="stat-upcoming">0</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">Completed</div>
-          <div class="text-2xl font-bold text-emerald-500 mt-2" id="stat-completed">0</div>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
-          <i class="ti ti-search text-neutral-500"></i>
-          <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
-        </div>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-timeline" onchange="renderShootsList()">
-          <option value="">All Timelines</option>
-          <option value="upcoming">Upcoming Shoots</option>
-          <option value="completed">Completed Shoots</option>
-        </select>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-company" onchange="renderShootsList()"></select>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-loc" onchange="renderShootsList()"></select>
-      </div>
-      <div class="space-y-2" id="shoots-list"></div>
-    </section>
-
-    <section id="section-payments" class="app-section hidden space-y-4">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
-        <div class="flex gap-2">
-          <button onclick="downloadCompanyViewPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Share (Company)</button>
-          <button onclick="downloadFullReportPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Full Report</button>
-        </div>
-      </div>
-      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
-      <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
-        <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
-          <i class="ti ti-search text-neutral-500"></i>
-          <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
-        </div>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-company" onchange="renderPaymentsList()">
-          <option value="">All Companies</option>
-        </select>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-status" onchange="renderPaymentsList()">
-          <option value="">All Payment Status</option>
-          <option value="pending">Pending Payment</option>
-          <option value="part">Partial Payment</option>
-          <option value="done">Settled Payment</option>
-        </select>
-        <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-expenses" onchange="renderPaymentsList()">
-          <option value="">All Expenses</option>
-          <option value="pending">Pending Expenses</option>
-          <option value="settled">Settled Expenses</option>
-        </select>
-      </div>
-      <div class="space-y-2" id="payments-list"></div>
-    </section>
-
-    <section id="section-account" class="app-section hidden">
-      <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-        <h2 class="text-xl font-bold text-white">Account Settings</h2>
-      </div>
-
-      <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div class="lg:col-span-1">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-2 md:p-3 flex overflow-x-auto lg:flex-col gap-2 md:space-y-2 sticky top-20 hide-scrollbar" style="scrollbar-width: none;">
-            <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
-              <i class="ti ti-user text-lg"></i>
-              <span>Profile</span>
-            </button>
-            <button onclick="switchAccountTab('payment')" class="account-sidebar-item" data-tab="payment">
-              <i class="ti ti-credit-card text-lg"></i>
-              <span>Payment</span>
-            </button>
-            <button onclick="switchAccountTab('appearance')" class="account-sidebar-item" data-tab="appearance">
-              <i class="ti ti-palette text-lg"></i>
-              <span>Appearance</span>
-            </button>
-            <button onclick="switchAccountTab('security')" class="account-sidebar-item" data-tab="security">
-              <i class="ti ti-lock text-lg"></i>
-              <span>Security</span>
-            </button>
-            <button onclick="switchAccountTab('whatsapp')" class="account-sidebar-item" data-tab="whatsapp">
-              <i class="ti ti-brand-whatsapp text-lg"></i>
-              <span>WhatsApp</span>
-            </button>
-            <button onclick="switchAccountTab('settings')" class="account-sidebar-item" data-tab="settings">
-              <i class="ti ti-settings text-lg"></i>
-              <span>Management</span>
-            </button>
-            <button onclick="switchAccountTab('data')" class="account-sidebar-item" data-tab="data">
-              <i class="ti ti-database text-lg"></i>
-              <span>Data</span>
-            </button>
-          </div>
-        </div>
-
-        <div class="lg:col-span-3 space-y-6">
-          
-          <div id="account-profile" class="account-content-section active">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 space-y-4">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+              <div class="flex items-center gap-2.5 mb-4">
+                <i class="ti ti-calendar-event text-[#c9a96e] text-lg"></i>
+                <h3 class="text-base font-bold text-white">Upcoming Shoots</h3>
+                <span class="ml-auto text-xs text-neutral-500" id="dash-upcoming-count">0 shoots</span>
               </div>
+              <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
+            </div>
 
-              <div class="space-y-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
-                  <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
-                  <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
-                  <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="pt-3 flex gap-2">
-                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                    <i class="ti ti-device-floppy"></i> Save Changes
-                  </button>
-                </div>
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+              <div class="flex items-center gap-2.5 mb-4">
+                <i class="ti ti-building text-[#c9a96e] text-lg"></i>
+                <h3 class="text-base font-bold text-white">Top Companies</h3>
+                <button onclick="showAllCompanies()" class="ml-auto text-xs px-2.5 py-1 rounded-lg bg-[#c9a96e]/10 text-[#c9a96e] hover:bg-[#c9a96e]/20 transition border border-[#c9a96e]/30">View All</button>
               </div>
+              <div class="space-y-2.5" id="dash-top-companies"></div>
             </div>
           </div>
 
-          <div id="account-payment" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Add your payment information</p>
+          <div class="lg:col-span-5 space-y-4">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
+              <div class="flex items-center gap-2.5 mb-4">
+                <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
+                <h3 class="text-base font-bold text-white">Payment Status</h3>
               </div>
-
-              <div class="space-y-4">
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
-                  <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                </div>
-
-                <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
-                  <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
-                </div>
-
-                <div class="pt-3 flex gap-2">
-                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                    <i class="ti ti-device-floppy"></i> Save Changes
-                  </button>
-                </div>
-              </div>
+              <div id="dash-payments" class="space-y-3"></div>
             </div>
           </div>
-
-          <div id="account-appearance" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-palette text-[#c9a96e]"></i> UI Theme Selection
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Customize the visual style of your workspace</p>
-              </div>
-
-              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
-                <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0f0f0f]" id="theme-btn-midnight">
-                  <div class="bg-[#050505] rounded-lg h-24 p-2 flex flex-col gap-2">
-                    <div class="w-full h-3 bg-[#0a0a0a] rounded flex justify-between items-center px-1">
-                      <div class="w-2 h-2 bg-[#c9a96e] rounded-full"></div>
-                    </div>
-                    <div class="flex gap-2 flex-1">
-                      <div class="w-1/3 h-full bg-[#0f0f0f] rounded"></div>
-                      <div class="w-2/3 h-full bg-[#0f0f0f] rounded"></div>
-                    </div>
-                  </div>
-                  <p class="text-center text-xs font-bold text-white mt-2">Midnight Studio</p>
-                </div>
-
-                <div onclick="setAppTheme('boho')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-boho">
-                  <div class="bg-[#f9f6f0] rounded-lg h-24 p-2 border border-[#e6dfd5] flex flex-col gap-2">
-                    <div class="w-full h-3 bg-[#f2ece4] rounded flex justify-between items-center px-1">
-                      <div class="w-2 h-2 bg-[#d4a373] rounded-full"></div>
-                    </div>
-                    <div class="flex gap-2 flex-1">
-                      <div class="w-1/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
-                      <div class="w-2/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
-                    </div>
-                  </div>
-                  <p class="text-center text-xs font-bold text-white mt-2">Boho Lounge</p>
-                </div>
-
-                <div onclick="setAppTheme('minimal')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-minimal">
-                  <div class="bg-[#ffffff] rounded-lg h-24 p-2 border border-[#e5e7eb] flex flex-col gap-2">
-                    <div class="w-full h-3 bg-[#ffffff] rounded flex justify-between items-center px-1">
-                      <div class="w-2 h-2 bg-[#111827] rounded-full"></div>
-                    </div>
-                    <div class="flex gap-2 flex-1">
-                      <div class="w-1/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
-                      <div class="w-2/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
-                    </div>
-                  </div>
-                  <p class="text-center text-xs font-bold text-white mt-2">Modern Minimal</p>
-                </div>
-
-              </div>
-            </div>
-          </div>
-
-          <div id="account-security" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
-              </div>
-
-              <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
-                <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
-              </div>
-
-              <div class="space-y-3">
-                <div class="flex gap-2">
-                  <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
-                  <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
-                    <i class="ti ti-check"></i> Update
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="account-whatsapp" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Customize your communication templates</p>
-              </div>
-
-              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
-                <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
-                <div class="flex flex-wrap gap-1.5">
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Client Name]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Event]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Date]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Location]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Total Amount]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Amount Paid]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Pending Balance]</span>
-                  <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Payment Details]</span>
-                </div>
-              </div>
-
-              <div class="flex flex-col gap-1.5">
-                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
-                <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
-              </div>
-
-              <div class="flex flex-col gap-1.5">
-                <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
-                <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
-              </div>
-
-              <div class="flex gap-2 pt-3">
-                <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
-                  <i class="ti ti-device-floppy"></i> Save Templates
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div id="account-settings" class="account-content-section">
-            <div class="space-y-5">
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
-                  </h3>
-                </div>
-                <div id="settings-companies" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
-                  </h3>
-                </div>
-                <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-
-              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                <div class="border-b border-neutral-800 pb-4 mb-4">
-                  <h3 class="text-base font-bold text-white flex items-center gap-2">
-                    <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
-                  </h3>
-                </div>
-                <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                <div class="flex gap-2">
-                  <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                  <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div id="account-data" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-database text-[#c9a96e]"></i> Data Management
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
-              </div>
-
-              <div class="space-y-3">
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
-                  <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
-                    <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all data points.</p>
-                  </div>
-                  <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-file-type-pdf text-lg"></i> Export Full Database (PDF)
-                  </button>
-                </div>
-
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
-                  <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
-                    <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records.</p>
-                  </div>
-                  <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-file-spreadsheet text-lg"></i> Export Full Database (CSV)
-                  </button>
-                </div>
-
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
-                  <div class="space-y-2">
-                    <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
-                    <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
-                  </div>
-                  <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
-                    <i class="ti ti-refresh"></i> Force Cloud Sync
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-
         </div>
-      </div>
-    </section>
-  </main>
+      </section>
 
-  <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
-    <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
-    <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
-    <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
-    <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
-    <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
-  </nav>
-
-  <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
-    <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
-      <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
-        <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
-        <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
-      </div>
-      
-      <div class="p-5 space-y-4 flex-1">
-        <input type="hidden" id="edit-shoot-id"/>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
-            <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      <section id="section-calendar" class="app-section hidden space-y-6">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+          <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
+          <div class="flex items-center gap-1">
+            <button onclick="calPrev()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-left"></i></button>
+            <button onclick="calToday()" class="px-3 py-2 text-xs font-medium border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Today</button>
+            <button onclick="calNext()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-right"></i></button>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
-            <div class="relative">
-              <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-              <button type="button" onclick="toggleDatePicker()" class="absolute right-2 top-2.5 p-1.5 text-neutral-500 hover:text-[#c9a96e] transition">
-                <i class="ti ti-calendar text-lg"></i>
+        </div>
+        <div class="grid grid-cols-7 gap-1 bg-neutral-950 p-2 border border-neutral-900 rounded-xl shadow-inner" id="cal-grid"></div>
+        <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
+      </section>
+
+      <section id="section-shoots" class="app-section hidden space-y-4">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+          <h2 class="text-xl font-bold text-white">Shoots List</h2>
+          <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
+            <div class="text-2xl font-bold text-white mt-2" id="stat-total">0</div>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Upcoming</div>
+            <div class="text-2xl font-bold text-[#c9a96e] mt-2" id="stat-upcoming">0</div>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">Completed</div>
+            <div class="text-2xl font-bold text-emerald-500 mt-2" id="stat-completed">0</div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+          <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+            <i class="ti ti-search text-neutral-500"></i>
+            <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
+          </div>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-timeline" onchange="renderShootsList()">
+            <option value="">All Timelines</option>
+            <option value="upcoming">Upcoming Shoots</option>
+            <option value="completed">Completed Shoots</option>
+          </select>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-company" onchange="renderShootsList()"></select>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-loc" onchange="renderShootsList()"></select>
+        </div>
+        <div class="space-y-2" id="shoots-list"></div>
+      </section>
+
+      <section id="section-payments" class="app-section hidden space-y-4">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+          <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
+          <div class="flex gap-2">
+            <button onclick="downloadCompanyViewPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Share (Company)</button>
+            <button onclick="downloadFullReportPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Full Report</button>
+          </div>
+        </div>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
+        <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+          <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+            <i class="ti ti-search text-neutral-500"></i>
+            <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
+          </div>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-company" onchange="renderPaymentsList()">
+            <option value="">All Companies</option>
+          </select>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-status" onchange="renderPaymentsList()">
+            <option value="">All Payment Status</option>
+            <option value="pending">Pending Payment</option>
+            <option value="part">Partial Payment</option>
+            <option value="done">Settled Payment</option>
+          </select>
+          <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-expenses" onchange="renderPaymentsList()">
+            <option value="">All Expenses</option>
+            <option value="pending">Pending Expenses</option>
+            <option value="settled">Settled Expenses</option>
+          </select>
+        </div>
+        <div class="space-y-2" id="payments-list"></div>
+      </section>
+
+      <section id="section-account" class="app-section hidden">
+        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+          <h2 class="text-xl font-bold text-white">Account Settings</h2>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          <div class="lg:col-span-1">
+            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-2 md:p-3 flex overflow-x-auto lg:flex-col gap-2 md:space-y-2 sticky top-20 hide-scrollbar" style="scrollbar-width: none;">
+              <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
+                <i class="ti ti-user text-lg"></i>
+                <span>Profile</span>
               </button>
-              <div id="date-picker-dropdown" class="hidden absolute top-full right-0 mt-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg shadow-xl p-3 z-50">
-                <div class="space-y-2">
-                  <div class="flex items-center justify-between mb-3">
-                    <button type="button" onclick="datePickerPrev()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-left"></i></button>
-                    <span id="date-picker-label" class="text-xs font-bold text-white"></span>
-                    <button type="button" onclick="datePickerNext()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-right"></i></button>
+              <button onclick="switchAccountTab('payment')" class="account-sidebar-item" data-tab="payment">
+                <i class="ti ti-credit-card text-lg"></i>
+                <span>Payment</span>
+              </button>
+              <button onclick="switchAccountTab('appearance')" class="account-sidebar-item" data-tab="appearance">
+                <i class="ti ti-palette text-lg"></i>
+                <span>Appearance</span>
+              </button>
+              <button onclick="switchAccountTab('security')" class="account-sidebar-item" data-tab="security">
+                <i class="ti ti-lock text-lg"></i>
+                <span>Security</span>
+              </button>
+              <button onclick="switchAccountTab('whatsapp')" class="account-sidebar-item" data-tab="whatsapp">
+                <i class="ti ti-brand-whatsapp text-lg"></i>
+                <span>WhatsApp</span>
+              </button>
+              <button onclick="switchAccountTab('settings')" class="account-sidebar-item" data-tab="settings">
+                <i class="ti ti-settings text-lg"></i>
+                <span>Management</span>
+              </button>
+              <button onclick="switchAccountTab('data')" class="account-sidebar-item" data-tab="data">
+                <i class="ti ti-database text-lg"></i>
+                <span>Data</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="lg:col-span-3 space-y-6">
+            
+            <div id="account-profile" class="account-content-section active">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
+                    <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                   </div>
-                  <div class="grid grid-cols-7 gap-1" id="date-picker-grid"></div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
+                    <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
+                    <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  </div>
+
+                  <div class="pt-3 flex gap-2">
+                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                      <i class="ti ti-device-floppy"></i> Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-payment" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Add your payment information</p>
+                </div>
+
+                <div class="space-y-4">
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
+                    <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                  </div>
+
+                  <div class="flex flex-col gap-1.5">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
+                    <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+                  </div>
+
+                  <div class="pt-3 flex gap-2">
+                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                      <i class="ti ti-device-floppy"></i> Save Changes
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-appearance" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-palette text-[#c9a96e]"></i> UI Theme Selection
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Customize the visual style of your workspace</p>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  
+                  <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0f0f0f]" id="theme-btn-midnight">
+                    <div class="bg-[#050505] rounded-lg h-24 p-2 flex flex-col gap-2">
+                      <div class="w-full h-3 bg-[#0a0a0a] rounded flex justify-between items-center px-1">
+                        <div class="w-2 h-2 bg-[#c9a96e] rounded-full"></div>
+                      </div>
+                      <div class="flex gap-2 flex-1">
+                        <div class="w-1/3 h-full bg-[#0f0f0f] rounded"></div>
+                        <div class="w-2/3 h-full bg-[#0f0f0f] rounded"></div>
+                      </div>
+                    </div>
+                    <p class="text-center text-xs font-bold text-white mt-2">Midnight Studio</p>
+                  </div>
+
+                  <div onclick="setAppTheme('boho')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-boho">
+                    <div class="bg-[#f9f6f0] rounded-lg h-24 p-2 border border-[#e6dfd5] flex flex-col gap-2">
+                      <div class="w-full h-3 bg-[#f2ece4] rounded flex justify-between items-center px-1">
+                        <div class="w-2 h-2 bg-[#d4a373] rounded-full"></div>
+                      </div>
+                      <div class="flex gap-2 flex-1">
+                        <div class="w-1/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
+                        <div class="w-2/3 h-full bg-[#ffffff] border border-[#e6dfd5] rounded"></div>
+                      </div>
+                    </div>
+                    <p class="text-center text-xs font-bold text-white mt-2">Boho Lounge</p>
+                  </div>
+
+                  <div onclick="setAppTheme('minimal')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0f0f0f]" id="theme-btn-minimal">
+                    <div class="bg-[#ffffff] rounded-lg h-24 p-2 border border-[#e5e7eb] flex flex-col gap-2">
+                      <div class="w-full h-3 bg-[#ffffff] rounded flex justify-between items-center px-1">
+                        <div class="w-2 h-2 bg-[#111827] rounded-full"></div>
+                      </div>
+                      <div class="flex gap-2 flex-1">
+                        <div class="w-1/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
+                        <div class="w-2/3 h-full bg-[#f9fafb] border border-[#e5e7eb] rounded"></div>
+                      </div>
+                    </div>
+                    <p class="text-center text-xs font-bold text-white mt-2">Modern Minimal</p>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <div id="account-security" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
+                </div>
+
+                <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
+                  <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="flex gap-2">
+                    <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
+                    <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                      <i class="ti ti-check"></i> Update
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-whatsapp" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Customize your communication templates</p>
+                </div>
+
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
+                  <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Client Name]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Event]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Date]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Location]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Total Amount]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Amount Paid]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Pending Balance]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded text-neutral-300">[Payment Details]</span>
+                  </div>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
+                  <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
+                  <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
+                </div>
+
+                <div class="flex gap-2 pt-3">
+                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                    <i class="ti ti-device-floppy"></i> Save Templates
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-settings" class="account-content-section">
+              <div class="space-y-5">
+                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
+                    </h3>
+                  </div>
+                  <div id="settings-companies" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                  <div class="flex gap-2">
+                    <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                    <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                  </div>
+                </div>
+
+                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
+                    </h3>
+                  </div>
+                  <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                  <div class="flex gap-2">
+                    <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                    <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                  </div>
+                </div>
+
+                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                    <h3 class="text-base font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
+                    </h3>
+                  </div>
+                  <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
+                  <div class="flex gap-2">
+                    <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                    <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-data" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-database text-[#c9a96e]"></i> Data Management
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Export or synchronize your shoot data</p>
+                </div>
+
+                <div class="space-y-3">
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                    <div class="space-y-2">
+                      <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
+                      <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all data points.</p>
+                    </div>
+                    <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
+                      <i class="ti ti-file-type-pdf text-lg"></i> Export Full Database (PDF)
+                    </button>
+                  </div>
+
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                    <div class="space-y-2">
+                      <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
+                      <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records.</p>
+                    </div>
+                    <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition">
+                      <i class="ti ti-file-spreadsheet text-lg"></i> Export Full Database (CSV)
+                    </button>
+                  </div>
+
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
+                    <div class="space-y-2">
+                      <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
+                      <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
+                    </div>
+                    <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+                      <i class="ti ti-refresh"></i> Force Cloud Sync
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
+      <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
+      <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
+      <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
+      <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
+      <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
+    </nav>
+
+    <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
+      <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
+          <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
+          <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+        </div>
+        
+        <div class="p-5 space-y-4 flex-1">
+          <input type="hidden" id="edit-shoot-id"/>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name *</label>
+              <input type="text" id="f-shoot-name" placeholder="e.g., Malhotra family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
+              <div class="relative">
+                <input type="date" id="f-shoot-date" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                <button type="button" onclick="toggleDatePicker()" class="absolute right-2 top-2.5 p-1.5 text-neutral-500 hover:text-[#c9a96e] transition">
+                  <i class="ti ti-calendar text-lg"></i>
+                </button>
+                <div id="date-picker-dropdown" class="hidden absolute top-full right-0 mt-2 bg-[#0f0f0f] border border-neutral-900 rounded-lg shadow-xl p-3 z-50">
+                  <div class="space-y-2">
+                    <div class="flex items-center justify-between mb-3">
+                      <button type="button" onclick="datePickerPrev()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-left"></i></button>
+                      <span id="date-picker-label" class="text-xs font-bold text-white"></span>
+                      <button type="button" onclick="datePickerNext()" class="p-1 hover:text-[#c9a96e]"><i class="ti ti-chevron-right"></i></button>
+                    </div>
+                    <div class="grid grid-cols-7 gap-1" id="date-picker-grid"></div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
-            <select id="f-shoot-event" onchange="handleEventOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Category</label>
+              <select id="f-shoot-event" onchange="handleEventOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+            </div>
+            <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
+              <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+            </div>
           </div>
-          <div id="f-event-other-wrap" class="hidden flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Category</label>
-            <input type="text" id="f-shoot-event-other" placeholder="e.g., Birthday" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
+              <select id="f-shoot-session" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+                <option value="Morning Session">Morning Session</option>
+                <option value="Afternoon Session">Afternoon Session</option>
+                <option value="Evening Session">Evening Session</option>
+                <option value="Full Day">Full Day</option>
+              </select>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
+              <select id="f-shoot-loc" onchange="handleLocOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
+              <select id="f-shoot-company" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+            </div>
+          </div>
+
+          <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
+            <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+
+          <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
+              <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
+              <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition"/>
+            </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expense Status</label>
+              <select id="f-shoot-expense-status" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition">
+                <option value="pending">Pending</option>
+                <option value="settled">Settled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
+              <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+                <option value="pending">Pending</option>
+                <option value="part">Partial</option>
+                <option value="done">Settled</option>
+              </select>
+            </div>
+          </div>
+
+          <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
+            <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-purple-500 transition"/>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
+            <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-20 resize-none"></textarea>
           </div>
         </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session</label>
-            <select id="f-shoot-session" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-              <option value="Morning Session">Morning Session</option>
-              <option value="Afternoon Session">Afternoon Session</option>
-              <option value="Evening Session">Evening Session</option>
-              <option value="Full Day">Full Day</option>
-            </select>
+        
+        <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 gap-2 pb-safe-offset">
+          <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Delete</button>
+          <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Text via WhatsApp</button>
+          <div class="flex items-center gap-2 ml-auto">
+            <button onclick="closeShootModal()" class="px-4 py-2 text-xs font-semibold border border-neutral-800 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Cancel</button>
+            <button onclick="saveShoot()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Save Record</button>
           </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</label>
-            <select id="f-shoot-loc" onchange="handleLocOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
-            <select id="f-shoot-company" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
-          </div>
-        </div>
-
-        <div id="f-loc-other-wrap" class="hidden flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Location</label>
-          <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-        </div>
-
-        <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
-            <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
-            <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition"/>
-          </div>
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expense Status</label>
-            <select id="f-shoot-expense-status" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition">
-              <option value="pending">Pending</option>
-              <option value="settled">Settled</option>
-            </select>
-          </div>
-        </div>
-
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-          <div class="flex flex-col gap-1.5">
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
-            <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-              <option value="pending">Pending</option>
-              <option value="part">Partial</option>
-              <option value="done">Settled</option>
-            </select>
-          </div>
-        </div>
-
-        <div id="f-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
-          <input type="number" id="f-shoot-part-paid" placeholder="Enter received amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-purple-500 transition"/>
-        </div>
-
-        <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes</label>
-          <textarea id="f-shoot-notes" placeholder="Extra requirements or remarks..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-20 resize-none"></textarea>
         </div>
       </div>
-      
-      <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between sticky bottom-0 gap-2 pb-safe-offset">
-        <button id="modal-delete-btn" onclick="triggerDeleteFromModal()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Delete</button>
-        <button id="modal-whatsapp-btn" onclick="triggerModalWhatsApp()" class="hidden items-center gap-1.5 text-xs font-semibold text-emerald-400 border border-emerald-950 bg-emerald-950/10 hover:bg-emerald-950/30 px-3 py-2 rounded-lg transition"><i class="ti ti-brand-whatsapp text-sm"></i> Text via WhatsApp</button>
-        <div class="flex items-center gap-2 ml-auto">
-          <button onclick="closeShootModal()" class="px-4 py-2 text-xs font-semibold border border-neutral-800 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Cancel</button>
-          <button onclick="saveShoot()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Save Record</button>
+    </div>
+
+    <div id="confirm-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
+        <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
+        <div class="space-y-1">
+          <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Are you sure?</h4>
+          <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This action cannot be reversed.</p>
+        </div>
+        <div class="flex items-center justify-center gap-2 pt-2">
+          <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
+          <button id="confirm-action-btn" class="w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm</button>
         </div>
       </div>
     </div>
-  </div>
 
-  <div id="confirm-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')">
-    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
-      <div class="w-12 h-12 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-400 text-2xl mx-auto"><i class="ti ti-alert-triangle"></i></div>
-      <div class="space-y-1">
-        <h4 id="confirm-title" class="text-white font-bold text-sm tracking-wide">Are you sure?</h4>
-        <p id="confirm-sub-text" class="text-xs text-neutral-500 leading-relaxed">This action cannot be reversed.</p>
-      </div>
-      <div class="flex items-center justify-center gap-2 pt-2">
-        <button onclick="closeConfirmModal()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
-        <button id="confirm-action-btn" class="w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm</button>
+    <div id="privacy-prompt-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
+        <div class="w-12 h-12 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-lock"></i></div>
+        <div class="space-y-1">
+          <h4 class="text-white font-bold text-base tracking-wide">Unlock Dashboard Ledger</h4>
+          <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
+        </div>
+        <div class="space-y-3">
+          <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-amber-500 transition"/>
+          <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closePrivacyPrompt()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Abort</button>
+          <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Unlock</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div id="privacy-prompt-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
-      <div class="w-12 h-12 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-lock"></i></div>
-      <div class="space-y-1">
-        <h4 class="text-white font-bold text-base tracking-wide">Unlock Dashboard Ledger</h4>
-        <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
-      </div>
-      <div class="space-y-3">
-        <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-amber-500 transition"/>
-        <p id="privacy-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect password.</p>
-      </div>
-      <div class="flex gap-2 pt-2">
-        <button onclick="closePrivacyPrompt()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Abort</button>
-        <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Unlock</button>
-      </div>
-    </div>
+    <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
   </div>
-
-  <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    // ==========================================
+    // SUPABASE CONFIGURATION
+    // ==========================================
+    const SUPABASE_URL = localStorage.getItem('SUPABASE_URL') || 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = localStorage.getItem('SUPABASE_ANON_KEY') || 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 
     const HEADERS = {
       'Content-Type': 'application/json',
@@ -1299,6 +865,86 @@
       return text ? JSON.parse(text) : [];
     }
 
+    // ==========================================
+    // GOOGLE OAUTH CONFIGURATION
+    // ==========================================
+    let currentUser = null;
+
+    function initGoogleSignIn() {
+      const GOOGLE_CLIENT_ID = localStorage.getItem('GOOGLE_CLIENT_ID');
+      
+      if (!GOOGLE_CLIENT_ID) {
+        console.warn('Google Client ID not configured. Showing Setup Warning.');
+        document.getElementById('google-signin-button').style.display = 'none';
+        document.getElementById('config-warning').classList.remove('hidden');
+        return;
+      }
+
+      google.accounts.id.initialize({
+        client_id: GOOGLE_CLIENT_ID,
+        callback: handleGoogleSignIn,
+        auto_select: false
+      });
+
+      google.accounts.id.renderButton(
+        document.getElementById('google-signin-button'),
+        { theme: 'outline', size: 'large', width: '100%' }
+      );
+    }
+
+    function handleGoogleSignIn(response) {
+      const token = response.credential;
+      const decoded = parseJwt(token);
+      
+      currentUser = {
+        id: decoded.sub, email: decoded.email, name: decoded.name, token: token
+      };
+
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showToast(`Welcome, ${currentUser.name}!`, 'success');
+      
+      // Hide login, show app, and load data
+      document.getElementById('login-modal').classList.remove('active');
+      document.getElementById('main-app').style.display = 'block';
+      document.getElementById('loading-screen').classList.remove('hidden');
+      loadAll(); 
+    }
+
+    function logout() {
+      currentUser = null;
+      localStorage.removeItem('currentUser');
+      google.accounts.id.disableAutoSelect();
+      document.getElementById('main-app').style.display = 'none';
+      document.getElementById('login-modal').classList.add('active');
+      showToast('Logged out successfully');
+    }
+
+    function parseJwt(token) {
+      try {
+        const base64Url = token.split('.')[1];
+        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+        return JSON.parse(jsonPayload);
+      } catch(e) { return {}; }
+    }
+
+    // Initialize Auth Logic on page load
+    document.addEventListener('DOMContentLoaded', () => {
+      const savedUser = localStorage.getItem('currentUser');
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        document.getElementById('main-app').style.display = 'block';
+        loadAll(); // Load data since they are logged in
+      } else {
+        document.getElementById('loading-screen').classList.add('hidden');
+        document.getElementById('login-modal').classList.add('active');
+        initGoogleSignIn();
+      }
+    });
+
+    // ==========================================
+    // MAIN APP LOGIC
+    // ==========================================
     const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
     const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
     const DEFAULT_EVENTS = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'];
@@ -1978,7 +1624,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
       grid.innerHTML = html;
 
-      // Use Event Delegation to safely handle day clicks (bypasses browser sanitization blocks)
+      // Use Event Delegation to safely handle day clicks
       grid.onclick = function(e) {
         const dayElement = e.target.closest('[data-date]');
         if (dayElement) {
@@ -1990,12 +1636,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const panel = document.getElementById('cal-day-panel');
       panel.classList.remove('hidden');
 
-      // Use a Try-Catch block to prevent Locale string crashes in strict privacy browsers
       let headerLabel = '';
       try {
         headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
       } catch (e) {
-        headerLabel = new Date(calSelected + 'T00:00:00').toDateString(); // Safe fallback for strict fingerprinting
+        headerLabel = new Date(calSelected + 'T00:00:00').toDateString(); 
       }
 
       let interiorHtml = `
@@ -3429,8 +3074,12 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         showToast('Force cloud database sync synchronization completed.');
       }, 2000);
     }
+    
+    // Function to generate unique ID for new records
+    function uid() {
+      return Date.now().toString(36) + Math.random().toString(36).substr(2);
+    }
 
-    loadAll();
   </script>
 </body>
 </html>
