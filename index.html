@@ -3339,6 +3339,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
             
             // Clear input and re-render
             fileInput.value = '';
+            
+            // ⭐ FIX: SAVE TO DATABASE - This was missing!
+            saveShoots();
+            
             renderShootsList();
             renderCalendar();
             renderPaymentsList();
