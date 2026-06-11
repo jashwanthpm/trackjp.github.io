@@ -84,25 +84,48 @@
     }
 
     /* Google Sign-In Button Override */
-    #g_id_onload { display: none; }
+    #g_id_onload { display: none !important; }
 
     /* Mobile-optimized Google Sign-In Button */
     #google-signin-button {
       display: flex !important;
       justify-content: center !important;
+      align-items: center !important;
       width: 100% !important;
+      max-width: 100% !important;
       margin: 0 auto !important;
+      padding: 0 !important;
+      min-height: 45px !important;
     }
 
     #google-signin-button > div {
       display: flex !important;
       justify-content: center !important;
+      align-items: center !important;
+      width: 100% !important;
+    }
+
+    #google-signin-button iframe {
+      max-width: 100% !important;
+      width: auto !important;
+      height: auto !important;
+      min-height: 40px !important;
     }
 
     @media (max-width: 640px) {
-      #google-signin-button iframe {
-        max-width: 100% !important;
+      #google-signin-button {
+        min-height: 45px !important;
+      }
+      
+      #google-signin-button > div {
         width: 100% !important;
+        max-width: 100% !important;
+      }
+
+      #google-signin-button iframe {
+        max-width: 90vw !important;
+        width: auto !important;
+        height: auto !important;
       }
     }
 
@@ -956,7 +979,12 @@
 
       google.accounts.id.renderButton(
         document.getElementById('google-signin-button'),
-        { theme: 'outline', size: 'large', width: '100%' }
+        { 
+          theme: 'outline', 
+          size: window.innerWidth < 640 ? 'large' : 'large',
+          width: '280',
+          locale: 'en'
+        }
       );
     }
 
