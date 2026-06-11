@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <meta id="meta-theme-color" name="theme-color" content="#050505">
   <title>Sakkhi by Jashwanth JP</title>
+  
+  <link id="pwa-manifest" rel="manifest" href="">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
   <style>
     body {
@@ -17,6 +21,7 @@
       background-color: #050505;
       color: #e8e8e8;
       transition: background-color 0.3s ease, color 0.3s ease;
+      -webkit-tap-highlight-color: transparent;
     }
     .brand-serif {
       font-family: 'Cinzel', serif;
@@ -32,7 +37,6 @@
       transition: filter 0.2s ease-in-out;
     }
 
-    /* Fixed Account Tab CSS */
     .account-sidebar-item {
       display: flex;
       align-items: center;
@@ -80,85 +84,77 @@
       display: none;
     }
 
-    /* =========================================
-       THEME OVERRIDE ENGINE
-       ========================================= */
-       
-    /* BOHO LOUNGE THEME */
+    /* THEME OVERRIDE ENGINE */
     body[data-theme="boho"] {
-      background-color: #1a1a1a !important;
-      color: #e0e0e0 !important;
+      background-color: #f9f6f0 !important;
+      color: #3a332a !important;
     }
     body[data-theme="boho"] header, body[data-theme="boho"] nav, body[data-theme="boho"] .bg-\[\#0a0a0a\] {
-      background-color: rgba(25, 25, 25, 0.9) !important;
+      background-color: rgba(242, 236, 228, 0.9) !important;
     }
     body[data-theme="boho"] .bg-\[\#0f0f0f\], body[data-theme="boho"] .bg-neutral-950, body[data-theme="boho"] #shoot-modal, body[data-theme="boho"] #date-picker-dropdown {
-      background-color: #252525 !important;
+      background-color: #ffffff !important;
     }
     body[data-theme="boho"] .border-neutral-900, body[data-theme="boho"] .border-neutral-800 {
-      border-color: #3a3a3a !important;
+      border-color: #e6dfd5 !important;
     }
-    body[data-theme="boho"] .text-white { color: #e0e0e0 !important; }
+    body[data-theme="boho"] .text-white { color: #3a332a !important; }
     body[data-theme="boho"] .text-neutral-500, body[data-theme="boho"] .text-neutral-400, body[data-theme="boho"] .text-neutral-300 {
-      color: #a0a0a0 !important;
+      color: #8c8273 !important;
     }
-    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #ff6b6b !important; }
-    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #ff6b6b !important; color: white !important; }
-    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #ff6b6b !important; }
-    body[data-theme="boho"] .bg-neutral-900 { background-color: #2a2a2a !important; }
+    body[data-theme="boho"] .text-\[\#c9a96e\] { color: #d4a373 !important; }
+    body[data-theme="boho"] .bg-\[\#c9a96e\] { background-color: #d4a373 !important; color: white !important; }
+    body[data-theme="boho"] .border-\[\#c9a96e\] { border-color: #d4a373 !important; }
+    body[data-theme="boho"] .bg-neutral-900 { background-color: #f2ece4 !important; }
     body[data-theme="boho"] input, body[data-theme="boho"] select, body[data-theme="boho"] textarea {
-      color: #e0e0e0 !important;
-      background-color: #2a2a2a !important;
+      color: #3a332a !important;
     }
     body[data-theme="boho"] input::placeholder, body[data-theme="boho"] textarea::placeholder {
-      color: #7a7a7a !important;
+      color: #a3998b !important;
     }
     body[data-theme="boho"] input:focus, body[data-theme="boho"] select:focus, body[data-theme="boho"] textarea:focus {
-      border-color: #ff6b6b !important;
+      border-color: #d4a373 !important;
     }
-    body[data-theme="boho"] .account-sidebar-item:hover { color: #e0e0e0 !important; background-color: rgba(255, 107, 107, 0.1) !important; }
-    body[data-theme="boho"] .account-sidebar-item.active { background-color: rgba(255, 107, 107, 0.15) !important; color: #ff6b6b !important; border-color: #3a3a3a !important; }
+    body[data-theme="boho"] .account-sidebar-item:hover { color: #3a332a !important; background-color: rgba(242, 236, 228, 0.7) !important; }
+    body[data-theme="boho"] .account-sidebar-item.active { background-color: #f2ece4 !important; color: #d4a373 !important; border-color: #e6dfd5 !important; }
 
-    /* MODERN MINIMALIST THEME */
     body[data-theme="minimal"] {
-      background-color: #0f1419 !important;
-      color: #d8e4f0 !important;
+      background-color: #ffffff !important;
+      color: #111827 !important;
     }
     body[data-theme="minimal"] header, body[data-theme="minimal"] nav, body[data-theme="minimal"] .bg-\[\#0a0a0a\] {
-      background-color: rgba(15, 20, 25, 0.95) !important;
+      background-color: rgba(255, 255, 255, 0.95) !important;
     }
     body[data-theme="minimal"] .bg-\[\#0f0f0f\] {
-      background-color: #1a2332 !important;
+      background-color: #ffffff !important;
       box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
     }
     body[data-theme="minimal"] .bg-neutral-950, body[data-theme="minimal"] #shoot-modal, body[data-theme="minimal"] #date-picker-dropdown {
-      background-color: #1a2332 !important;
+      background-color: #f9fafb !important;
     }
     body[data-theme="minimal"] .border-neutral-900, body[data-theme="minimal"] .border-neutral-800 {
-      border-color: #2d3d52 !important;
+      border-color: #e5e7eb !important;
     }
-    body[data-theme="minimal"] .text-white { color: #d8e4f0 !important; }
+    body[data-theme="minimal"] .text-white { color: #111827 !important; }
     body[data-theme="minimal"] .text-neutral-500, body[data-theme="minimal"] .text-neutral-400, body[data-theme="minimal"] .text-neutral-300 {
-      color: #8aafcd !important;
+      color: #6b7280 !important;
     }
-    body[data-theme="minimal"] .text-\[\#c9a96e\] { color: #4fa3ff !important; }
-    body[data-theme="minimal"] .bg-\[\#c9a96e\] { background-color: #4fa3ff !important; color: white !important; }
-    body[data-theme="minimal"] .border-\[\#c9a96e\] { border-color: #4fa3ff !important; }
-    body[data-theme="minimal"] .bg-neutral-900 { background-color: #1a2332 !important; }
+    body[data-theme="minimal"] .text-\[\#c9a96e\] { color: #111827 !important; }
+    body[data-theme="minimal"] .bg-\[\#c9a96e\] { background-color: #111827 !important; color: white !important; }
+    body[data-theme="minimal"] .border-\[\#c9a96e\] { border-color: #111827 !important; }
+    body[data-theme="minimal"] .bg-neutral-900 { background-color: #f3f4f6 !important; }
     body[data-theme="minimal"] input, body[data-theme="minimal"] select, body[data-theme="minimal"] textarea {
-      color: #d8e4f0 !important;
-      background-color: #1a2332 !important;
+      color: #111827 !important;
     }
     body[data-theme="minimal"] input::placeholder, body[data-theme="minimal"] textarea::placeholder {
-      color: #5a7a9d !important;
+      color: #9ca3af !important;
     }
     body[data-theme="minimal"] input:focus, body[data-theme="minimal"] select:focus, body[data-theme="minimal"] textarea:focus {
-      border-color: #4fa3ff !important;
+      border-color: #111827 !important;
     }
-    body[data-theme="minimal"] .account-sidebar-item:hover { color: #d8e4f0 !important; background-color: rgba(79, 163, 255, 0.1) !important; }
-    body[data-theme="minimal"] .account-sidebar-item.active { background-color: rgba(79, 163, 255, 0.15) !important; color: #4fa3ff !important; border-color: #2d3d52 !important; }
+    body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
+    body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
   </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
 <body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
 
@@ -170,10 +166,29 @@
     <div class="w-40 h-[2px] bg-neutral-800 rounded-full overflow-hidden">
       <div id="load-progress" class="h-full bg-[#c9a96e] w-1/12 transition-all duration-500"></div>
     </div>
-    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
+    <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to secure database...</p>
   </div>
 
-  <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
+  <div id="login-screen" class="fixed inset-0 bg-[#050505] z-[900] flex-col items-center justify-center p-4 hidden">
+    <div class="w-full max-w-sm bg-[#0f0f0f] border border-neutral-900 rounded-2xl p-8 shadow-2xl space-y-6 transform transition-all relative overflow-hidden">
+      <div class="absolute top-0 inset-x-0 h-1 bg-gradient-to-r from-transparent via-[#c9a96e] to-transparent opacity-50"></div>
+      <div class="text-center space-y-2 relative z-10">
+        <div class="w-12 h-12 bg-amber-950/20 border border-[#c9a96e]/20 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto mb-4"><i class="ti ti-lock"></i></div>
+        <h1 class="brand-serif text-3xl font-bold tracking-wider text-white">SAKKHI</h1>
+        <p class="text-[10px] tracking-[0.2em] uppercase text-neutral-500 font-medium">Restricted Workspace</p>
+      </div>
+      <div class="space-y-4 pt-4 relative z-10">
+        <div class="space-y-2">
+          <input type="password" id="login-password" placeholder="Enter Master Password" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-4 py-3 text-white tracking-widest outline-none focus:border-[#c9a96e] transition" onkeypress="if(event.key === 'Enter') attemptLogin()"/>
+          <p id="login-error" class="text-[11px] text-red-400 font-medium text-center hidden">Incorrect master password.</p>
+        </div>
+        <button onclick="attemptLogin()" class="w-full py-3 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-sm rounded-xl transition shadow-lg shadow-amber-900/20">Unlock Workspace</button>
+      </div>
+      <p class="text-center text-[10px] text-neutral-600 relative z-10">Default password is <strong>admin123</strong></p>
+    </div>
+  </div>
+
+  <header id="main-header" class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300 hidden">
     <div class="flex flex-col">
       <h1 class="brand-serif text-xl md:text-2xl font-bold tracking-wider text-[#c9a96e]">SAKKHI</h1>
       <p class="text-[8px] md:text-[9px] tracking-[0.25em] uppercase text-gray-400 font-medium">by Jashwanth JP</p>
@@ -195,8 +210,7 @@
     </div>
   </header>
 
-  <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
-
+  <main id="main-content" class="max-w-7xl mx-auto px-4 md:px-8 py-6 hidden">
     <section id="section-dashboard" class="app-section space-y-6">
       <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
         <div>
@@ -204,9 +218,7 @@
           <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
         </div>
       </div>
-
       <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
-
       <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
         <div class="lg:col-span-7 space-y-4">
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
@@ -217,7 +229,6 @@
             </div>
             <div class="space-y-2.5 overflow-y-auto max-h-96 pr-2" id="dash-upcoming"></div>
           </div>
-
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
             <div class="flex items-center gap-2.5 mb-4">
               <i class="ti ti-building text-[#c9a96e] text-lg"></i>
@@ -227,7 +238,6 @@
             <div class="space-y-2.5" id="dash-top-companies"></div>
           </div>
         </div>
-
         <div class="lg:col-span-5 space-y-4">
           <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
             <div class="flex items-center gap-2.5 mb-4">
@@ -258,7 +268,6 @@
         <h2 class="text-xl font-bold text-white">Shoots List</h2>
         <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
       </div>
-
       <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
         <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
           <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
@@ -273,7 +282,6 @@
           <div class="text-2xl font-bold text-emerald-500 mt-2" id="stat-completed">0</div>
         </div>
       </div>
-
       <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
         <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
           <i class="ti ti-search text-neutral-500"></i>
@@ -377,17 +385,14 @@
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
                   <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                 </div>
-
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
                   <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                 </div>
-
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
                   <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                 </div>
-
                 <div class="pt-3 flex gap-2">
                   <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
                     <i class="ti ti-device-floppy"></i> Save Changes
@@ -411,12 +416,10 @@
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
                   <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                 </div>
-
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
                   <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                 </div>
-
                 <div class="pt-3 flex gap-2">
                   <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
                     <i class="ti ti-device-floppy"></i> Save Changes
@@ -436,7 +439,6 @@
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                
                 <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0f0f0f]" id="theme-btn-midnight">
                   <div class="bg-[#050505] rounded-lg h-24 p-2 flex flex-col gap-2">
                     <div class="w-full h-3 bg-[#0a0a0a] rounded flex justify-between items-center px-1">
@@ -475,32 +477,50 @@
                   </div>
                   <p class="text-center text-xs font-bold text-white mt-2">Modern Minimal</p>
                 </div>
-
               </div>
             </div>
           </div>
 
           <div id="account-security" class="account-content-section">
-            <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-              <div class="border-b border-neutral-800 pb-4">
-                <h3 class="text-lg font-bold text-white flex items-center gap-2">
-                  <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
-                </h3>
-                <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
-              </div>
-
-              <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4">
-                <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
-              </div>
-
-              <div class="space-y-3">
-                <div class="flex gap-2">
-                  <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
-                  <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
-                    <i class="ti ti-check"></i> Update
-                  </button>
+            <div class="space-y-5">
+              
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                <div class="border-b border-neutral-800 pb-4 mb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-shield-lock text-emerald-500"></i> Master App Password
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Change the root password required to unlock and open Sakkhi.</p>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex gap-2">
+                    <input id="acc-master-pass" type="password" placeholder="Enter new Master Password" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition"/>
+                    <button onclick="updateMasterPassword()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                      <i class="ti ti-check"></i> Update
+                    </button>
+                  </div>
                 </div>
               </div>
+
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
+                <div class="border-b border-neutral-800 pb-4 mb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-eye-off text-amber-500"></i> Financial Privacy PIN
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial dashboard from accidental visibility.</p>
+                </div>
+                <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-4 mb-4">
+                  <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information.</p>
+                </div>
+                <div class="space-y-3">
+                  <div class="flex gap-2">
+                    <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
+                    <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                      <i class="ti ti-check"></i> Update
+                    </button>
+                  </div>
+                </div>
+              </div>
+
             </div>
           </div>
 
@@ -547,6 +567,32 @@
 
           <div id="account-settings" class="account-content-section">
             <div class="space-y-5">
+
+              <div class="bg-[#0f0f0f] border border-emerald-900/30 rounded-xl p-6 relative overflow-hidden">
+                <div class="absolute top-0 right-0 p-4 opacity-10 text-emerald-500"><i class="ti ti-device-mobile text-6xl"></i></div>
+                <div class="relative z-10 space-y-4">
+                  <div class="border-b border-neutral-800 pb-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-device-mobile text-emerald-500"></i> Install App (PWA)
+                    </h3>
+                    <p class="text-xs text-neutral-500 mt-1">Add Sakkhi to your home screen for a full-screen native app experience.</p>
+                  </div>
+                  
+                  <div id="pwa-ready-state" class="hidden flex items-center justify-between bg-emerald-950/20 border border-emerald-900/50 p-4 rounded-lg">
+                    <div>
+                      <p class="text-sm font-bold text-emerald-400">App is ready to install!</p>
+                      <p class="text-[10px] text-neutral-400 mt-0.5">Works on iOS (Share > Add to Home Screen) and Android.</p>
+                    </div>
+                    <button onclick="installPWA()" class="bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs px-4 py-2 rounded-lg transition shadow-lg shadow-emerald-900/20">Install Sakkhi</button>
+                  </div>
+
+                  <div id="pwa-wait-state" class="bg-neutral-950 border border-neutral-900 p-4 rounded-lg">
+                     <p class="text-xs text-neutral-400 leading-relaxed">Waiting for browser authorization... If the install button doesn't appear, ensure you are accessing this site via <strong class="text-neutral-200">HTTPS</strong> and have uploaded the <strong class="text-neutral-200">sw.js</strong> file to your server.</p>
+                     <p class="text-[10px] text-neutral-500 mt-3 border-t border-neutral-800 pt-3">iOS Safari Users: You can bypass this check by tapping the "Share" icon in your browser and selecting "Add to Home Screen".</p>
+                  </div>
+                </div>
+              </div>
+
               <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
                 <div class="border-b border-neutral-800 pb-4 mb-4">
                   <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -636,7 +682,7 @@
     </section>
   </main>
 
-  <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
+  <nav id="main-nav" class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe hidden">
     <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
     <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
     <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
@@ -836,7 +882,6 @@
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
     let _events = [...DEFAULT_EVENTS];
-    let _analyticsChartInstance = null;
     let _privacyModeActive = true;
     let calYear = new Date().getFullYear();
     let calMonth = new Date().getMonth();
@@ -844,6 +889,8 @@
     let _currentAccountTab = 'profile';
 
     let _appPin = '1234jp'; 
+    let _masterPassword = 'admin123';
+    
     let _profile = { 
       bizName: '', 
       phone: '',
@@ -855,37 +902,65 @@
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
 
-    function setSyncStatus(state, label) {
-      const dot = document.getElementById('sync-dot');
-      const lbl = document.getElementById('sync-label');
-      if (dot) {
-        dot.className = "w-2 h-2 rounded-full transition-colors duration-300 " + 
-          (state === 'syncing' ? 'bg-amber-500 animate-pulse' : state === 'synced' ? 'bg-emerald-500' : 'bg-red-500');
+    /* PWA ENGINE */
+    let deferredPrompt;
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      document.getElementById('pwa-wait-state').classList.add('hidden');
+      document.getElementById('pwa-ready-state').classList.remove('hidden');
+    });
+
+    async function installPWA() {
+      if (deferredPrompt) {
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        if (outcome === 'accepted') showToast('Thank you for installing Sakkhi!', 'success');
+        deferredPrompt = null;
+        document.getElementById('pwa-ready-state').classList.add('hidden');
+        document.getElementById('pwa-wait-state').classList.remove('hidden');
       }
+    }
+
+    function updatePWAManifest(theme) {
+      const isBoho = theme === 'boho'; const isMinimal = theme === 'minimal';
+      const bgColor = isBoho ? '#f9f6f0' : (isMinimal ? '#ffffff' : '#050505');
+      const fgColor = isBoho ? '#d4a373' : (isMinimal ? '#111827' : '#c9a96e');
+      
+      document.getElementById('meta-theme-color').setAttribute('content', bgColor);
+      const canvas = document.createElement('canvas'); canvas.width = 512; canvas.height = 512;
+      const ctx = canvas.getContext('2d'); ctx.fillStyle = bgColor; ctx.fillRect(0, 0, 512, 512);
+      ctx.strokeStyle = fgColor; ctx.lineWidth = 20; ctx.strokeRect(40, 40, 432, 432);
+      ctx.fillStyle = fgColor; ctx.font = 'bold 280px "Cinzel", serif'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle'; ctx.fillText('S', 256, 280);
+      const iconUrl = canvas.toDataURL('image/png');
+      const manifest = { "name": "Sakkhi Photography", "short_name": "Sakkhi", "start_url": ".", "display": "standalone", "background_color": bgColor, "theme_color": bgColor, "icons": [{ "src": iconUrl, "sizes": "512x512", "type": "image/png" }, { "src": iconUrl, "sizes": "192x192", "type": "image/png" }] };
+      const blob = new Blob([JSON.stringify(manifest)], {type: 'application/json'});
+      document.getElementById('pwa-manifest').setAttribute('href', URL.createObjectURL(blob));
+    }
+
+    if ('serviceWorker' in navigator) { window.addEventListener('load', () => { navigator.serviceWorker.register('./sw.js').catch(() => { }); }); }
+
+    /* UI ENGINES */
+    function setSyncStatus(state, label) {
+      const dot = document.getElementById('sync-dot'); const lbl = document.getElementById('sync-label');
+      if (dot) dot.className = "w-2 h-2 rounded-full transition-colors duration-300 " + (state === 'syncing' ? 'bg-amber-500 animate-pulse' : state === 'synced' ? 'bg-emerald-500' : 'bg-red-500');
       if (lbl) lbl.textContent = label;
     }
 
     function showToast(msg, type = 'success') {
-      const c = document.getElementById('toast-container');
-      if (!c) return;
+      const c = document.getElementById('toast-container'); if (!c) return;
       const t = document.createElement('div');
       t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
       t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
-      c.appendChild(t);
-      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+      c.appendChild(t); setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
     async function ensureTables() {
-      try {
-        await sbFetch('shoots?limit=1');
-        return true;
-      } catch (e) {
+      try { await sbFetch('shoots?limit=1'); return true; } 
+      catch (e) {
         if (e.message.includes('relation') || e.message.includes('does not exist') || e.message.includes('42P01')) {
-          setSyncStatus('error', 'Schema Needed');
-          injectCloudTables();
-          return false;
-        }
-        throw e;
+          setSyncStatus('error', 'Schema Needed'); injectCloudTables(); return false;
+        } throw e;
       }
     }
 
@@ -894,152 +969,131 @@
         <div class="max-w-md mx-4 p-6 bg-[#0f0f0f] border border-neutral-900 rounded-2xl space-y-4 text-left">
           <div class="text-amber-500 font-bold text-base flex items-center gap-2"><i class="ti ti-database-exclamation text-xl"></i> Database Setup Protocol</div>
           <p class="text-xs text-neutral-400 leading-relaxed">Supabase table setups are missing. Go to your <a href="https://supabase.com/dashboard" target="_blank" class="text-amber-400 underline font-medium">Supabase Console</a> and run this SQL query block directly:</p>
-          <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">${getSqlSetupScript()}</pre>
+          <pre class="bg-neutral-950 p-3 border border-neutral-900 rounded-lg text-[10px] text-neutral-300 overflow-x-auto select-all leading-normal">create table if not exists shoots ( id text primary key, name text, date text, event text, session text, location text, company text, notes text, amount numeric default 0, expense numeric default 0, expense_status text default 'pending', pay_status text default 'pending', part_paid numeric default 0, created timestamptz default now() ); create table if not exists settings ( key text primary key, value jsonb ); alter table shoots enable row level security; alter table settings enable row level security; create policy "Allow all" on shoots for all using (true) with check (true); create policy "Allow all" on settings for all using (true) with check (true);</pre>
           <button class="w-full py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-xs rounded-lg transition" onclick="location.reload()">Check Database Sync Again</button>
         </div>`;
     }
 
-    function getSqlSetupScript() {
-      return `create table if not exists shoots (
-  id text primary key,
-  name text,
-  date text,
-  event text,
-  session text,
-  location text,
-  company text,
-  notes text,
-  amount numeric default 0,
-  expense numeric default 0,
-  expense_status text default 'pending',
-  pay_status text default 'pending',
-  part_paid numeric default 0,
-  created timestamptz default now()
-);
+    function dbToShoot(r) { return { id: r.id, name: r.name || '', date: r.date || '', event: r.event || 'Wedding', session: r.session || 'Morning Session', location: r.location || '', company: r.company || '', notes: r.notes || '', amount: Number(r.amount || 0), expense: Number(r.expense || 0), expenseStatus: r.expense_status || 'pending', payStatus: r.pay_status || 'pending', partPaid: Number(r.part_paid || 0), created: r.created }; }
+    function shootToDb(s) { return { id: s.id, name: s.name, date: s.date, event: s.event, session: s.session, location: s.location, company: s.company, notes: s.notes, amount: s.amount || 0, expense: s.expense || 0, expense_status: s.expenseStatus || 'pending', pay_status: s.payStatus || 'pending', part_paid: s.partPaid || 0, created: s.created || new Date().toISOString() }; }
 
-create table if not exists settings (
-  key text primary key,
-  value jsonb
-);
-
-alter table shoots enable row level security;
-alter table settings enable row level security;
-create policy "Allow all" on shoots for all using (true) with check (true);
-create policy "Allow all" on settings for all using (true) with check (true);`;
-    }
-
-    function dbToShoot(r) {
-      return {
-        id: r.id,
-        name: r.name || '',
-        date: r.date || '',
-        event: r.event || 'Wedding',
-        session: r.session || 'Morning Session',
-        location: r.location || '',
-        company: r.company || '',
-        notes: r.notes || '',
-        amount: Number(r.amount || 0),
-        expense: Number(r.expense || 0),
-        expenseStatus: r.expense_status || 'pending',
-        payStatus: r.pay_status || 'pending',
-        partPaid: Number(r.part_paid || 0),
-        created: r.created
-      };
-    }
-
-    function shootToDb(s) {
-      return {
-        id: s.id,
-        name: s.name,
-        date: s.date,
-        event: s.event,
-        session: s.session,
-        location: s.location,
-        company: s.company,
-        notes: s.notes,
-        amount: s.amount || 0,
-        expense: s.expense || 0,
-        expense_status: s.expenseStatus || 'pending',
-        pay_status: s.payStatus || 'pending',
-        part_paid: s.partPaid || 0,
-        created: s.created || new Date().toISOString()
-      };
-    }
-
-    async function loadAll() {
+    /* CORE BOOT & AUTHENTICATION FLOW */
+    async function bootApp() {
       setSyncStatus('syncing', 'Connecting');
       const isConfigured = await ensureTables();
       if (!isConfigured) return;
 
       try {
         const bar = document.getElementById('load-progress');
-        if(bar) bar.style.width = "60%";
+        if(bar) bar.style.width = "40%";
         
-        const raw = await sbFetch('shoots?select=*&order=date.desc');
-        _shoots = raw.map(dbToShoot);
-
+        // 1. Fetch settings only (to check master password)
         const configurations = await sbFetch('settings?select=*');
         
-        const cRow = configurations.find(r => r.key === 'companies');
-        if (cRow) _companies = cRow.value;
-        
-        const lRow = configurations.find(r => r.key === 'locations');
-        if (lRow) _locs = lRow.value;
-        
-        const eRow = configurations.find(r => r.key === 'events');
-        if (eRow) _events = eRow.value;
-        
-        const pinRow = configurations.find(r => r.key === 'app_pin');
-        if (pinRow) _appPin = pinRow.value;
-        
+        const masterPassRow = configurations.find(r => r.key === 'master_password');
+        if (masterPassRow) {
+           _masterPassword = masterPassRow.value;
+        } else {
+           await saveSettingToDB('master_password', _masterPassword); // create default
+        }
+
         const profileRow = configurations.find(r => r.key === 'profile');
         if (profileRow) {
           _profile = { ..._profile, ...profileRow.value };
-          if (_profile.theme) {
-            setAppTheme(_profile.theme, true);
-          }
+          if (_profile.theme) setAppTheme(_profile.theme, true);
+        } else {
+          updatePWAManifest(_profile.theme);
         }
 
-        if(bar) bar.style.width = "100%";
-        setTimeout(() => {
-          setSyncStatus('synced', 'Synced with Cloud');
-          document.getElementById('loading-screen').classList.add('hidden');
-          applyPrivacyUIVisibility();
-          renderDashboard();
-        }, 400);
+        document.getElementById('loading-screen').classList.add('hidden');
+
+        // 2. Check if logged in this session
+        if (sessionStorage.getItem('sakkhi_auth_token') === 'verified') {
+           loadDataAfterAuth(configurations);
+        } else {
+           // Show Login Screen
+           document.getElementById('login-screen').classList.remove('hidden');
+           document.getElementById('login-screen').classList.add('flex');
+        }
 
       } catch (e) {
         setSyncStatus('error', 'Sync Lost');
-        showToast('Load Error: ' + e.message, 'error');
+        showToast('Boot Error: ' + e.message, 'error');
         document.getElementById('loading-screen').classList.add('hidden');
       }
     }
 
+    function attemptLogin() {
+      const input = document.getElementById('login-password').value;
+      const err = document.getElementById('login-error');
+      
+      if (input === _masterPassword) {
+         sessionStorage.setItem('sakkhi_auth_token', 'verified');
+         document.getElementById('login-screen').classList.add('hidden');
+         document.getElementById('login-screen').classList.remove('flex');
+         document.getElementById('loading-screen').classList.remove('hidden');
+         
+         // User verified, fetch full data payload
+         fetchFullData();
+      } else {
+         err.classList.remove('hidden');
+      }
+    }
+
+    async function fetchFullData() {
+       try {
+          const configurations = await sbFetch('settings?select=*');
+          loadDataAfterAuth(configurations);
+       } catch(e) {
+          showToast('Data Error: ' + e.message, 'error');
+       }
+    }
+
+    async function loadDataAfterAuth(configurations) {
+        const bar = document.getElementById('load-progress');
+        if(bar) bar.style.width = "70%";
+        
+        const cRow = configurations.find(r => r.key === 'companies'); if (cRow) _companies = cRow.value;
+        const lRow = configurations.find(r => r.key === 'locations'); if (lRow) _locs = lRow.value;
+        const eRow = configurations.find(r => r.key === 'events'); if (eRow) _events = eRow.value;
+        const pinRow = configurations.find(r => r.key === 'app_pin'); if (pinRow) _appPin = pinRow.value;
+
+        // Fetch sensitive shoot ledger
+        const raw = await sbFetch('shoots?select=*&order=date.desc');
+        _shoots = raw.map(dbToShoot);
+
+        if(bar) bar.style.width = "100%";
+        
+        setTimeout(() => {
+          setSyncStatus('synced', 'Synced with Cloud');
+          document.getElementById('loading-screen').classList.add('hidden');
+          
+          // Reveal Main Workspace
+          document.getElementById('main-header').classList.remove('hidden');
+          document.getElementById('main-content').classList.remove('hidden');
+          document.getElementById('main-nav').classList.remove('hidden');
+          document.getElementById('main-nav').classList.add('flex');
+          
+          applyPrivacyUIVisibility();
+          renderDashboard();
+        }, 400);
+    }
+
+    /* DB FUNCTIONS */
     async function saveShootToDB(shoot) {
       setSyncStatus('syncing', 'Saving Record...');
       try {
         const existing = _shoots.find(s => s.id === shoot.id);
         if (existing) {
-          await sbFetch(`shoots?id=eq.${shoot.id}`, {
-            method: 'PATCH',
-            body: JSON.stringify(shootToDb(shoot))
-          });
+          await sbFetch(`shoots?id=eq.${shoot.id}`, { method: 'PATCH', body: JSON.stringify(shootToDb(shoot)) });
           const idx = _shoots.findIndex(s => s.id === shoot.id);
           if (idx >= 0) _shoots[idx] = shoot;
         } else {
-          await sbFetch('shoots', {
-            method: 'POST',
-            body: JSON.stringify(shootToDb(shoot))
-          });
+          await sbFetch('shoots', { method: 'POST', body: JSON.stringify(shootToDb(shoot)) });
           _shoots.push(shoot);
         }
-        setSyncStatus('synced', 'Saved Successfully');
-        showToast('Shoot record saved successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Save Failed');
-        showToast('Push Error: ' + e.message, 'error');
-        throw e;
-      }
+        setSyncStatus('synced', 'Saved Successfully'); showToast('Shoot record saved successfully');
+      } catch (e) { setSyncStatus('error', 'Save Failed'); showToast('Push Error: ' + e.message, 'error'); throw e; }
     }
 
     async function deleteShootFromDB(id) {
@@ -1047,486 +1101,164 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       try {
         await sbFetch(`shoots?id=eq.${id}`, { method: 'DELETE' });
         _shoots = _shoots.filter(s => s.id !== id);
-        setSyncStatus('synced', 'Deleted Successfully');
-        showToast('Shoot record deleted successfully');
-      } catch (e) {
-        setSyncStatus('error', 'Delete Failed');
-        showToast('Delete Error: ' + e.message, 'error');
-        throw e;
-      }
+        setSyncStatus('synced', 'Deleted Successfully'); showToast('Shoot record deleted successfully');
+      } catch (e) { setSyncStatus('error', 'Delete Failed'); showToast('Delete Error: ' + e.message, 'error'); throw e; }
     }
 
     async function saveSettingToDB(key, value) {
       try {
         const checkExisting = await sbFetch(`settings?key=eq.${key}&select=key`);
-        
-        if (checkExisting && checkExisting.length > 0) {
-          await sbFetch(`settings?key=eq.${key}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ value })
-          });
-        } else {
-          await sbFetch('settings', {
-            method: 'POST',
-            body: JSON.stringify({ key, value })
-          });
-        }
-      } catch (e) {
-        showToast('Settings Save Error: ' + e.message, 'error');
-      }
+        if (checkExisting && checkExisting.length > 0) { await sbFetch(`settings?key=eq.${key}`, { method: 'PATCH', body: JSON.stringify({ value }) }); } 
+        else { await sbFetch('settings', { method: 'POST', body: JSON.stringify({ key, value }) }); }
+      } catch (e) { showToast('Settings Save Error: ' + e.message, 'error'); }
     }
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
+    function uid() { return Date.now().toString(36) + Math.random().toString(36).substr(2); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
-      document.querySelectorAll('.nav-tab').forEach(t => {
-        t.className = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all";
-      });
-      
+      document.querySelectorAll('.nav-tab').forEach(t => { t.className = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"; });
       document.getElementById('section-' + tab).classList.remove('hidden');
       const targetTab = document.getElementById('tab-' + tab);
-      if (targetTab) {
-        targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
-      }
-      
-      if (tab === 'dashboard') renderDashboard();
-      if (tab === 'calendar') renderCalendar();
-      if (tab === 'shoots') renderShootsList();
-      if (tab === 'payments') renderPayments();
-      if (tab === 'account') {
-        renderSettings();
-        populateProfileUI();
-      }
+      if (targetTab) targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+      if (tab === 'dashboard') renderDashboard(); if (tab === 'calendar') renderCalendar(); if (tab === 'shoots') renderShootsList(); if (tab === 'payments') renderPayments();
+      if (tab === 'account') { renderSettings(); populateProfileUI(); }
     }
 
     function switchAccountTab(tab) {
       _currentAccountTab = tab;
       document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
-      
-      const sections = {
-        'profile': ['account-profile'],
-        'payment': ['account-payment'],
-        'appearance': ['account-appearance'],
-        'security': ['account-security'],
-        'whatsapp': ['account-whatsapp'],
-        'settings': ['account-settings'],
-        'data': ['account-data']
-      };
-
-      (sections[tab] || []).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('active');
-      });
-
+      const sections = { 'profile': ['account-profile'], 'payment': ['account-payment'], 'appearance': ['account-appearance'], 'security': ['account-security'], 'whatsapp': ['account-whatsapp'], 'settings': ['account-settings'], 'data': ['account-data'] };
+      (sections[tab] || []).forEach(id => { const el = document.getElementById(id); if (el) el.classList.add('active'); });
       const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
-      if(activeBtn) {
-        activeBtn.classList.add('active');
-        activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
-      }
+      if(activeBtn) { activeBtn.classList.add('active'); activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' }); }
     }
 
     function setAppTheme(theme, skipSave = false) {
       document.body.setAttribute('data-theme', theme);
-      
-      document.querySelectorAll('.theme-option').forEach(el => {
-        el.classList.remove('ring-2', 'ring-[#c9a96e]', 'ring-neutral-700', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
-      });
-      
+      document.querySelectorAll('.theme-option').forEach(el => { el.classList.remove('ring-2', 'ring-[#c9a96e]', 'ring-neutral-700', 'ring-offset-2', 'ring-offset-[#0f0f0f]'); });
       const activeBtn = document.getElementById('theme-btn-' + theme);
       if(activeBtn) {
         if (theme === 'midnight') activeBtn.classList.add('ring-2', 'ring-[#c9a96e]', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
         else activeBtn.classList.add('ring-2', 'ring-neutral-700', 'ring-offset-2', 'ring-offset-[#0f0f0f]');
       }
-
-      if (!skipSave) {
-        _profile.theme = theme;
-        saveSettingToDB('profile', _profile);
-        showToast('UI theme changed to ' + theme);
-      }
+      updatePWAManifest(theme);
+      if (!skipSave) { _profile.theme = theme; saveSettingToDB('profile', _profile); showToast('UI theme changed to ' + theme); }
     }
 
     function renderDashboard() {
-      const shoots = _shoots;
-      const td = today();
-      const now = new Date();
-
+      const shoots = _shoots; const td = today(); const now = new Date();
       document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-
       const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const trueOutstanding = totalGross - realizedReceived;
 
       document.getElementById('dash-stats').innerHTML = `
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Total Amount</p>
-              <p class="text-xl md:text-2xl font-bold text-[#c9a96e] privacy-target tracking-tight">${fmtAmt(totalGross)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Gross worth of shoots</p>
-            </div>
-            <i class="ti ti-cash text-2xl text-[#c9a96e] opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Expenses</p>
-              <p class="text-xl md:text-2xl font-bold text-orange-500 privacy-target tracking-tight">${fmtAmt(totalExpenses)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Total run costs</p>
-            </div>
-            <i class="ti ti-receipt text-2xl text-orange-500 opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p>
-              <p class="text-xl md:text-2xl font-bold text-emerald-400 privacy-target tracking-tight">${fmtAmt(realizedReceived)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Cash in hand</p>
-            </div>
-            <i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i>
-          </div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="flex items-start justify-between">
-            <div class="flex-1">
-              <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
-              <p class="text-xl md:text-2xl font-bold text-red-400 privacy-target tracking-tight">${fmtAmt(trueOutstanding)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Outstanding</p>
-            </div>
-            <i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i>
-          </div>
-        </div>`;
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="flex items-start justify-between"><div class="flex-1"><p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Total Amount</p><p class="text-xl md:text-2xl font-bold text-[#c9a96e] privacy-target tracking-tight">${fmtAmt(totalGross)}</p><p class="text-[11px] text-neutral-600 mt-2">Gross worth of shoots</p></div><i class="ti ti-cash text-2xl text-[#c9a96e] opacity-20"></i></div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="flex items-start justify-between"><div class="flex-1"><p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Expenses</p><p class="text-xl md:text-2xl font-bold text-orange-500 privacy-target tracking-tight">${fmtAmt(totalExpenses)}</p><p class="text-[11px] text-neutral-600 mt-2">Total run costs</p></div><i class="ti ti-receipt text-2xl text-orange-500 opacity-20"></i></div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="flex items-start justify-between"><div class="flex-1"><p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p><p class="text-xl md:text-2xl font-bold text-emerald-400 privacy-target tracking-tight">${fmtAmt(realizedReceived)}</p><p class="text-[11px] text-neutral-600 mt-2">Cash in hand</p></div><i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i></div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="flex items-start justify-between"><div class="flex-1"><p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p><p class="text-xl md:text-2xl font-bold text-red-400 privacy-target tracking-tight">${fmtAmt(trueOutstanding)}</p><p class="text-[11px] text-neutral-600 mt-2">Outstanding</p></div><i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i></div></div>`;
 
       const upcoming = shoots.filter(s => s.date >= td).sort((a, b) => a.date.localeCompare(b.date)).slice(0, 8);
       document.getElementById('dash-upcoming-count').textContent = upcoming.length + ' shoot' + (upcoming.length !== 1 ? 's' : '');
-      
       const ul = document.getElementById('dash-upcoming');
-      if (!upcoming.length) {
-        ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No upcoming shoots</div>';
-      } else {
-        ul.innerHTML = upcoming.map(s => {
-          const { dd, mmm } = ddMmm(s.date);
-          return `
-            <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-start gap-3">
-              <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                <span class="text-sm font-bold text-[#c9a96e] leading-none">${dd}</span>
-                <span class="text-[8px] uppercase text-neutral-500">${mmm}</span>
-              </div>
-              <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-white truncate">${s.name}</p>
-                <p class="text-xs text-neutral-500">${s.event} • ${s.location || 'N/A'}</p>
-              </div>
-            </div>
-          `;
-        }).join('');
-      }
+      if (!upcoming.length) ul.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600 tracking-wide">No upcoming shoots</div>';
+      else ul.innerHTML = upcoming.map(s => { const { dd, mmm } = ddMmm(s.date); return `<div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-start gap-3"><div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-900 rounded-lg flex flex-col items-center justify-center flex-shrink-0"><span class="text-sm font-bold text-[#c9a96e] leading-none">${dd}</span><span class="text-[8px] uppercase text-neutral-500">${mmm}</span></div><div class="flex-1 min-w-0"><p class="text-sm font-semibold text-white truncate">${s.name}</p><p class="text-xs text-neutral-500">${s.event} • ${s.location || 'N/A'}</p></div></div>`; }).join('');
 
       const verifiedSettledCount = shoots.filter(s => s.payStatus === 'done').length;
       const allocatedTrancheCount = shoots.filter(s => s.payStatus === 'part').length;
       const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending').length;
-
       const settledPct = totalGross ? (realizedReceived / totalGross * 100).toFixed(0) : 0;
       const duePct = totalGross ? (trueOutstanding / totalGross * 100).toFixed(0) : 0;
 
       document.getElementById('dash-payments').innerHTML = `
         <div class="space-y-3">
-          <div class="space-y-1.5">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-neutral-400 font-medium">Settled</span>
-              <span class="text-xs font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span>
-            </div>
-            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
-              <div class="h-full bg-emerald-500 rounded-full transition-all" style="width: ${settledPct}%"></div>
-            </div>
-            <div class="text-[11px] text-neutral-600">${settledPct}% of total</div>
-          </div>
-
-          <div class="space-y-1.5 pt-2">
-            <div class="flex items-center justify-between">
-              <span class="text-xs text-neutral-400 font-medium">Due</span>
-              <span class="text-xs font-bold text-red-400 privacy-target">${fmtAmt(trueOutstanding)}</span>
-            </div>
-            <div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden">
-              <div class="h-full bg-red-500 rounded-full transition-all" style="width: ${duePct}%"></div>
-            </div>
-            <div class="text-[11px] text-neutral-600">${duePct}% pending</div>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-3 border-t border-neutral-900">
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400">${unliquidatedCount} Pending</span>
-          </div>
+          <div class="space-y-1.5"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400 font-medium">Settled</span><span class="text-xs font-bold text-emerald-400 privacy-target">${fmtAmt(realizedReceived)}</span></div><div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-emerald-500 rounded-full transition-all" style="width: ${settledPct}%"></div></div><div class="text-[11px] text-neutral-600">${settledPct}% of total</div></div>
+          <div class="space-y-1.5 pt-2"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400 font-medium">Due</span><span class="text-xs font-bold text-red-400 privacy-target">${fmtAmt(trueOutstanding)}</span></div><div class="w-full h-2 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-red-500 rounded-full transition-all" style="width: ${duePct}%"></div></div><div class="text-[11px] text-neutral-600">${duePct}% pending</div></div>
+          <div class="flex flex-wrap gap-2 pt-3 border-t border-neutral-900"><span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span><span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span><span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400">${unliquidatedCount} Pending</span></div>
         </div>`;
-
-      applyPrivacyUIVisibility();
-      renderTopCompanies();
+      applyPrivacyUIVisibility(); renderTopCompanies();
     }
 
     function renderTopCompanies() {
       const companyStats = {};
       _shoots.forEach(s => {
-        const comp = s.company || 'Direct';
-        if (!companyStats[comp]) {
-          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
-        }
-        companyStats[comp].shoots++;
-        companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
-          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-        }
+        const comp = s.company || 'Direct'; if (!companyStats[comp]) companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
+        companyStats[comp].shoots++; companyStats[comp].revenue += Number(s.amount || 0);
+        if (s.payStatus !== 'done') companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
       });
-
-      const topCompanies = Object.entries(companyStats)
-        .map(([name, data]) => ({ name, ...data }))
-        .sort((a, b) => b.revenue - a.revenue)
-        .slice(0, 5);
-
+      const topCompanies = Object.entries(companyStats).map(([name, data]) => ({ name, ...data })).sort((a, b) => b.revenue - a.revenue).slice(0, 5);
       const container = document.getElementById('dash-top-companies');
-      if (!topCompanies.length) {
-        container.innerHTML = '<div class="text-center py-4 text-xs text-neutral-500">No company data</div>';
-        return;
-      }
-
-      container.innerHTML = topCompanies.map((c, i) => `
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer">
-          <div class="flex items-start justify-between mb-2">
-            <div class="flex-1">
-              <p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p>
-              <p class="text-xs text-neutral-500">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
-            </div>
-            <div class="text-right">
-              <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
-              <p class="text-xs text-red-400 privacy-target" style="display: ${c.pending > 0 ? 'block' : 'none'}">${fmtAmt(c.pending)} due</p>
-            </div>
-          </div>
-        </div>
-      `).join('');
-
+      if (!topCompanies.length) { container.innerHTML = '<div class="text-center py-4 text-xs text-neutral-500">No company data</div>'; return; }
+      container.innerHTML = topCompanies.map((c, i) => `<div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer"><div class="flex items-start justify-between mb-2"><div class="flex-1"><p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p><p class="text-xs text-neutral-500">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p></div><div class="text-right"><p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p><p class="text-xs text-red-400 privacy-target" style="display: ${c.pending > 0 ? 'block' : 'none'}">${fmtAmt(c.pending)} due</p></div></div></div>`).join('');
       applyPrivacyUIVisibility();
     }
 
     function showAllCompanies() {
       const companyStats = {};
       _shoots.forEach(s => {
-        const comp = s.company || 'Direct';
-        if (!companyStats[comp]) {
-          companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
-        }
-        companyStats[comp].shoots++;
-        companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
-          companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-        }
+        const comp = s.company || 'Direct'; if (!companyStats[comp]) companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
+        companyStats[comp].shoots++; companyStats[comp].revenue += Number(s.amount || 0);
+        if (s.payStatus !== 'done') companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
       });
-
-      const allCompanies = Object.entries(companyStats)
-        .map(([name, data]) => ({ name, ...data }))
-        .sort((a, b) => b.revenue - a.revenue);
-
-      const modalContent = `
-        <div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onclick="if(event.target === this) this.remove()">
-          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto">
-            <div class="sticky top-0 bg-[#0f0f0f] border-b border-neutral-900 p-5 flex items-center justify-between">
-              <h2 class="text-xl font-bold text-white">All Companies (${allCompanies.length})</h2>
-              <button onclick="this.closest('.fixed').remove()" class="text-neutral-500 hover:text-white text-2xl">&times;</button>
-            </div>
-            <div class="p-5 space-y-3">
-              ${allCompanies.map((c, i) => `
-                <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition">
-                  <div class="flex items-start justify-between mb-2">
-                    <div class="flex-1">
-                      <p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p>
-                      <p class="text-xs text-neutral-500 mt-1">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
-                    </div>
-                    <div class="text-right">
-                      <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p>
-                      <p class="text-xs text-red-400 privacy-target">${c.pending > 0 ? fmtAmt(c.pending) + ' due' : 'Settled'}</p>
-                    </div>
-                  </div>
-                  <div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden">
-                    <div class="h-full bg-[#c9a96e]" style="width: ${(c.revenue / (allCompanies[0]?.revenue || 1) * 100)}%"></div>
-                  </div>
-                </div>
-              `).join('')}
-            </div>
-          </div>
-        </div>
-      `;
-      document.body.insertAdjacentHTML('beforeend', modalContent);
-      applyPrivacyUIVisibility();
+      const allCompanies = Object.entries(companyStats).map(([name, data]) => ({ name, ...data })).sort((a, b) => b.revenue - a.revenue);
+      const modalContent = `<div class="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4" onclick="if(event.target === this) this.remove()"><div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl max-w-2xl w-full max-h-[80vh] overflow-y-auto"><div class="sticky top-0 bg-[#0f0f0f] border-b border-neutral-900 p-5 flex items-center justify-between"><h2 class="text-xl font-bold text-white">All Companies (${allCompanies.length})</h2><button onclick="this.closest('.fixed').remove()" class="text-neutral-500 hover:text-white text-2xl">&times;</button></div><div class="p-5 space-y-3">${allCompanies.map((c, i) => `<div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition"><div class="flex items-start justify-between mb-2"><div class="flex-1"><p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p><p class="text-xs text-neutral-500 mt-1">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p></div><div class="text-right"><p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(c.revenue)}</p><p class="text-xs text-red-400 privacy-target">${c.pending > 0 ? fmtAmt(c.pending) + ' due' : 'Settled'}</p></div></div><div class="w-full h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#c9a96e]" style="width: ${(c.revenue / (allCompanies[0]?.revenue || 1) * 100)}%"></div></div></div>`).join('')}</div></div></div>`;
+      document.body.insertAdjacentHTML('beforeend', modalContent); applyPrivacyUIVisibility();
     }
 
     function getShootRowHtmlTemplate(s, isDashboardFrame) {
       const { dd, mmm } = ddMmm(s.date);
-      
-      const badgeStyles = {
-        'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
-        'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
-        'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
-        'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
-        'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
-        'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
-        'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
-      }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
-
-      return `
-        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
-              <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
-            </div>
-            
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-semibold text-white">${s.name}</div>
-              <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                <span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>
-                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${s.company}</span>` : ''}
-              </div>
-            </div>
-          </div>
-
-          <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
-            <i class="ti ti-brand-whatsapp text-sm"></i>
-          </button>
-        </div>`;
+      const badgeStyles = { 'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900', 'Reception':'bg-blue-950 text-blue-400 border border-blue-900', 'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900', 'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900', 'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900', 'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900', 'House Warming':'bg-sky-950 text-sky-400 border border-sky-900' }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
+      return `<div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap"><div class="flex items-center gap-3 min-w-0 flex-1"><div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0"><span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span><span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span></div><div class="min-w-0 flex-1"><div class="text-sm font-semibold text-white">${s.name}</div><div class="flex flex-wrap items-center gap-2 mt-1"><span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span><span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>${s.company ? `<span class="text-xs text-neutral-500 truncate">${s.company}</span>` : ''}</div></div></div><button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0"><i class="ti ti-brand-whatsapp text-sm"></i></button></div>`;
     }
 
     function renderCalendar() {
       const monthLabel = MONTHS[calMonth] + ' ' + calYear;
       document.getElementById('cal-month-label').textContent = monthLabel;
-
       const monthStart = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-01';
       const lastDay = new Date(calYear, calMonth + 1, 0).getDate();
       const monthEnd = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(lastDay).padStart(2, '0');
-      
       const shootsThisMonth = _shoots.filter(s => s.date >= monthStart && s.date <= monthEnd);
       const completedThisMonth = shootsThisMonth.filter(s => s.date < today()).length;
-      
-      const todayStr = today();
-      const upcomingShoots = _shoots.filter(s => s.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
+      const upcomingShoots = _shoots.filter(s => s.date >= today()).sort((a, b) => a.date.localeCompare(b.date));
       const nextShoot = upcomingShoots[0];
       
       let daysUntilNext = '';
       if (nextShoot) {
-        const nextDate = new Date(nextShoot.date + 'T00:00:00');
-        const todayDate = new Date();
-        const diffTime = nextDate - todayDate;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-        if (diffDays === 0) daysUntilNext = 'Today';
-        else if (diffDays === 1) daysUntilNext = 'Tomorrow';
-        else daysUntilNext = `in ${diffDays} days`;
+        const diffDays = Math.ceil((new Date(nextShoot.date + 'T00:00:00') - new Date()) / (1000 * 60 * 60 * 24));
+        if (diffDays === 0) daysUntilNext = 'Today'; else if (diffDays === 1) daysUntilNext = 'Tomorrow'; else daysUntilNext = `in ${diffDays} days`;
       }
 
       const existingStats = document.getElementById('cal-stats');
+      const statsHtml = `<div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div><div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div><div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div></div>${nextShoot ? `<div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div><div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div><div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div></div>` : `<div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div><div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div><div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div></div>`}<div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div><div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div><div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div></div>`;
       if (!existingStats) {
         const borderDiv = document.querySelector('#section-calendar .border-b');
-        if (borderDiv) {
-          const statsDiv = document.createElement('div');
-          statsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4';
-          statsDiv.id = 'cal-stats';
-          statsDiv.innerHTML = `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-            </div>
-            ${nextShoot ? `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-              <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-            </div>
-            ` : `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-              <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-            </div>
-            `}
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-            </div>
-          `;
-          borderDiv.after(statsDiv);
-        }
-      } else {
-        existingStats.innerHTML = `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-          </div>
-          ${nextShoot ? `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-            <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-          </div>
-          ` : `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-            <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-          </div>
-          `}
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-          </div>
-        `;
-      }
-
-      const firstDay = new Date(calYear, calMonth, 1);
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      const startingDayOfWeek = firstDay.getDay();
+        if (borderDiv) { const statsDiv = document.createElement('div'); statsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4'; statsDiv.id = 'cal-stats'; statsDiv.innerHTML = statsHtml; borderDiv.after(statsDiv); }
+      } else { existingStats.innerHTML = statsHtml; }
 
       const grid = document.getElementById('cal-grid');
       let html = '<div class="text-center text-xs font-bold text-neutral-500 py-1">SUN</div><div class="text-center text-xs font-bold text-neutral-500 py-1">MON</div><div class="text-center text-xs font-bold text-neutral-500 py-1">TUE</div><div class="text-center text-xs font-bold text-neutral-500 py-1">WED</div><div class="text-center text-xs font-bold text-neutral-500 py-1">THU</div><div class="text-center text-xs font-bold text-neutral-500 py-1">FRI</div><div class="text-center text-xs font-bold text-neutral-500 py-1">SAT</div>';
-
-      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
-
+      for (let i = 0; i < new Date(calYear, calMonth, 1).getDay(); i++) html += '<div></div>';
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
         const isSelected = dateStr === calSelected ? 'bg-[#c9a96e] text-black font-bold' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
         html += `<div onclick="calSelectDate('${dateStr}')" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
       }
-
       grid.innerHTML = html;
 
       const contextualShoots = _shoots.filter(s => s.date === calSelected).sort((a, b) => a.date.localeCompare(b.date));
-      const panel = document.getElementById('cal-day-panel');
-      panel.classList.remove('hidden');
-
+      const panel = document.getElementById('cal-day-panel'); panel.classList.remove('hidden');
       const headerLabel = new Date(calSelected + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-      let interiorHtml = `
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="text-sm font-bold text-white">${headerLabel}</div>
-            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button>
-          </div>`;
-
-      if (!contextualShoots.length) {
-        interiorHtml += `<p class="text-xs text-neutral-600 py-4 text-center">No shoots scheduled for this day.</p>`;
-      } else {
-        interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
-      }
-      interiorHtml += `</div>`;
-      panel.innerHTML = interiorHtml;
-      applyPrivacyUIVisibility();
+      let interiorHtml = `<div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4"><div class="flex items-center justify-between"><div class="text-sm font-bold text-white">${headerLabel}</div><button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button></div>`;
+      if (!contextualShoots.length) interiorHtml += `<p class="text-xs text-neutral-600 py-4 text-center">No shoots scheduled for this day.</p>`;
+      else interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
+      interiorHtml += `</div>`; panel.innerHTML = interiorHtml; applyPrivacyUIVisibility();
     }
 
     function calSelectDate(date) { calSelected = date; renderCalendar(); }
@@ -1540,109 +1272,49 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       const fc = document.getElementById('filter-company')?.value || '';
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
-
-      const totalShoots = _shoots.length;
-      const upcomingShoots = _shoots.filter(s => s.date >= td).length;
-      const completedShoots = _shoots.filter(s => s.date < td).length;
-      
-      document.getElementById('stat-total').textContent = totalShoots;
-      document.getElementById('stat-upcoming').textContent = upcomingShoots;
-      document.getElementById('stat-completed').textContent = completedShoots;
+      document.getElementById('stat-total').textContent = _shoots.length;
+      document.getElementById('stat-upcoming').textContent = _shoots.filter(s => s.date >= td).length;
+      document.getElementById('stat-completed').textContent = _shoots.filter(s => s.date < td).length;
 
       const compDropdown = document.getElementById('filter-company');
-      if (compDropdown) {
-        const cachedSelection = compDropdown.value;
-        compDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
-      }
-
+      if (compDropdown) compDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === compDropdown.value ? 'selected' : ''}>${c}</option>`).join('');
       const locDropdown = document.getElementById('filter-loc');
-      if (locDropdown) {
-        const cachedSelection = locDropdown.value;
-        locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
-      }
+      if (locDropdown) locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === locDropdown.value ? 'selected' : ''}>${l}</option>`).join('');
 
       let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      
       if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fl) filtered = filtered.filter(s => s.location === fl);
+      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
+      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
+
+      const targetContainer = document.getElementById('shoots-list'); if (!targetContainer) return;
+      if (!filtered.length) { targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>'; return; }
       
-      if (ft === 'upcoming') {
-        filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
-      } else if (ft === 'completed') {
-        filtered = filtered.filter(s => s.date < td);
-      }
-
       const grouped = {};
-      filtered.forEach(s => {
-        const monthKey = s.date.slice(0, 7);
-        if (!grouped[monthKey]) grouped[monthKey] = [];
-        grouped[monthKey].push(s);
+      filtered.forEach(s => { const k = s.date.slice(0, 7); if (!grouped[k]) grouped[k] = []; grouped[k].push(s); });
+      let html = '';
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        const shoots = grouped[monthKey]; const [year, month] = monthKey.split('-');
+        html += `<div class="mb-6"><div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900"><i class="ti ti-calendar text-[#c9a96e]"></i><h3 class="text-sm font-bold text-white tracking-wide">${MONTHS[parseInt(month) - 1]} ${year}</h3><span class="text-xs text-neutral-500 ml-auto">${shoots.length} shoots</span></div><div class="space-y-2">${shoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div></div>`;
       });
-
-      const targetContainer = document.getElementById('shoots-list');
-      if (!targetContainer) return;
-      if (!filtered.length) {
-        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
-      } else {
-        let html = '';
-        const sortedMonths = Object.keys(grouped).sort().reverse();
-        sortedMonths.forEach(monthKey => {
-          const shoots = grouped[monthKey];
-          const [year, month] = monthKey.split('-');
-          const monthName = MONTHS[parseInt(month) - 1];
-          const monthLabel = `${monthName} ${year}`;
-          
-          html += `<div class="mb-6">
-            <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-              <i class="ti ti-calendar text-[#c9a96e]"></i>
-              <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
-              <span class="text-xs text-neutral-500 ml-auto">${shoots.length} shoots</span>
-            </div>
-            <div class="space-y-2">
-              ${shoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}
-            </div>
-          </div>`;
-        });
-        targetContainer.innerHTML = html;
-      }
-      applyPrivacyUIVisibility();
+      targetContainer.innerHTML = html; applyPrivacyUIVisibility();
     }
 
     function renderPayments() {
       const payCompDropdown = document.getElementById('pay-filter-company');
-      if (payCompDropdown) {
-        const cachedSelection = payCompDropdown.value;
-        payCompDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
-      }
+      if (payCompDropdown) payCompDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === payCompDropdown.value ? 'selected' : ''}>${c}</option>`).join('');
 
       const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
       const outstanding = gross - captured;
 
       document.getElementById('pay-stats').innerHTML = `
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
-          <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">All shoots</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
-          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
-          <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
-          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
-          <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
-          <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">Run costs</div>
-        </div>`;
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div><div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div><div class="text-[10px] text-neutral-600 mt-1">All shoots</div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div><div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div><div class="text-[10px] text-emerald-600 mt-1">Settled payments</div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div><div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div><div class="text-[10px] text-red-600 mt-1">Outstanding</div></div>
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition"><div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div><div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div><div class="text-[10px] text-neutral-600 mt-1">Run costs</div></div>`;
 
       renderPaymentsList();
     }
@@ -1659,128 +1331,33 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
       if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
 
-      const rootList = document.getElementById('payments-list');
-      if (!rootList) return;
-      
-      if (!filtered.length) {
-        rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found.</div>';
-        return;
-      }
+      const rootList = document.getElementById('payments-list'); if (!rootList) return;
+      if (!filtered.length) { rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found.</div>'; return; }
 
       const grouped = {};
-      filtered.forEach(s => {
-        const monthKey = s.date?.slice(0, 7);
-        if (!monthKey) return;
-        if (!grouped[monthKey]) grouped[monthKey] = [];
-        grouped[monthKey].push(s);
-      });
+      filtered.forEach(s => { const k = s.date?.slice(0, 7); if (!k) return; if (!grouped[k]) grouped[k] = []; grouped[k].push(s); });
 
       let html = '';
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        
-        html += `
-          <div class="mb-6">
-            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
-              <div class="flex justify-between items-center">
-                <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
-                <span class="text-xs text-neutral-500 privacy-target">${shoots.length} • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
-              </div>
-            </div>
-            <div class="space-y-2">
-              ${shoots.map(s => {
-                const { dd, mmm } = ddMmm(s.date);
-                const paymentBadgeColor = s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500';
-                const paymentLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
-                const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
-                const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
-                return `
-                  <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')">
-                    <div class="flex items-center gap-3 min-w-0 flex-1">
-                      <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                        <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
-                        <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
-                      </div>
-                      
-                      <div class="min-w-0 flex-1">
-                        <div class="text-sm font-semibold text-white">${s.name}</div>
-                        <div class="flex flex-wrap items-center gap-2 mt-1">
-                          <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${s.event}</span>
-                          ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
-                        </div>
-                      </div>
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
-                      <div class="text-right">
-                        <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadgeColor}">${paymentLabel}</span>
-                      </div>
-                      ${s.expense ? `
-                      <div class="text-right">
-                        <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
-                        <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
-                      </div>` : ''}
-                      <button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
-                        <i class="ti ti-brand-whatsapp text-sm"></i>
-                      </button>
-                    </div>
-                  </div>
-                `;
-              }).join('')}
-            </div>
-          </div>
-        `;
+        const shoots = grouped[monthKey]; const [year, month] = monthKey.split('-');
+        html += `<div class="mb-6"><div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg"><div class="flex justify-between items-center"><h3 class="text-sm font-bold text-[#c9a96e]">${MONTHS[parseInt(month) - 1] || 'Unknown'} ${year}</h3><span class="text-xs text-neutral-500 privacy-target">${shoots.length} • Rs. ${shoots.reduce((a, s) => a + Number(s.amount || 0), 0).toLocaleString('en-IN')}</span></div></div><div class="space-y-2">${shoots.map(s => {
+          const { dd, mmm } = ddMmm(s.date);
+          const payColor = s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500';
+          const payLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
+          const expColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
+          return `<div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')"><div class="flex items-center gap-3 min-w-0 flex-1"><div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0"><span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span><span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span></div><div class="min-w-0 flex-1"><div class="text-sm font-semibold text-white">${s.name}</div><div class="flex flex-wrap items-center gap-2 mt-1"><span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${s.event}</span>${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}</div></div></div><div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0"><div class="text-right"><p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p><span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${payColor}">${payLabel}</span></div>${s.expense ? `<div class="text-right"><p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p><span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expColor}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</span></div>` : ''}<button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0"><i class="ti ti-brand-whatsapp text-sm"></i></button></div></div>`;
+        }).join('')}</div></div>`;
       });
-      
-      rootList.innerHTML = html;
-      applyPrivacyUIVisibility();
+      rootList.innerHTML = html; applyPrivacyUIVisibility();
     }
 
     function renderSettings() {
       const compTarget = document.getElementById('settings-companies');
-      if (compTarget) {
-        compTarget.innerHTML = _companies.map((c, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${c}</span>
-            <div class="flex gap-1">
-              <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
-
+      if (compTarget) compTarget.innerHTML = _companies.map((c, i) => `<div class="flex items-center justify-between py-2 text-xs"><span class="text-neutral-300 font-medium">${c}</span><div class="flex gap-1"><button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button><button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button></div></div>`).join('');
       const locTarget = document.getElementById('settings-locations');
-      if (locTarget) {
-        locTarget.innerHTML = DEFAULT_LOCS.map(l => `
-          <div class="flex items-center justify-between py-2 text-xs opacity-50">
-            <span class="text-neutral-400">${l}</span>
-            <span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span>
-          </div>`).join('') + 
-          _locs.map((l, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${l}</span>
-            <div class="flex gap-1">
-              <button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
-
+      if (locTarget) locTarget.innerHTML = DEFAULT_LOCS.map(l => `<div class="flex items-center justify-between py-2 text-xs opacity-50"><span class="text-neutral-400">${l}</span><span class="text-[9px] uppercase font-bold tracking-wider text-neutral-600">Default</span></div>`).join('') + _locs.map((l, i) => `<div class="flex items-center justify-between py-2 text-xs"><span class="text-neutral-300 font-medium">${l}</span><div class="flex gap-1"><button onclick="renameLocation(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button><button onclick="deleteLocation(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button></div></div>`).join('');
       const eventTarget = document.getElementById('settings-events');
-      if (eventTarget) {
-        eventTarget.innerHTML = _events.map((e, i) => `
-          <div class="flex items-center justify-between py-2 text-xs">
-            <span class="text-neutral-300 font-medium">${e}</span>
-            <div class="flex gap-1">
-              <button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
-              <button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
-            </div>
-          </div>`).join('');
-      }
+      if (eventTarget) eventTarget.innerHTML = _events.map((e, i) => `<div class="flex items-center justify-between py-2 text-xs"><span class="text-neutral-300 font-medium">${e}</span><div class="flex gap-1"><button onclick="renameEvent(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button><button onclick="deleteEvent(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button></div></div>`).join('');
     }
 
     function populateProfileUI() {
@@ -1790,9 +1367,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       document.getElementById('acc-upi').value = _profile.upi || '';
       document.getElementById('acc-bank').value = _profile.bank || '';
       document.getElementById('acc-wa-template').value = _profile.waTemplate || '';
-      if (document.getElementById('acc-wa-template-payment')) {
-        document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
-      }
+      if (document.getElementById('acc-wa-template-payment')) document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
     }
 
     async function saveProfileSettings() {
@@ -1802,26 +1377,127 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       _profile.upi = document.getElementById('acc-upi').value.trim();
       _profile.bank = document.getElementById('acc-bank').value.trim();
       _profile.waTemplate = document.getElementById('acc-wa-template').value.trim();
-      if (document.getElementById('acc-wa-template-payment')) {
-        _profile.waTemplatePayment = document.getElementById('acc-wa-template-payment').value.trim();
-      }
-      
-      await saveSettingToDB('profile', _profile);
-      showToast('Profile configuration records updated successfully.');
+      if (document.getElementById('acc-wa-template-payment')) _profile.waTemplatePayment = document.getElementById('acc-wa-template-payment').value.trim();
+      await saveSettingToDB('profile', _profile); showToast('Profile configuration records updated successfully.');
     }
 
     async function updatePrivacyPIN() {
       const newPin = document.getElementById('acc-pin').value.trim();
-      if (!/^\d{4,6}$/.test(newPin)) {
-        showToast('PIN must be between 4 to 6 digits.', 'error');
-        return;
-      }
-      _appPin = newPin;
-      await saveSettingToDB('app_pin', _appPin);
-      document.getElementById('acc-pin').value = ''; 
-      showToast('Financial Privacy PIN updated securely.');
+      if (!/^\d{4,6}$/.test(newPin)) { showToast('PIN must be between 4 to 6 digits.', 'error'); return; }
+      _appPin = newPin; await saveSettingToDB('app_pin', _appPin); document.getElementById('acc-pin').value = ''; showToast('Financial Privacy PIN updated securely.');
     }
 
+    async function updateMasterPassword() {
+      const newPass = document.getElementById('acc-master-pass').value.trim();
+      if (!newPass || newPass.length < 4) { showToast('Password must be at least 4 characters.', 'error'); return; }
+      _masterPassword = newPass;
+      await saveSettingToDB('master_password', _masterPassword);
+      document.getElementById('acc-master-pass').value = '';
+      showToast('Master App Password updated securely.', 'success');
+    }
+
+    /* Modal Management */
+    function clearModalFields() {
+      document.getElementById('edit-shoot-id').value = '';
+      document.getElementById('f-shoot-name').value = '';
+      document.getElementById('f-shoot-date').value = '';
+      const eSel = document.getElementById('f-shoot-event'); if (eSel && _events.length) eSel.value = _events[0];
+      document.getElementById('f-shoot-event-other').value = ''; document.getElementById('f-event-other-wrap').classList.add('hidden');
+      document.getElementById('f-shoot-session').value = 'Morning Session';
+      document.getElementById('f-shoot-loc-other').value = ''; document.getElementById('f-loc-other-wrap').classList.add('hidden');
+      document.getElementById('f-shoot-notes').value = '';
+      document.getElementById('f-shoot-amount').value = '';
+      document.getElementById('f-shoot-expense').value = ''; document.getElementById('f-shoot-expense-status').value = 'pending';
+      document.getElementById('f-shoot-pay-status').value = 'pending'; document.getElementById('f-shoot-part-paid').value = '';
+      document.getElementById('f-part-pay-wrap').style.display = 'none';
+    }
+
+    function handleEventOther() {
+      const wrap = document.getElementById('f-event-other-wrap');
+      if (document.getElementById('f-shoot-event').value === 'Other') wrap.classList.remove('hidden'); else wrap.classList.add('hidden');
+    }
+
+    function handleLocOther() {
+      const wrap = document.getElementById('f-loc-other-wrap');
+      if (document.getElementById('f-shoot-loc').value === '__other__') wrap.classList.remove('hidden'); else wrap.classList.add('hidden');
+    }
+
+    function handlePayStatusChange() {
+      const wrap = document.getElementById('f-part-pay-wrap');
+      if (document.getElementById('f-shoot-pay-status').value === 'part') wrap.style.display = 'flex'; else wrap.style.display = 'none';
+    }
+
+    function openAddShootModal(dateStr) {
+      document.getElementById('edit-shoot-id').value = ''; document.getElementById('shoot-modal-title').textContent = 'New Shoot';
+      document.getElementById('modal-delete-btn').classList.add('hidden'); document.getElementById('modal-whatsapp-btn').classList.add('hidden');
+      clearModalFields();
+      
+      const cSel = document.getElementById('f-shoot-company'); if (cSel) cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      const lSel = document.getElementById('f-shoot-loc'); if (lSel) lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
+      const eSel = document.getElementById('f-shoot-event'); if (eSel) eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
+      if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
+      openModal('shoot-modal-backdrop');
+    }
+
+    function openEditShootModal(id) {
+      const s = _shoots.find(x => x.id === id); if (!s) return;
+      document.getElementById('edit-shoot-id').value = id; document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
+      document.getElementById('modal-delete-btn').classList.remove('hidden'); document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
+      
+      document.getElementById('f-shoot-name').value = s.name; document.getElementById('f-shoot-date').value = s.date;
+      document.getElementById('f-shoot-session').value = s.session || 'Morning Session'; document.getElementById('f-shoot-notes').value = s.notes || '';
+      document.getElementById('f-shoot-amount').value = s.amount || ''; document.getElementById('f-shoot-expense').value = s.expense || '';
+      document.getElementById('f-shoot-expense-status').value = s.expenseStatus || 'pending';
+      document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending'; document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
+      
+      const cSel = document.getElementById('f-shoot-company'); if (cSel) { cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join(''); if (s && s.company) cSel.value = s.company; }
+      const lSel = document.getElementById('f-shoot-loc'); if (lSel) {
+        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
+        if (s && s.location) {
+          if ([...DEFAULT_LOCS, ..._locs].includes(s.location)) { lSel.value = s.location; document.getElementById('f-loc-other-wrap').classList.add('hidden'); }
+          else { lSel.value = '__other__'; document.getElementById('f-shoot-loc-other').value = s.location; document.getElementById('f-loc-other-wrap').classList.remove('hidden'); }
+        }
+      }
+      const eSel = document.getElementById('f-shoot-event'); if (eSel && s.event) {
+        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
+        if (_events.includes(s.event)) { eSel.value = s.event; document.getElementById('f-event-other-wrap').classList.add('hidden'); }
+        else { eSel.value = 'Other'; document.getElementById('f-shoot-event-other').value = s.event; document.getElementById('f-event-other-wrap').classList.remove('hidden'); }
+      }
+      handlePayStatusChange(); openModal('shoot-modal-backdrop');
+    }
+
+    async function saveShoot() {
+      const name = document.getElementById('f-shoot-name').value.trim(); const date = document.getElementById('f-shoot-date').value;
+      if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
+      let event = document.getElementById('f-shoot-event').value;
+      if (event === 'Other') { event = document.getElementById('f-shoot-event-other').value.trim() || 'Other'; if (event !== 'Other' && !_events.includes(event)) { _events.push(event); await saveSettingToDB('events', _events); } }
+      let location = document.getElementById('f-shoot-loc').value;
+      if (location === '__other__') { location = document.getElementById('f-shoot-loc-other').value.trim(); if (location && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) { _locs.push(location); await saveSettingToDB('locations', _locs); } }
+      const payStatus = document.getElementById('f-shoot-pay-status').value; const expenseStatus = document.getElementById('f-shoot-expense-status').value;
+      const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0; const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0;
+      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
+      const editId = document.getElementById('edit-shoot-id').value;
+      const record = { id: editId || uid(), name, date, event, session: document.getElementById('f-shoot-session').value, location, company: document.getElementById('f-shoot-company').value, notes: document.getElementById('f-shoot-notes').value.trim(), amount, expense, expenseStatus, payStatus, partPaid, created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString() };
+      try { await saveShootToDB(record); closeShootModal(); refreshCurrentView(); } catch (e) {}
+    }
+
+    function triggerDeleteFromModal() { const id = document.getElementById('edit-shoot-id').value; if (id) { closeShootModal(); setTimeout(() => askDeletePrompt(id), 250); } }
+    let _pendingDropTargetId = null;
+    function askDeletePrompt(id) {
+      const s = _shoots.find(x => x.id === id); if (!s) return;
+      _pendingDropTargetId = id; document.getElementById('confirm-title').textContent = 'Delete Shoot?'; document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop; openModal('confirm-modal-backdrop');
+    }
+    async function executeConfirmedRecordDrop() { if (!_pendingDropTargetId) return; try { await deleteShootFromDB(_pendingDropTargetId); _pendingDropTargetId = null; closeConfirmModal(); refreshCurrentView(); } catch (e) {} }
+
+    function openModal(id) { const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-auto'); const inner = m.firstElementChild; if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4'); document.body.style.overflow = 'hidden'; }
+    function closeModal(id) { const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto'); const inner = m.firstElementChild; if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4'); document.body.style.overflow = ''; }
+    function closeShootModal() { closeModal('shoot-modal-backdrop'); }
+    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
+    function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
+
+    /* Exporters and Utilities... */
     function exportAllDataToPDF() {
       if (!_shoots.length) {
         showToast('No data to export', 'error');
@@ -2134,817 +1810,8 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
-    function openAddShootModal(dateStr) {
-      document.getElementById('edit-shoot-id').value = '';
-      document.getElementById('shoot-modal-title').textContent = 'New Shoot';
-      document.getElementById('modal-delete-btn').classList.add('hidden');
-      document.getElementById('modal-whatsapp-btn').classList.add('hidden');
-      clearModalFields();
-      
-      const cSel = document.getElementById('f-shoot-company');
-      if (cSel) {
-        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
-      }
-
-      const lSel = document.getElementById('f-shoot-loc');
-      if (lSel) {
-        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
-      }
-
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel) {
-        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
-      }
-      
-      if (dateStr) document.getElementById('f-shoot-date').value = dateStr;
-      openModal('shoot-modal-backdrop');
-    }
-
-    function openEditShootModal(id) {
-      const s = _shoots.find(x => x.id === id); if (!s) return;
-      document.getElementById('edit-shoot-id').value = id;
-      document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
-      document.getElementById('modal-delete-btn').classList.remove('hidden');
-      document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
-      
-      document.getElementById('f-shoot-name').value = s.name;
-      document.getElementById('f-shoot-date').value = s.date;
-      document.getElementById('f-shoot-session').value = s.session || 'Morning Session';
-      document.getElementById('f-shoot-notes').value = s.notes || '';
-      document.getElementById('f-shoot-amount').value = s.amount || '';
-      document.getElementById('f-shoot-expense').value = s.expense || '';
-      document.getElementById('f-shoot-expense-status').value = s.expenseStatus || 'pending';
-      document.getElementById('f-shoot-pay-status').value = s.payStatus || 'pending';
-      document.getElementById('f-shoot-part-paid').value = s.partPaid || '';
-      
-      const cSel = document.getElementById('f-shoot-company');
-      if (cSel) {
-        cSel.innerHTML = '<option value="">None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
-        if (s && s.company) cSel.value = s.company;
-      }
-
-      const lSel = document.getElementById('f-shoot-loc');
-      if (lSel) {
-        lSel.innerHTML = [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}">${l}</option>`).join('') + '<option value="__other__">Add Custom Location</option>';
-        if (s && s.location) {
-          if ([...DEFAULT_LOCS, ..._locs].includes(s.location)) {
-            lSel.value = s.location;
-            document.getElementById('f-loc-other-wrap').classList.add('hidden');
-          } else {
-            lSel.value = '__other__';
-            document.getElementById('f-shoot-loc-other').value = s.location;
-            document.getElementById('f-loc-other-wrap').classList.remove('hidden');
-          }
-        }
-      }
-
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && s.event) {
-        eSel.innerHTML = _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Other</option>';
-        if (_events.includes(s.event)) {
-          eSel.value = s.event;
-          document.getElementById('f-event-other-wrap').classList.add('hidden');
-        } else {
-          eSel.value = 'Other';
-          document.getElementById('f-shoot-event-other').value = s.event;
-          document.getElementById('f-event-other-wrap').classList.remove('hidden');
-        }
-      }
-
-      handlePayStatusChange();
-      openModal('shoot-modal-backdrop');
-    }
-
-    function clearModalFields() {
-      document.getElementById('edit-shoot-id').value = '';
-      document.getElementById('f-shoot-name').value = '';
-      document.getElementById('f-shoot-date').value = '';
-      
-      const eSel = document.getElementById('f-shoot-event');
-      if (eSel && _events.length) eSel.value = _events[0];
-
-      document.getElementById('f-shoot-event-other').value = '';
-      document.getElementById('f-event-other-wrap').classList.add('hidden');
-      document.getElementById('f-shoot-session').value = 'Morning Session';
-      document.getElementById('f-shoot-loc-other').value = '';
-      document.getElementById('f-loc-other-wrap').classList.add('hidden');
-      document.getElementById('f-shoot-notes').value = '';
-      document.getElementById('f-shoot-amount').value = '';
-      document.getElementById('f-shoot-expense').value = '';
-      document.getElementById('f-shoot-expense-status').value = 'pending';
-      document.getElementById('f-shoot-pay-status').value = 'pending';
-      document.getElementById('f-shoot-part-paid').value = '';
-      document.getElementById('f-part-pay-wrap').style.display = 'none';
-    }
-
-    function handleEventOther() {
-      const wrap = document.getElementById('f-event-other-wrap');
-      if (document.getElementById('f-shoot-event').value === 'Other') wrap.classList.remove('hidden');
-      else wrap.classList.add('hidden');
-    }
-
-    function handleLocOther() {
-      const wrap = document.getElementById('f-loc-other-wrap');
-      if (document.getElementById('f-shoot-loc').value === '__other__') wrap.classList.remove('hidden');
-      else wrap.classList.add('hidden');
-    }
-
-    function handlePayStatusChange() {
-      const wrap = document.getElementById('f-part-pay-wrap');
-      if (document.getElementById('f-shoot-pay-status').value === 'part') wrap.style.display = 'flex';
-      else wrap.style.display = 'none';
-    }
-
-    async function saveShoot() {
-      const name = document.getElementById('f-shoot-name').value.trim();
-      const date = document.getElementById('f-shoot-date').value;
-      if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
-
-      let event = document.getElementById('f-shoot-event').value;
-      if (event === 'Other') {
-        event = document.getElementById('f-shoot-event-other').value.trim() || 'Other';
-        if (event !== 'Other' && !_events.includes(event)) {
-          _events.push(event); await saveSettingToDB('events', _events);
-        }
-      }
-
-      let location = document.getElementById('f-shoot-loc').value;
-      if (location === '__other__') {
-        location = document.getElementById('f-shoot-loc-other').value.trim();
-        if (location && !_locs.includes(location) && !DEFAULT_LOCS.includes(location)) {
-          _locs.push(location); await saveSettingToDB('locations', _locs);
-        }
-      }
-
-      const payStatus = document.getElementById('f-shoot-pay-status').value;
-      const expenseStatus = document.getElementById('f-shoot-expense-status').value;
-      const amount = parseFloat(document.getElementById('f-shoot-amount').value) || 0;
-      const expense = parseFloat(document.getElementById('f-shoot-expense').value) || 0;
-      const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
-
-      const editId = document.getElementById('edit-shoot-id').value;
-      const record = {
-        id: editId || uid(),
-        name, date, event,
-        session: document.getElementById('f-shoot-session').value,
-        location,
-        company: document.getElementById('f-shoot-company').value,
-        notes: document.getElementById('f-shoot-notes').value.trim(),
-        amount, expense, expenseStatus, payStatus, partPaid,
-        created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString()
-      };
-
-      try {
-        await saveShootToDB(record);
-        closeShootModal();
-        refreshCurrentView();
-      } catch (e) {}
-    }
-
-    function triggerDeleteFromModal() {
-      const id = document.getElementById('edit-shoot-id').value;
-      if (id) { closeShootModal(); setTimeout(() => askDeletePrompt(id), 250); }
-    }
-
-    let _pendingDropTargetId = null;
-    function askDeletePrompt(id) {
-      const s = _shoots.find(x => x.id === id); if (!s) return;
-      _pendingDropTargetId = id;
-      document.getElementById('confirm-title').textContent = 'Delete Shoot?';
-      document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
-      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
-      document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop;
-      openModal('confirm-modal-backdrop');
-    }
-
-    async function executeConfirmedRecordDrop() {
-      if (!_pendingDropTargetId) return;
-      try {
-        await deleteShootFromDB(_pendingDropTargetId);
-        _pendingDropTargetId = null; closeConfirmModal(); refreshCurrentView();
-      } catch (e) {}
-    }
-
-    function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
-    function openModal(id) {
-      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = 'hidden';
-    }
-    function closeModal(id) {
-      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = '';
-    }
-    function closeShootModal() { closeModal('shoot-modal-backdrop'); }
-    function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
-
-    function triggerRowWhatsApp(id, event, mode = 'reminder') {
-      if (event && event.stopPropagation) event.stopPropagation();
-      const s = _shoots.find(x => x.id === id);
-      if (!s) return;
-      
-      let msgTemplate = '';
-      if (mode === 'payment') {
-        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!";
-      } else {
-        msgTemplate = _profile.waTemplate || "Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!";
-      }
-      
-      const dateObj = new Date(s.date + 'T00:00:00');
-      const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
-
-      const totalAmt = Number(s.amount || 0);
-      const amtPaid = s.payStatus === 'done' ? totalAmt : (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-      const pendingBal = totalAmt - amtPaid;
-
-      let paymentDetailsStr = `UPI ID: ${_profile.upi || 'N/A'}`;
-      if (_profile.bank) {
-        paymentDetailsStr += `\nBank Details:\n${_profile.bank}`;
-      }
-
-      const msg = msgTemplate
-        .replace(/\[Client Name\]/gi, s.name)
-        .replace(/\[Event\]/gi, s.event)
-        .replace(/\[Date\]/gi, dateFormatted)
-        .replace(/\[Location\]/gi, s.location || 'TBA')
-        .replace(/\[Total Amount\]/gi, fmtAmt(totalAmt))
-        .replace(/\[Amount Paid\]/gi, fmtAmt(amtPaid))
-        .replace(/\[Pending Balance\]/gi, fmtAmt(pendingBal))
-        .replace(/\[Payment Details\]/gi, paymentDetailsStr);
-        
-      const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
-    }
-
-    function triggerModalWhatsApp() {
-      const id = document.getElementById('edit-shoot-id').value;
-      const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
-      const activeTabId = activeNode ? activeNode.id.replace('tab-', '') : '';
-      const contextMode = (activeTabId === 'payments') ? 'payment' : 'reminder';
-      triggerRowWhatsApp(id, { stopPropagation: () => {} }, contextMode);
-    }
-
-    function refreshCurrentView() {
-      const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
-      if (!activeNode) return;
-      const activeTabId = activeNode.id.replace('tab-', '');
-      if (activeTabId === 'dashboard') renderDashboard();
-      if (activeTabId === 'calendar') renderCalendar();
-      if (activeTabId === 'shoots') renderShootsList();
-      if (activeTabId === 'payments') renderPayments();
-    }
-
-    let datePickerMonth = new Date().getMonth();
-    let datePickerYear = new Date().getFullYear();
-
-    function toggleDatePicker() {
-      const picker = document.getElementById('date-picker-dropdown');
-      if (picker.classList.contains('hidden')) {
-        datePickerMonth = new Date().getMonth();
-        datePickerYear = new Date().getFullYear();
-        renderDatePicker();
-        picker.classList.remove('hidden');
-      } else {
-        picker.classList.add('hidden');
-      }
-    }
-
-    function datePickerPrev() {
-      datePickerMonth--;
-      if (datePickerMonth < 0) {
-        datePickerMonth = 11;
-        datePickerYear--;
-      }
-      renderDatePicker();
-    }
-
-    function datePickerNext() {
-      datePickerMonth++;
-      if (datePickerMonth > 11) {
-        datePickerMonth = 0;
-        datePickerYear++;
-      }
-      renderDatePicker();
-    }
-
-    function renderDatePicker() {
-      const label = document.getElementById('date-picker-label');
-      label.textContent = MONTHS[datePickerMonth] + ' ' + datePickerYear;
-
-      const firstDay = new Date(datePickerYear, datePickerMonth, 1);
-      const daysInMonth = new Date(datePickerYear, datePickerMonth + 1, 0).getDate();
-      const startingDayOfWeek = firstDay.getDay();
-
-      const grid = document.getElementById('date-picker-grid');
-      let html = '';
-      for (let i = 0; i < startingDayOfWeek; i++) html += '<div></div>';
-      for (let d = 1; d <= daysInMonth; d++) {
-        const dateStr = datePickerYear + '-' + String(datePickerMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        html += `<button type="button" onclick="selectDateFromPicker('${dateStr}')" class="text-xs p-1.5 rounded hover:bg-[#c9a96e] hover:text-black transition">${d}</button>`;
-      }
-      grid.innerHTML = html;
-    }
-
-    function selectDateFromPicker(dateStr) {
-      document.getElementById('f-shoot-date').value = dateStr;
-      document.getElementById('date-picker-dropdown').classList.add('hidden');
-    }
-
-    function downloadCompanyViewPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 14;
-      let yPos = 12;
-      doc.setFillColor(5, 5, 5);
-      doc.rect(0, 0, pageWidth, pageHeight, 'F');
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, 0, pageWidth, 26, 'F');
-      doc.setDrawColor(201, 169, 110);
-      doc.setLineWidth(0.5);
-      doc.line(0, 26, pageWidth, 26);
-      doc.setFontSize(18);
-      doc.setTextColor(201, 169, 110);
-      doc.setFont(undefined, 'bold');
-      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
-      yPos = 32;
-      const companyFilter = document.getElementById('pay-filter-company')?.value || '';
-      if (!companyFilter) {
-        doc.setFontSize(10);
-        doc.setTextColor(220, 53, 69);
-        doc.text('Please select a company', margin, yPos);
-        doc.save(`Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('Please select a targeted company context first.', 'error');
-        return;
-      }
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Company - ' + companyFilter, margin, yPos);
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(150, 150, 150);
-      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-      doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      yPos += 14;
-      let filtered = _shoots.filter(s => s.company === companyFilter && s.amount);
-      if (filtered.length === 0) {
-        doc.setFontSize(10);
-        doc.setTextColor(220, 53, 69);
-        doc.text('No data', margin, yPos);
-        doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-        showToast('No logged data rows matching this context.', 'error');
-        return;
-      }
-      const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const totalExpenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const grossTotal = total + totalExpenses;
-      const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const due = (total + totalExpenses) - received;
-      const boxW = (pageWidth - 2 * margin - 8) / 3;
-      [{ label: 'TOTAL', value: grossTotal, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }, { label: 'EXPENSES', value: totalExpenses, color: [255, 152, 0] }].forEach((s, i) => {
-        const x = margin + i * (boxW + 4);
-        doc.setFillColor(20, 20, 20);
-        doc.rect(x, yPos, boxW, 15, 'F');
-        doc.setDrawColor(50, 50, 50);
-        doc.rect(x, yPos, boxW, 15);
-        doc.setFontSize(7);
-        doc.setTextColor(120, 120, 120);
-        doc.text(s.label, x + 3, yPos + 4);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...s.color);
-        doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
-      });
-      yPos += 20;
-      const grouped = {};
-      filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(s => {
-        const k = s.date.slice(0, 7);
-        if (!grouped[k]) grouped[k] = [];
-        grouped[k].push(s);
-      });
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage();
-          doc.setFillColor(5, 5, 5);
-          doc.rect(0, 0, pageWidth, pageHeight, 'F');
-          yPos = margin;
-        }
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1];
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        doc.setFillColor(20, 20, 20);
-        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
-        doc.setDrawColor(80, 80, 80);
-        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(201, 169, 110);
-        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        doc.setFontSize(7);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN'), pageWidth - margin - 30, yPos + 6);
-        yPos += 11;
-        shoots.forEach(s => {
-          if (yPos > pageHeight - 12) {
-            doc.addPage();
-            doc.setFillColor(5, 5, 5);
-            doc.rect(0, 0, pageWidth, pageHeight, 'F');
-            yPos = margin;
-          }
-          doc.setFillColor(15, 15, 15);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
-          doc.setDrawColor(50, 50, 50);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          const dateObj = new Date(s.date + 'T00:00:00');
-          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(255, 255, 255);
-          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          doc.setFontSize(7);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(150, 150, 150);
-          doc.text(s.event, margin + 3, yPos + 7.5);
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(201, 169, 110);
-          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
-          doc.setFontSize(6);
-          const statusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus];
-          doc.setTextColor(...statusColor);
-          const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
-          doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
-          let nextY = yPos + 12;
-          if (s.expense) {
-            doc.setFontSize(8);
-            doc.setFont(undefined, 'bold');
-            doc.setTextColor(255, 152, 0);
-            doc.text('Expenses: Rs. ' + Number(s.expense).toLocaleString('en-IN'), margin + 3, nextY);
-            nextY += 5;
-          }
-          if (s.notes) {
-            doc.setFontSize(6);
-            doc.setTextColor(150, 150, 150);
-            const noteText = s.notes.substring(0, 50);
-            doc.text('Note: ' + noteText, margin + 3, nextY);
-            nextY += 4;
-          }
-          yPos = nextY;
-        });
-        yPos += 2;
-      });
-
-      if (yPos > pageHeight - 35) {
-        doc.addPage();
-        doc.setFillColor(5, 5, 5);
-        doc.rect(0, 0, pageWidth, pageHeight, 'F');
-        yPos = margin;
-      }
-      doc.setDrawColor(50, 50, 50);
-      doc.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 5;
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(201, 169, 110);
-      doc.text('PAYMENT DETAILS', margin, yPos);
-      yPos += 5;
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(180, 180, 180);
-      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
-      yPos += 4;
-      if (_profile.bank) {
-        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
-        doc.text(splitBank, margin, yPos);
-        yPos += splitBank.length * 3.5;
-      }
-
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
-      doc.setDrawColor(50, 50, 50);
-      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 100);
-      doc.text(companyFilter, margin, pageHeight - 3);
-      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Ledger data archived successfully.', 'success');
-    }
-
-    function downloadFullReportPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 14;
-      let yPos = 12;
-      doc.setFillColor(5, 5, 5);
-      doc.rect(0, 0, pageWidth, pageHeight, 'F');
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, 0, pageWidth, 26, 'F');
-      doc.setDrawColor(201, 169, 110);
-      doc.setLineWidth(0.5);
-      doc.line(0, 26, pageWidth, 26);
-      doc.setFontSize(18);
-      doc.setTextColor(201, 169, 110);
-      doc.setFont(undefined, 'bold');
-      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
-      yPos = 32;
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Full Financial Report', margin, yPos);
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(150, 150, 150);
-      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-      doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      yPos += 14;
-      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const outstanding = gross - captured;
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const stats = [{ label: 'TOTAL', value: gross, color: [201, 169, 110] }, { label: 'RECEIVED', value: captured, color: [76, 175, 80] }, { label: 'DUE', value: outstanding, color: [220, 53, 69] }, { label: 'EXPENSES', value: expenses, color: [255, 152, 0] }];
-      const boxW = (pageWidth - 2 * margin - 4) / 2;
-      for (let i = 0; i < stats.length; i += 2) {
-        for (let j = 0; j < 2; j++) {
-          if (!stats[i + j]) continue;
-          const s = stats[i + j];
-          const x = margin + j * (boxW + 4);
-          doc.setFillColor(20, 20, 20);
-          doc.rect(x, yPos, boxW, 15, 'F');
-          doc.setDrawColor(50, 50, 50);
-          doc.rect(x, yPos, boxW, 15);
-          doc.setFontSize(7);
-          doc.setTextColor(120, 120, 120);
-          doc.text(s.label, x + 3, yPos + 4);
-          doc.setFontSize(10);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(...s.color);
-          doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
-        }
-        yPos += 17;
-      }
-      yPos += 2;
-      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      const grouped = {};
-      filtered.forEach(s => {
-        const k = s.date.slice(0, 7);
-        if (!grouped[k]) grouped[k] = [];
-        grouped[k].push(s);
-      });
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage();
-          doc.setFillColor(5, 5, 5);
-          doc.rect(0, 0, pageWidth, pageHeight, 'F');
-          yPos = margin;
-        }
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1];
-        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        const monthExp = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-        doc.setFillColor(20, 20, 20);
-        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
-        doc.setDrawColor(80, 80, 80);
-        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(201, 169, 110);
-        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        doc.setFontSize(7);
-        doc.setTextColor(150, 150, 150);
-        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN') + ' | Exp: Rs. ' + monthExp.toLocaleString('en-IN'), pageWidth - margin - 80, yPos + 6);
-        yPos += 11;
-        shoots.forEach(s => {
-          if (yPos > pageHeight - 12) {
-            doc.addPage();
-            doc.setFillColor(5, 5, 5);
-            doc.rect(0, 0, pageWidth, pageHeight, 'F');
-            yPos = margin;
-          }
-          doc.setFillColor(15, 15, 15);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
-          doc.setDrawColor(50, 50, 50);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          const dateObj = new Date(s.date + 'T00:00:00');
-          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(255, 255, 255);
-          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          doc.setFontSize(7);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(150, 150, 150);
-          doc.text(s.event + ' • ' + (s.company || 'Direct'), margin + 3, yPos + 7.5);
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(201, 169, 110);
-          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 70, yPos + 3);
-          if (s.expense) {
-            doc.setTextColor(255, 152, 0);
-            doc.text('Rs. ' + Number(s.expense).toLocaleString('en-IN'), pageWidth - margin - 25, yPos + 3);
-          }
-          let nextY = yPos + 12;
-          if (s.notes) {
-            doc.setFontSize(6);
-            doc.setTextColor(150, 150, 150);
-            const noteText = s.notes.substring(0, 50);
-            doc.text('Note: ' + noteText, margin + 3, nextY);
-            nextY += 4;
-          }
-          yPos = nextY;
-        });
-        yPos += 2;
-      });
-
-      if (yPos > pageHeight - 35) {
-        doc.addPage();
-        doc.setFillColor(5, 5, 5);
-        doc.rect(0, 0, pageWidth, pageHeight, 'F');
-        yPos = margin;
-      }
-      doc.setDrawColor(50, 50, 50);
-      doc.line(margin, yPos, pageWidth - margin, yPos);
-      yPos += 5;
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(201, 169, 110);
-      doc.text('PAYMENT DETAILS', margin, yPos);
-      yPos += 5;
-      doc.setFontSize(8);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(180, 180, 180);
-      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
-      yPos += 4;
-      if (_profile.bank) {
-        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
-        doc.text(splitBank, margin, yPos);
-        yPos += splitBank.length * 3.5;
-      }
-
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
-      doc.setDrawColor(50, 50, 50);
-      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 100);
-      doc.text('Full Report', margin, pageHeight - 3);
-      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Full ledger documentation completed.', 'success');
-    }
-
-    function downloadShootsListPDF() {
-      const { jsPDF } = window.jspdf;
-      const doc = new jsPDF();
-      const pageWidth = doc.internal.pageSize.getWidth();
-      const pageHeight = doc.internal.pageSize.getHeight();
-      const margin = 14;
-      let yPos = 12;
-      doc.setFillColor(5, 5, 5);
-      doc.rect(0, 0, pageWidth, pageHeight, 'F');
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, 0, pageWidth, 26, 'F');
-      doc.setDrawColor(201, 169, 110);
-      doc.setLineWidth(0.5);
-      doc.line(0, 26, pageWidth, 26);
-      doc.setFontSize(18);
-      doc.setTextColor(201, 169, 110);
-      doc.setFont(undefined, 'bold');
-      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
-      yPos = 32;
-      doc.setFontSize(9);
-      doc.setFont(undefined, 'bold');
-      doc.setTextColor(255, 255, 255);
-      doc.text('Shoots List', margin, yPos);
-      doc.setFontSize(7);
-      doc.setFont(undefined, 'normal');
-      doc.setTextColor(150, 150, 150);
-      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-      doc.text('Generated: ' + dateStr, margin, yPos + 6);
-      yPos += 14;
-      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      const td = today();
-      
-      const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
-      const ft = document.getElementById('filter-timeline')?.value || '';
-      const fc = document.getElementById('filter-company')?.value || '';
-      const fl = document.getElementById('filter-loc')?.value || '';
-      
-      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
-      if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fl) filtered = filtered.filter(s => s.location === fl);
-      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
-      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
-      
-      const upcoming = filtered.filter(s => s.date >= td).length;
-      const stats = [{ label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] }, { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }];
-      const boxW = (pageWidth - 2 * margin - 4) / 2;
-      stats.forEach((s, i) => {
-        const x = margin + i * (boxW + 4);
-        doc.setFillColor(20, 20, 20);
-        doc.rect(x, yPos, boxW, 15, 'F');
-        doc.setDrawColor(50, 50, 50);
-        doc.rect(x, yPos, boxW, 15);
-        doc.setFontSize(7);
-        doc.setTextColor(120, 120, 120);
-        doc.text(s.label, x + 3, yPos + 4);
-        doc.setFontSize(10);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(...s.color);
-        doc.text(s.value, x + 3, yPos + 12);
-      });
-      yPos += 20;
-      const grouped = {};
-      filtered.forEach(s => {
-        const k = s.date.slice(0, 7);
-        if (!grouped[k]) grouped[k] = [];
-        grouped[k].push(s);
-      });
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
-        if (yPos > pageHeight - 25) {
-          doc.addPage();
-          doc.setFillColor(5, 5, 5);
-          doc.rect(0, 0, pageWidth, pageHeight, 'F');
-          yPos = margin;
-        }
-        const shoots = grouped[monthKey];
-        const [year, month] = monthKey.split('-');
-        const monthName = MONTHS[parseInt(month) - 1];
-        doc.setFillColor(20, 20, 20);
-        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
-        doc.setDrawColor(80, 80, 80);
-        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
-        doc.setFontSize(9);
-        doc.setFont(undefined, 'bold');
-        doc.setTextColor(201, 169, 110);
-        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
-        doc.setFontSize(7);
-        doc.setTextColor(150, 150, 150);
-        doc.text(shoots.length + ' shoots', pageWidth - margin - 30, yPos + 6);
-        yPos += 11;
-        shoots.forEach(s => {
-          if (yPos > pageHeight - 12) {
-            doc.addPage();
-            doc.setFillColor(5, 5, 5);
-            doc.rect(0, 0, pageWidth, pageHeight, 'F');
-            yPos = margin;
-          }
-          doc.setFillColor(15, 15, 15);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10, 'F');
-          doc.setDrawColor(50, 50, 50);
-          doc.rect(margin, yPos, pageWidth - 2 * margin, 10);
-          const dateObj = new Date(s.date + 'T00:00:00');
-          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
-          doc.setFontSize(8);
-          doc.setFont(undefined, 'bold');
-          doc.setTextColor(255, 255, 255);
-          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
-          doc.setFontSize(7);
-          doc.setFont(undefined, 'normal');
-          doc.setTextColor(150, 150, 150);
-          doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
-          let nextY = yPos + 12;
-          if (s.notes) {
-            doc.setFontSize(6);
-            doc.setTextColor(150, 150, 150);
-            const noteText = s.notes.substring(0, 50);
-            doc.text('Note: ' + noteText, margin + 3, nextY);
-            nextY += 4;
-          }
-          yPos = nextY;
-        });
-        yPos += 2;
-      });
-      doc.setFillColor(15, 15, 15);
-      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
-      doc.setDrawColor(50, 50, 50);
-      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
-      doc.setFontSize(7);
-      doc.setTextColor(100, 100, 100);
-      doc.text('Shoots Report', margin, pageHeight - 3);
-      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
-      doc.save(`ShootsReport_${new Date().toISOString().split('T')[0]}.pdf`);
-      showToast('Shoots register successfully archived.', 'success');
-    }
-
-    function forceSync() {
-      setSyncStatus('syncing', 'Force Syncing...');
-      setTimeout(() => {
-        setSyncStatus('synced', 'Synced');
-        showToast('Force cloud database sync synchronization completed.');
-      }, 2000);
-    }
-
-    loadAll();
+    /* Boot App */
+    bootApp();
   </script>
 </body>
 </html>
