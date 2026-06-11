@@ -1079,83 +1079,81 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       };
     }
 
-    function shootToDb(s) {
-      return {
-        id: s.id,
-        user_id: currentUser.id, // Strictly attach to the logged in user
-        name: s.name,
-        date: s.date,
-        event: s.event,
-        session: s.session,
-        location: s.location,
-        company: s.company,
-        notes: s.notes,
-        amount: s.amount || 0,
-        expense: s.expense || 0,
-        expense_status: s.expenseStatus || 'pending',
-        pay_status: s.payStatus || 'pending',
-        part_paid: s.partPaid || 0,
-        created: s.created || new Date().toISOString()
-      };
-    }
+   function shootToDb(s) {
+  const userId = currentUser?.id || currentUser?.email || 'default_user';
+  return {
+    id: s.id,
+    user_id: userId,
+    name: s.name,
+    date: s.date,
+    event: s.event,
+    session: s.session,
+    location: s.location,
+    company: s.company,
+    notes: s.notes,
+    amount: s.amount || 0,
+    expense: s.expense || 0,
+    expense_status: s.expenseStatus || 'pending',
+    pay_status: s.payStatus || 'pending',
+    part_paid: s.partPaid || 0,
+    created: s.created || new Date().toISOString()
+  };
+}
+   async function loadAll() {
+  setSyncStatus('syncing', 'Connecting');
+  try {
+    const bar = document.getElementById('load-progress');
+    if(bar) bar.style.width = "60%";
+    
+    const userId = currentUser?.id || currentUser?.email || 'default_user';
 
-    async function loadAll() {
-      setSyncStatus('syncing', 'Connecting');
-      const isConfigured = await ensureTables();
-      if (!isConfigured) return;
+    // Fetch only shoots belonging to this specific user
+    const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
+    _shoots = raw.map(dbToShoot);
 
-      try {
-        const bar = document.getElementById('load-progress');
-        if(bar) bar.style.width = "60%";
-        
-        // Fetch only shoots belonging to currentUser
-        const raw = await sbFetch(`shoots?user_id=eq.${currentUser.id}&select=*&order=date.desc`);
-        _shoots = raw.map(dbToShoot);
-
-        // Fetch only settings belonging to currentUser via our key prefix trick
-        const configurationsRaw = await sbFetch(`settings?key=like.${currentUser.id}_*&select=*`);
-        
-        // Map the prefixed keys back to normal app keys
-        const configurations = configurationsRaw.map(r => ({
-            key: r.key.replace(`${currentUser.id}_`, ''),
-            value: r.value
-        }));
-        
-        const cRow = configurations.find(r => r.key === 'companies');
-        if (cRow) _companies = cRow.value;
-        
-        const lRow = configurations.find(r => r.key === 'locations');
-        if (lRow) _locs = lRow.value;
-        
-        const eRow = configurations.find(r => r.key === 'events');
-        if (eRow) _events = eRow.value;
-        
-        const pinRow = configurations.find(r => r.key === 'app_pin');
-        if (pinRow) _appPin = pinRow.value;
-        
-        const profileRow = configurations.find(r => r.key === 'profile');
-        if (profileRow) {
-          _profile = { ..._profile, ...profileRow.value };
-          if (_profile.theme) {
-            setAppTheme(_profile.theme, true);
-          }
-        }
-
-        if(bar) bar.style.width = "100%";
-        setTimeout(() => {
-          setSyncStatus('synced', 'Synced with Cloud');
-          document.getElementById('loading-screen').classList.add('hidden');
-          applyPrivacyUIVisibility();
-          renderDashboard();
-        }, 400);
-
-      } catch (e) {
-        setSyncStatus('error', 'Sync Lost');
-        showToast('Load Error: ' + e.message, 'error');
-        document.getElementById('loading-screen').classList.add('hidden');
+    // Fetch only settings belonging to this specific user
+    const configurationsRaw = await sbFetch(`settings?user_id=eq.${userId}&select=*`);
+    
+    // Remove the unique prefix so the app reads the keys correctly
+    const configurations = configurationsRaw.map(r => ({
+        key: r.key.replace(`${userId}_`, ''),
+        value: r.value
+    }));
+    
+    const cRow = configurations.find(r => r.key === 'companies');
+    if (cRow) _companies = cRow.value;
+    
+    const lRow = configurations.find(r => r.key === 'locations');
+    if (lRow) _locs = lRow.value;
+    
+    const eRow = configurations.find(r => r.key === 'events');
+    if (eRow) _events = eRow.value;
+    
+    const pinRow = configurations.find(r => r.key === 'app_pin');
+    if (pinRow) _appPin = pinRow.value;
+    
+    const profileRow = configurations.find(r => r.key === 'profile');
+    if (profileRow) {
+      _profile = { ..._profile, ...profileRow.value };
+      if (_profile.theme) {
+        setAppTheme(_profile.theme, true);
       }
     }
 
+    if(bar) bar.style.width = "100%";
+    setTimeout(() => {
+      setSyncStatus('synced', 'Synced with Cloud');
+      document.getElementById('loading-screen').classList.add('hidden');
+      applyPrivacyUIVisibility();
+      renderDashboard();
+    }, 400);
+
+  } catch (e) {
+    setSyncStatus('error', 'Sync Lost');
+    showToast('Load Error: ' + e.message, 'error');
+    document.getElementById('loading-screen').classList.add('hidden');
+  }
+}
     async function saveShootToDB(shoot) {
       setSyncStatus('syncing', 'Saving Record...');
       try {
@@ -1198,27 +1196,34 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       }
     }
 
-    async function saveSettingToDB(key, value) {
-      // Prepend user ID to the key to isolate settings per user without breaking Supabase constraints
-      const dbKey = `${currentUser.id}_${key}`;
-      try {
-        const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
-        
-        if (checkExisting && checkExisting.length > 0) {
-          await sbFetch(`settings?key=eq.${dbKey}`, {
-            method: 'PATCH',
-            body: JSON.stringify({ value })
-          });
-        } else {
-          await sbFetch('settings', {
-            method: 'POST',
-            body: JSON.stringify({ key: dbKey, value })
-          });
-        }
-      } catch (e) {
-        showToast('Settings Save Error: ' + e.message, 'error');
-      }
+    async function saveSettingToDB(baseKey, value) {
+  const userId = currentUser?.id || currentUser?.email || 'default_user';
+  
+  // Combine User ID and setting key to prevent Primary Key crashes in your database
+  const uniqueKey = `${userId}_${baseKey}`; 
+  
+  try {
+    const checkExisting = await sbFetch(`settings?key=eq.${uniqueKey}&select=key`);
+    
+    if (checkExisting && checkExisting.length > 0) {
+      await sbFetch(`settings?key=eq.${uniqueKey}`, {
+        method: 'PATCH',
+        body: JSON.stringify({ value: value, user_id: userId }) 
+      });
+    } else {
+      await sbFetch('settings', {
+        method: 'POST',
+        body: JSON.stringify({ 
+          key: uniqueKey, 
+          value: value, 
+          user_id: userId 
+        })
+      });
     }
+  } catch (e) {
+    showToast('Settings Save Error: ' + e.message, 'error');
+  }
+}
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
