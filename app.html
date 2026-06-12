@@ -3387,12 +3387,24 @@ function logoutConfirm() {
         localStorage.clear();
         sessionStorage.clear();
         
-        // Reset UI
-        document.getElementById('main-app').style.display = 'none';
-        document.getElementById('csv-import-input').value = '';
-        document.getElementById('import-status').textContent = '';
-        
-        showToast('Signed out successfully. See you next time!', 'success');
+       // Reset UI
+document.getElementById('main-app').style.display = 'none';
+
+// Bring back the loading screen and update the text
+const loadingScreen = document.getElementById('loading-screen');
+const loadingText = document.getElementById('loading-text');
+if (loadingScreen && loadingText) {
+  loadingScreen.classList.remove('hidden');
+  loadingText.textContent = 'Signing out securely...';
+}
+
+document.getElementById('csv-import-input').value = '';
+document.getElementById('import-status').textContent = '';
+
+// Redirect after delay
+setTimeout(() => {
+  window.location.href = 'index.html';
+}, 1500);
         
         // Redirect after delay
         setTimeout(() => {
