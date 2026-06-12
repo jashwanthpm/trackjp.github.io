@@ -1145,7 +1145,6 @@
         google.accounts.id.disableAutoSelect();
         
         document.getElementById('main-app').style.display = 'none';
-        document.getElementById('login-modal').classList.add('active');
         document.getElementById('csv-import-input').value = '';
         document.getElementById('import-status').textContent = '';
         
@@ -1153,7 +1152,6 @@
       } catch(e) {
         console.error('Logout error:', e);
         document.getElementById('main-app').style.display = 'none';
-        document.getElementById('login-modal').classList.add('active');
       }
     }
 
