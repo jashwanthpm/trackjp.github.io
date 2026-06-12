@@ -3359,7 +3359,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 function logoutConfirm() {
   // 1. Update the custom modal text
   document.getElementById('confirm-title').textContent = 'Sign Out?';
-  document.getElementById('confirm-sub-text').textContent = 'Are you sure you want to sign out? All local data will be cleared.';
+  document.getElementById('confirm-sub-text').textContent = 'Are you sure you want to sign out?';
   
   // 2. Grab the confirm button and assign the logout action
   const confirmBtn = document.getElementById('confirm-action-btn');
