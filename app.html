@@ -1063,6 +1063,15 @@
           showToast('Welcome to Demo Mode! Changes are not saved to the cloud.', 'info');
       }, 500);
 
+      // Force unhide financial data by default in demo mode
+      _privacyModeActive = false;
+      const icon = document.getElementById('privacy-icon');
+      if (icon) icon.className = 'ti ti-eye text-lg';
+
+      // Add the PIN hint only for demo users
+      const demoHint = document.getElementById('demo-pin-hint');
+      if (demoHint) demoHint.textContent = "Provide security verification to reveal ledger amounts. (default PIN : 1234)";
+
       applyPrivacyUIVisibility();
       renderDashboard();
     }
