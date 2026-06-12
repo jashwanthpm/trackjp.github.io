@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Sakkhi Shoot Management</title>
 
-  <!-- Favicon -->
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23050505'/%3E%3Ccircle cx='50' cy='50' r='45' fill='%23c9a96e'/%3E%3Crect x='35' y='25' width='30' height='25' fill='%23050505' rx='3'/%3E%3Ccircle cx='42' cy='32' r='3' fill='%23050505'/%3E%3Ccircle cx='58' cy='32' r='3' fill='%23050505'/%3E%3Cpath d='M 35 45 L 65 45 L 60 65 Q 50 70 40 65 Z' fill='%23050505'/%3E%3C/svg%3E" />
   <meta name="theme-color" content="#c9a96e">
 
@@ -555,7 +554,6 @@
                   <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
                 </div>
 
-                <!-- ACCOUNT INFO BAR - SHOWS WHO IS SIGNED IN -->
                 <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                   <div class="flex items-center gap-2">
                     <i class="ti ti-login text-[#c9a96e]"></i>
@@ -795,7 +793,6 @@
                 </div>
 
                 <div class="space-y-3">
-                  <!-- PDF Export -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
@@ -806,7 +803,6 @@
                     </button>
                   </div>
 
-                  <!-- CSV Export -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
@@ -817,7 +813,6 @@
                     </button>
                   </div>
 
-                  <!-- CSV IMPORT - NEW FEATURE -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">📥 Import Data from CSV</p>
@@ -832,7 +827,6 @@
                     <div id="import-status" class="text-xs text-neutral-500 h-5"></div>
                   </div>
 
-                  <!-- Cloud Sync -->
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
@@ -1033,6 +1027,46 @@
       'Prefer': 'return=representation'
     };
 
+    // ==========================================
+    // DEMO MODE SETUP
+    // ==========================================
+    const isDemoMode = new URLSearchParams(window.location.search).get('mode') === 'demo';
+
+    function initDemoData() {
+      currentUser = { id: 'demo_user', email: 'demo@sakkhi.com', name: 'Demo User', user_metadata: { name: 'Demo User' } };
+
+      const currentYear = new Date().getFullYear();
+      const currentMonth = String(new Date().getMonth() + 1).padStart(2, '0');
+      const nextMonth = String((new Date().getMonth() + 2) % 12 || 12).padStart(2, '0');
+      const nextYear = new Date().getMonth() === 11 ? currentYear + 1 : currentYear;
+
+      const demoShoots = [
+        { id: "demo1", name: "Malhotra Family Shoot", date: `${currentYear}-${currentMonth}-15`, event: "Wedding", session: "Full Day", location: "Mumbai", company: "Elegance Studios", notes: "Beautiful family portraits", amount: 50000, expense: 5000, expenseStatus: "settled", payStatus: "done", partPaid: 0, created: new Date().toISOString() },
+        { id: "demo2", name: "Smith Portrait Session", date: `${currentYear}-${currentMonth}-20`, event: "Portrait", session: "Morning Session", location: "Delhi", company: "Studio Pro", notes: "Individual headshots", amount: 15000, expense: 2000, expenseStatus: "pending", payStatus: "pending", partPaid: 0, created: new Date().toISOString() },
+        { id: "demo3", name: "Johnson Birthday Party", date: `${currentYear}-${currentMonth}-22`, event: "Birthday", session: "Afternoon Session", location: "Bangalore", company: "Happy Events", notes: "Candid and formal shots", amount: 25000, expense: 3000, expenseStatus: "settled", payStatus: "part", partPaid: 12500, created: new Date().toISOString() },
+        { id: "demo4", name: "Patel Wedding Reception", date: `${currentYear}-${currentMonth}-25`, event: "Wedding", session: "Evening Session", location: "Pune", company: "Luxury Events", notes: "Reception coverage", amount: 75000, expense: 8000, expenseStatus: "pending", payStatus: "pending", partPaid: 0, created: new Date().toISOString() },
+        { id: "demo5", name: "Corporate Team Building", date: `${currentYear}-${currentMonth}-28`, event: "Corporate", session: "Full Day", location: "Hyderabad", company: "TechCorp Inc", notes: "Team activities and group shots", amount: 40000, expense: 4500, expenseStatus: "settled", payStatus: "done", partPaid: 0, created: new Date().toISOString() },
+        { id: "demo6", name: "Anniversary Celebration", date: `${nextYear}-${nextMonth}-02`, event: "Anniversary", session: "Morning Session", location: "Chennai", company: "Celebrate Studio", notes: "Couple photoshoot", amount: 20000, expense: 2500, expenseStatus: "settled", payStatus: "done", partPaid: 0, created: new Date().toISOString() },
+        { id: "demo7", name: "Baby Shower Event", date: `${nextYear}-${nextMonth}-05`, event: "Baby Shower", session: "Afternoon Session", location: "Kolkata", company: "Event Management Co", notes: "Mother and guests photography", amount: 18000, expense: 2000, expenseStatus: "pending", payStatus: "part", partPaid: 9000, created: new Date().toISOString() }
+      ];
+
+      _shoots = demoShoots;
+      _companies = [...new Set(_shoots.map(s => s.company).filter(Boolean))];
+      _locs = [...new Set(_shoots.map(s => s.location).filter(Boolean))];
+      _events = [...new Set([...DEFAULT_EVENTS, ..._shoots.map(s => s.event)])];
+
+      document.getElementById('loading-screen').classList.add('hidden');
+      updateAccountDisplay();
+      setSyncStatus('synced', 'Demo Mode');
+      
+      setTimeout(() => {
+          showToast('Welcome to Demo Mode! Changes are not saved to the cloud.', 'info');
+      }, 500);
+
+      applyPrivacyUIVisibility();
+      renderDashboard();
+    }
+
     async function sbFetch(path, opts = {}) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         ...opts,
@@ -1128,33 +1162,6 @@
       loadAll(); 
     }
 
-    function logout() {
-      try {
-        currentUser = null;
-        _shoots = [];
-        _companies = [...DEFAULT_COMPANIES];
-        _locs = [];
-        _events = [];
-        _profile = {};
-        _appPin = '';
-        
-        localStorage.removeItem('currentUser');
-        localStorage.clear();
-        sessionStorage.clear();
-        
-        google.accounts.id.disableAutoSelect();
-        
-        document.getElementById('main-app').style.display = 'none';
-        document.getElementById('csv-import-input').value = '';
-        document.getElementById('import-status').textContent = '';
-        
-        showToast('Signed out successfully', 'success');
-      } catch(e) {
-        console.error('Logout error:', e);
-        document.getElementById('main-app').style.display = 'none';
-      }
-    }
-
     function parseJwt(token) {
       try {
         const base64Url = token.split('.')[1];
@@ -1166,6 +1173,14 @@
 
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', () => {
+      // Check for Demo Mode first
+      if (isDemoMode) {
+        document.getElementById('login-modal').classList.remove('active');
+        document.getElementById('main-app').style.display = 'block';
+        initDemoData();
+        return;
+      }
+
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
@@ -1223,8 +1238,8 @@
       const c = document.getElementById('toast-container');
       if (!c) return;
       const t = document.createElement('div');
-      t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
-      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
+      t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' || type === 'info' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
+      t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : type === 'info' ? 'ti-info-circle' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
       c.appendChild(t);
       setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
@@ -1326,6 +1341,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     created: s.created || new Date().toISOString()
   };
 }
+
    async function loadAll() {
   setSyncStatus('syncing', 'Connecting');
   try {
@@ -1382,7 +1398,20 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     document.getElementById('loading-screen').classList.add('hidden');
   }
 }
+
     async function saveShootToDB(shoot) {
+      if (isDemoMode) {
+        setSyncStatus('syncing', 'Mock Saving...');
+        return new Promise(resolve => setTimeout(() => {
+          const existingIdx = _shoots.findIndex(s => s.id === shoot.id);
+          if (existingIdx >= 0) _shoots[existingIdx] = shoot;
+          else _shoots.push(shoot);
+          setSyncStatus('synced', 'Demo Mode');
+          showToast('Record saved locally for demo.');
+          resolve();
+        }, 300));
+      }
+
       setSyncStatus('syncing', 'Saving Record...');
       try {
         const existing = _shoots.find(s => s.id === shoot.id);
@@ -1410,6 +1439,16 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     async function deleteShootFromDB(id) {
+      if (isDemoMode) {
+        setSyncStatus('syncing', 'Mock Deleting...');
+        return new Promise(resolve => setTimeout(() => {
+           _shoots = _shoots.filter(s => s.id !== id);
+           setSyncStatus('synced', 'Demo Mode');
+           showToast('Record deleted locally for demo.');
+           resolve();
+        }, 300));
+      }
+
       setSyncStatus('syncing', 'Deleting Record...');
       try {
         // Enforce deletion only if it matches current user
@@ -1425,33 +1464,38 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     async function saveSettingToDB(baseKey, value) {
-  const userId = currentUser?.id || currentUser?.email || 'default_user';
-  
-  // Combine User ID and setting key to prevent Primary Key crashes in your database
-  const uniqueKey = `${userId}_${baseKey}`; 
-  
-  try {
-    const checkExisting = await sbFetch(`settings?key=eq.${uniqueKey}&select=key`);
-    
-    if (checkExisting && checkExisting.length > 0) {
-      await sbFetch(`settings?key=eq.${uniqueKey}`, {
-        method: 'PATCH',
-        body: JSON.stringify({ value: value, user_id: userId }) 
-      });
-    } else {
-      await sbFetch('settings', {
-        method: 'POST',
-        body: JSON.stringify({ 
-          key: uniqueKey, 
-          value: value, 
-          user_id: userId 
-        })
-      });
+      if (isDemoMode) {
+         showToast('Settings applied locally for demo.', 'info');
+         return Promise.resolve();
+      }
+
+      const userId = currentUser?.id || currentUser?.email || 'default_user';
+      
+      // Combine User ID and setting key to prevent Primary Key crashes in your database
+      const uniqueKey = `${userId}_${baseKey}`; 
+      
+      try {
+        const checkExisting = await sbFetch(`settings?key=eq.${uniqueKey}&select=key`);
+        
+        if (checkExisting && checkExisting.length > 0) {
+          await sbFetch(`settings?key=eq.${uniqueKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value: value, user_id: userId }) 
+          });
+        } else {
+          await sbFetch('settings', {
+            method: 'POST',
+            body: JSON.stringify({ 
+              key: uniqueKey, 
+              value: value, 
+              user_id: userId 
+            })
+          });
+        }
+      } catch (e) {
+        showToast('Settings Save Error: ' + e.message, 'error');
+      }
     }
-  } catch (e) {
-    showToast('Settings Save Error: ' + e.message, 'error');
-  }
-}
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
@@ -1503,6 +1547,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if(activeBtn) {
         activeBtn.classList.add('active');
         activeBtn.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'center' });
+      }
+
+      if (tab === 'profile') {
+        updateAccountDisplay();
       }
     }
 
@@ -3354,26 +3402,30 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     // Logout confirmation and cleanup
-function logoutConfirm() {
-  // 1. Update the custom modal text
-  document.getElementById('confirm-title').textContent = 'Sign Out?';
-  document.getElementById('confirm-sub-text').textContent = 'Are you sure you want to sign out?';
-  
-  // 2. Grab the confirm button and assign the logout action
-  const confirmBtn = document.getElementById('confirm-action-btn');
-  confirmBtn.className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
-  
-  confirmBtn.onclick = function() {
-    closeConfirmModal();
-    logout();
-  };
-  
-  // 3. Open your custom modal
-  openModal('confirm-modal-backdrop');
-}
+    function logoutConfirm() {
+      // 1. Update the custom modal text
+      document.getElementById('confirm-title').textContent = 'Sign Out?';
+      document.getElementById('confirm-sub-text').textContent = 'Are you sure you want to sign out?';
+      
+      // 2. Grab the confirm button and assign the logout action
+      const confirmBtn = document.getElementById('confirm-action-btn');
+      confirmBtn.className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      
+      confirmBtn.onclick = function() {
+        closeConfirmModal();
+        logout();
+      };
+      
+      // 3. Open your custom modal
+      openModal('confirm-modal-backdrop');
+    }
 
     // Main logout function
     function logout() {
+      if (isDemoMode) {
+         window.location.href = 'landing page.html'; 
+         return;
+      }
       try {
         currentUser = null;
         _shoots = [];
@@ -3403,7 +3455,7 @@ function logoutConfirm() {
         
         // Redirect after delay
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = 'landing page.html';
         }, 1500);
       } catch (e) {
         console.error('Logout error:', e);
