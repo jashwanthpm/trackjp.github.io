@@ -1,0 +1,263 @@
+<html lang="en" class="scroll-smooth">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Sakkhi Shoot Management</title>
+  
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23050505'/%3E%3Ccircle cx='50' cy='50' r='45' fill='%23c9a96e'/%3E%3Crect x='35' y='25' width='30' height='25' fill='%23050505' rx='3'/%3E%3Ccircle cx='42' cy='32' r='3' fill='%23050505'/%3E%3Ccircle cx='58' cy='32' r='3' fill='%23050505'/%3E%3Cpath d='M 35 45 L 65 45 L 60 65 Q 50 70 40 65 Z' fill='%23050505'/%3E%3C/svg%3E" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; overflow-x: hidden; }
+    .brand-serif { font-family: 'Cinzel', serif; }
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: #050505; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 3px; }
+    .glass-nav { background: rgba(5, 5, 5, 0.7); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px); }
+    .bg-grid { background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col antialiased selection:bg-[#c9a96e] selection:text-black">
+
+  <header class="px-6 py-4 flex items-center justify-between border-b border-white/5 glass-nav sticky top-0 z-50">
+    <div class="flex flex-col">
+      <h1 class="brand-serif text-xl sm:text-2xl font-bold tracking-widest text-transparent bg-clip-text bg-gradient-to-r from-[#c9a96e] to-[#e6c98a]">SAKKHI</h1>
+      <p class="text-[8px] sm:text-[9px] tracking-[0.3em] uppercase text-neutral-500 font-semibold">Shoot Management</p>
+    </div>
+    <nav class="hidden md:flex gap-8 items-center">
+      <a href="#features" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Features</a>
+      <a href="#showcase" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Interface</a>
+      <a href="#pricing" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Pricing</a>
+      <a href="#faq" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Help</a>
+    </nav>
+    <div class="flex gap-4 items-center">
+      <button onclick="window.location.href='app.html'" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">Sign In</button>
+    </div>
+  </header>
+
+  <section class="relative flex flex-col items-center justify-center text-center px-4 pt-32 pb-20 overflow-hidden">
+    <div class="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[500px] bg-[#c9a96e] opacity-[0.03] blur-[120px] rounded-full pointer-events-none"></div>
+    
+    <div class="max-w-5xl space-y-8 relative z-10">
+      <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-[#c9a96e]/20 bg-[#c9a96e]/5 text-[#c9a96e] text-[10px] sm:text-xs font-bold tracking-widest uppercase shadow-[0_0_15px_rgba(201,169,110,0.05)]">
+        <i class="ti ti-aperture"></i> The Professional Workflow
+      </div>
+      <h2 class="text-5xl sm:text-7xl md:text-8xl font-bold text-white tracking-tight leading-[1.1]">
+        Manage your shoots.<br/> <span class="text-transparent bg-clip-text bg-gradient-to-r from-[#c9a96e] via-[#e6c98a] to-[#c9a96e] brand-serif italic pr-2">Master your ledger.</span>
+      </h2>
+      <p class="text-base sm:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed font-light">
+        Stop tracking high-end clients on messy spreadsheets. Get a clear view of your studio's upcoming shoots, automate payment reminders, and secure every rupee in one sleek dashboard.
+      </p>
+      <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
+        <a href="#pricing" class="w-full sm:w-auto bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm sm:text-base px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(201,169,110,0.2)] hover:shadow-[0_0_40px_rgba(201,169,110,0.4)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+          Start Your Free Demo <i class="ti ti-arrow-right"></i>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="px-4 pb-24 max-w-6xl mx-auto w-full relative z-10">
+    <div class="relative group">
+      <div class="absolute -inset-1 bg-gradient-to-r from-[#c9a96e]/30 to-[#c9a96e]/10 rounded-2xl blur opacity-30 group-hover:opacity-60 transition duration-1000 group-hover:duration-200"></div>
+      <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/80 backdrop-blur-sm">
+        <img src="https://placehold.co/1200x700/050505/c9a96e?text=Main+Dashboard+Interface" alt="Sakkhi Dashboard Preview" class="w-full h-auto rounded-xl border border-white/5 object-cover shadow-2xl" />
+      </div>
+    </div>
+  </section>
+
+  <section id="features" class="py-24 px-4 md:px-8 w-full border-t border-white/5 bg-[#080808]">
+    <div class="max-w-7xl mx-auto">
+      <div class="text-center mb-20 space-y-3">
+        <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Everything your studio needs.</h3>
+        <p class="text-neutral-500 text-base max-w-2xl mx-auto">Nothing it doesn't. Designed to keep your creative workflow organized without the administrative clutter.</p>
+      </div>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-emerald-950/40 border border-emerald-900/50 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-wallet"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">Smart Financial Ledger</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Automatically calculate gross revenue, isolate your run-costs, and track exactly who owes you money. View partial tranches at a glance.</p>
+        </div>
+        
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-amber-950/40 border border-amber-900/50 rounded-xl flex items-center justify-center text-[#c9a96e] text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-brand-whatsapp"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">1-Click WhatsApp Prompts</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Send beautifully formatted shoot reminders and polite payment requests directly to clients via WhatsApp without typing a word.</p>
+        </div>
+        
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center text-blue-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-file-type-pdf"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">Instant PDF Reports</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Generate branded, multi-page PDF exports of your entire database or filter down to a specific company's ledger in one click.</p>
+        </div>
+        
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-red-950/40 border border-red-900/50 rounded-xl flex items-center justify-center text-red-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-eye-off"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">Financial Privacy Mode</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Review your schedule safely while on set. Use your 4-digit PIN to instantly blur all sensitive financial data on the main dashboard.</p>
+        </div>
+
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center text-purple-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-cloud-upload"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">Cloud Sync Security</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Your data syncs instantly across devices. Check your schedule whether you are color grading at your desk or out on location.</p>
+        </div>
+
+        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
+          <div class="w-14 h-14 bg-sky-950/40 border border-sky-900/50 rounded-xl flex items-center justify-center text-sky-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-file-spreadsheet"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">CSV Import & Export</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Easily migrate your old spreadsheets into Sakkhi in seconds, or export your full history when it's time to hand off to your accountant.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section id="showcase" class="py-24 px-4 md:px-8 bg-[#050505] relative border-t border-white/5 overflow-hidden">
+    <div class="absolute inset-0 bg-grid opacity-30 pointer-events-none"></div>
+
+    <div class="max-w-7xl mx-auto space-y-32 relative z-10">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="space-y-6 lg:order-1 order-2">
+          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Never double-book your gear again.</h3>
+          <p class="text-base text-neutral-400 leading-relaxed font-light">
+            Between packing the drones, calibrating gimbals, swapping Sony and Lumix lenses, and locking in freelance crew, you can't afford scheduling errors. The visual calendar lets you see your entire month at a glance.
+          </p>
+          <ul class="space-y-4 pt-4">
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-calendar-event"></i></div> Visual monthly grid with shoot volume indicators.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-clock"></i></div> Track morning, evening, or full-day coverage sessions.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-map-pin"></i></div> Filter by locations and custom event categories.</li>
+          </ul>
+        </div>
+        <div class="lg:order-2 order-1 relative group">
+          <div class="absolute -inset-4 bg-[#c9a96e]/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
+          <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/90 backdrop-blur shadow-2xl">
+            <img src="https://placehold.co/800x600/080808/c9a96e?text=Interactive+Calendar+View" alt="Calendar View" class="w-full h-auto rounded-xl border border-white/5" />
+          </div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="relative group">
+          <div class="absolute -inset-4 bg-[#c9a96e]/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
+          <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/90 backdrop-blur shadow-2xl">
+            <img src="https://placehold.co/800x600/080808/c9a96e?text=Payments+%26+Ledger+View" alt="Payments Ledger" class="w-full h-auto rounded-xl border border-white/5" />
+          </div>
+        </div>
+        <div class="space-y-6">
+          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Master your cash flow.</h3>
+          <p class="text-base text-neutral-400 leading-relaxed font-light">
+            Batch exporting out of Lightroom or waiting on heavy Premiere Pro renders takes time. Chasing down invoices shouldn't. Sakkhi tracks your gross revenue, isolates your run-costs, and distinctly highlights pending payments.
+          </p>
+          <ul class="space-y-4 pt-4">
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-building"></i></div> Filter ledgers by specific freelance companies.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-chart-pie"></i></div> Track outstanding vs. settled studio expenses.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-receipt"></i></div> Generate targeted PDF reports instantly.</li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="pricing" class="py-24 px-4 md:px-8 max-w-7xl mx-auto w-full border-t border-white/5 bg-[#080808]">
+    <div class="text-center mb-16 space-y-3">
+      <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Simple, transparent pricing.</h3>
+      <p class="text-neutral-500 text-base max-w-xl mx-auto">Invest in your workflow. Choose the plan that fits your studio volume.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      
+      <div class="bg-[#121212] border border-white/5 rounded-[2rem] p-8 md:p-10 relative flex flex-col hover:border-white/10 transition-colors">
+        <div class="mb-8">
+          <h4 class="text-white font-bold text-2xl mb-2">Monthly Flex</h4>
+          <p class="text-sm text-neutral-500 font-light">Perfect for freelancers and seasonal workflows.</p>
+        </div>
+        <div class="mb-8 border-b border-white/5 pb-8">
+          <div class="flex items-end gap-1">
+            <span class="text-5xl font-bold text-white tracking-tight">₹150</span>
+            <span class="text-neutral-500 text-base mb-1.5 font-medium">/mo</span>
+          </div>
+          <p class="text-sm text-neutral-400 mt-3 font-light">Billed monthly. Cancel anytime.</p>
+        </div>
+        <ul class="space-y-4 mb-10 flex-1">
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Unlimited Shoot Records</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Automated Ledger Analytics</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> 1-Click WhatsApp Templates</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> PDF Invoice Exports</li>
+        </ul>
+        <a href="#" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
+      </div>
+
+      <div class="bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-[2rem] p-8 md:p-10 relative shadow-[0_0_40px_rgba(201,169,110,0.08)] flex flex-col transform md:-translate-y-4">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] text-black text-xs font-bold uppercase tracking-widest px-5 py-1.5 rounded-full shadow-lg">
+          Best Value (Save 16%)
+        </div>
+        <div class="mb-8 mt-2">
+          <h4 class="text-white font-bold text-2xl mb-2">Annual Pro</h4>
+          <p class="text-sm text-neutral-500 font-light">For established studios shooting year-round.</p>
+        </div>
+        <div class="mb-8 border-b border-white/5 pb-8">
+          <div class="flex items-end gap-1">
+            <span class="text-5xl font-bold text-white tracking-tight">₹1,499</span>
+            <span class="text-neutral-500 text-base mb-1.5 font-medium">/yr</span>
+          </div>
+          <p class="text-sm text-[#c9a96e] mt-3 font-medium">Get 2 months completely free.</p>
+        </div>
+        <ul class="space-y-4 mb-10 flex-1">
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> <span class="font-bold text-white">Everything in Monthly</span></li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Secure Cloud Database Sync</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> CSV Bulk Imports/Exports</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Priority Customer Support</li>
+        </ul>
+        <a href="#" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="faq" class="py-24 px-4 md:px-8 bg-[#050505] border-t border-white/5">
+    <div class="max-w-3xl mx-auto">
+      <div class="text-center mb-16">
+        <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">Frequently Asked Questions</h3>
+      </div>
+      <div class="space-y-4">
+        <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
+          <h4 class="text-white font-semibold text-base mb-3">Is my financial data secure?</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Yes. Your data is stored securely using Supabase (PostgreSQL) with strict Row Level Security (RLS) policies. Only you can view your authenticated database records. We also feature an in-app "Privacy PIN" to blur amounts if you are reviewing schedules in public.</p>
+        </div>
+        <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
+          <h4 class="text-white font-semibold text-base mb-3">Does Sakkhi process payments directly?</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">No. We do not take a cut of your earnings. Sakkhi is a ledger and communication tool. Your WhatsApp prompts will include your own direct UPI or Bank details so clients pay you directly with zero transaction fees.</p>
+        </div>
+        <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
+          <h4 class="text-white font-semibold text-base mb-3">Can I export my data if I decide to leave?</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Absolutely. You own your data. You can export your entire database to a standard CSV spreadsheet or a formatted PDF document at any time from the Account Data settings.</p>
+        </div>
+      </div>
+      <div class="mt-16 text-center bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-3xl p-10">
+        <h4 class="text-white font-bold text-xl mb-2">Still have questions?</h4>
+        <p class="text-sm text-neutral-400 mb-6 font-light">Reach out to our support team for help with onboarding or setup.</p>
+        <a href="mailto:support@sakkhi.com" class="inline-flex items-center gap-2 text-sm font-semibold bg-white/5 hover:bg-white/10 text-white px-6 py-3 rounded-xl transition border border-white/10">
+          <i class="ti ti-mail text-[#c9a96e]"></i> Contact Support
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <footer class="py-10 px-8 border-t border-white/5 bg-[#050505] text-center md:text-left flex flex-col md:flex-row justify-between items-center gap-6">
+    <div>
+      <h2 class="brand-serif text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#c9a96e] to-[#e6c98a]">SAKKHI</h2>
+      <p class="text-xs text-neutral-600 mt-2 font-light">&copy; 2026 Sakkhi Shoot Management. All rights reserved.</p>
+    </div>
+    <div class="flex gap-6">
+      <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Terms of Service</a>
+      <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Privacy Policy</a>
+    </div>
+  </footer>
+
+</body>
+</html>
