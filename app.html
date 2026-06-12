@@ -3356,12 +3356,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     // Logout confirmation and cleanup
-    function logoutConfirm() {
-      const confirmed = confirm('Are you sure you want to sign out? All local data will be cleared.');
-      if (confirmed) {
-        logout();
-      }
-    }
+function logoutConfirm() {
+  // 1. Update the custom modal text
+  document.getElementById('confirm-title').textContent = 'Sign Out?';
+  document.getElementById('confirm-sub-text').textContent = 'Are you sure you want to sign out? All local data will be cleared.';
+  
+  // 2. Grab the confirm button and assign the logout action
+  const confirmBtn = document.getElementById('confirm-action-btn');
+  confirmBtn.className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+  
+  confirmBtn.onclick = function() {
+    closeConfirmModal();
+    logout();
+  };
+  
+  // 3. Open your custom modal
+  openModal('confirm-modal-backdrop');
+}
 
     // Main logout function
     function logout() {
