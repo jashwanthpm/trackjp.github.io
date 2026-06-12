@@ -3404,18 +3404,27 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     // ===== NEW FEATURES =====
     
-    // Update account email display
+    // Update account email display 
     function updateAccountDisplay() {
       const emailDisplay = document.getElementById('account-email-display');
       if (currentUser) {
         const email = currentUser.email || currentUser.user_id || 'Account User';
         const displayName = currentUser.user_metadata?.name || email;
-        emailDisplay.innerHTML = `<i class="ti ti-mail mr-2"></i>${displayName}`;
+        
+        emailDisplay.innerHTML = `
+          <div class="flex flex-col gap-1.5">
+            <div class="flex items-center text-[#c9a96e]">
+              <i class="ti ti-user mr-2"></i>${displayName}
+            </div>
+            <div class="flex items-center text-xs text-neutral-400 font-normal">
+              <i class="ti ti-mail mr-2"></i>${email}
+            </div>
+          </div>
+        `;
       } else {
         emailDisplay.textContent = 'Not signed in';
       }
     }
-
     // Logout confirmation and cleanup
     function logoutConfirm() {
       // 1. Update the custom modal text
