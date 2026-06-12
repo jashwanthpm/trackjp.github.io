@@ -2555,17 +2555,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     function togglePrivacyMode() {
       if (_privacyModeActive) {
-        document.getElementById('privacy-pass-input').value = '';
-        document.getElementById('privacy-error-lbl').classList.add('hidden');
-        openModal('privacy-prompt-backdrop');
+        if (isDemoMode) {
+          // Bypass the password prompt completely in demo mode
+          _privacyModeActive = false;
+          applyPrivacyUIVisibility();
+          document.getElementById('privacy-icon').className = 'ti ti-eye text-lg';
+        } else {
+          document.getElementById('privacy-pass-input').value = '';
+          document.getElementById('privacy-error-lbl').classList.add('hidden');
+          openModal('privacy-prompt-backdrop');
+        }
       } else {
         _privacyModeActive = true;
         applyPrivacyUIVisibility();
-        const icon = document.getElementById('privacy-icon');
-        icon.className = 'ti ti-eye-off text-lg';
+        document.getElementById('privacy-icon').className = 'ti ti-eye-off text-lg';
       }
     }
-
+    
     function closePrivacyPrompt() { closeModal('privacy-prompt-backdrop'); }
     function verifyPrivacyPassword() {
       const input = document.getElementById('privacy-pass-input').value;
