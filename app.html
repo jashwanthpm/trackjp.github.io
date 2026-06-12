@@ -3388,7 +3388,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         
         // Redirect after delay
         setTimeout(() => {
-          location.reload();
+          window.location.href = 'index.html';
         }, 1500);
       } catch (e) {
         console.error('Logout error:', e);
