@@ -273,14 +273,18 @@ async function initiateCheckout(planType) {
   const user = JSON.parse(userStr);
 
   try {
-    // We will link this to your Supabase Edge Function later
     const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
-      body: JSON.stringify({ plan: planType, userId: user.id })
-    });
-    const orderData = await response.json();
+  method: 'POST',
+  headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
+  body: JSON.stringify({ plan: planType, userId: user.id })
+});
+const orderData = await response.json();
 
+// 🔍 DEBUG: Log what the backend is returning
+console.log('📦 Order Data from backend:', orderData);
+console.log('💰 Amount value:', orderData.amount);
+console.log('📊 Amount type:', typeof orderData.amount);
+    
    const options = {
   key: "rzp_live_T185OAqoeUUqkZ",
   amount: orderData.amount, // This pulls the 15000 or 149900 from the backend
