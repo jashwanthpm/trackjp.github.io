@@ -302,7 +302,22 @@ async function initiateCheckout(planType) {
     alert("Failed to initiate checkout. Please try again later.");
   }
 }
-  
+  // Auto-trigger checkout if returning from login
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const planToCheckout = urlParams.get('checkout');
+      
+      if (planToCheckout) {
+        // Clean the URL so it doesn't loop if they refresh
+        window.history.replaceState(null, '', window.location.pathname + '#pricing');
+        sessionStorage.removeItem('pendingPlan');
+        
+        // Wait half a second for the page to load, then pop the payment window
+        setTimeout(() => {
+          initiateCheckout(planToCheckout);
+        }, 500);
+      }
+    });
 </script>
 </body>
 </html>
