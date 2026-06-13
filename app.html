@@ -1164,19 +1164,23 @@
       // Update account display
       updateAccountDisplay();
       
-      // NEW: Check if they came here to buy a plan
-      const pendingPlan = sessionStorage.getItem('pendingPlan');
-      if (pendingPlan) {
-        // Bounce them right back to the pricing page to finish the checkout
-        window.location.href = `index.html?checkout=${pendingPlan}`;
-        return; 
-      }
-      
       // Hide login, show app, and load data
       document.getElementById('login-modal').classList.remove('active');
       document.getElementById('main-app').style.display = 'block';
       document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll();
+      
+      loadAll(); 
+
+      // If they came from the pricing page, open their Profile tab automatically
+      if (sessionStorage.getItem('redirectToProfile')) {
+        sessionStorage.removeItem('redirectToProfile');
+        
+        // Wait slightly for the loading screen to finish its animation
+        setTimeout(() => {
+          switchTab('account');
+          switchAccountTab('profile');
+        }, 500);
+      }
       document.getElementById('main-app').style.display = 'block';
       document.getElementById('loading-screen').classList.remove('hidden');
       loadAll(); 
