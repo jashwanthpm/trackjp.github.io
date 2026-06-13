@@ -276,7 +276,10 @@ async function initiateCheckout(planType) {
   // Use Supabase Anon Key for authentication
 const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
   method: 'POST',
-  headers: { 'Content-Type': 'application/json' },
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'  // ← Replace with your anon key
+  },
   body: JSON.stringify({ plan: planType, userId: user.id })
 });
     
