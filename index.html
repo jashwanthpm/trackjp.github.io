@@ -281,19 +281,27 @@ async function initiateCheckout(planType) {
     });
     const orderData = await response.json();
 
-    const options = {
-      key: "rzp_test_T15M1VZylyrKfJ", 
-      amount: orderData.amount,
-      currency: "INR",
-      name: "Sakkhi Shoot Management",
-      description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
-      order_id: orderData.id,
-      handler: function (response) {
-        window.location.href = "app.html";
-      },
-      prefill: { email: user.email },
-      theme: { color: "#c9a96e" }
-    };
+   const options = {
+  key: "rzp_test_T1SM1VZylrKfJ",
+  amount: orderData.amount,
+  currency: "INR",
+  name: "Sakkhi Shoot Management",
+  description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
+  order_id: orderData.id,
+  
+  // ADD THIS EXACT BLOCK RIGHT HERE:
+  notes: {
+    userId: user.id,
+    plan: planType
+  },
+  // --------------------------------
+
+  handler: function (response) {
+    window.location.href = "app.html";
+  },
+  prefill: { email: user.email },
+  theme: { color: "#c9a96e" }
+};
     const rzp = new Razorpay(options);
     rzp.open();
   } catch (error) {
