@@ -7,6 +7,7 @@
   <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' fill='%23050505'/%3E%3Ccircle cx='50' cy='50' r='45' fill='%23c9a96e'/%3E%3Crect x='35' y='25' width='30' height='25' fill='%23050505' rx='3'/%3E%3Ccircle cx='42' cy='32' r='3' fill='%23050505'/%3E%3Ccircle cx='58' cy='32' r='3' fill='%23050505'/%3E%3Cpath d='M 35 45 L 65 45 L 60 65 Q 50 70 40 65 Z' fill='%23050505'/%3E%3C/svg%3E" />
 
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   
@@ -189,7 +190,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> 1-Click WhatsApp Templates</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> PDF Invoice Exports</li>
         </ul>
-        <a href="#" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
+        <a href="#" onclick="initiateCheckout('monthly'); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
       </div>
 
       <div class="bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-[2rem] p-8 md:p-10 relative shadow-[0_0_40px_rgba(201,169,110,0.08)] flex flex-col transform md:-translate-y-4">
@@ -213,7 +214,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> CSV Bulk Imports/Exports</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Priority Customer Support</li>
         </ul>
-        <a href="#" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>
+        <a href="#" onclick="initiateCheckout('annual'); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>
       </div>
 
     </div>
@@ -257,7 +258,48 @@
       <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Terms of Service</a>
       <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Privacy Policy</a>
     </div>
-  </footer>
+ </footer>
 
+<script>
+async function initiateCheckout(planType) {
+  const userStr = localStorage.getItem('currentUser');
+  if (!userStr) {
+    alert("Please sign in from the dashboard before subscribing.");
+    window.location.href = "app.html";
+    return;
+  }
+  const user = JSON.parse(userStr);
+
+  try {
+    // We will link this to your Supabase Edge Function later
+    const response = await fetch('YOUR_SUPABASE_EDGE_FUNCTION_URL/create-razorpay-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
+      body: JSON.stringify({ plan: planType, userId: user.id })
+    });
+    const orderData = await response.json();
+
+    const options = {
+      key: "YOUR_RAZORPAY_KEY_ID", 
+      amount: orderData.amount,
+      currency: "INR",
+      name: "Sakkhi Shoot Management",
+      description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
+      order_id: orderData.id,
+      handler: function (response) {
+        alert("Payment processing! Please check your dashboard in a few moments.");
+        window.location.href = "app.html";
+      },
+      prefill: { email: user.email },
+      theme: { color: "#c9a96e" }
+    };
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch (error) {
+    console.error("Checkout failed:", error);
+    alert("Failed to initiate checkout. Please try again later.");
+  }
+}
+</script>
 </body>
 </html>
