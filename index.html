@@ -262,12 +262,14 @@
 
 <script>
 async function initiateCheckout(planType) {
-  const userStr = localStorage.getItem('currentUser');
-  if (!userStr) {
-    alert("Please sign in from the dashboard before subscribing.");
-    window.location.href = "app.html";
-    return;
-  }
+      const userStr = localStorage.getItem('currentUser');
+      if (!userStr) {
+        // Save what they wanted to buy
+        sessionStorage.setItem('pendingPlan', planType);
+        alert("Let's get you signed in first! You will be redirected to complete your purchase.");
+        window.location.href = "app.html";
+        return;
+      }
   const user = JSON.parse(userStr);
 
   try {
@@ -300,6 +302,22 @@ async function initiateCheckout(planType) {
     alert("Failed to initiate checkout. Please try again later.");
   }
 }
+  // Auto-trigger checkout if returning from login
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const planToCheckout = urlParams.get('checkout');
+      
+      if (planToCheckout) {
+        // Clean the URL so it doesn't loop if they refresh
+        window.history.replaceState(null, '', window.location.pathname + '#pricing');
+        sessionStorage.removeItem('pendingPlan');
+        
+        // Wait half a second for the page to load, then pop the payment window
+        setTimeout(() => {
+          initiateCheckout(planToCheckout);
+        }, 500);
+      }
+    });
 </script>
 </body>
 </html>
