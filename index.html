@@ -266,7 +266,7 @@ async function initiateCheckout(planType) {
       if (!userStr) {
         // Save what they wanted to buy
         sessionStorage.setItem('pendingPlan', planType);
-        alert("Let's get you signed in first! You will be redirected to complete your purchase.");
+        // Silently redirect to the sign-in page
         window.location.href = "app.html";
         return;
       }
