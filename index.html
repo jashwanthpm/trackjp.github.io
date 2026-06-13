@@ -264,8 +264,9 @@
 async function initiateCheckout(planType) {
       const userStr = localStorage.getItem('currentUser');
       if (!userStr) {
-        // Silently flag that they need to see their profile
-        sessionStorage.setItem('redirectToProfile', 'true');
+        // Save what they wanted to buy
+        sessionStorage.setItem('pendingPlan', planType);
+        alert("Let's get you signed in first! You will be redirected to complete your purchase.");
         window.location.href = "app.html";
         return;
       }
