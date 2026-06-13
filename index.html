@@ -262,39 +262,28 @@
 
 <script>
 async function initiateCheckout(planType) {
-  const userStr = localStorage.getItem('currentUser');
-
-  // 1. If not logged in, force sign-in and remember the plan
-  if (!userStr) {
-    sessionStorage.setItem('pendingPlan', planType);
-    window.location.href = "app.html";
-    return;
-  }
-
+      const userStr = localStorage.getItem('currentUser');
+      if (!userStr) {
+        // Save what they wanted to buy
+        sessionStorage.setItem('pendingPlan', planType);
+        // Silently redirect to the sign-in page
+        window.location.href = "app.html";
+        return;
+      }
   const user = JSON.parse(userStr);
 
-  // 2. User is logged in, check if they have an active plan in Supabase
   try {
-    const response = await fetch(`https://smyupcjfusgduaoxqfvu.supabase.co/rest/v1/subscriptions?user_id=eq.${user.id}&status=eq.active&select=id`, {
-      headers: {
-        'apikey': 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'
-      }
-    });
-    const activePlans = await response.json();
-
-    // 3. If they already have an active plan, just go to the dashboard
-    if (activePlans.length > 0) {
-      window.location.href = "app.html";
-      return;
-    }
-  } catch (error) {
-    console.error("Subscription check failed:", error);
-  }
-
-  // 4. If no active plan found, proceed to payment
-  // (Paste your existing Razorpay /create-razorpay-order fetch here)
-}
+  // Use Supabase Anon Key for authentication
+const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'  // ← Replace with your anon key
+  },
+  body: JSON.stringify({ plan: planType, userId: user.id })
+});
+    
+const orderData = await response.json();
 
 // 🔍 DEBUG: Log what the backend is returning
 console.log('📦 Order Data from backend:', orderData);
