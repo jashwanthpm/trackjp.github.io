@@ -289,7 +289,6 @@ async function initiateCheckout(planType) {
       description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
       order_id: orderData.id,
       handler: function (response) {
-        alert("Payment processing! Please check your dashboard in a few moments.");
         window.location.href = "app.html";
       },
       prefill: { email: user.email },
