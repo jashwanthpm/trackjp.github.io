@@ -1220,6 +1220,8 @@
     let calMonth = new Date().getMonth();
     let calSelected = today();
     let _currentAccountTab = 'profile';
+    let _subscription = { plan: 'free', status: 'inactive', expiresAt: null };
+let _isSubActive = false;
 
     let _appPin = '1234'; 
     let _profile = { 
@@ -1391,7 +1393,23 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         setAppTheme(_profile.theme, true);
       }
     }
-
+try {
+      const subRaw = await sbFetch(`subscriptions?user_id=eq.${userId}&select=*`);
+      if (subRaw && subRaw.length > 0) {
+        _subscription = {
+          plan: subRaw[0].plan_type,
+          status: subRaw[0].status,
+          expiresAt: subRaw[0].expires_at
+        };
+        
+        if (_subscription.expiresAt && new Date(_subscription.expiresAt) < new Date()) {
+          _subscription.status = 'expired';
+        }
+        _isSubActive = _subscription.status === 'active';
+      }
+    } catch (e) {
+      console.warn("Could not load subscription data.");
+    }
     if(bar) bar.style.width = "100%";
     setTimeout(() => {
       setSyncStatus('synced', 'Synced with Cloud');
@@ -2588,6 +2606,11 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     function openAddShootModal(dateStr) {
+      if (!_isSubActive && !isDemoMode) {
+    showToast('Your subscription is expired. Please renew to add shoots.', 'error');
+    window.location.href = 'index.html#pricing';
+    return;
+  }
       document.getElementById('edit-shoot-id').value = '';
       document.getElementById('shoot-modal-title').textContent = 'New Shoot';
       document.getElementById('modal-delete-btn').classList.add('hidden');
@@ -2709,6 +2732,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
     async function saveShoot() {
+      if (!_isSubActive && !isDemoMode) {
+    showToast('Subscription expired. Cannot save changes.', 'error');
+    return;
+  }
       const name = document.getElementById('f-shoot-name').value.trim();
       const date = document.getElementById('f-shoot-date').value;
       if (!name || !date) { showToast('Please enter a Name and Date', 'error'); return; }
@@ -2761,6 +2788,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     let _pendingDropTargetId = null;
     function askDeletePrompt(id) {
+      if (!_isSubActive && !isDemoMode) {
+    showToast('Subscription expired. Cannot delete records.', 'error');
+    return;
+  }
       const s = _shoots.find(x => x.id === id); if (!s) return;
       _pendingDropTargetId = id;
       document.getElementById('confirm-title').textContent = 'Delete Shoot?';
@@ -3404,27 +3435,34 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     // ===== NEW FEATURES =====
     
-    // Update account email display 
-    function updateAccountDisplay() {
-      const emailDisplay = document.getElementById('account-email-display');
-      if (currentUser) {
-        const email = currentUser.email || currentUser.user_id || 'Account User';
-        const displayName = currentUser.user_metadata?.name || email;
-        
-        emailDisplay.innerHTML = `
-          <div class="flex flex-col gap-1.5">
-            <div class="flex items-center text-[#c9a96e]">
-              <i class="ti ti-user mr-2"></i>${displayName}
-            </div>
-            <div class="flex items-center text-xs text-neutral-400 font-normal">
-              <i class="ti ti-mail mr-2"></i>${email}
-            </div>
-          </div>
-        `;
-      } else {
-        emailDisplay.textContent = 'Not signed in';
-      }
-    }
+  // Update account email display 
+function updateAccountDisplay() {
+  const emailDisplay = document.getElementById('account-email-display');
+  if (currentUser) {
+    const email = currentUser.email || currentUser.user_id || 'Account User';
+    const displayName = currentUser.user_metadata?.name || email;
+    
+    const subBadgeColor = _isSubActive ? 'bg-emerald-950/40 text-emerald-400 border-emerald-900' : 'bg-red-950/40 text-red-400 border-red-900';
+    const subText = _isSubActive ? `${_subscription.plan.toUpperCase()} PLAN (Valid till ${new Date(_subscription.expiresAt).toLocaleDateString()})` : `EXPIRED / INACTIVE`;
+
+    emailDisplay.innerHTML = `
+      <div class="flex flex-col gap-1.5">
+        <div class="flex items-center text-[#c9a96e]">
+          <i class="ti ti-user mr-2"></i>${displayName}
+        </div>
+        <div class="flex items-center text-xs text-neutral-400 font-normal mb-2">
+          <i class="ti ti-mail mr-2"></i>${email}
+        </div>
+        <div class="pt-3 border-t border-neutral-800 flex items-center justify-between">
+          <span class="text-[10px] px-2 py-1 rounded font-bold border ${subBadgeColor}">${subText}</span>
+          ${!_isSubActive ? `<button onclick="window.location.href='index.html#pricing'" class="text-[10px] bg-[#c9a96e] text-black px-3 py-1.5 rounded font-bold hover:bg-[#e6c98a] transition shadow-lg">Renew Plan</button>` : ''}
+        </div>
+      </div>
+    `;
+  } else {
+    emailDisplay.textContent = 'Not signed in';
+  }
+}
     // Logout confirmation and cleanup
     function logoutConfirm() {
       // 1. Update the custom modal text
