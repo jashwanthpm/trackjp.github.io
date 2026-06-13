@@ -35,8 +35,7 @@
       <a href="#faq" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Help</a>
     </nav>
     <div class="flex gap-4 items-center">
-      <button id="nav-signin-btn" onclick="goToApp()" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">Sign In</button>
-      <button id="nav-dashboard-btn" onclick="goDashboard()" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300 hidden">Dashboard</button>
+      <button onclick="window.location.href='app.html'" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-5 py-2.5 rounded-lg shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">Sign In</button>
     </div>
   </header>
 
@@ -109,121 +108,124 @@
         </div>
 
         <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-cyan-950/40 border border-cyan-900/50 rounded-xl flex items-center justify-center text-cyan-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-brand-instagram"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Direct Instagram Integration</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light">Link your Instagram profile and share behind-the-scenes stories with clients. Let them know what's coming and build anticipation.</p>
+          <div class="w-14 h-14 bg-sky-950/40 border border-sky-900/50 rounded-xl flex items-center justify-center text-sky-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-file-spreadsheet"></i></div>
+          <h4 class="text-white font-bold text-lg mb-3">CSV Import & Export</h4>
+          <p class="text-sm text-neutral-400 leading-relaxed font-light">Easily migrate your old spreadsheets into Sakkhi in seconds, or export your full history when it's time to hand off to your accountant.</p>
         </div>
       </div>
     </div>
   </section>
 
-  <section id="pricing" class="py-24 px-4 md:px-8 w-full border-t border-white/5 bg-[#050505]">
-    <div class="max-w-5xl mx-auto">
-      <div class="text-center mb-16 space-y-3">
-        <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Simple, Transparent Pricing</h3>
-        <p class="text-neutral-500 text-base max-w-2xl mx-auto">Scale your business without breaking the bank. Choose the plan that fits your studio's workflow.</p>
-      </div>
+  <section id="showcase" class="py-24 px-4 md:px-8 bg-[#050505] relative border-t border-white/5 overflow-hidden">
+    <div class="absolute inset-0 bg-grid opacity-30 pointer-events-none"></div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto">
-        <!-- Monthly Plan -->
-        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 transition-all duration-300">
-          <div class="mb-6">
-            <h4 class="text-white font-bold text-2xl mb-2">Flex Plan</h4>
-            <p class="text-neutral-500 text-sm mb-4">For growing studios</p>
-            <div class="flex items-baseline gap-1">
-              <span class="text-4xl font-bold text-[#c9a96e]">₹149</span>
-              <span class="text-neutral-500">/month</span>
-            </div>
-          </div>
-          <ul class="space-y-3 mb-8">
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Unlimited shoots & clients</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Smart financial ledger</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>WhatsApp payment reminders</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>PDF report exports</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Cloud sync & backup</span>
-            </li>
+    <div class="max-w-7xl mx-auto space-y-32 relative z-10">
+      
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="space-y-6 lg:order-1 order-2">
+          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Never double-book your gear again.</h3>
+          <p class="text-base text-neutral-400 leading-relaxed font-light">
+            Between packing the drones, calibrating gimbals, swapping Sony and Lumix lenses, and locking in freelance crew, you can't afford scheduling errors. The visual calendar lets you see your entire month at a glance.
+          </p>
+          <ul class="space-y-4 pt-4">
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-calendar-event"></i></div> Visual monthly grid with shoot volume indicators.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-clock"></i></div> Track morning, evening, or full-day coverage sessions.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-map-pin"></i></div> Filter by locations and custom event categories.</li>
           </ul>
-          <button onclick="initiateCheckout('monthly')" class="w-full bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(201,169,110,0.3)]">
-            Choose Plan
-          </button>
         </div>
-
-        <!-- Annual Plan -->
-        <div class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-2xl p-8 hover:border-[#c9a96e]/60 transition-all duration-300 ring-1 ring-[#c9a96e]/10">
-          <div class="inline-block bg-[#c9a96e] text-black text-xs font-bold px-3 py-1 rounded-full mb-4">SAVE 34%</div>
-          <div class="mb-6">
-            <h4 class="text-white font-bold text-2xl mb-2">Pro Plan</h4>
-            <p class="text-neutral-500 text-sm mb-4">Best for established studios</p>
-            <div class="flex items-baseline gap-1">
-              <span class="text-4xl font-bold text-[#c9a96e]">₹1,499</span>
-              <span class="text-neutral-500">/year</span>
-            </div>
-            <p class="text-xs text-neutral-500 mt-2">₹124.91/month when billed annually</p>
+        <div class="lg:order-2 order-1 relative group">
+          <div class="absolute -inset-4 bg-[#c9a96e]/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
+          <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/90 backdrop-blur shadow-2xl">
+            <img src="calendar.jpg" alt="Calendar View" class="w-full h-auto rounded-xl border border-white/5" />
           </div>
-          <ul class="space-y-3 mb-8">
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Everything in Flex Plan</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Priority customer support</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Advanced analytics</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Custom branding options</span>
-            </li>
-            <li class="text-sm text-neutral-400 flex items-start gap-3">
-              <i class="ti ti-check text-emerald-400 mt-1"></i>
-              <span>Team members support</span>
-            </li>
-          </ul>
-          <button onclick="initiateCheckout('annual')" class="w-full bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-3 rounded-lg transition-all duration-300 hover:shadow-[0_0_20px_rgba(201,169,110,0.3)]">
-            Choose Plan
-          </button>
         </div>
       </div>
 
-      <div class="mt-16 text-center text-neutral-500 text-sm">
-        <p>All plans include unlimited cloud storage, auto-sync, and data export. Cancel anytime.</p>
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
+        <div class="relative group">
+          <div class="absolute -inset-4 bg-[#c9a96e]/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
+          <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/90 backdrop-blur shadow-2xl">
+            <img src="Payments & ledger View.jpg" alt="Payments Ledger" class="w-full h-auto rounded-xl border border-white/5" />
+          </div>
+        </div>
+        <div class="space-y-6">
+          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Master your cash flow.</h3>
+          <p class="text-base text-neutral-400 leading-relaxed font-light">
+            Batch exporting out of Lightroom or waiting on heavy Premiere Pro renders takes time. Chasing down invoices shouldn't. Sakkhi tracks your gross revenue, isolates your run-costs, and distinctly highlights pending payments.
+          </p>
+          <ul class="space-y-4 pt-4">
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-building"></i></div> Filter ledgers by specific freelance companies.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-chart-pie"></i></div> Track outstanding vs. settled studio expenses.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-receipt"></i></div> Generate targeted PDF reports instantly.</li>
+          </ul>
+        </div>
       </div>
+
     </div>
   </section>
 
-  <section id="faq" class="py-24 px-4 md:px-8 w-full border-t border-white/5 bg-[#080808]">
+  <section id="pricing" class="py-24 px-4 md:px-8 max-w-7xl mx-auto w-full border-t border-white/5 bg-[#080808]">
+    <div class="text-center mb-16 space-y-3">
+      <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Simple, transparent pricing.</h3>
+      <p class="text-neutral-500 text-base max-w-xl mx-auto">Invest in your workflow. Choose the plan that fits your studio volume.</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+      
+      <div class="bg-[#121212] border border-white/5 rounded-[2rem] p-8 md:p-10 relative flex flex-col hover:border-white/10 transition-colors">
+        <div class="mb-8">
+          <h4 class="text-white font-bold text-2xl mb-2">Monthly Flex</h4>
+          <p class="text-sm text-neutral-500 font-light">Perfect for freelancers and seasonal workflows.</p>
+        </div>
+        <div class="mb-8 border-b border-white/5 pb-8">
+          <div class="flex items-end gap-1">
+            <span class="text-5xl font-bold text-white tracking-tight">₹150</span>
+            <span class="text-neutral-500 text-base mb-1.5 font-medium">/mo</span>
+          </div>
+          <p class="text-sm text-neutral-400 mt-3 font-light">Billed monthly. Cancel anytime.</p>
+        </div>
+        <ul class="space-y-4 mb-10 flex-1">
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Unlimited Shoot Records</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Automated Ledger Analytics</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> 1-Click WhatsApp Templates</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> PDF Invoice Exports</li>
+        </ul>
+        <a href="#" onclick="initiateCheckout('monthly'); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
+      </div>
+
+      <div class="bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-[2rem] p-8 md:p-10 relative shadow-[0_0_40px_rgba(201,169,110,0.08)] flex flex-col transform md:-translate-y-4">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] text-black text-xs font-bold uppercase tracking-widest px-5 py-1.5 rounded-full shadow-lg">
+          Best Value (Save 16%)
+        </div>
+        <div class="mb-8 mt-2">
+          <h4 class="text-white font-bold text-2xl mb-2">Annual Pro</h4>
+          <p class="text-sm text-neutral-500 font-light">For established studios shooting year-round.</p>
+        </div>
+        <div class="mb-8 border-b border-white/5 pb-8">
+          <div class="flex items-end gap-1">
+            <span class="text-5xl font-bold text-white tracking-tight">₹1,499</span>
+            <span class="text-neutral-500 text-base mb-1.5 font-medium">/yr</span>
+          </div>
+          <p class="text-sm text-[#c9a96e] mt-3 font-medium">Get 2 months completely free.</p>
+        </div>
+        <ul class="space-y-4 mb-10 flex-1">
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> <span class="font-bold text-white">Everything in Monthly</span></li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Secure Cloud Database Sync</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> CSV Bulk Imports/Exports</li>
+          <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Priority Customer Support</li>
+        </ul>
+        <a href="#" onclick="initiateCheckout('annual'); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>
+      </div>
+
+    </div>
+  </section>
+
+  <section id="faq" class="py-24 px-4 md:px-8 bg-[#050505] border-t border-white/5">
     <div class="max-w-3xl mx-auto">
-      <div class="text-center mb-16 space-y-3">
-        <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight">Questions & Answers</h3>
-        <p class="text-neutral-500 text-base">Everything you need to know about Sakkhi</p>
+      <div class="text-center mb-16">
+        <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight mb-3">Frequently Asked Questions</h3>
       </div>
-
       <div class="space-y-4">
-        <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
-          <h4 class="text-white font-semibold text-base mb-3">What payment methods do you accept?</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light">We accept all major credit cards, debit cards, and UPI via Razorpay. Your payment information is fully encrypted and PCI-DSS compliant.</p>
-        </div>
-        <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
-          <h4 class="text-white font-semibold text-base mb-3">Can I change plans anytime?</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light">Yes. You can upgrade or downgrade your plan at any time. Changes take effect immediately, and we'll prorate any charges or credits.</p>
-        </div>
         <div class="bg-[#0a0a0a] border border-white/5 p-6 rounded-2xl hover:border-white/10 transition-colors">
           <h4 class="text-white font-semibold text-base mb-3">Is my financial data secure?</h4>
           <p class="text-sm text-neutral-400 leading-relaxed font-light">Yes. Your data is stored securely using Supabase (PostgreSQL) with strict Row Level Security (RLS) policies. Only you can view your authenticated database records. We also feature an in-app "Privacy PIN" to blur amounts if you are reviewing schedules in public.</p>
@@ -256,165 +258,82 @@
       <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Terms of Service</a>
       <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Privacy Policy</a>
     </div>
-  </footer>
+ </footer>
 
 <script>
-  // Supabase config
-  const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
-  const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+async function initiateCheckout(planType) {
+      const userStr = localStorage.getItem('currentUser');
+      if (!userStr) {
+        // Save what they wanted to buy
+        sessionStorage.setItem('pendingPlan', planType);
+        // Silently redirect to the sign-in page
+        window.location.href = "app.html";
+        return;
+      }
+  const user = JSON.parse(userStr);
+
+  try {
+  // Use Supabase Anon Key for authentication
+const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
+  method: 'POST',
+  headers: { 
+    'Content-Type': 'application/json',
+    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'  // ← Replace with your anon key
+  },
+  body: JSON.stringify({ plan: planType, userId: user.id })
+});
+    
+const orderData = await response.json();
+
+// 🔍 DEBUG: Log what the backend is returning
+console.log('📦 Order Data from backend:', orderData);
+console.log('💰 Amount value:', orderData.amount);
+console.log('📊 Amount type:', typeof orderData.amount);
+    
+   const options = {
+  key: "rzp_live_T185OAqoeUUqkZ",
+  amount: orderData.amount, // This pulls the 15000 or 149900 from the backend
+currency: "INR",
+order_id: orderData.id,
+  name: "Sakkhi Shoot Management",
+  description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
   
-  async function sbFetch(endpoint, options = {}) {
-    const url = `${SUPABASE_URL}/rest/v1/${endpoint}`;
-    const headers = {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${SUPABASE_ANON_KEY}`,
-      'apikey': SUPABASE_ANON_KEY,
-      ...options.headers,
-    };
-    
-    const response = await fetch(url, {
-      ...options,
-      headers,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`Supabase error: ${response.statusText}`);
-    }
-    
-    return await response.json();
-  }
-
-  // Check if user is logged in and has active plan
-  async function checkUserStatus() {
-    const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
-      // Not logged in
-      document.getElementById('nav-signin-btn').style.display = 'block';
-      document.getElementById('nav-dashboard-btn').style.display = 'none';
-      return;
-    }
-    
-    try {
-      const user = JSON.parse(userStr);
-      const subRaw = await sbFetch(`subscriptions?user_id=eq.${user.id}&select=*`);
-      
-      if (subRaw && subRaw.length > 0) {
-        const sub = subRaw[0];
-        const isActive = sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date());
-        
-        if (isActive) {
-          // Has active plan, show dashboard button
-          document.getElementById('nav-signin-btn').style.display = 'none';
-          document.getElementById('nav-dashboard-btn').style.display = 'block';
-        } else {
-          // Plan expired, show signin
-          document.getElementById('nav-signin-btn').style.display = 'block';
-          document.getElementById('nav-dashboard-btn').style.display = 'none';
-        }
-      } else {
-        // No subscription, show signin
-        document.getElementById('nav-signin-btn').style.display = 'block';
-        document.getElementById('nav-dashboard-btn').style.display = 'none';
-      }
-    } catch (e) {
-      console.warn('Could not check user status:', e);
-      document.getElementById('nav-signin-btn').style.display = 'block';
-      document.getElementById('nav-dashboard-btn').style.display = 'none';
-    }
-  }
-
-  function goToApp() {
-    window.location.href = 'app.html';
-  }
-
-  function goDashboard() {
-    window.location.href = 'app.html';
-  }
-
-  async function initiateCheckout(planType) {
-    const userStr = localStorage.getItem('currentUser');
-    if (!userStr) {
-      // Save what they wanted to buy
-      sessionStorage.setItem('pendingPlan', planType);
-      // Redirect to sign-in
-      window.location.href = "app.html";
-      return;
-    }
-    
-    const user = JSON.parse(userStr);
-
-    // Check if they already have an active plan
-    try {
-      const subRaw = await sbFetch(`subscriptions?user_id=eq.${user.id}&select=*`);
-      if (subRaw && subRaw.length > 0) {
-        const sub = subRaw[0];
-        const isActive = sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date());
-        
-        if (isActive) {
-          alert(`You already have an active ${sub.plan_type} plan! Go to your dashboard to manage it.`);
-          window.location.href = 'app.html';
-          return;
-        }
-      }
-    } catch (e) {
-      console.warn('Could not check subscription:', e);
-    }
-
-    try {
-      const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
-        method: 'POST',
-        headers: { 
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'
-        },
-        body: JSON.stringify({ plan: planType, userId: user.id })
-      });
-      
-      const orderData = await response.json();
-      
-      const options = {
-        key: "rzp_live_T185OAqoeUUqkZ",
-        amount: orderData.amount,
-        currency: "INR",
-        order_id: orderData.id,
-        name: "Sakkhi Shoot Management",
-        description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
-        notes: {
+  // ADD THIS EXACT BLOCK RIGHT HERE:
+  notes: {
           userId: user.id || user.uid || user.email || user.id,
           plan: planType
         },
-        handler: function (response) {
-          window.location.href = "app.html";
-        },
-        prefill: { email: user.email },
-        theme: { color: "#c9a96e" }
-      };
-      
-      const rzp = new Razorpay(options);
-      rzp.open();
-    } catch (error) {
-      console.error("Checkout failed:", error);
-      alert("Failed to initiate checkout. Please try again later.");
-    }
+  // --------------------------------
+
+  handler: function (response) {
+    window.location.href = "app.html";
+  },
+  prefill: { email: user.email },
+  theme: { color: "#c9a96e" }
+};
+    const rzp = new Razorpay(options);
+    rzp.open();
+  } catch (error) {
+    console.error("Checkout failed:", error);
+    alert("Failed to initiate checkout. Please try again later.");
   }
-
-  // Check status on page load
-  window.addEventListener('DOMContentLoaded', checkUserStatus);
-
+}
   // Auto-trigger checkout if returning from login
-  document.addEventListener('DOMContentLoaded', () => {
-    const urlParams = new URLSearchParams(window.location.search);
-    const planToCheckout = urlParams.get('checkout');
-    
-    if (planToCheckout) {
-      window.history.replaceState(null, '', window.location.pathname + '#pricing');
-      sessionStorage.removeItem('pendingPlan');
+    document.addEventListener('DOMContentLoaded', () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const planToCheckout = urlParams.get('checkout');
       
-      setTimeout(() => {
-        initiateCheckout(planToCheckout);
-      }, 500);
-    }
-  });
+      if (planToCheckout) {
+        // Clean the URL so it doesn't loop if they refresh
+        window.history.replaceState(null, '', window.location.pathname + '#pricing');
+        sessionStorage.removeItem('pendingPlan');
+        
+        // Wait half a second for the page to load, then pop the payment window
+        setTimeout(() => {
+          initiateCheckout(planToCheckout);
+        }, 500);
+      }
+    });
 </script>
 </body>
 </html>
