@@ -291,9 +291,9 @@ async function initiateCheckout(planType) {
   
   // ADD THIS EXACT BLOCK RIGHT HERE:
   notes: {
-    userId: user.id,
-    plan: planType
-  },
+          userId: user.id || user.uid || user.email || user.id,
+          plan: planType
+        },
   // --------------------------------
 
   handler: function (response) {
