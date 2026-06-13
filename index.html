@@ -283,8 +283,9 @@ async function initiateCheckout(planType) {
 
    const options = {
   key: "rzp_live_T185OAqoeUUqkZ",
-  amount: orderData.amount,
-  currency: "INR",
+  amount: orderData.amount, // This pulls the 15000 or 149900 from the backend
+currency: "INR",
+order_id: orderData.id,
   name: "Sakkhi Shoot Management",
   description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
   order_id: orderData.id,
