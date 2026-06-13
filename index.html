@@ -272,7 +272,7 @@ async function initiateCheckout(planType) {
 
   try {
     // We will link this to your Supabase Edge Function later
-    const response = await fetch('YOUR_SUPABASE_EDGE_FUNCTION_URL/create-razorpay-order', {
+    const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${user.token}` },
       body: JSON.stringify({ plan: planType, userId: user.id })
