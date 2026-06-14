@@ -290,29 +290,35 @@ console.log('📦 Order Data from backend:', orderData);
 console.log('💰 Amount value:', orderData.amount);
 console.log('📊 Amount type:', typeof orderData.amount);
     
-   const options = {
+   const finalAmount = parseInt(orderData.amount, 10);
+
+const options = {
   key: "rzp_live_T185OAqoeUUqkZ",
-  amount: orderData.amount, // This pulls the 15000 or 149900 from the backend
-currency: "INR",
-order_id: orderData.id,
+  amount: finalAmount, 
+  currency: "INR",
+  order_id: orderData.id,
   name: "Sakkhi Shoot Management",
   description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
-  
-  // ADD THIS EXACT BLOCK RIGHT HERE:
   notes: {
-          userId: user.id || user.uid || user.email || user.id,
-          plan: planType
-        },
-  // --------------------------------
-
+    userId: user.id || user.uid || user.email,
+    plan: planType
+  },
   handler: function (response) {
     window.location.href = "app.html";
   },
   prefill: { email: user.email },
   theme: { color: "#c9a96e" }
 };
-    const rzp = new Razorpay(options);
-    rzp.open();
+
+const rzp = new Razorpay(options);
+
+// Catch payment failures cleanly
+rzp.on('payment.failed', function (response){
+    console.error(response.error);
+    alert(`Payment Failed: ${response.error.description}\nPlease try again or disable active ad-blockers.`);
+});
+
+rzp.open();
   } catch (error) {
     console.error("Checkout failed:", error);
     alert("Failed to initiate checkout. Please try again later.");
