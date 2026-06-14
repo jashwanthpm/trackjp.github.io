@@ -1430,6 +1430,26 @@ try {
     }
     if(bar) bar.style.width = "100%";
     setTimeout(() => {
+      
+      // --- NEW: SUBSCRIPTION REDIRECT LOGIC ---
+      if (!_isSubActive && !isDemoMode) {
+        // Change the loading screen text to let them know what's happening
+        const loadingText = document.getElementById('loading-text');
+        if (loadingText) loadingText.textContent = "No active plan found. Redirecting to payments...";
+        
+        // Turn the loading bar red for visual feedback
+        const loadProgress = document.getElementById('load-progress');
+        if (loadProgress) loadProgress.className = "h-full bg-red-500 w-full transition-all duration-500";
+        
+        // Redirect them to the pricing page after a brief 1.5-second pause
+        setTimeout(() => {
+          window.location.href = 'index.html#pricing';
+        }, 1500);
+        
+        return; // CRITICAL: Stop the rest of the function so the dashboard never loads
+      }
+      // ----------------------------------------
+
       setSyncStatus('synced', 'Synced with Cloud');
       document.getElementById('loading-screen').classList.add('hidden');
       applyPrivacyUIVisibility();
