@@ -190,7 +190,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> 1-Click WhatsApp Templates</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> PDF Invoice Exports</li>
         </ul>
-<a href="#" onclick="initiateCheckout('monthly', event); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
+<a href="#" onclick="('monthly', event); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
       </div>
 
       <div class="bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-[2rem] p-8 md:p-10 relative shadow-[0_0_40px_rgba(201,169,110,0.08)] flex flex-col transform md:-translate-y-4">
@@ -214,7 +214,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> CSV Bulk Imports/Exports</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Priority Customer Support</li>
         </ul>
-<a href="#" onclick="initiateCheckout('annual', event); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>      </div>
+<a href="#" onclick="('annual', event); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>      </div>
 
     </div>
   </section>
@@ -284,7 +284,7 @@ async function initiateCheckout(planType, event) {
     const supabaseUrl = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
-    const subRes = await fetch(`https://smyupcjfusgduaoxqfvu.supabase.co/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
+    const subRes = await fetch(`${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
       headers: { 
         'apikey': anonKey, 
         'Authorization': 'Bearer ' + anonKey,
