@@ -190,7 +190,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> 1-Click WhatsApp Templates</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> PDF Invoice Exports</li>
         </ul>
-        <a href="#" onclick="initiateCheckout('monthly'); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
+<a href="#" onclick="initiateCheckout('monthly', event); return false;" class="block w-full text-center border border-white/10 hover:bg-white/5 text-white font-bold py-4 rounded-xl transition-colors">Select Monthly</a>
       </div>
 
       <div class="bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/30 rounded-[2rem] p-8 md:p-10 relative shadow-[0_0_40px_rgba(201,169,110,0.08)] flex flex-col transform md:-translate-y-4">
@@ -214,8 +214,7 @@
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> CSV Bulk Imports/Exports</li>
           <li class="flex items-center gap-3 text-sm text-neutral-300 font-light"><i class="ti ti-check text-[#c9a96e] text-xl"></i> Priority Customer Support</li>
         </ul>
-        <a href="#" onclick="initiateCheckout('annual'); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>
-      </div>
+<a href="#" onclick="initiateCheckout('annual', event); return false;" class="block w-full text-center bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300">Subscribe Annually</a>      </div>
 
     </div>
   </section>
@@ -261,67 +260,91 @@
  </footer>
 
 <script>
-async function initiateCheckout(planType) {
-      const userStr = localStorage.getItem('currentUser');
-      if (!userStr) {
-        // Save what they wanted to buy
-        sessionStorage.setItem('pendingPlan', planType);
-        // Silently redirect to the sign-in page
-        window.location.href = "app.html";
-        return;
-      }
+async function initiateCheckout(planType, event) {
+  // 1. Lock the button instantly to prevent double-clicks
+  const clickedBtn = event ? event.currentTarget : null;
+  const originalText = clickedBtn ? clickedBtn.innerText : "Processing...";
+
+  if (clickedBtn) {
+    clickedBtn.style.pointerEvents = "none";
+    clickedBtn.innerText = "Loading...";
+    clickedBtn.style.opacity = "0.5";
+  }
+
+  const userStr = localStorage.getItem('currentUser');
+  if (!userStr) {
+    sessionStorage.setItem('pendingPlan', planType);
+    window.location.href = "app.html";
+    return;
+  }
   const user = JSON.parse(userStr);
 
   try {
-  // Use Supabase Anon Key for authentication
-const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
-  method: 'POST',
-  headers: { 
-    'Content-Type': 'application/json',
-    'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'  // ← Replace with your anon key
-  },
-  body: JSON.stringify({ plan: planType, userId: user.id })
-});
+    const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
+      method: 'POST',
+      headers: { 
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'
+      },
+      body: JSON.stringify({ plan: planType, userId: user.id })
+    });
+        
+    const orderData = await response.json();
+    const finalAmount = parseInt(orderData.amount, 10);
+        
+    const options = {
+      key: "rzp_live_T185OAqoeUUqkZ",
+      amount: finalAmount,
+      currency: "INR",
+      order_id: orderData.id,
+      name: "Sakkhi Shoot Management",
+      description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
+      notes: {
+        userId: user.id || user.uid || user.email,
+        plan: planType
+      },
+      handler: function (response) {
+        window.location.href = "app.html";
+      },
+      modal: {
+        ondismiss: function() {
+          // Unlock button if user closes the Razorpay window manually
+          if (clickedBtn) {
+            clickedBtn.style.pointerEvents = "auto";
+            clickedBtn.innerText = originalText;
+            clickedBtn.style.opacity = "1";
+          }
+        }
+      },
+      prefill: { email: user.email },
+      theme: { color: "#c9a96e" }
+    };
     
-const orderData = await response.json();
-
-// 🔍 DEBUG: Log what the backend is returning
-console.log('📦 Order Data from backend:', orderData);
-console.log('💰 Amount value:', orderData.amount);
-console.log('📊 Amount type:', typeof orderData.amount);
+    const rzp = new Razorpay(options);
     
-   const finalAmount = parseInt(orderData.amount, 10);
+    // Catch payment failures
+    rzp.on('payment.failed', function (response){
+        console.error(response.error);
+        alert(`Payment Failed: ${response.error.description}\nPlease try again.`);
+        // Unlock button so they can try again
+        if (clickedBtn) {
+          clickedBtn.style.pointerEvents = "auto";
+          clickedBtn.innerText = originalText;
+          clickedBtn.style.opacity = "1";
+        }
+    });
 
-const options = {
-  key: "rzp_live_T185OAqoeUUqkZ",
-  amount: finalAmount, 
-  currency: "INR",
-  order_id: orderData.id,
-  name: "Sakkhi Shoot Management",
-  description: planType === 'monthly' ? "Monthly Flex Plan" : "Annual Pro Plan",
-  notes: {
-    userId: user.id || user.uid || user.email,
-    plan: planType
-  },
-  handler: function (response) {
-    window.location.href = "app.html";
-  },
-  prefill: { email: user.email },
-  theme: { color: "#c9a96e" }
-};
+    rzp.open();
 
-const rzp = new Razorpay(options);
-
-// Catch payment failures cleanly
-rzp.on('payment.failed', function (response){
-    console.error(response.error);
-    alert(`Payment Failed: ${response.error.description}\nPlease try again or disable active ad-blockers.`);
-});
-
-rzp.open();
   } catch (error) {
     console.error("Checkout failed:", error);
     alert("Failed to initiate checkout. Please try again later.");
+    // Unlock button on error
+    if (clickedBtn) {
+      clickedBtn.style.pointerEvents = "auto";
+      clickedBtn.innerText = originalText;
+      clickedBtn.style.opacity = "1";
+    }
   }
 }
   // Auto-trigger checkout if returning from login
