@@ -280,11 +280,36 @@ async function initiateCheckout(planType, event) {
   const user = JSON.parse(userStr);
 
   try {
+    // --- CHECK IF THEY ALREADY HAVE AN ACTIVE PLAN ---
+    const supabaseUrl = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    
+    const subRes = await fetch(`${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
+      headers: { 
+        'apikey': anonKey, 
+        'Authorization': 'Bearer ' + anonKey,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    if (subRes.ok) {
+        const subs = await subRes.json();
+        if (subs && subs.length > 0) {
+            const activeSub = subs.find(s => s.status === 'active' && new Date(s.expires_at) > new Date());
+            if (activeSub) {
+                alert("You already have an active subscription! Taking you to your dashboard.");
+                window.location.href = "app.html";
+                return;
+            }
+        }
+    }
+    // ------------------------------------------------------
+
     const response = await fetch('https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/create-razorpay-order', {
       method: 'POST',
       headers: { 
         'Content-Type': 'application/json',
-        'Authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'
+        'Authorization': 'Bearer ' + anonKey
       },
       body: JSON.stringify({ plan: planType, userId: user.id })
     });
@@ -308,7 +333,6 @@ async function initiateCheckout(planType, event) {
       },
       modal: {
         ondismiss: function() {
-          // Unlock button if user closes the Razorpay window manually
           if (clickedBtn) {
             clickedBtn.style.pointerEvents = "auto";
             clickedBtn.innerText = originalText;
@@ -322,11 +346,9 @@ async function initiateCheckout(planType, event) {
     
     const rzp = new Razorpay(options);
     
-    // Catch payment failures
     rzp.on('payment.failed', function (response){
         console.error(response.error);
         alert(`Payment Failed: ${response.error.description}\nPlease try again.`);
-        // Unlock button so they can try again
         if (clickedBtn) {
           clickedBtn.style.pointerEvents = "auto";
           clickedBtn.innerText = originalText;
@@ -339,7 +361,6 @@ async function initiateCheckout(planType, event) {
   } catch (error) {
     console.error("Checkout failed:", error);
     alert("Failed to initiate checkout. Please try again later.");
-    // Unlock button on error
     if (clickedBtn) {
       clickedBtn.style.pointerEvents = "auto";
       clickedBtn.innerText = originalText;
