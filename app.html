@@ -1122,7 +1122,7 @@
      
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleSignIn,
+        callback: ,
         auto_select: false
       });
 
@@ -1158,10 +1158,9 @@
         user_metadata: { name: decoded.name }
       };
 
-     localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
       showToast(`Welcome, ${currentUser.name}!`, 'success');
       
-      // Update account display
       updateAccountDisplay();
       
       // Hide login, show app, and load data
@@ -1170,6 +1169,7 @@
       document.getElementById('loading-screen').classList.remove('hidden');
       
       loadAll(); 
+    }
 
       // NEW: Check if they came here to buy a plan
       const pendingPlan = sessionStorage.getItem('pendingPlan');
@@ -1431,25 +1431,30 @@ try {
     if(bar) bar.style.width = "100%";
     setTimeout(() => {
       
-      // --- NEW: SUBSCRIPTION REDIRECT LOGIC ---
-      if (!_isSubActive && !isDemoMode) {
-        // Change the loading screen text to let them know what's happening
-        const loadingText = document.getElementById('loading-text');
-        if (loadingText) loadingText.textContent = "No active plan found. Redirecting to payments...";
+      // --- INTELLIGENT PLAN ROUTING ---
+      const pendingPlan = sessionStorage.getItem('pendingPlan');
+      
+      // Did they click a plan button on the landing page?
+      if (pendingPlan) {
+        sessionStorage.removeItem('pendingPlan'); // Clear it immediately
         
-        // Turn the loading bar red for visual feedback
-        const loadProgress = document.getElementById('load-progress');
-        if (loadProgress) loadProgress.className = "h-full bg-red-500 w-full transition-all duration-500";
-        
-        // Redirect them to the pricing page after a brief 1.5-second pause
-        setTimeout(() => {
-          window.location.href = 'index.html#pricing';
-        }, 1500);
-        
-        return; // CRITICAL: Stop the rest of the function so the dashboard never loads
+        if (!_isSubActive) {
+          // 1. They clicked a plan AND they are inactive -> Send to Checkout
+          const loadingText = document.getElementById('loading-text');
+          if (loadingText) loadingText.textContent = "Redirecting to secure checkout...";
+          
+          setTimeout(() => {
+            window.location.href = `index.html?checkout=${pendingPlan}`;
+          }, 800);
+          return; // Stop here, don't load dashboard
+        } else {
+          // 2. They clicked a plan but ALREADY have an active plan -> Let them in!
+          showToast('You already have an active subscription!', 'success');
+        }
       }
-      // ----------------------------------------
+      // ---------------------------------
 
+      // 3. Normal Sign In (or active user) -> Load Dashboard
       setSyncStatus('synced', 'Synced with Cloud');
       document.getElementById('loading-screen').classList.add('hidden');
       applyPrivacyUIVisibility();
