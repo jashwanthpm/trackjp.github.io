@@ -1095,7 +1095,6 @@
     let currentUser = null;
 
     function initGoogleSignIn() {
-      // Check if google is defined, if not wait for it
       if (!window.google) {
         console.warn('Google script not loaded yet, retrying...');
         setTimeout(initGoogleSignIn, 500);
@@ -1122,7 +1121,7 @@
      
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: handleGoogleSignIn, // <-- This was the missing piece!
+        callback: handleGoogleSignIn,
         auto_select: false
       });
 
@@ -1136,7 +1135,6 @@
         }
       );
       
-      // Ensure button is visible on mobile
       setTimeout(() => {
         const btn = document.getElementById('google-signin-button');
         if (btn) {
@@ -1147,65 +1145,28 @@
     }
 
     function handleGoogleSignIn(response) {
-      // ... some code ...
-      loadAll(); 
-    }
+      const token = response.credential;
+      const decoded = parseJwt(token);
+      
+      currentUser = {
+        id: decoded.sub, 
+        email: decoded.email, 
+        name: decoded.name, 
+        token: token,
+        user_metadata: { name: decoded.name }
+      };
 
-      // NEW: Check if they came here to buy a plan
-      const pendingPlan = sessionStorage.getItem('pendingPlan');
-      if (pendingPlan) {
-        // Bounce them right back to the pricing page to finish the checkout
-        window.location.href = `index.html?checkout=${pendingPlan}`;
-        return; 
-      }
-
-      // Hide login, show app, and load data
+      localStorage.setItem('currentUser', JSON.stringify(currentUser));
+      showToast(`Welcome, ${currentUser.name}!`, 'success');
+      
+      updateAccountDisplay();
+      
       document.getElementById('login-modal').classList.remove('active');
       document.getElementById('main-app').style.display = 'block';
       document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll();
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
+      
       loadAll(); 
     }
-
-    function parseJwt(token) {
-      // NEW: Check if they came here to buy a plan
-      const pendingPlan = sessionStorage.getItem('pendingPlan');
-      if (pendingPlan) {
-        // Bounce them right back to the pricing page to finish the checkout
-        window.location.href = `index.html?checkout=${pendingPlan}`;
-        return; 
-      }
-
-      // Hide login, show app, and load data
-      document.getElementById('login-modal').classList.remove('active');
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll();
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll(); 
-    }
-
-    function parseJwt(token) {
-      try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        return JSON.parse(jsonPayload);
-      } catch(e) { return {}; }
-    }
-
-    // Initialize Auth Logic on page load
-    document.addEventListener('DOMContentLoaded', () => {
-      // Check for Demo Mode first
-      if (isDemoMode) {
-        document.getElementById('login-modal').classList.remove('active');
-        document.getElementById('main-app').style.display = 'block';
-        initDemoData();
-        return;
-      }
 
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
