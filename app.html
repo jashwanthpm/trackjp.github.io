@@ -1144,30 +1144,6 @@
       }, 100);
     }
 
-    function handleGoogleSignIn(response) {
-      const token = response.credential;
-      const decoded = parseJwt(token);
-      
-      currentUser = {
-        id: decoded.sub, 
-        email: decoded.email, 
-        name: decoded.name, 
-        token: token,
-        user_metadata: { name: decoded.name }
-      };
-
-      localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      showToast(`Welcome, ${currentUser.name}!`, 'success');
-      
-      updateAccountDisplay();
-      
-      document.getElementById('login-modal').classList.remove('active');
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      
-      loadAll(); 
-    }
-
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
