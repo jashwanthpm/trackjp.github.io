@@ -1122,7 +1122,7 @@
      
       google.accounts.id.initialize({
         client_id: GOOGLE_CLIENT_ID,
-        callback: ,
+        callback: handleGoogleSignIn, // <-- This was the missing piece!
         auto_select: false
       });
 
@@ -1170,7 +1170,6 @@
       
       loadAll(); 
     }
-
       // NEW: Check if they came here to buy a plan
       const pendingPlan = sessionStorage.getItem('pendingPlan');
       if (pendingPlan) {
