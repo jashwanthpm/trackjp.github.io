@@ -284,7 +284,7 @@ async function initiateCheckout(planType, event) {
     const supabaseUrl = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const anonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
-    const subRes = await fetch(`${supabaseUrl}/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
+    const subRes = await fetch(`https://smyupcjfusgduaoxqfvu.supabase.co/rest/v1/subscriptions?user_id=eq.${user.id}&select=*`, {
       headers: { 
         'apikey': anonKey, 
         'Authorization': 'Bearer ' + anonKey,
