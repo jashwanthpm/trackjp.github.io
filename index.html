@@ -350,8 +350,17 @@
     }
   }
 
-  // Auto-trigger checkout if returning from login
+ // Auto-trigger checkout if returning from login
   document.addEventListener('DOMContentLoaded', () => {
+    
+    // --- NEW CODE: Update Nav Button if Logged In ---
+    const loggedInUser = localStorage.getItem('currentUser');
+    const navBtn = document.getElementById('nav-auth-btn');
+    if (loggedInUser && navBtn) {
+      navBtn.innerHTML = 'Open Dashboard <i class="ti ti-arrow-right ml-1"></i>';
+    }
+    // ------------------------------------------------
+
     const urlParams = new URLSearchParams(window.location.search);
     const planToCheckout = urlParams.get('checkout');
     
