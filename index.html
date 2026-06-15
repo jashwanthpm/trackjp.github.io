@@ -292,8 +292,20 @@
         const isCurrentlyActive = currentSub.status === 'active' && (!currentSub.expires_at || new Date(currentSub.expires_at) > new Date());
         
         if (isCurrentlyActive) {
-          alert("You already have an active plan! Redirecting you to your dashboard.");
-          window.location.href = "app.html";
+          // Create a custom styled popup matching the Sakkhi theme
+          const toast = document.createElement('div');
+          toast.className = 'fixed top-24 left-1/2 -translate-x-1/2 bg-[#0a0a0a] border border-[#c9a96e]/50 text-[#c9a96e] px-6 py-3 rounded-xl shadow-[0_0_30px_rgba(201,169,110,0.15)] z-[100] flex items-center gap-3 opacity-0 transition-opacity duration-300 font-medium text-sm';
+          toast.innerHTML = '<i class="ti ti-circle-check text-lg"></i><span>Active plan found. Redirecting to dashboard...</span>';
+          document.body.appendChild(toast);
+          
+          // Fade it in
+          setTimeout(() => { toast.classList.remove('opacity-0'); }, 10);
+          
+          // Redirect after 1.5 seconds
+          setTimeout(() => {
+            window.location.href = "app.html";
+          }, 1500);
+          
           return; // Stop the checkout process here
         }
       }
