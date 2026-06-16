@@ -1690,9 +1690,9 @@ try {
       if (newBookings.length > 0 && !isDemoMode) {
         setTimeout(() => {
           if (newBookings.length === 1) {
-            showToast(`✨ New booking via Magic Link: ${newBookings[0].name}`, 'success');
+            showBookingAlert('New Booking Arrived! 🎉', newBookings[0].name);
           } else {
-            showToast(`✨ ${newBookings.length} new shoots booked via Magic Links!`, 'success');
+            showBookingAlert(`${newBookings.length} New Bookings! 🎉`, 'Check your shoots list for details.');
           }
         }, 800);
       }
@@ -4132,6 +4132,51 @@ async function executeDeleteAll() {
         console.error(err);
       }
     }
+
+    // --- PREMIUM BOOKING ALERT BANNER ---
+    function showBookingAlert(title, subtitle) {
+      const alertId = 'booking-alert-' + Date.now();
+      const html = `
+        <div id="${alertId}" class="fixed top-4 md:top-8 left-1/2 -translate-x-1/2 z-[10000] flex items-center gap-4 bg-[#0f0f0f] border-2 border-[#c9a96e]/40 p-4 md:p-5 rounded-2xl shadow-[0_10px_40px_rgba(201,169,110,0.15)] transition-all duration-500 transform -translate-y-24 opacity-0 w-[90%] max-w-sm pointer-events-auto">
+          <div class="w-12 h-12 rounded-full bg-emerald-950/40 border border-emerald-900/60 flex items-center justify-center text-emerald-400 text-2xl flex-shrink-0">
+            <i class="ti ti-confetti"></i>
+          </div>
+          <div class="flex-1">
+            <h4 class="text-white font-bold text-sm md:text-base tracking-wide">${title}</h4>
+            <p class="text-xs text-[#c9a96e] mt-1 font-medium">${subtitle}</p>
+          </div>
+          <button onclick="document.getElementById('${alertId}').style.opacity='0'; setTimeout(()=>document.getElementById('${alertId}').remove(), 500)" class="text-neutral-500 hover:text-white p-1 transition">
+            <i class="ti ti-x text-lg"></i>
+          </button>
+        </div>
+      `;
+      
+      document.body.insertAdjacentHTML('beforeend', html);
+      
+      const el = document.getElementById(alertId);
+      
+      // Animate it dropping down
+      setTimeout(() => {
+        el.classList.remove('-translate-y-24', 'opacity-0');
+        el.classList.add('translate-y-0', 'opacity-100');
+      }, 50);
+
+      // Auto-hide after 8 seconds (much longer than standard toasts)
+      setTimeout(() => {
+        if (document.getElementById(alertId)) {
+          el.classList.remove('translate-y-0', 'opacity-100');
+          el.classList.add('-translate-y-24', 'opacity-0');
+          setTimeout(() => el.remove(), 500);
+        }
+      }, 8000);
+    }
+
+    // --- DASHBOARD CHART LOGIC (CUSTOM DATES & REAL DATA) ---
+    let sakkhiChartInstance = null;
+
+    function initChartDates() {
+        const today = new Date();
+    
     // --- DASHBOARD CHART LOGIC (CUSTOM DATES & REAL DATA) ---
     let sakkhiChartInstance = null;
 
