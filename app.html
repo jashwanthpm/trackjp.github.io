@@ -3860,12 +3860,12 @@ async function executeDeleteAll() {
         if (checkExisting && checkExisting.length > 0) {
           await sbFetch(`settings?key=eq.${dbKey}`, {
             method: 'PATCH',
-            body: JSON.stringify({ value: payload })
+            body: JSON.stringify({ value: payload, user_id: currentUser.id }) // Added user_id
           });
         } else {
           await sbFetch('settings', {
             method: 'POST',
-            body: JSON.stringify({ key: dbKey, value: payload })
+            body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id }) // Added user_id
           });
         }
 
@@ -3881,6 +3881,7 @@ async function executeDeleteAll() {
       } catch(err) {
         setSyncStatus('error', 'Link Failed');
         showToast('Database error generating link.', 'error');
+        console.error(err);
       }
     }
   </script>
