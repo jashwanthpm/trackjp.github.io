@@ -13,29 +13,32 @@
     .hide-scrollbar { scrollbar-width: none; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-6 sm:pt-4">
 
-  <div id="booking-container" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl hidden relative z-10">
+  <!-- Main Booking Form Container -->
+  <div id="booking-container" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-5 sm:p-8 shadow-2xl hidden relative z-10">
     
-    <div class="text-center mb-8">
-      <div class="w-16 h-16 bg-neutral-900/50 border border-neutral-800 rounded-full flex items-center justify-center mx-auto mb-3">
-        <i class="ti ti-camera text-2xl text-[#c9a96e]"></i>
+    <div class="text-center mb-5">
+      <div class="w-12 h-12 bg-neutral-900/50 border border-neutral-800 rounded-full flex items-center justify-center mx-auto mb-2">
+        <i class="ti ti-camera text-xl text-[#c9a96e]"></i>
       </div>
-      <h2 id="photographer-name" class="text-xl sm:text-2xl font-bold text-white">Book a Shoot</h2>
-      <p id="studio-welcome" class="text-xs text-[#c9a96e] mt-1 font-medium tracking-wide uppercase">Loading partner details...</p>
+      <h2 id="photographer-name" class="text-xl font-bold text-white">Book a Shoot</h2>
+      <p id="studio-welcome" class="text-[10px] text-[#c9a96e] mt-1 font-bold tracking-widest uppercase">Loading partner details...</p>
     </div>
 
-    <form id="booking-form" class="space-y-4" onsubmit="submitBooking(event)">
+    <form id="booking-form" class="space-y-3.5" onsubmit="submitBooking(event)">
       
+      <!-- Client Name -->
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
-        <input type="text" id="client-name" required placeholder="e.g., Malhotra Family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <input type="text" id="client-name" required placeholder="e.g., Malhotra Family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
+      <!-- Custom Date & Session Picker -->
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 relative">
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Date *</label>
-          <div id="calendar-trigger" onclick="toggleCalendar()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-neutral-400 cursor-pointer flex justify-between items-center transition hover:border-[#c9a96e]">
+          <div id="calendar-trigger" onclick="toggleCalendar()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-neutral-400 cursor-pointer flex justify-between items-center transition hover:border-[#c9a96e]">
             <span id="selected-date-display">Select a date</span>
             <i class="ti ti-calendar text-[#c9a96e]"></i>
           </div>
@@ -44,22 +47,24 @@
 
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session *</label>
-          <select id="event-session" required disabled class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition disabled:opacity-50 disabled:cursor-not-allowed">
+          <select id="event-session" required disabled class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition disabled:opacity-50 disabled:cursor-not-allowed">
             <option value="">Pick a date first</option>
           </select>
         </div>
 
+        <!-- Smart Calendar Dropdown -->
         <div id="calendar-dropdown" class="hidden absolute top-[65px] left-0 w-full sm:w-[320px] bg-[#0a0a0a] border border-neutral-800 rounded-xl shadow-2xl p-4 z-50">
           <div class="flex items-center justify-between mb-4">
-            <button type="button" onclick="calPrev()" class="text-neutral-400 hover:text-white p-1"><i class="ti ti-chevron-left"></i></button>
+            <button type="button" id="cal-prev-btn" onclick="calPrev()" class="text-neutral-400 hover:text-white p-1 transition"><i class="ti ti-chevron-left"></i></button>
             <span id="cal-month-year" class="text-sm font-bold text-[#c9a96e]"></span>
-            <button type="button" onclick="calNext()" class="text-neutral-400 hover:text-white p-1"><i class="ti ti-chevron-right"></i></button>
+            <button type="button" onclick="calNext()" class="text-neutral-400 hover:text-white p-1 transition"><i class="ti ti-chevron-right"></i></button>
           </div>
           <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-neutral-500 font-bold mb-2">
             <div>SU</div><div>MO</div><div>TU</div><div>WE</div><div>TH</div><div>FR</div><div>SA</div>
           </div>
           <div id="cal-grid" class="grid grid-cols-7 gap-1"></div>
           
+          <!-- Calendar Legend -->
           <div class="flex justify-center gap-4 mt-4 pt-3 border-t border-neutral-900 text-[9px] text-neutral-400 uppercase font-bold tracking-wider">
             <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Free</span>
             <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Partial</span>
@@ -68,10 +73,11 @@
         </div>
       </div>
 
+      <!-- Event Type & Location -->
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event *</label>
-          <select id="event-type" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+          <select id="event-type" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
             <option value="Wedding">Wedding</option>
             <option value="Reception">Reception</option>
             <option value="Pre-Wedding">Pre-Wedding</option>
@@ -81,36 +87,48 @@
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location *</label>
-          <input type="text" id="event-location" required placeholder="City or Venue" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          <input type="text" id="event-location" required placeholder="City or Venue" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
       </div>
 
+      <!-- Notes -->
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Additional Notes</label>
-        <textarea id="event-notes" placeholder="Any special requirements..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition h-20 resize-none"></textarea>
+        <textarea id="event-notes" placeholder="Any special requirements..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-16 resize-none"></textarea>
       </div>
 
-      <button type="submit" id="submit-btn" class="w-full mt-4 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold py-3 rounded-lg transition">
+      <button type="submit" id="submit-btn" class="w-full mt-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold py-2.5 rounded-lg transition">
         Submit Request
       </button>
     </form>
   </div>
 
-  <div id="error-container" class="text-center hidden relative z-10">
+  <!-- Studio Upcoming Shoots (Shown below the form) -->
+  <div id="company-shoots-container" class="w-full max-w-md mt-4 hidden relative z-10">
+    <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-2 pl-1">Your Upcoming Shoots</h3>
+    <div id="company-shoots-list" class="space-y-2">
+      <!-- Injected via JavaScript -->
+    </div>
+  </div>
+
+  <!-- Invalid Link Container -->
+  <div id="error-container" class="text-center hidden relative z-10 w-full max-w-md p-8">
     <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto mb-4"><i class="ti ti-alert-triangle"></i></div>
     <h2 class="text-xl font-bold text-white mb-2">Invalid Link</h2>
     <p class="text-xs text-neutral-500">This booking link is invalid or has expired.</p>
   </div>
 
+  <!-- Success Container -->
   <div id="success-container" class="text-center hidden bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl relative z-10">
     <div class="w-16 h-16 bg-emerald-950/30 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-500 text-3xl mx-auto mb-4"><i class="ti ti-circle-check"></i></div>
     <h2 class="text-xl font-bold text-white mb-2">Request Sent!</h2>
     <p class="text-xs text-neutral-500">Your booking request has been securely delivered. We will review the details and confirm shortly.</p>
   </div>
 
-  <div class="mt-8 flex flex-col items-center opacity-50 relative z-10 pb-4">
-    <p class="text-[9px] uppercase tracking-widest text-neutral-500 font-bold mb-1.5">Powered securely by</p>
-    <img src="SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-5 grayscale hover:grayscale-0 transition duration-300"/>
+  <!-- BRANDING FOOTER -->
+  <div class="mt-6 flex flex-col items-center opacity-50 relative z-10 pb-4">
+    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-1.5">Powered securely by</p>
+    <img src="SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 grayscale hover:grayscale-0 transition duration-300"/>
   </div>
 
   <script>
@@ -134,7 +152,7 @@
     let targetUserName = '';
     
     // Calendar state
-    let dateStatusMap = {}; // Will hold { 'YYYY-MM-DD': ['Morning Session'] }
+    let dateStatusMap = {}; 
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
 
@@ -147,11 +165,9 @@
 
       if (encodedData) {
         try {
-          // Add padding back if necessary
           let padded = encodedData;
           while (padded.length % 4 !== 0) padded += '=';
           
-          // Decode URL safe Base64
           const decodedStr = decodeURIComponent(escape(atob(padded)));
           const parts = decodedStr.split('|');
           
@@ -164,7 +180,8 @@
             document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
             document.getElementById('booking-container').classList.remove('hidden');
             
-            await fetchBlockedDates(targetUserId);
+            // Pass the studio name to fetch their specific shoots too!
+            await fetchBlockedDates(targetUserId, activeStudio);
           } else {
             throw new Error("Invalid format");
           }
@@ -175,7 +192,6 @@
         document.getElementById('error-container').classList.remove('hidden');
       }
       
-      // Close dropdown if clicked outside
       document.addEventListener('click', (e) => {
         const cal = document.getElementById('calendar-dropdown');
         const trigger = document.getElementById('calendar-trigger');
@@ -186,17 +202,16 @@
     });
 
     // ==========================================
-    // 3. SMART CALENDAR LOGIC
+    // 3. FETCH DATES & STUDIO SHOOTS
     // ==========================================
-    async function fetchBlockedDates(userId) {
+    async function fetchBlockedDates(userId, studioName) {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date,session`, { headers: HEADERS });
-        const data = await res.json();
+        // 1. Fetch all dates to block the calendar for everyone
+        const resAll = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date,session`, { headers: HEADERS });
+        const dataAll = await resAll.json();
         
-        data.forEach(s => {
+        dataAll.forEach(s => {
           if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
-          
-          // If session is empty or Full Day, treat as fully booked
           if (!s.session || s.session === 'Full Day') {
             dateStatusMap[s.date].push('Morning Session', 'Evening Session', 'Afternoon Session');
           } else {
@@ -204,11 +219,54 @@
           }
         });
         renderCalendarGrid();
+
+        // 2. Fetch upcoming shoots specifically for THIS company to show them their list
+        const todayStr = new Date().toISOString().split('T')[0];
+        const encodedStudio = encodeURIComponent(studioName);
+        const resStudio = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&company=eq.${encodedStudio}&date=gte.${todayStr}&order=date.asc&select=name,date,event,location`, { headers: HEADERS });
+        
+        const studioShoots = await resStudio.json();
+        renderStudioShoots(studioShoots);
+
       } catch (e) {
         console.error("Could not fetch availability.");
       }
     }
 
+    function renderStudioShoots(shoots) {
+      const container = document.getElementById('company-shoots-container');
+      const list = document.getElementById('company-shoots-list');
+      
+      if (!shoots || shoots.length === 0) {
+        return; // Keep it hidden if they have no upcoming shoots
+      }
+
+      container.classList.remove('hidden');
+      let html = '';
+      
+      shoots.forEach(s => {
+        const [y, m, d] = s.date.split('-');
+        const monthName = MONTHS[parseInt(m)-1].substring(0,3);
+        
+        html += `
+          <div class="bg-[#0f0f0f] border border-neutral-900 rounded-lg p-3 flex items-center gap-3">
+            <div class="w-10 h-10 bg-neutral-950 border border-neutral-800 rounded-md flex flex-col items-center justify-center flex-shrink-0">
+              <span class="text-sm font-bold text-[#c9a96e] leading-tight">${d}</span>
+              <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold">${monthName}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-bold text-white truncate">${s.name}</div>
+              <div class="text-[10px] text-neutral-500 mt-0.5">${s.event} • ${s.location || 'TBA'}</div>
+            </div>
+          </div>
+        `;
+      });
+      list.innerHTML = html;
+    }
+
+    // ==========================================
+    // 4. SMART CALENDAR LOGIC
+    // ==========================================
     function toggleCalendar() {
       const cal = document.getElementById('calendar-dropdown');
       cal.classList.toggle('hidden');
@@ -216,6 +274,14 @@
     }
 
     function calPrev() {
+      const currentMonth = new Date().getMonth();
+      const currentYear = new Date().getFullYear();
+      
+      // Prevent clicking if trying to go before the current month
+      if (calYear < currentYear || (calYear === currentYear && calMonth <= currentMonth)) {
+        return;
+      }
+      
       calMonth--;
       if (calMonth < 0) { calMonth = 11; calYear--; }
       renderCalendarGrid();
@@ -230,12 +296,21 @@
     function renderCalendarGrid() {
       document.getElementById('cal-month-year').textContent = `${MONTHS[calMonth]} ${calYear}`;
       
-      const firstDay = new Date(calYear, calMonth, 1).getDay();
-      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
-      
-      // Get today's date at midnight local time to disable past dates
       const today = new Date();
       today.setHours(0,0,0,0);
+      const currentMonth = today.getMonth();
+      const currentYear = today.getFullYear();
+
+      // Hide the Previous arrow if we are on the current month so they can't see the past!
+      const prevBtn = document.getElementById('cal-prev-btn');
+      if (calYear < currentYear || (calYear === currentYear && calMonth <= currentMonth)) {
+        prevBtn.style.visibility = 'hidden';
+      } else {
+        prevBtn.style.visibility = 'visible';
+      }
+      
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
 
       const grid = document.getElementById('cal-grid');
       let html = '';
@@ -243,7 +318,6 @@
       for (let i = 0; i < firstDay; i++) html += '<div></div>';
       
       for (let d = 1; d <= daysInMonth; d++) {
-        // Format YYYY-MM-DD safely based on local timezone assembly
         const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
         const thisDateObj = new Date(calYear, calMonth, d);
         
@@ -265,7 +339,6 @@
           html += `<div class="${buttonClasses}"><span>${d}</span><div class="w-1 h-1 rounded-full ${dotColor} mt-0.5"></div></div>`;
         } else {
           buttonClasses += `text-neutral-300 bg-neutral-900/40 hover:bg-neutral-800 hover:text-white cursor-pointer`;
-          // Attach data-sessions directly to the button for the click handler to read
           html += `<button type="button" onclick="selectDate('${dateStr}', ${isMorningBooked}, ${isEveningBooked})" class="${buttonClasses}">
                      <span>${d}</span>
                      <div class="w-1 h-1 rounded-full ${dotColor} mt-0.5"></div>
@@ -278,15 +351,13 @@
     function selectDate(dateStr, morningBooked, eveningBooked) {
       document.getElementById('event-date').value = dateStr;
       
-      // Update display label to look nice
       const [y, m, d] = dateStr.split('-');
       document.getElementById('selected-date-display').textContent = `${d} ${MONTHS[parseInt(m)-1]} ${y}`;
       document.getElementById('selected-date-display').classList.add('text-white');
       
-      // Update Session Dropdown rules!
       const sessionSelect = document.getElementById('event-session');
       sessionSelect.disabled = false;
-      sessionSelect.innerHTML = ''; // clear options
+      sessionSelect.innerHTML = ''; 
       
       if (!morningBooked && !eveningBooked) {
         sessionSelect.innerHTML += `<option value="Full Day">Full Day</option>`;
@@ -298,12 +369,11 @@
         sessionSelect.innerHTML += `<option value="Evening Session">Evening Session</option>`;
       }
 
-      // Close calendar
       document.getElementById('calendar-dropdown').classList.add('hidden');
     }
 
     // ==========================================
-    // 4. SUBMIT FORM
+    // 5. SUBMIT FORM
     // ==========================================
     async function submitBooking(e) {
       e.preventDefault();
@@ -340,6 +410,7 @@
         if (!res.ok) throw new Error("Database rejection");
 
         document.getElementById('booking-container').classList.add('hidden');
+        document.getElementById('company-shoots-container').classList.add('hidden');
         document.getElementById('success-container').classList.remove('hidden');
       } catch (err) {
         alert("Something went wrong securely delivering the request. Please try again.");
