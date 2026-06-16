@@ -159,24 +159,23 @@
     let calYear = new Date().getFullYear();
 
     // ==========================================
-    // 2. DECODE URL & INITIALIZE
+    // 2. READ SHORTCODE & INITIALIZE
     // ==========================================
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const encodedData = urlParams.get('b'); 
+      const refCode = urlParams.get('ref'); // Look for the tiny 'ref' code
 
-      if (encodedData) {
+      if (refCode) {
         try {
-          let padded = encodedData;
-          while (padded.length % 4 !== 0) padded += '=';
-          
-          const decodedStr = decodeURIComponent(escape(atob(padded)));
-          const parts = decodedStr.split('|');
-          
-          if (parts.length === 3) {
-            targetUserId = parts[0];
-            activeStudio = parts[1];
-            targetUserName = parts[2];
+          // Ask Supabase for the details attached to this shortcode
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.link_${refCode}&select=value`, { headers: HEADERS });
+          const data = await res.json();
+
+          if (data && data.length > 0) {
+            const payload = data[0].value;
+            targetUserId = payload.u;
+            activeStudio = payload.s;
+            targetUserName = payload.n;
 
             document.getElementById('photographer-name').textContent = `Book with ${targetUserName}`;
             document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
@@ -185,7 +184,7 @@
             // Pass the studio name to fetch their specific shoots too!
             await fetchBlockedDates(targetUserId, activeStudio);
           } else {
-            throw new Error("Invalid format");
+            throw new Error("Link expired or invalid");
           }
         } catch (e) {
           document.getElementById('error-container').classList.remove('hidden');
@@ -194,6 +193,7 @@
         document.getElementById('error-container').classList.remove('hidden');
       }
       
+      // Close dropdown if clicked outside
       document.addEventListener('click', (e) => {
         const cal = document.getElementById('calendar-dropdown');
         const trigger = document.getElementById('calendar-trigger');
