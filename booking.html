@@ -6,17 +6,23 @@
   <title>Book a Shoot</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   <style>
     body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; }
+    .hide-scrollbar::-webkit-scrollbar { display: none; }
+    .hide-scrollbar { scrollbar-width: none; }
   </style>
 </head>
-<body class="min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen flex flex-col items-center justify-center p-4">
 
-  <div id="booking-container" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl hidden">
+  <div id="booking-container" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-6 sm:p-8 shadow-2xl hidden relative z-10">
     
     <div class="text-center mb-8">
-      <h2 class="text-2xl font-bold text-[#c9a96e]">Shoot Request</h2>
-      <p id="studio-welcome" class="text-xs text-neutral-500 mt-2">Loading partner details...</p>
+      <div class="w-16 h-16 bg-neutral-900/50 border border-neutral-800 rounded-full flex items-center justify-center mx-auto mb-3">
+        <i class="ti ti-camera text-2xl text-[#c9a96e]"></i>
+      </div>
+      <h2 id="photographer-name" class="text-xl sm:text-2xl font-bold text-white">Book a Shoot</h2>
+      <p id="studio-welcome" class="text-xs text-[#c9a96e] mt-1 font-medium tracking-wide uppercase">Loading partner details...</p>
     </div>
 
     <form id="booking-form" class="space-y-4" onsubmit="submitBooking(event)">
@@ -26,10 +32,40 @@
         <input type="text" id="client-name" required placeholder="e.g., Malhotra Family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Date *</label>
-        <input type="date" id="event-date" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-        <p id="date-error" class="text-[10px] text-red-500 hidden mt-1">This date is already booked. Please select another.</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 relative">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Date *</label>
+          <div id="calendar-trigger" onclick="toggleCalendar()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-neutral-400 cursor-pointer flex justify-between items-center transition hover:border-[#c9a96e]">
+            <span id="selected-date-display">Select a date</span>
+            <i class="ti ti-calendar text-[#c9a96e]"></i>
+          </div>
+          <input type="hidden" id="event-date" required />
+        </div>
+
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session *</label>
+          <select id="event-session" required disabled class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition disabled:opacity-50 disabled:cursor-not-allowed">
+            <option value="">Pick a date first</option>
+          </select>
+        </div>
+
+        <div id="calendar-dropdown" class="hidden absolute top-[65px] left-0 w-full sm:w-[320px] bg-[#0a0a0a] border border-neutral-800 rounded-xl shadow-2xl p-4 z-50">
+          <div class="flex items-center justify-between mb-4">
+            <button type="button" onclick="calPrev()" class="text-neutral-400 hover:text-white p-1"><i class="ti ti-chevron-left"></i></button>
+            <span id="cal-month-year" class="text-sm font-bold text-[#c9a96e]"></span>
+            <button type="button" onclick="calNext()" class="text-neutral-400 hover:text-white p-1"><i class="ti ti-chevron-right"></i></button>
+          </div>
+          <div class="grid grid-cols-7 gap-1 text-center text-[10px] text-neutral-500 font-bold mb-2">
+            <div>SU</div><div>MO</div><div>TU</div><div>WE</div><div>TH</div><div>FR</div><div>SA</div>
+          </div>
+          <div id="cal-grid" class="grid grid-cols-7 gap-1"></div>
+          
+          <div class="flex justify-center gap-4 mt-4 pt-3 border-t border-neutral-900 text-[9px] text-neutral-400 uppercase font-bold tracking-wider">
+            <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500"></div> Free</span>
+            <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-amber-500"></div> Partial</span>
+            <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-red-500"></div> Booked</span>
+          </div>
+        </div>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -44,18 +80,9 @@
           </select>
         </div>
         <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session *</label>
-          <select id="event-session" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-            <option value="Full Day">Full Day</option>
-            <option value="Morning Session">Morning</option>
-            <option value="Evening Session">Evening</option>
-          </select>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location *</label>
+          <input type="text" id="event-location" required placeholder="City or Venue" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
-      </div>
-
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location *</label>
-        <input type="text" id="event-location" required placeholder="City or Venue" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -69,24 +96,29 @@
     </form>
   </div>
 
-  <div id="error-container" class="text-center hidden">
-    <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto mb-4">⚠</div>
+  <div id="error-container" class="text-center hidden relative z-10">
+    <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto mb-4"><i class="ti ti-alert-triangle"></i></div>
     <h2 class="text-xl font-bold text-white mb-2">Invalid Link</h2>
     <p class="text-xs text-neutral-500">This booking link is invalid or has expired.</p>
   </div>
 
-  <div id="success-container" class="text-center hidden bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl">
-    <div class="w-16 h-16 bg-emerald-950/30 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-500 text-3xl mx-auto mb-4">✓</div>
+  <div id="success-container" class="text-center hidden bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl relative z-10">
+    <div class="w-16 h-16 bg-emerald-950/30 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-500 text-3xl mx-auto mb-4"><i class="ti ti-circle-check"></i></div>
     <h2 class="text-xl font-bold text-white mb-2">Request Sent!</h2>
-    <p class="text-xs text-neutral-500">We have received your booking request. We will review the details and confirm shortly.</p>
+    <p class="text-xs text-neutral-500">Your booking request has been securely delivered. We will review the details and confirm shortly.</p>
+  </div>
+
+  <div class="mt-8 flex flex-col items-center opacity-50 relative z-10 pb-4">
+    <p class="text-[9px] uppercase tracking-widest text-neutral-500 font-bold mb-1.5">Powered securely by</p>
+    <img src="SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-5 grayscale hover:grayscale-0 transition duration-300"/>
   </div>
 
   <script>
     // ==========================================
     // 1. CONFIGURATION
     // ==========================================
-    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co'; // Your URL
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'; // Paste your full key here!
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co'; 
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'; // <--- PASTE YOUR KEY HERE!
 
     const HEADERS = {
       'Content-Type': 'application/json',
@@ -95,90 +127,200 @@
       'Prefer': 'return=representation'
     };
 
+    const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
     let targetUserId = '';
     let activeStudio = '';
-    let blockedDates = [];
+    let targetUserName = '';
+    
+    // Calendar state
+    let dateStatusMap = {}; // Will hold { 'YYYY-MM-DD': ['Morning Session'] }
+    let calMonth = new Date().getMonth();
+    let calYear = new Date().getFullYear();
 
     // ==========================================
     // 2. DECODE URL & INITIALIZE
     // ==========================================
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
-      const encodedData = urlParams.get('b'); // Look for the 'b' parameter
+      const encodedData = urlParams.get('b'); 
 
       if (encodedData) {
         try {
-          // Decode the Base64 URL parameter into a JSON object
-          const decoded = JSON.parse(atob(encodedData));
-          targetUserId = decoded.u; // The specific Sakkhi User ID
-          activeStudio = decoded.s; // The Studio Name
+          // Add padding back if necessary
+          let padded = encodedData;
+          while (padded.length % 4 !== 0) padded += '=';
+          
+          // Decode URL safe Base64
+          const decodedStr = decodeURIComponent(escape(atob(padded)));
+          const parts = decodedStr.split('|');
+          
+          if (parts.length === 3) {
+            targetUserId = parts[0];
+            activeStudio = parts[1];
+            targetUserName = parts[2];
 
-          if (targetUserId && activeStudio) {
-            document.getElementById('studio-welcome').textContent = `Booking exclusively for ${activeStudio}`;
+            document.getElementById('photographer-name').textContent = `Book with ${targetUserName}`;
+            document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
             document.getElementById('booking-container').classList.remove('hidden');
             
-            // Fetch dates for THIS specific user
             await fetchBlockedDates(targetUserId);
           } else {
-            throw new Error("Missing data");
+            throw new Error("Invalid format");
           }
         } catch (e) {
-          // If decoding fails (someone messed with the URL), show error
           document.getElementById('error-container').classList.remove('hidden');
         }
       } else {
         document.getElementById('error-container').classList.remove('hidden');
       }
-
-      // Restrict past dates on the calendar
-      const today = new Date().toISOString().split('T')[0];
-      document.getElementById('event-date').setAttribute('min', today);
+      
+      // Close dropdown if clicked outside
+      document.addEventListener('click', (e) => {
+        const cal = document.getElementById('calendar-dropdown');
+        const trigger = document.getElementById('calendar-trigger');
+        if (!cal.contains(e.target) && !trigger.contains(e.target)) {
+          cal.classList.add('hidden');
+        }
+      });
     });
 
     // ==========================================
-    // 3. FETCH ANONYMOUS DATES FOR THIS USER
+    // 3. SMART CALENDAR LOGIC
     // ==========================================
     async function fetchBlockedDates(userId) {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date`, { headers: HEADERS });
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date,session`, { headers: HEADERS });
         const data = await res.json();
-        blockedDates = data.map(shoot => shoot.date);
+        
+        data.forEach(s => {
+          if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
+          
+          // If session is empty or Full Day, treat as fully booked
+          if (!s.session || s.session === 'Full Day') {
+            dateStatusMap[s.date].push('Morning Session', 'Evening Session', 'Afternoon Session');
+          } else {
+            dateStatusMap[s.date].push(s.session);
+          }
+        });
+        renderCalendarGrid();
       } catch (e) {
         console.error("Could not fetch availability.");
       }
     }
 
-    document.getElementById('event-date').addEventListener('change', (e) => {
-      const selectedDate = e.target.value;
-      const errorMsg = document.getElementById('date-error');
+    function toggleCalendar() {
+      const cal = document.getElementById('calendar-dropdown');
+      cal.classList.toggle('hidden');
+      renderCalendarGrid();
+    }
+
+    function calPrev() {
+      calMonth--;
+      if (calMonth < 0) { calMonth = 11; calYear--; }
+      renderCalendarGrid();
+    }
+
+    function calNext() {
+      calMonth++;
+      if (calMonth > 11) { calMonth = 0; calYear++; }
+      renderCalendarGrid();
+    }
+
+    function renderCalendarGrid() {
+      document.getElementById('cal-month-year').textContent = `${MONTHS[calMonth]} ${calYear}`;
       
-      if (blockedDates.includes(selectedDate)) {
-        errorMsg.classList.remove('hidden');
-        e.target.value = ''; 
-      } else {
-        errorMsg.classList.add('hidden');
+      const firstDay = new Date(calYear, calMonth, 1).getDay();
+      const daysInMonth = new Date(calYear, calMonth + 1, 0).getDate();
+      
+      // Get today's date at midnight local time to disable past dates
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      const grid = document.getElementById('cal-grid');
+      let html = '';
+      
+      for (let i = 0; i < firstDay; i++) html += '<div></div>';
+      
+      for (let d = 1; d <= daysInMonth; d++) {
+        // Format YYYY-MM-DD safely based on local timezone assembly
+        const dateStr = `${calYear}-${String(calMonth + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+        const thisDateObj = new Date(calYear, calMonth, d);
+        
+        const isPast = thisDateObj < today;
+        const bookedSessions = dateStatusMap[dateStr] || [];
+        
+        let isMorningBooked = bookedSessions.includes('Morning Session');
+        let isEveningBooked = bookedSessions.includes('Evening Session') || bookedSessions.includes('Afternoon Session');
+        let isFullyBooked = isMorningBooked && isEveningBooked;
+
+        let dotColor = 'bg-emerald-500'; // Free
+        if (isFullyBooked) dotColor = 'bg-red-500';
+        else if (isMorningBooked || isEveningBooked) dotColor = 'bg-amber-500';
+
+        let buttonClasses = `p-2 rounded-lg text-sm font-medium relative transition flex flex-col items-center justify-center h-10 w-full mx-auto `;
+        
+        if (isPast || isFullyBooked) {
+          buttonClasses += `text-neutral-600 bg-neutral-900/20 cursor-not-allowed ${isFullyBooked ? 'line-through decoration-red-900/50' : ''}`;
+          html += `<div class="${buttonClasses}"><span>${d}</span><div class="w-1 h-1 rounded-full ${dotColor} mt-0.5"></div></div>`;
+        } else {
+          buttonClasses += `text-neutral-300 bg-neutral-900/40 hover:bg-neutral-800 hover:text-white cursor-pointer`;
+          // Attach data-sessions directly to the button for the click handler to read
+          html += `<button type="button" onclick="selectDate('${dateStr}', ${isMorningBooked}, ${isEveningBooked})" class="${buttonClasses}">
+                     <span>${d}</span>
+                     <div class="w-1 h-1 rounded-full ${dotColor} mt-0.5"></div>
+                   </button>`;
+        }
       }
-    });
+      grid.innerHTML = html;
+    }
+
+    function selectDate(dateStr, morningBooked, eveningBooked) {
+      document.getElementById('event-date').value = dateStr;
+      
+      // Update display label to look nice
+      const [y, m, d] = dateStr.split('-');
+      document.getElementById('selected-date-display').textContent = `${d} ${MONTHS[parseInt(m)-1]} ${y}`;
+      document.getElementById('selected-date-display').classList.add('text-white');
+      
+      // Update Session Dropdown rules!
+      const sessionSelect = document.getElementById('event-session');
+      sessionSelect.disabled = false;
+      sessionSelect.innerHTML = ''; // clear options
+      
+      if (!morningBooked && !eveningBooked) {
+        sessionSelect.innerHTML += `<option value="Full Day">Full Day</option>`;
+      }
+      if (!morningBooked) {
+        sessionSelect.innerHTML += `<option value="Morning Session">Morning Session</option>`;
+      }
+      if (!eveningBooked) {
+        sessionSelect.innerHTML += `<option value="Evening Session">Evening Session</option>`;
+      }
+
+      // Close calendar
+      document.getElementById('calendar-dropdown').classList.add('hidden');
+    }
 
     // ==========================================
-    // 4. SUBMIT TO THE CORRECT USER'S DATABASE
+    // 4. SUBMIT FORM
     // ==========================================
     async function submitBooking(e) {
       e.preventDefault();
       
       const btn = document.getElementById('submit-btn');
-      btn.textContent = 'Sending...';
+      btn.innerHTML = '<i class="ti ti-loader animate-spin mr-2"></i> Sending...';
       btn.disabled = true;
 
       const newShoot = {
         id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        user_id: targetUserId, // Assigned to the user from the link!
+        user_id: targetUserId, 
         name: document.getElementById('client-name').value.trim(),
         date: document.getElementById('event-date').value,
         event: document.getElementById('event-type').value,
         session: document.getElementById('event-session').value,
         location: document.getElementById('event-location').value.trim(),
-        company: activeStudio, // Assigned from the link!
+        company: activeStudio, 
         notes: "[WEB LEAD] " + document.getElementById('event-notes').value.trim(),
         amount: 0,
         expense: 0,
@@ -200,8 +342,8 @@
         document.getElementById('booking-container').classList.add('hidden');
         document.getElementById('success-container').classList.remove('hidden');
       } catch (err) {
-        alert("Something went wrong. Please try again.");
-        btn.textContent = 'Submit Request';
+        alert("Something went wrong securely delivering the request. Please try again.");
+        btn.innerHTML = 'Submit Request';
         btn.disabled = false;
       }
     }
