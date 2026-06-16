@@ -413,31 +413,33 @@
                 <i class="ti ti-chart-pie text-[#c9a96e] text-lg"></i>
                 <h3 class="text-base font-bold text-white">Payment Status</h3>
               </div>
-              <div id="dash-payments" class="space-y-3"></div>
+             416          <div id="dash-payments" class="space-y-3"></div>
+      </div>
+        
+       <!-- Custom Financial Chart (Small) -->
+       <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl p-4 sm:p-5 mt-6 w-full">
+         <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
+            <div>
+            <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Financial Trends</h3>
             </div>
-          </div>
-          <!-- Custom Financial Chart (Small) -->
-<div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl p-4 sm:p-5 mt-6 w-full">
-  <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-4 gap-3">
-    <div>
-      <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Financial Trends</h3>
-    </div>
-    
-    <!-- Custom Date Pickers -->
-    <div class="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded-lg p-1 px-2">
-      <input type="date" id="chart-start-date" onchange="updateDashboardChart()" class="bg-transparent text-[10px] font-bold text-[#c9a96e] outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
-      <span class="text-neutral-600 text-xs">-</span>
-      <input type="date" id="chart-end-date" onchange="updateDashboardChart()" class="bg-transparent text-[10px] font-bold text-[#c9a96e] outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
-    </div>
-  </div>
+           
+           <!-- Custom Date Pickers -->
+            <div class="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded-lg p-1 px-2">
+             <input type="date" id="chart-start-date" onchange="updateDashboardChart()" class="bg-transparent text-[10px] font-bold text-[#c9a96e] outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+              <span class="text-neutral-600 text-xs">-</span>
+             <input type="date" id="chart-end-date" onchange="updateDashboardChart()" class="bg-transparent text-[10px] font-bold text-[#c9a96e] outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+           </div>
+         </div>
 
-  <!-- The Chart Canvas (Reduced Height) -->
-  <div class="relative h-48 w-full">
-    <canvas id="sakkhiChart"></canvas>
-  </div>
-</div>
-        </div>
-      </section>
+          <!-- The Chart Canvas (Reduced Height) -->
+          <div class="relative h-48 w-full">
+            <canvas id="sakkhiChart"></canvas>
+          </div>
+       </div>
+
+      </div> <!-- Closes the lg:col-span-5 column -->
+   </div> <!-- Closes the lg:grid-cols-12 grid -->
+  </section>
 
       <section id="section-calendar" class="app-section hidden space-y-6">
         <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
