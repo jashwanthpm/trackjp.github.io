@@ -1659,12 +1659,30 @@ try {
       console.warn("Could not load subscription data.");
     }
     if(bar) bar.style.width = "100%";
+    
+    // --- MAGIC LINK NOTIFICATION LOGIC ---
+    const lastSeen = localStorage.getItem('sakkhi_last_seen');
+    const newBookings = lastSeen ? _shoots.filter(s => s.created && s.created > lastSeen) : [];
+    localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
+    // -------------------------------------
+
     setTimeout(() => {
       setSyncStatus('synced', 'Synced with Cloud');
       document.getElementById('loading-screen').classList.add('hidden');
       applyPrivacyUIVisibility();
       updateAccountDisplay();
       renderDashboard();
+
+      // Show notification if external bookings came in
+      if (newBookings.length > 0 && !isDemoMode) {
+        setTimeout(() => {
+          if (newBookings.length === 1) {
+            showToast(`✨ New booking via Magic Link: ${newBookings[0].name}`, 'success');
+          } else {
+            showToast(`✨ ${newBookings.length} new shoots booked via Magic Links!`, 'success');
+          }
+        }, 800); // Slight delay so it appears nicely after the app loads
+      }
     }, 400);
 
   } catch (e) {
@@ -1706,6 +1724,9 @@ try {
         }
         setSyncStatus('synced', 'Saved Successfully');
         showToast('Shoot record saved successfully');
+        
+        // Update "last seen" so your own shoots don't trigger the alert on refresh
+        localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
       } catch (e) {
         setSyncStatus('error', 'Save Failed');
         showToast('Push Error: ' + e.message, 'error');
