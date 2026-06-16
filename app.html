@@ -3832,29 +3832,29 @@ async function executeDeleteAll() {
     showToast('Failed to erase data: ' + e.message, 'error');
   }
 }
-    // --- MAGIC LINK GENERATOR ---
+    // --- MAGIC LINK GENERATOR (OPTIMIZED) ---
     function copyBookingLink(companyName) {
       if (!currentUser || !currentUser.id) {
         showToast('You must be logged in to generate a link.', 'error');
         return;
       }
       
-      // Create a payload with the User ID and the Company Name
-      const payload = {
-        u: currentUser.id,
-        s: companyName
-      };
+      // Grab user's name (fallback to email or 'Photographer')
+      const userName = currentUser.user_metadata?.name || currentUser.name || 'Photographer';
       
-      // Scramble it into Base64 format
-      const encodedPayload = btoa(JSON.stringify(payload));
+      // Create a compact string: id|company|name
+      const rawString = `${currentUser.id}|${companyName}|${userName}`;
       
-      // Build the final URL (uses your current domain)
+      // Scramble into a shorter Base64 string (UTF-8 safe) and remove padding '='
+      const encodedPayload = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
+      
+      // Build the final URL
       const baseUrl = window.location.href.replace('app.html', '').replace('#', '').split('?')[0];
       const magicLink = baseUrl + 'booking.html?b=' + encodedPayload;
       
       // Copy to clipboard
       navigator.clipboard.writeText(magicLink).then(() => {
-        showToast(`Booking link for ${companyName} copied to clipboard!`, 'success');
+        showToast(`Short booking link for ${companyName} copied!`, 'success');
       }).catch(err => {
         showToast('Failed to copy link. Try again.', 'error');
       });
