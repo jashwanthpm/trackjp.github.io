@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Book a Shoot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; }
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+
+  <div id="booking-container" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl hidden">
+    
+    <div class="text-center mb-8">
+      <h2 class="text-2xl font-bold text-[#c9a96e]">Shoot Request</h2>
+      <p id="studio-welcome" class="text-xs text-neutral-500 mt-2">Loading partner details...</p>
+    </div>
+
+    <form id="booking-form" class="space-y-4" onsubmit="submitBooking(event)">
+      
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
+        <input type="text" id="client-name" required placeholder="e.g., Malhotra Family" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Date *</label>
+        <input type="date" id="event-date" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <p id="date-error" class="text-[10px] text-red-500 hidden mt-1">This date is already booked. Please select another.</p>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event *</label>
+          <select id="event-type" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+            <option value="Wedding">Wedding</option>
+            <option value="Reception">Reception</option>
+            <option value="Pre-Wedding">Pre-Wedding</option>
+            <option value="Corporate">Corporate</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Session *</label>
+          <select id="event-session" required class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+            <option value="Full Day">Full Day</option>
+            <option value="Morning Session">Morning</option>
+            <option value="Evening Session">Evening</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location *</label>
+        <input type="text" id="event-location" required placeholder="City or Venue" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Additional Notes</label>
+        <textarea id="event-notes" placeholder="Any special requirements..." class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition h-20 resize-none"></textarea>
+      </div>
+
+      <button type="submit" id="submit-btn" class="w-full mt-4 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold py-3 rounded-lg transition">
+        Submit Request
+      </button>
+    </form>
+  </div>
+
+  <div id="error-container" class="text-center hidden">
+    <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto mb-4">⚠</div>
+    <h2 class="text-xl font-bold text-white mb-2">Invalid Link</h2>
+    <p class="text-xs text-neutral-500">This booking link is invalid or has expired.</p>
+  </div>
+
+  <div id="success-container" class="text-center hidden bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md p-8 shadow-2xl">
+    <div class="w-16 h-16 bg-emerald-950/30 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-500 text-3xl mx-auto mb-4">✓</div>
+    <h2 class="text-xl font-bold text-white mb-2">Request Sent!</h2>
+    <p class="text-xs text-neutral-500">We have received your booking request. We will review the details and confirm shortly.</p>
+  </div>
+
+  <script>
+    // ==========================================
+    // 1. CONFIGURATION
+    // ==========================================
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co'; // Your URL
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...'; // Paste your full key here!
+
+    const HEADERS = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    };
+
+    let targetUserId = '';
+    let activeStudio = '';
+    let blockedDates = [];
+
+    // ==========================================
+    // 2. DECODE URL & INITIALIZE
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      const urlParams = new URLSearchParams(window.location.search);
+      const encodedData = urlParams.get('b'); // Look for the 'b' parameter
+
+      if (encodedData) {
+        try {
+          // Decode the Base64 URL parameter into a JSON object
+          const decoded = JSON.parse(atob(encodedData));
+          targetUserId = decoded.u; // The specific Sakkhi User ID
+          activeStudio = decoded.s; // The Studio Name
+
+          if (targetUserId && activeStudio) {
+            document.getElementById('studio-welcome').textContent = `Booking exclusively for ${activeStudio}`;
+            document.getElementById('booking-container').classList.remove('hidden');
+            
+            // Fetch dates for THIS specific user
+            await fetchBlockedDates(targetUserId);
+          } else {
+            throw new Error("Missing data");
+          }
+        } catch (e) {
+          // If decoding fails (someone messed with the URL), show error
+          document.getElementById('error-container').classList.remove('hidden');
+        }
+      } else {
+        document.getElementById('error-container').classList.remove('hidden');
+      }
+
+      // Restrict past dates on the calendar
+      const today = new Date().toISOString().split('T')[0];
+      document.getElementById('event-date').setAttribute('min', today);
+    });
+
+    // ==========================================
+    // 3. FETCH ANONYMOUS DATES FOR THIS USER
+    // ==========================================
+    async function fetchBlockedDates(userId) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date`, { headers: HEADERS });
+        const data = await res.json();
+        blockedDates = data.map(shoot => shoot.date);
+      } catch (e) {
+        console.error("Could not fetch availability.");
+      }
+    }
+
+    document.getElementById('event-date').addEventListener('change', (e) => {
+      const selectedDate = e.target.value;
+      const errorMsg = document.getElementById('date-error');
+      
+      if (blockedDates.includes(selectedDate)) {
+        errorMsg.classList.remove('hidden');
+        e.target.value = ''; 
+      } else {
+        errorMsg.classList.add('hidden');
+      }
+    });
+
+    // ==========================================
+    // 4. SUBMIT TO THE CORRECT USER'S DATABASE
+    // ==========================================
+    async function submitBooking(e) {
+      e.preventDefault();
+      
+      const btn = document.getElementById('submit-btn');
+      btn.textContent = 'Sending...';
+      btn.disabled = true;
+
+      const newShoot = {
+        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
+        user_id: targetUserId, // Assigned to the user from the link!
+        name: document.getElementById('client-name').value.trim(),
+        date: document.getElementById('event-date').value,
+        event: document.getElementById('event-type').value,
+        session: document.getElementById('event-session').value,
+        location: document.getElementById('event-location').value.trim(),
+        company: activeStudio, // Assigned from the link!
+        notes: "[WEB LEAD] " + document.getElementById('event-notes').value.trim(),
+        amount: 0,
+        expense: 0,
+        expense_status: 'pending',
+        pay_status: 'pending',
+        part_paid: 0,
+        created: new Date().toISOString()
+      };
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots`, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify(newShoot)
+        });
+
+        if (!res.ok) throw new Error("Database rejection");
+
+        document.getElementById('booking-container').classList.add('hidden');
+        document.getElementById('success-container').classList.remove('hidden');
+      } catch (err) {
+        alert("Something went wrong. Please try again.");
+        btn.textContent = 'Submit Request';
+        btn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
