@@ -1820,16 +1820,6 @@ try {
         if (el) el.classList.add('active');
       });
 
-      const activeBtn = document.querySelector(`[data-tab="${tab}"]`);
-      if(activeBtn) {
-        activeBtn.classList.add('active');
-      }
-    }
-
-      if (tab === 'profile') {
-        updateAccountDisplay();
-      }
-
     function setAppTheme(theme, skipSave = false) {
       document.body.setAttribute('data-theme', theme);
       
