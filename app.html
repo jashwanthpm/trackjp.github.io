@@ -735,9 +735,32 @@
                     <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
                     <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
                       <i class="ti ti-check"></i> Update
+                    
                     </button>
                   </div>
                 </div>
+
+              <div class="border-t border-neutral-800 pt-5 mt-5 space-y-5">
+                  <div class="border-b border-neutral-800 pb-4">
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-key text-emerald-500"></i> Account Password
+                    </h3>
+                    <p class="text-xs text-neutral-500 mt-1">Set a password so you can log in with your email instead of Google.</p>
+                  </div>
+
+                  <div class="space-y-3">
+                    <div class="flex gap-2">
+                      <input id="new-login-password" type="password" placeholder="New password (min 6 chars)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition"/>
+                      <button onclick="setNewPassword()" id="set-pwd-btn" class="flex items-center justify-center min-w-[90px] gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                        <i class="ti ti-check"></i> Save
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                </div>
+            </div>
+
+            <div id="account-whatsapp" class="account-content-section">
               </div>
             </div>
 
@@ -2505,7 +2528,59 @@ try {
       document.getElementById('acc-pin').value = ''; 
       showToast('Financial Privacy PIN updated securely.');
     }
+    
+// ==========================================
+    // SET ACCOUNT PASSWORD (FOR GOOGLE USERS)
+    // ==========================================
+    async function setNewPassword() {
+      const pwdInput = document.getElementById('new-login-password');
+      const newPassword = pwdInput.value;
 
+      if (!newPassword || newPassword.length < 6) {
+        showToast('Password must be at least 6 characters long.', 'error');
+        return;
+      }
+
+      if (!currentUser || !currentUser.token) {
+        showToast('Authentication error. Please log out and log back in.', 'error');
+        return;
+      }
+
+      const btn = document.getElementById('set-pwd-btn');
+      const originalText = btn.innerHTML;
+      btn.innerHTML = '<i class="ti ti-loader"></i>...';
+      btn.disabled = true;
+
+      try {
+        // We use the user's personal access token to authorize the password change
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${currentUser.token}`
+          },
+          body: JSON.stringify({ password: newPassword })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error_description || data.msg || 'Failed to set password');
+        }
+
+        showToast('Password set successfully! You can now use it to log in.', 'success');
+        pwdInput.value = ''; // Clear the input
+        
+      } catch (error) {
+        console.error(error);
+        showToast(error.message, 'error');
+      } finally {
+        btn.innerHTML = originalText;
+        btn.disabled = false;
+      }
+    }
+    
     function exportAllDataToPDF() {
       if (!_shoots.length) {
         showToast('No data to export', 'error');
