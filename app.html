@@ -1660,11 +1660,24 @@ try {
     }
     if(bar) bar.style.width = "100%";
     
-    // --- MAGIC LINK NOTIFICATION LOGIC ---
-    const lastSeen = localStorage.getItem('sakkhi_last_seen');
-    const newBookings = lastSeen ? _shoots.filter(s => s.created && s.created > lastSeen) : [];
+    // --- ROBUST MAGIC LINK NOTIFICATION LOGIC ---
+    const lastSeenStr = localStorage.getItem('sakkhi_last_seen');
+    let newBookings = [];
+
+    if (lastSeenStr) {
+      // Convert to exact milliseconds and subtract a 5-second buffer for server/browser clock differences
+      const lastSeenTime = new Date(lastSeenStr).getTime() - 5000; 
+      
+      newBookings = _shoots.filter(s => {
+        if (!s.created) return false;
+        const shootTime = new Date(s.created).getTime();
+        return shootTime > lastSeenTime;
+      });
+    }
+
+    // Update the tracker to right now
     localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
-    // -------------------------------------
+    // ---------------------------------------------
 
     setTimeout(() => {
       setSyncStatus('synced', 'Synced with Cloud');
@@ -1681,7 +1694,7 @@ try {
           } else {
             showToast(`✨ ${newBookings.length} new shoots booked via Magic Links!`, 'success');
           }
-        }, 800); // Slight delay so it appears nicely after the app loads
+        }, 800);
       }
     }, 400);
 
