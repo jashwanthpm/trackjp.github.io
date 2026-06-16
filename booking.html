@@ -376,21 +376,21 @@
         let isEveningBooked = bookedSessions.includes('Evening Session') || bookedSessions.includes('Afternoon Session');
         let isFullyBooked = isMorningBooked && isEveningBooked;
 
-        // Add subtle glows to the calendar dots
+        // Apply glows to the dots
         let dotColor = 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'; 
         if (isFullyBooked) dotColor = 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.5)]';
         else if (isMorningBooked || isEveningBooked) dotColor = 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]';
 
-        let buttonClasses = `p-2 rounded-xl text-sm font-medium relative transition-all duration-200 flex flex-col items-center justify-center h-10 w-full mx-auto `;
+        let buttonClasses = `w-10 h-10 rounded-full flex flex-col items-center justify-center transition-all duration-300 mx-auto group `;
         
         if (isPast || isFullyBooked) {
-          buttonClasses += `text-neutral-600 bg-white/5 cursor-not-allowed ${isFullyBooked ? 'opacity-50' : ''}`;
-          html += `<div class="${buttonClasses}"><span>${d}</span><div class="w-1 h-1 rounded-full ${dotColor} mt-1"></div></div>`;
+          buttonClasses += `text-neutral-600 bg-neutral-900/40 cursor-not-allowed ${isFullyBooked ? 'opacity-50' : ''}`;
+          html += `<div class="${buttonClasses}"><span class="text-sm leading-none mt-1">${d}</span><div class="w-1 h-1 rounded-full ${dotColor} mt-1"></div></div>`;
         } else {
-          buttonClasses += `text-neutral-200 bg-white/5 border border-transparent hover:bg-[#c9a96e]/10 hover:border-[#c9a96e]/30 hover:text-[#c9a96e] cursor-pointer`;
+          buttonClasses += `text-neutral-200 bg-neutral-900 hover:bg-[#c9a96e] hover:text-black hover:shadow-[0_0_15px_rgba(201,169,110,0.3)] cursor-pointer`;
           html += `<button type="button" onclick="selectDate('${dateStr}', ${isMorningBooked}, ${isEveningBooked})" class="${buttonClasses}">
-                     <span>${d}</span>
-                     <div class="w-1 h-1 rounded-full ${dotColor} mt-1"></div>
+                     <span class="text-sm leading-none mt-1 group-hover:font-bold">${d}</span>
+                     <div class="w-1.5 h-1.5 rounded-full ${dotColor} mt-1 group-hover:bg-black group-hover:shadow-none transition-colors"></div>
                    </button>`;
         }
       }
