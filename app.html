@@ -3579,7 +3579,7 @@ function updateAccountDisplay() {
       }
     }
 
-    // CSV Import function - IMPROVED
+   // CSV Import function - FIXED
     function importDataFromCSV() {
       const fileInput = document.getElementById('csv-import-input');
       const file = fileInput.files[0];
@@ -3616,6 +3616,7 @@ function updateAccountDisplay() {
           let imported = 0;
           let skipped = 0;
           const errors = [];
+          const tempImportedShoots = []; // Temporary array to prevent premature pushing
 
           // Parse data rows
           for (let i = 1; i < lines.length; i++) {
@@ -3651,35 +3652,35 @@ function updateAccountDisplay() {
                 created: new Date().toISOString()
               };
 
-              _shoots.push(shoot);
+              tempImportedShoots.push(shoot); // Store here safely for now
               imported++;
             } catch (err) {
               errors.push(`Row ${i + 1}`);
             }
           }
 
-          // Show status
+          // Show status and begin saving process
           if (imported > 0) {
-            statusDiv.innerHTML = `<span class="text-emerald-400">✅ Saving ${imported} records to database...</span>`;
+            statusDiv.innerHTML = `<span class="text-amber-400">⏳ Saving ${imported} records to database...</span>`;
             showToast(`Saving ${imported} shoot records to database...`, 'info');
             
             try {
-              // Save each imported shoot to the database
-              for (const shoot of _shoots.slice(-imported)) {
+              // Save each imported shoot to the database properly via POST track
+              for (const shoot of tempImportedShoots) {
                 await saveShootToDB(shoot);
               }
               
               statusDiv.innerHTML = `<span class="text-emerald-400">✅ Successfully imported & saved ${imported} records${skipped > 0 ? ` (${skipped} skipped)` : ''}</span>`;
               showToast(`Imported and saved ${imported} shoot records successfully!`, 'success');
               
-              // Clear input and re-render
+              // Clear input and trigger UI updates
               fileInput.value = '';
               renderShootsList();
               renderCalendar();
               renderPaymentsList();
               renderDashboard();
               
-              // Clear status after 5 seconds
+              // Clear status text after 5 seconds
               setTimeout(() => {
                 statusDiv.textContent = '';
               }, 5000);
