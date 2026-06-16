@@ -815,7 +815,12 @@
 
                   <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
                     <div class="space-y-2">
-                      <p class="text-xs text-neutral-400 font-semibold">📥 Import Data from CSV</p>
+                      <div class="flex items-center justify-between w-full">
+  <p class="text-xs text-neutral-400 font-semibold">📥 Import Data from CSV</p>
+  <button onclick="downloadSampleCSV()" class="text-[10px] bg-[#c9a96e]/10 text-[#c9a96e] border border-[#c9a96e]/30 px-2 py-1 rounded hover:bg-[#c9a96e]/20 transition flex items-center gap-1">
+    <i class="ti ti-download"></i> Sample CSV
+  </button>
+</div>
                       <p class="text-xs text-neutral-500">Upload a CSV file to import shoot records. Required columns: name, date, event. Optional: session, location, company, notes, amount, expense, expense_status, pay_status, part_paid</p>
                     </div>
                     <div class="flex flex-col sm:flex-row gap-2">
@@ -836,6 +841,17 @@
                       <i class="ti ti-refresh"></i> Force Cloud Sync
                     </button>
                   </div>
+                  <div class="bg-red-950/10 border border-red-900/30 rounded-lg p-4 space-y-3 mt-6">
+                <div class="space-y-2">
+                  <p class="text-xs text-red-400 font-semibold flex items-center gap-2">
+                    <i class="ti ti-alert-triangle text-base"></i> Danger Zone
+                  </p>
+                  <p class="text-xs text-neutral-500">Permanently wipe all your shoot records. This action cannot be undone and requires your financial PIN to confirm.</p>
+                </div>
+                <button onclick="promptDeleteAll()" class="flex items-center gap-2 w-full justify-center bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+                  <i class="ti ti-trash"></i> Erase All Database Records
+                </button>
+              </div>
                 </div>
               </div>
             </div>
@@ -1036,7 +1052,27 @@
         </div>
       </div>
     </div>
-
+    
+<!-- PASTE THE DELETE ALL MODAL HERE (Line 1055) -->
+    <div id="delete-all-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+      <div class="bg-[#0f0f0f] border border-red-900/50 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-red-600"></div>
+        <div class="w-12 h-12 bg-red-950/40 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-2xl mx-auto"><i class="ti ti-alert-octagon"></i></div>
+        <div class="space-y-1">
+          <h4 class="text-white font-bold text-base tracking-wide">Erase Entire Database?</h4>
+          <p class="text-xs text-neutral-400 leading-relaxed">This will permanently delete all your records. You cannot undo this. Enter your financial PIN to proceed.</p>
+        </div>
+        <div class="space-y-3 pt-2">
+          <input type="password" id="delete-all-pin-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-red-500 transition"/>
+          <p id="delete-all-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect PIN.</p>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closeDeleteAllModal()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
+          <button onclick="executeDeleteAll()" class="w-1/2 py-2.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm Delete</button>
+        </div>
+      </div>
+    </div>
+    
     <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-50 flex flex-col gap-2 pointer-events-none"></div>
   </div>
 
@@ -3585,6 +3621,13 @@ function updateAccountDisplay() {
       const file = fileInput.files[0];
       const statusDiv = document.getElementById('import-status');
 
+      // PASTE SUBSCRIPTION CHECK HERE
+          if (!_isSubActive && !isDemoMode) {
+            showToast('Your subscription is expired. Please renew to import data.', 'error');
+            window.location.href = 'index.html#pricing';
+            return;
+          }
+      
       if (!file) {
         statusDiv.innerHTML = '<span class="text-red-400">❌ Please select a CSV file</span>';
         return;
@@ -3724,7 +3767,70 @@ function updateAccountDisplay() {
         updateAccountDisplay();
       }
     }
+// --- SAMPLE CSV GENERATOR ---
+function downloadSampleCSV() {
+  const headers = ['name', 'date', 'event', 'session', 'location', 'company', 'amount', 'expense', 'expense_status', 'pay_status', 'part_paid', 'notes'];
+  const sampleRow = ['Sample Client', '2026-06-25', 'Wedding', 'Full Day', 'Bangalore', 'Studio A', '50000', '5000', 'pending', 'part', '10000', 'These are sample notes'];
+  
+  const csvContent = headers.join(',') + '\n' + sampleRow.join(',');
+  
+  const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', 'Sakkhi_Sample_Format.csv');
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Sample CSV template downloaded.', 'info');
+}
 
+// --- DELETE ALL DATA LOGIC ---
+function promptDeleteAll() {
+  if (isDemoMode) {
+     showToast('Cannot delete all data in Demo Mode.', 'error');
+     return;
+  }
+  document.getElementById('delete-all-pin-input').value = '';
+  document.getElementById('delete-all-error-lbl').classList.add('hidden');
+  openModal('delete-all-modal-backdrop');
+}
+
+function closeDeleteAllModal() {
+  closeModal('delete-all-modal-backdrop');
+}
+
+async function executeDeleteAll() {
+  const input = document.getElementById('delete-all-pin-input').value;
+  const errorLabel = document.getElementById('delete-all-error-lbl');
+  
+  // Verify PIN matches the _appPin setting
+  if (input !== _appPin) {
+    errorLabel.classList.remove('hidden');
+    return;
+  }
+  
+  errorLabel.classList.add('hidden');
+  setSyncStatus('syncing', 'Erasing Data...');
+  
+  try {
+    // Tell Supabase to delete all shoots belonging to this specific user
+    await sbFetch(`shoots?user_id=eq.${currentUser.id}`, { method: 'DELETE' });
+    
+    // Clear local array so the UI updates immediately
+    _shoots = [];
+    
+    setSyncStatus('synced', 'Database Cleared');
+    showToast('All shoot records have been permanently deleted.', 'success');
+    
+    closeDeleteAllModal();
+    refreshCurrentView();
+    updateAccountDisplay(); 
+  } catch (e) {
+    setSyncStatus('error', 'Delete Failed');
+    showToast('Failed to erase data: ' + e.message, 'error');
+  }
+}
   </script>
 </body>
 </html>
