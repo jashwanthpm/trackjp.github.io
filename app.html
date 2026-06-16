@@ -2294,6 +2294,7 @@ try {
           <div class="flex items-center justify-between py-2 text-xs">
             <span class="text-neutral-300 font-medium">${c}</span>
             <div class="flex gap-1">
+              <button onclick="copyBookingLink('${c}')" class="p-1 text-emerald-500 hover:text-emerald-400 transition" title="Copy Magic Booking Link"><i class="ti ti-link text-sm"></i></button>
               <button onclick="renameCompany(${i})" class="p-1 text-neutral-500 hover:text-white transition"><i class="ti ti-pencil text-sm"></i></button>
               <button onclick="deleteCompany(${i})" class="p-1 text-neutral-500 hover:text-red-400 transition"><i class="ti ti-trash text-sm"></i></button>
             </div>
@@ -3831,6 +3832,33 @@ async function executeDeleteAll() {
     showToast('Failed to erase data: ' + e.message, 'error');
   }
 }
+    // --- MAGIC LINK GENERATOR ---
+    function copyBookingLink(companyName) {
+      if (!currentUser || !currentUser.id) {
+        showToast('You must be logged in to generate a link.', 'error');
+        return;
+      }
+      
+      // Create a payload with the User ID and the Company Name
+      const payload = {
+        u: currentUser.id,
+        s: companyName
+      };
+      
+      // Scramble it into Base64 format
+      const encodedPayload = btoa(JSON.stringify(payload));
+      
+      // Build the final URL (uses your current domain)
+      const baseUrl = window.location.href.replace('app.html', '').replace('#', '').split('?')[0];
+      const magicLink = baseUrl + 'booking.html?b=' + encodedPayload;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(magicLink).then(() => {
+        showToast(`Booking link for ${companyName} copied to clipboard!`, 'success');
+      }).catch(err => {
+        showToast('Failed to copy link. Try again.', 'error');
+      });
+    }
   </script>
 </body>
 </html>
