@@ -1314,7 +1314,6 @@
         return;
       }
 
-      // We use the authHeaders to ensure Supabase accepts the request
       const authHeaders = {
         'Content-Type': 'application/json',
         'apikey': SUPABASE_KEY,
@@ -1326,38 +1325,53 @@
       btn.innerText = 'Processing...';
 
       try {
-        // 1. First, attempt to Sign In
+        // 1. Try to Sign In first
         let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
           method: 'POST',
           headers: authHeaders,
           body: JSON.stringify({ email, password })
         });
 
-        let data = await res.json();
+        let data;
+        try { data = await res.json(); } catch(e) { data = {}; }
 
-        // 2. If Sign In fails because user doesn't exist, attempt Sign Up
-        if (!res.ok && (data.error === 'invalid_grant' || (data.error_description || '').includes('Invalid login credentials'))) {
-          
-          const signUpRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
-            method: 'POST',
-            headers: authHeaders,
-            body: JSON.stringify({ email, password })
-          });
-          
-          const signUpData = await signUpRes.json();
+        // 2. If Sign In fails, figure out why
+        if (!res.ok) {
+           const errMsg = (data.error_description || data.msg || data.error || '').toLowerCase();
+           console.log("Login failed with reason:", errMsg);
+           
+           // If Supabase says invalid credentials, we try to sign them up instead!
+           if (errMsg.includes('invalid login credentials') || errMsg.includes('invalid_grant')) {
+               console.log("Attempting to sign up new user instead...");
+               
+               const signUpRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+                 method: 'POST',
+                 headers: authHeaders,
+                 body: JSON.stringify({ email, password })
+               });
+               
+               let signUpData;
+               try { signUpData = await signUpRes.json(); } catch(e) { signUpData = {}; }
 
-          if (!signUpRes.ok) {
-            throw new Error(signUpData.msg || signUpData.error_description || 'Sign up failed');
-          } else {
-            showToast('Account created! Please check your email to verify.', 'success');
-            return;
-          }
-        } else if (!res.ok) {
-          // Catch other errors (like password too short)
-          throw new Error(data.error_description || data.msg || 'Login failed');
+               if (!signUpRes.ok) {
+                 const suErrMsg = signUpData.error_description || signUpData.msg || 'Sign up failed';
+                 
+                 // If the email is already in the database from a Google Login!
+                 if (suErrMsg.toLowerCase().includes('already registered')) {
+                     throw new Error('This email is registered via Google. Please use Google Sign-In!');
+                 }
+                 throw new Error(suErrMsg);
+               } else {
+                 showToast('Account created! Please check your email to verify.', 'success');
+                 return; // Stop here and wait for them to verify
+               }
+           } else {
+               // Throw whatever other error happened (e.g., "Email not confirmed")
+               throw new Error(data.error_description || data.msg || 'Login failed');
+           }
         }
 
-        // 3. Successful Login: Map the response to your existing currentUser format
+        // 3. Successful Login
         currentUser = {
           id: data.user.id,
           email: data.user.email,
@@ -1366,7 +1380,6 @@
           user_metadata: data.user.user_metadata || {}
         };
 
-        // Save to local storage and trigger app load just like Google Sign-In does
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         showToast(`Welcome back!`, 'success');
         
@@ -1378,6 +1391,7 @@
         loadAll();
 
       } catch (error) {
+        console.error("Auth Error:", error);
         showToast(error.message, 'error');
       } finally {
         btn.innerText = originalText;
