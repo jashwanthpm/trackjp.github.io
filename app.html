@@ -1302,7 +1302,7 @@
         return JSON.parse(jsonPayload);
       } catch(e) { return {}; }
     }
-    // ==========================================
+// ==========================================
     // EMAIL & PASSWORD AUTHENTICATION
     // ==========================================
     async function handleEmailLogin() {
@@ -1314,7 +1314,13 @@
         return;
       }
 
-      // Change button text to show loading state
+      // We use the authHeaders to ensure Supabase accepts the request
+      const authHeaders = {
+        'Content-Type': 'application/json',
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + SUPABASE_KEY
+      };
+
       const btn = document.querySelector('#email-signin-form button');
       const originalText = btn.innerText;
       btn.innerText = 'Processing...';
@@ -1323,18 +1329,18 @@
         // 1. First, attempt to Sign In
         let res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=password`, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          headers: authHeaders,
           body: JSON.stringify({ email, password })
         });
 
         let data = await res.json();
 
-        // 2. If Sign In fails because user doesn't exist (invalid_credentials), attempt Sign Up
-        if (!res.ok && data.error_description === 'Invalid login credentials') {
+        // 2. If Sign In fails because user doesn't exist, attempt Sign Up
+        if (!res.ok && (data.error === 'invalid_grant' || (data.error_description || '').includes('Invalid login credentials'))) {
           
           const signUpRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+            headers: authHeaders,
             body: JSON.stringify({ email, password })
           });
           
@@ -1344,12 +1350,11 @@
             throw new Error(signUpData.msg || signUpData.error_description || 'Sign up failed');
           } else {
             showToast('Account created! Please check your email to verify.', 'success');
-            btn.innerText = originalText;
             return;
           }
         } else if (!res.ok) {
-          // Some other login error occurred
-          throw new Error(data.error_description || 'Login failed');
+          // Catch other errors (like password too short)
+          throw new Error(data.error_description || data.msg || 'Login failed');
         }
 
         // 3. Successful Login: Map the response to your existing currentUser format
@@ -1378,7 +1383,6 @@
         btn.innerText = originalText;
       }
     }
-
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', () => {
       // Check for Demo Mode first
