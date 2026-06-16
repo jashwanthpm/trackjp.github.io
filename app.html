@@ -386,6 +386,34 @@
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl p-4 sm:p-6 w-full max-w-4xl mx-auto mt-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h3 class="text-sm uppercase tracking-widest font-bold text-neutral-500">Financial Overview</h3>
+      <p class="text-xs text-neutral-600 mt-1">Revenue vs Expenses (6-Month View)</p>
+    </div>
+    
+    <select id="chart-start-month" onchange="updateDashboardChart()" class="bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs font-bold text-[#c9a96e] outline-none focus:border-[#c9a96e] transition cursor-pointer">
+      <option value="0">Jan - Jun</option>
+      <option value="1">Feb - Jul</option>
+      <option value="2">Mar - Aug</option>
+      <option value="3">Apr - Sep</option>
+      <option value="4">May - Oct</option>
+      <option value="5">Jun - Nov</option>
+      <option value="6">Jul - Dec</option>
+      <option value="7">Aug - Jan</option>
+      <option value="8">Sep - Feb</option>
+      <option value="9">Oct - Mar</option>
+      <option value="10">Nov - Apr</option>
+      <option value="11">Dec - May</option>
+    </select>
+  </div>
+
+  <div class="relative h-64 w-full">
+    <canvas id="sakkhiChart"></canvas>
+  </div>
+</div>
+
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-7 space-y-4">
             <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
@@ -3885,6 +3913,117 @@ async function executeDeleteAll() {
         console.error(err);
       }
     }
+    // --- DASHBOARD CHART LOGIC ---
+let sakkhiChartInstance = null;
+
+// The full 12 months of data (This can later be wired directly to your Supabase data!)
+const allMonths = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const rawRevenue = [45000, 52000, 38000, 65000, 72000, 48000, 55000, 80000, 60000, 95000, 85000, 110000];
+const rawExpenses = [12000, 15000, 10000, 18000, 22000, 14000, 16000, 25000, 18000, 30000, 28000, 35000];
+
+function updateDashboardChart() {
+  const startIndex = parseInt(document.getElementById('chart-start-month').value);
+  
+  // Calculate the 6-month window (with wrap-around)
+  let displayLabels = [];
+  let displayRevenue = [];
+  let displayExpenses = [];
+
+  for (let i = 0; i < 6; i++) {
+    let pointer = (startIndex + i) % 12; // The '%' handles the wrap-around perfectly
+    displayLabels.push(allMonths[pointer]);
+    displayRevenue.push(rawRevenue[pointer]);
+    displayExpenses.push(rawExpenses[pointer]);
+  }
+
+  const ctx = document.getElementById('sakkhiChart').getContext('2d');
+
+  // Destroy old chart if it exists so we can draw a fresh one
+  if (sakkhiChartInstance) {
+    sakkhiChartInstance.destroy();
+  }
+
+  // Create the new chart
+  sakkhiChartInstance = new Chart(ctx, {
+    type: 'bar',
+    data: {
+      labels: displayLabels,
+      datasets: [
+        {
+          label: 'Revenue (₹)',
+          data: displayRevenue,
+          backgroundColor: '#c9a96e', // Sakkhi Gold
+          borderRadius: 4,
+          barPercentage: 0.6,
+          categoryPercentage: 0.8
+        },
+        {
+          label: 'Expenses (₹)',
+          data: displayExpenses,
+          backgroundColor: '#262626', // Dark Neutral
+          borderColor: '#404040',
+          borderWidth: 1,
+          borderRadius: 4,
+          barPercentage: 0.6,
+          categoryPercentage: 0.8
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: {
+        mode: 'index',
+        intersect: false,
+      },
+      plugins: {
+        legend: {
+          display: true,
+          position: 'top',
+          align: 'end',
+          labels: {
+            color: '#737373', // Neutral 500
+            boxWidth: 10,
+            usePointStyle: true,
+            font: { size: 10, family: "'Plus Jakarta Sans', sans-serif", weight: 'bold' }
+          }
+        },
+        tooltip: {
+          backgroundColor: '#050505',
+          titleColor: '#c9a96e',
+          bodyColor: '#e8e8e8',
+          borderColor: '#262626',
+          borderWidth: 1,
+          padding: 10,
+          cornerRadius: 8,
+          displayColors: true
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false, drawBorder: false },
+          ticks: { color: '#737373', font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" } }
+        },
+        y: {
+          grid: { color: '#1a1a1a', drawBorder: false }, // Faint horizontal lines
+          ticks: {
+            color: '#525252',
+            font: { size: 10, family: "'Plus Jakarta Sans', sans-serif" },
+            callback: function(value) {
+              return value >= 1000 ? (value / 1000) + 'k' : value; // Format as 10k, 20k
+            }
+          }
+        }
+      }
+    }
+  });
+}
+
+// Auto-load the chart when the Dashboard view opens
+document.addEventListener('DOMContentLoaded', () => {
+  // Wait a tiny bit to ensure the canvas is rendered, then draw
+  setTimeout(updateDashboardChart, 500); 
+});
   </script>
 </body>
 </html>
