@@ -1278,11 +1278,10 @@
       const googleToken = response.credential;
       const decoded = parseJwt(googleToken);
 
-      // Change button text to show loading state if you want
       showToast('Authenticating securely...', 'info');
 
       try {
-        // 1. Trade the Google ID Token for a Supabase Session!
+        // 1. Trade the Google ID Token for a Supabase Session
         const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=id_token`, {
           method: 'POST',
           headers: {
@@ -1301,12 +1300,12 @@
           throw new Error(data.error_description || data.msg || 'Failed to sync with Supabase Auth');
         }
 
-        // 2. Save the REAL Supabase token and UUID
+        // 2. Save the REAL Supabase token (HS256) instead of the Google one (RS256)
         currentUser = {
-          id: data.user.id, // Supabase's secure UUID
+          id: data.user.id, 
           email: data.user.email,
           name: data.user.user_metadata?.name || decoded.name,
-          token: data.access_token, // The HS256 token Supabase expects!
+          token: data.access_token, 
           user_metadata: data.user.user_metadata || {}
         };
 
