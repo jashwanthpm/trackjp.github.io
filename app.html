@@ -1274,56 +1274,57 @@
       }, 100);
     }
 
-    function handleGoogleSignIn(response) {
-      const token = response.credential;
-      const decoded = parseJwt(token);
-      
-      currentUser = {
-        id: decoded.sub, 
-        email: decoded.email, 
-        name: decoded.name, 
-        token: token,
-        user_metadata: { name: decoded.name }
-      };
+    async function handleGoogleSignIn(response) {
+      const googleToken = response.credential;
+      const decoded = parseJwt(googleToken);
 
-     localStorage.setItem('currentUser', JSON.stringify(currentUser));
-      showToast(`Welcome, ${currentUser.name}!`, 'success');
-      
-      // Update account display
-      updateAccountDisplay();
-      
-      // Hide login, show app, and load data
-      document.getElementById('login-modal').classList.remove('active');
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      
-      loadAll(); 
+      // Change button text to show loading state if you want
+      showToast('Authenticating securely...', 'info');
 
-      // NEW: Check if they came here to buy a plan
-      const pendingPlan = sessionStorage.getItem('pendingPlan');
-      if (pendingPlan) {
-        // Bounce them right back to the pricing page to finish the checkout
-        window.location.href = `index.html?checkout=${pendingPlan}`;
-        return; 
-      }
-
-      // Hide login, show app, and load data
-      document.getElementById('login-modal').classList.remove('active');
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll();
-      document.getElementById('main-app').style.display = 'block';
-      document.getElementById('loading-screen').classList.remove('hidden');
-      loadAll(); 
-    }
-
-    function parseJwt(token) {
       try {
-        const base64Url = token.split('.')[1];
-        const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-        const jsonPayload = decodeURIComponent(atob(base64).split('').map(c => '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2)).join(''));
-        return JSON.parse(jsonPayload);
-      } catch(e) { return {}; }
+        // 1. Trade the Google ID Token for a Supabase Session!
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=id_token`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY
+          },
+          body: JSON.stringify({
+            provider: 'google',
+            id_token: googleToken
+          })
+        });
+
+        const data = await res.json();
+
+        if (!res.ok) {
+          throw new Error(data.error_description || data.msg || 'Failed to sync with Supabase Auth');
+        }
+
+        // 2. Save the REAL Supabase token and UUID
+        currentUser = {
+          id: data.user.id, // Supabase's secure UUID
+          email: data.user.email,
+          name: data.user.user_metadata?.name || decoded.name,
+          token: data.access_token, // The HS256 token Supabase expects!
+          user_metadata: data.user.user_metadata || {}
+        };
+
+        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        showToast(`Welcome, ${currentUser.name}!`, 'success');
+        
+        updateAccountDisplay();
+        
+        document.getElementById('login-modal').classList.remove('active');
+        document.getElementById('main-app').style.display = 'block';
+        document.getElementById('loading-screen').classList.remove('hidden');
+        
+        loadAll();
+
+      } catch (error) {
+        console.error('Google Auth Error:', error);
+        showToast('Auth error: Please check Supabase Google provider settings.', 'error');
+      }
     }
 // ==========================================
     // EMAIL & PASSWORD AUTHENTICATION
