@@ -251,10 +251,10 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       <h2 class="brand-serif text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-[#c9a96e] to-[#e6c98a]">SAKKHI</h2>
       <p class="text-xs text-neutral-600 mt-2 font-light">&copy; 2026 Sakkhi Shoot Management. All rights reserved.</p>
     </div>
-    <div class="flex gap-6">
-      <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Terms of Service</a>
-      <a href="#" class="text-xs font-medium text-neutral-500 hover:text-[#c9a96e] transition-colors">Privacy Policy</a>
-    </div>
+    <div class="flex items-center gap-6">
+  <button type="button" onclick="openModal('tos-modal-backdrop')" class="text-sm text-neutral-400 hover:text-white transition">Terms of Service</button>
+  <button type="button" onclick="openModal('privacy-modal-backdrop')" class="text-sm text-neutral-400 hover:text-white transition">Privacy Policy</button>
+</div>
  </footer>
 
 <script>
@@ -373,6 +373,72 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       }, 500);
     }
   });
+  // PASTE THIS NEW JAVASCRIPT HERE
+  window.openModal = function(id) {
+    const m = document.getElementById(id);
+    m.classList.add('opacity-100', 'pointer-events-auto');
+    m.firstElementChild.classList.remove('translate-y-full', 'sm:translate-y-4');
+    document.body.style.overflow = 'hidden';
+  };
+  
+  window.closeModal = function(id) {
+    const m = document.getElementById(id);
+    m.classList.remove('opacity-100', 'pointer-events-auto');
+    m.firstElementChild.classList.add('translate-y-full', 'sm:translate-y-4');
+    document.body.style.overflow = '';
+  };
+
+  window.handleBackdropClick = function(e, id) {
+    if (e.target === document.getElementById(id)) window.closeModal(id);
+  };
+  // END OF PASTED JAVASCRIPT
 </script>
+  <!-- Terms of Service Modal -->
+<div id="tos-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'tos-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
+    <div class="flex items-center justify-between border-b border-neutral-800 pb-4 mb-4">
+      <h3 class="text-lg font-bold text-[#c9a96e]">Terms of Service</h3>
+      <button onclick="closeModal('tos-modal-backdrop')" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+    </div>
+    <div class="overflow-y-auto pr-2 space-y-4 text-xs text-neutral-400 leading-relaxed hide-scrollbar">
+      <p><strong class="text-white text-sm">1. Acceptance of Terms</strong><br>By accessing and using Sakkhi Shoot Management, you accept and agree to be bound by the terms and provision of this agreement.</p>
+      
+      <p><strong class="text-white text-sm">2. Use of Service</strong><br>Our service is provided to help freelancers and independent professionals manage their shoot schedules, ledgers, and client data. You agree not to misuse the service, attempt to bypass security measures, or use the platform for any illegal activities.</p>
+      
+      <p><strong class="text-white text-sm">3. Account Security</strong><br>You are responsible for safeguarding the password and financial PIN that you use to access the service. Sakkhi cannot and will not be liable for any loss or damage arising from your failure to comply with security obligations.</p>
+      
+      <p><strong class="text-white text-sm">4. Data Ownership & Export</strong><br>You retain full ownership of all data you input into the platform. You may export your database at any time. If you choose to erase your data, it is permanently removed from our active servers.</p>
+      
+      <p><strong class="text-white text-sm">5. Modifications</strong><br>We reserve the right to modify these terms at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+    </div>
+    <div class="pt-4 border-t border-neutral-800 mt-4 text-right">
+      <button onclick="closeModal('tos-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand</button>
+    </div>
+  </div>
+</div>
+
+<!-- Privacy Policy Modal -->
+<div id="privacy-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'privacy-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
+    <div class="flex items-center justify-between border-b border-neutral-800 pb-4 mb-4">
+      <h3 class="text-lg font-bold text-[#c9a96e]">Privacy Policy</h3>
+      <button onclick="closeModal('privacy-modal-backdrop')" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+    </div>
+    <div class="overflow-y-auto pr-2 space-y-4 text-xs text-neutral-400 leading-relaxed hide-scrollbar">
+      <p><strong class="text-white text-sm">1. Information We Collect</strong><br>We collect information you provide directly to us when you create an account, such as your name, email address, and authentication credentials via Google OAuth.</p>
+      
+      <p><strong class="text-white text-sm">2. How We Use Your Data</strong><br>Your data (shoot details, financial ledger, client notes) is stored securely on cloud servers solely to provide the management service to you. We do not sell your personal or financial data to third parties.</p>
+      
+      <p><strong class="text-white text-sm">3. Financial Privacy Feature</strong><br>We offer a built-in privacy PIN feature to mask your ledger amounts locally on your device to protect against shoulder surfing. This PIN is stored as a setting and does not encrypt the backend database.</p>
+      
+      <p><strong class="text-white text-sm">4. Data Deletion</strong><br>If you utilize the "Danger Zone" to erase your database, your records are permanently wiped from the active cloud storage immediately.</p>
+      
+      <p><strong class="text-white text-sm">5. Third-Party Services</strong><br>We use secure third-party providers (like Supabase and Google) for database hosting and authentication. Their respective privacy policies apply to the infrastructural data they process.</p>
+    </div>
+    <div class="pt-4 border-t border-neutral-800 mt-4 text-right">
+      <button onclick="closeModal('privacy-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
