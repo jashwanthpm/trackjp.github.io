@@ -3832,32 +3832,56 @@ async function executeDeleteAll() {
     showToast('Failed to erase data: ' + e.message, 'error');
   }
 }
-    // --- MAGIC LINK GENERATOR (OPTIMIZED) ---
-    function copyBookingLink(companyName) {
+    // --- MAGIC LINK GENERATOR (ULTRA SHORT) ---
+    async function copyBookingLink(companyName) {
       if (!currentUser || !currentUser.id) {
         showToast('You must be logged in to generate a link.', 'error');
         return;
       }
       
-      // Grab user's name (fallback to email or 'Photographer')
       const userName = currentUser.user_metadata?.name || currentUser.name || 'Photographer';
+      const payload = { u: currentUser.id, s: companyName, n: userName };
       
-      // Create a compact string: id|company|name
-      const rawString = `${currentUser.id}|${companyName}|${userName}`;
-      
-      // Scramble into a shorter Base64 string (UTF-8 safe) and remove padding '='
-      const encodedPayload = btoa(unescape(encodeURIComponent(rawString))).replace(/=/g, '');
-      
-      // Build the final URL
-      const baseUrl = window.location.href.replace('app.html', '').replace('#', '').split('?')[0];
-      const magicLink = baseUrl + 'booking.html?b=' + encodedPayload;
-      
-      // Copy to clipboard
-      navigator.clipboard.writeText(magicLink).then(() => {
-        showToast(`Short booking link for ${companyName} copied!`, 'success');
-      }).catch(err => {
-        showToast('Failed to copy link. Try again.', 'error');
-      });
+      // Generate a tiny 6-character hash code
+      let hash = 0;
+      const str = currentUser.id + companyName;
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const shortCode = Math.abs(hash).toString(36); 
+      const dbKey = 'link_' + shortCode;
+
+      setSyncStatus('syncing', 'Generating Link...');
+
+      try {
+        // Save this shortcode to your Supabase Settings database
+        const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
+        if (checkExisting && checkExisting.length > 0) {
+          await sbFetch(`settings?key=eq.${dbKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value: payload })
+          });
+        } else {
+          await sbFetch('settings', {
+            method: 'POST',
+            body: JSON.stringify({ key: dbKey, value: payload })
+          });
+        }
+
+        setSyncStatus('synced', 'Link Ready');
+
+        // Build the final tiny URL
+        const baseUrl = window.location.href.replace('app.html', '').replace('#', '').split('?')[0];
+        const magicLink = baseUrl + 'booking.html?ref=' + shortCode;
+        
+        navigator.clipboard.writeText(magicLink).then(() => {
+          showToast(`Short link for ${companyName} copied!`, 'success');
+        });
+      } catch(err) {
+        setSyncStatus('error', 'Link Failed');
+        showToast('Database error generating link.', 'error');
+      }
     }
   </script>
 </body>
