@@ -2982,7 +2982,7 @@ try {
       yPos += 22;
       
       // ==========================================
-      // NEW: CLICKABLE "PAY NOW" BUTTON IN PDF
+      // CLICKABLE "PAY NOW" BUTTON IN PDF
       // ==========================================
       if (due > 0 && _profile.upi) {
         const upiLink = `upi://pay?pa=${_profile.upi}&pn=${encodeURIComponent(_profile.bizName || 'SAKKHI')}&am=${due}&cu=INR`;
@@ -2995,7 +2995,7 @@ try {
         doc.setTextColor(255, 255, 255);
         doc.text(`CLICK HERE TO PAY PENDING BALANCE ( Rs. ${due.toLocaleString('en-IN')} ) VIA UPI`, pageWidth / 2, yPos + 7.5, { align: 'center' });
         
-        // This makes the entire green rectangle clickable in the PDF!
+        // This makes the entire green rectangle clickable
         doc.link(margin, yPos, pageWidth - 2 * margin, 12, { url: upiLink });
         
         yPos += 18;
@@ -3105,7 +3105,7 @@ try {
         yPos += 2;
       });
 
-      if (yPos > pageHeight - 35) {
+      if (yPos > pageHeight - 45) { // Increased safe zone for footer
         doc.addPage();
         doc.setFillColor(5, 5, 5);
         doc.rect(0, 0, pageWidth, pageHeight, 'F');
@@ -3123,15 +3123,18 @@ try {
       doc.setFont(undefined, 'normal');
       doc.setTextColor(180, 180, 180);
       doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
-      yPos += 4;
+      yPos += 5;
+      
+      // FIXED: Dynamic spacing for multiline Bank Details
       if (_profile.bank) {
         const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
         doc.text(splitBank, margin, yPos);
+        yPos += (splitBank.length * 4); // Accurately calculates height so there is NO overlap
       }
       
-      // Add a small clickable link in the footer details too
+      // Add a small clickable link in the footer details securely below the bank text
       if (due > 0 && _profile.upi) {
-        yPos += (_profile.bank ? 10 : 4);
+        yPos += 2; // Small extra padding gap
         const upiLink = `upi://pay?pa=${_profile.upi}&pn=${encodeURIComponent(_profile.bizName || 'SAKKHI')}&am=${due}&cu=INR`;
         doc.setTextColor(16, 185, 129); // Emerald
         doc.setFont(undefined, 'bold');
