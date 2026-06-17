@@ -1480,6 +1480,7 @@
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
     let _events = [...DEFAULT_EVENTS];
+    let _blockedDates = [];
     let _analyticsChartInstance = null;
     let _privacyModeActive = true;
     let calYear = new Date().getFullYear();
@@ -1648,6 +1649,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     
     const eRow = configurations.find(r => r.key === 'events');
     if (eRow) _events = eRow.value;
+
+    const blockRow = configurations.find(r => r.key === 'blocked_dates');
+    if (blockRow) _blockedDates = blockRow.value || [];
     
     const pinRow = configurations.find(r => r.key === 'app_pin');
     if (pinRow) _appPin = pinRow.value;
@@ -2144,6 +2148,22 @@ try {
         </div>`;
     }
 
+async function toggleBlockDate(dateStr) {
+      // Add or remove the date from the array
+      if (_blockedDates.includes(dateStr)) {
+        _blockedDates = _blockedDates.filter(d => d !== dateStr);
+      } else {
+        _blockedDates.push(dateStr);
+      }
+      
+      // Save it to your Supabase Settings database
+      await saveSettingToDB('blocked_dates', _blockedDates);
+      
+      // Refresh the UI visually
+      renderCalendar();
+      showToast(_blockedDates.includes(dateStr) ? 'Date marked as unavailable.' : 'Date is now unblocked.');
+    }
+    
     function renderCalendar() {
       const monthLabel = MONTHS[calMonth] + ' ' + calYear;
       document.getElementById('cal-month-label').textContent = monthLabel;
@@ -2171,65 +2191,43 @@ try {
       }
 
       const existingStats = document.getElementById('cal-stats');
+      const statsHtml = `
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
+          <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
+        </div>
+        ${nextShoot ? `
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
+          <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
+          <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
+        </div>
+        ` : `
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
+          <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
+          <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
+        </div>
+        `}
+        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
+          <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
+          <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
+        </div>
+      `;
+
       if (!existingStats) {
         const borderDiv = document.querySelector('#section-calendar .border-b');
         if (borderDiv) {
           const statsDiv = document.createElement('div');
           statsDiv.className = 'grid grid-cols-1 sm:grid-cols-3 gap-3 mb-4';
           statsDiv.id = 'cal-stats';
-          statsDiv.innerHTML = `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-            </div>
-            ${nextShoot ? `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-              <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-            </div>
-            ` : `
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-              <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-              <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-            </div>
-            `}
-            <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-              <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-              <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-              <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-            </div>
-          `;
+          statsDiv.innerHTML = statsHtml;
           borderDiv.after(statsDiv);
         }
       } else {
-        existingStats.innerHTML = `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Shoots This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-[#c9a96e] mt-2">${shootsThisMonth.length}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">${completedThisMonth} completed</div>
-          </div>
-          ${nextShoot ? `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-emerald-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-white mt-2">${nextShoot.name}</div>
-            <div class="text-[10px] text-emerald-400 mt-1">${daysUntilNext}</div>
-          </div>
-          ` : `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-500">Next Shoot</div>
-            <div class="text-sm font-bold tracking-tight text-neutral-500 mt-2">No upcoming shoots</div>
-            <div class="text-[10px] text-neutral-500 mt-1">Schedule one now!</div>
-          </div>
-          `}
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-            <div class="text-[10px] uppercase font-bold tracking-wider text-amber-500">Completed This Month</div>
-            <div class="text-2xl font-bold tracking-tight text-amber-500 mt-2">${completedThisMonth}</div>
-            <div class="text-[10px] text-neutral-500 mt-1">of ${shootsThisMonth.length} total</div>
-          </div>
-        `;
+        existingStats.innerHTML = statsHtml;
       }
 
       const firstDay = new Date(calYear, calMonth, 1);
@@ -2244,13 +2242,31 @@ try {
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
         const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
-        const isSelected = dateStr === calSelected ? 'bg-[#c9a96e] text-black font-bold' : 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
-        html += `<div data-date="${dateStr}" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelected} ${shootsOnDay > 0 ? 'border border-[#c9a96e]/50' : 'border border-transparent'}"><span>${d}</span>${shootsOnDay > 0 ? `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>` : ''}</div>`;
+        
+        // Blocked UI Logic
+        const isBlocked = _blockedDates.includes(dateStr);
+        let isSelectedClass = '';
+        
+        if (dateStr === calSelected) {
+           isSelectedClass = 'bg-[#c9a96e] text-black font-bold';
+        } else if (isBlocked) {
+           isSelectedClass = 'bg-red-950/20 text-red-500/70 hover:bg-red-950/40';
+        } else {
+           isSelectedClass = 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
+        }
+
+        let innerContent = `<span>${d}</span>`;
+        if (isBlocked) {
+          innerContent += `<div class="text-[10px] text-red-500/70 mt-0.5 flex justify-center"><i class="ti ti-lock"></i></div>`;
+        } else if (shootsOnDay > 0) {
+          innerContent += `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>`;
+        }
+
+        html += `<div data-date="${dateStr}" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelectedClass} ${shootsOnDay > 0 && !isBlocked ? 'border border-[#c9a96e]/50' : 'border border-transparent'}">${innerContent}</div>`;
       }
 
       grid.innerHTML = html;
 
-      // Use Event Delegation to safely handle day clicks
       grid.onclick = function(e) {
         const dayElement = e.target.closest('[data-date]');
         if (dayElement) {
@@ -2269,18 +2285,38 @@ try {
         headerLabel = new Date(calSelected + 'T00:00:00').toDateString(); 
       }
 
+      const isCurrentlyBlocked = _blockedDates.includes(calSelected);
+
       let interiorHtml = `
         <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-4 mt-4 space-y-4">
-          <div class="flex items-center justify-between">
-            <div class="text-sm font-bold text-white">${headerLabel}</div>
-            <button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button>
+          <div class="flex items-center justify-between flex-wrap gap-3">
+            <div class="text-sm font-bold text-white flex items-center gap-2">
+              ${headerLabel}
+              ${isCurrentlyBlocked ? '<span class="px-2 py-0.5 rounded text-[9px] font-bold bg-red-950 text-red-400 border border-red-900 uppercase tracking-widest">Unavailable</span>' : ''}
+            </div>
+            <div class="flex items-center gap-2">
+              <button onclick="toggleBlockDate('${calSelected}')" class="text-xs font-semibold ${isCurrentlyBlocked ? 'text-neutral-400 hover:text-white bg-neutral-900 border-neutral-800' : 'text-red-400 hover:text-red-300 bg-red-950/20 border-red-900/30'} flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition border">
+                <i class="ti ${isCurrentlyBlocked ? 'ti-unlock' : 'ti-lock'}"></i> ${isCurrentlyBlocked ? 'Unblock Date' : 'Block Date'}
+              </button>
+              ${!isCurrentlyBlocked ? `<button onclick="openAddShootModal('${calSelected}')" class="text-xs font-semibold bg-[#c9a96e] hover:bg-[#e6c98a] text-black flex items-center gap-1 px-3 py-1.5 rounded-lg transition"><i class="ti ti-plus"></i> Add Shoot</button>` : ''}
+            </div>
           </div>`;
 
-      if (!contextualShoots.length) {
+      if (isCurrentlyBlocked) {
+         interiorHtml += `
+          <div class="bg-red-950/10 border border-red-900/20 rounded-lg p-6 text-center mt-2">
+            <div class="w-12 h-12 bg-red-950/30 rounded-full flex items-center justify-center mx-auto mb-3 text-red-500/50 text-xl"><i class="ti ti-lock"></i></div>
+            <p class="text-sm text-red-400 font-bold mb-1">Date is Blocked</p>
+            <p class="text-xs text-red-400/70">You have marked this date as unavailable for new shoots.</p>
+          </div>`;
+      } 
+      
+      if (!contextualShoots.length && !isCurrentlyBlocked) {
         interiorHtml += `<p class="text-xs text-neutral-600 py-4 text-center">No shoots scheduled for this day.</p>`;
-      } else {
-        interiorHtml += `<div class="space-y-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
+      } else if (contextualShoots.length) {
+        interiorHtml += `<div class="space-y-2 mt-2">${contextualShoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}</div>`;
       }
+      
       interiorHtml += `</div>`;
       panel.innerHTML = interiorHtml;
       applyPrivacyUIVisibility();
