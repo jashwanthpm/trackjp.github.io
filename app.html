@@ -2650,7 +2650,12 @@ try {
         const data = await res.json();
 
         if (!res.ok) {
-          throw new Error(data.error_description || data.msg || 'Failed to set password');
+          const errText = data.error_description || data.msg || data.error || 'Failed to set password';
+          // Catch the ugly JWT error and make it friendly
+          if (errText.toLowerCase().includes('expired') || errText.toLowerCase().includes('jwt')) {
+            throw new Error('Session expired for your security. Please Sign Out and Log In again.');
+          }
+          throw new Error(errText);
         }
 
         showToast('Password updated securely!', 'success');
