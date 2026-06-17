@@ -751,7 +751,7 @@
                   <div class="space-y-3">
                     <div class="flex gap-2">
                       <input id="new-login-password" type="password" placeholder="New password (min 6 chars)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-emerald-500 transition"/>
-                      <button onclick="setNewPassword()" id="set-pwd-btn" class="flex items-center justify-center min-w-[90px] gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
+                      <button onclick="promptPasswordSecurity()" id="set-pwd-btn" class="flex items-center justify-center min-w-[90px] gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">
                         <i class="ti ti-check"></i> Save
                       </button>
                     </div>
@@ -1133,6 +1133,25 @@
           <button onclick="executeDeleteAll()" class="w-1/2 py-2.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm Delete</button>
         </div>
       </div>
+
+<div id="password-pin-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+      <div class="bg-[#0f0f0f] border border-emerald-900/50 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
+        <div class="w-12 h-12 bg-emerald-950/40 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-500 text-2xl mx-auto"><i class="ti ti-shield-lock"></i></div>
+        <div class="space-y-1">
+          <h4 class="text-white font-bold text-base tracking-wide">Security Verification</h4>
+          <p class="text-xs text-neutral-400 leading-relaxed">Please enter your Financial Privacy PIN to authorize this password change.</p>
+        </div>
+        <div class="space-y-3 pt-2">
+          <input type="password" id="password-pin-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-emerald-500 transition"/>
+          <p id="password-pin-error-lbl" class="text-[11px] text-red-400 font-medium hidden">Incorrect PIN.</p>
+        </div>
+        <div class="flex gap-2 pt-2">
+          <button onclick="closeModal('password-pin-modal-backdrop')" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
+          <button onclick="executeSetNewPassword()" id="execute-pwd-btn" class="w-1/2 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition">Verify & Save</button>
+        </div>
+      </div>
+    </div>
+      
     </div>
     
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
@@ -2567,9 +2586,11 @@ try {
     }
     
 // ==========================================
-    // SET ACCOUNT PASSWORD (FOR GOOGLE USERS)
+    // SET ACCOUNT PASSWORD (SECURED WITH PIN)
     // ==========================================
-    async function setNewPassword() {
+    let _pendingNewPassword = '';
+
+    function promptPasswordSecurity() {
       const pwdInput = document.getElementById('new-login-password');
       const newPassword = pwdInput.value;
 
@@ -2583,13 +2604,33 @@ try {
         return;
       }
 
-      const btn = document.getElementById('set-pwd-btn');
+      // Store the requested password temporarily
+      _pendingNewPassword = newPassword;
+      
+      // Reset and open the verification modal
+      document.getElementById('password-pin-input').value = '';
+      document.getElementById('password-pin-error-lbl').classList.add('hidden');
+      openModal('password-pin-modal-backdrop');
+    }
+
+    async function executeSetNewPassword() {
+      const pinInput = document.getElementById('password-pin-input').value;
+      const errorLbl = document.getElementById('password-pin-error-lbl');
+      
+      // Check against the user's saved app PIN
+      if (pinInput !== _appPin) {
+        errorLbl.classList.remove('hidden');
+        return;
+      }
+      
+      errorLbl.classList.add('hidden');
+      
+      const btn = document.getElementById('execute-pwd-btn');
       const originalText = btn.innerHTML;
-      btn.innerHTML = '<i class="ti ti-loader"></i>...';
+      btn.innerHTML = '<i class="ti ti-loader"></i> Processing...';
       btn.disabled = true;
 
       try {
-        // We use the user's personal access token to authorize the password change
         const res = await fetch(`${SUPABASE_URL}/auth/v1/user`, {
           method: 'PUT',
           headers: {
@@ -2597,7 +2638,7 @@ try {
             'apikey': SUPABASE_KEY,
             'Authorization': `Bearer ${currentUser.token}`
           },
-          body: JSON.stringify({ password: newPassword })
+          body: JSON.stringify({ password: _pendingNewPassword })
         });
 
         const data = await res.json();
@@ -2606,8 +2647,10 @@ try {
           throw new Error(data.error_description || data.msg || 'Failed to set password');
         }
 
-        showToast('Password set successfully! You can now use it to log in.', 'success');
-        pwdInput.value = ''; // Clear the input
+        showToast('Password updated securely!', 'success');
+        document.getElementById('new-login-password').value = ''; 
+        closeModal('password-pin-modal-backdrop');
+        _pendingNewPassword = ''; // Clear from memory for security
         
       } catch (error) {
         console.error(error);
