@@ -2598,14 +2598,21 @@ try {
         return;
       }
 
+      // 1. STRICT SECURITY CHECK: Ensure the login session isn't expired
       if (!currentUser || !currentUser.token) {
-        showToast('Authentication error. Please log out and log back in.', 'error');
+        alert("SECURITY LOCK: Your secure session is too old! Please scroll up, click 'Sign Out', and log back in to change your password.");
         return;
       }
 
       // Store the requested password temporarily
       _pendingNewPassword = newPassword;
       
+      // 2. AUTO-HEAL HTML: Pull the modal out of any hidden traps and attach it to the main window
+      const modal = document.getElementById('password-pin-modal-backdrop');
+      if (modal) {
+        document.body.appendChild(modal); 
+      }
+
       // Reset and open the verification modal
       document.getElementById('password-pin-input').value = '';
       document.getElementById('password-pin-error-lbl').classList.add('hidden');
