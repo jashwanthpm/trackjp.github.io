@@ -2388,8 +2388,19 @@ try {
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fs) filtered = filtered.filter(s => s.payStatus === fs);
-      if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
+      
+      // SMART FILTER LOGIC: 
+      // If user wants to see Pending/Partial payments AND Pending Expenses, show EVERYTHING that owes money (OR logic)
+      if ((fs === 'pending' || fs === 'part') && fe === 'pending') {
+        filtered = filtered.filter(s => 
+          s.payStatus === fs || 
+          (Number(s.expense || 0) > 0 && s.expenseStatus === 'pending')
+        );
+      } else {
+        // Standard strict filtering (AND logic) for exact matches (e.g., Settled Payments + Pending Expenses)
+        if (fs) filtered = filtered.filter(s => s.payStatus === fs);
+        if (fe) filtered = filtered.filter(s => Number(s.expense || 0) > 0 && s.expenseStatus === fe);
+      }
 
       // 2. Calculate stats based on the FILTERED array
       const gross = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
@@ -2401,7 +2412,7 @@ try {
       const expensesSettled = filtered.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
       const expensesPending = expenses - expensesSettled;
 
-      // 3. Render the updated stats cards (Expense card now has a split view)
+      // 3. Render the updated stats cards
       const payStatsContainer = document.getElementById('pay-stats');
       if (payStatsContainer) {
         payStatsContainer.innerHTML = `
@@ -2497,7 +2508,7 @@ try {
                         <p class="text-sm font-bold text-[#c9a96e] privacy-target">Rs. ${Number(s.amount || 0).toLocaleString('en-IN')}</p>
                         <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${paymentBadgeColor}">${paymentLabel}</span>
                       </div>
-                      ${s.expense ? `
+                      ${Number(s.expense || 0) > 0 ? `
                       <div class="text-right">
                         <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
                         <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
