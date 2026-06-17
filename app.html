@@ -2391,35 +2391,48 @@ try {
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
       if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
 
-      // 2. Calculate stats based on the FILTERED array (not the global _shoots)
+      // 2. Calculate stats based on the FILTERED array
       const gross = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const expenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
       const outstanding = gross - captured;
 
-      // 3. Render the updated stats cards
+      // Expense calculations
+      const expenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const expensesSettled = filtered.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
+      const expensesPending = expenses - expensesSettled;
+
+      // 3. Render the updated stats cards (Expense card now has a split view)
       const payStatsContainer = document.getElementById('pay-stats');
       if (payStatsContainer) {
         payStatsContainer.innerHTML = `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
             <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
-            <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
-            <div class="text-[10px] text-neutral-600 mt-1">Filtered shoots</div>
+            <div class="text-lg font-bold tracking-tight text-white mt-1 privacy-target">${fmtAmt(gross)}</div>
+            <div class="text-[10px] text-neutral-600 mt-auto pt-2">Filtered shoots</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
             <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
-            <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
-            <div class="text-[10px] text-emerald-600 mt-1">Filtered settled payments</div>
+            <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-1 privacy-target">${fmtAmt(captured)}</div>
+            <div class="text-[10px] text-emerald-600/60 mt-auto pt-2">Settled payments</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
             <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
-            <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
-            <div class="text-[10px] text-red-600 mt-1">Filtered outstanding</div>
+            <div class="text-2xl font-bold tracking-tight text-red-400 mt-1 privacy-target">${fmtAmt(outstanding)}</div>
+            <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
             <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
-            <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
-            <div class="text-[10px] text-neutral-600 mt-1">Filtered run costs</div>
+            <div class="text-lg font-bold tracking-tight text-amber-500 mt-1 privacy-target">${fmtAmt(expenses)}</div>
+            <div class="flex items-center justify-between mt-auto pt-2 border-t border-neutral-800/60">
+              <div>
+                 <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Settled:</span>
+                 <span class="text-[10px] font-bold text-emerald-400 ml-0.5 privacy-target">${fmtAmt(expensesSettled)}</span>
+              </div>
+              <div>
+                 <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Pending:</span>
+                 <span class="text-[10px] font-bold text-orange-400 ml-0.5 privacy-target">${fmtAmt(expensesPending)}</span>
+              </div>
+            </div>
           </div>`;
       }
 
