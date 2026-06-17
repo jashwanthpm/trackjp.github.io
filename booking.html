@@ -223,8 +223,8 @@
             activeStudio = payload.s;
             targetUserName = payload.n;
 
-            document.getElementById('photographer-name').textContent = `Book with ${activeStudio}`;
-document.getElementById('studio-welcome').textContent = `Exclusive link for ${targetUserName}`;
+            document.getElementById('photographer-name').textContent = `Book with ${targetUserName}`;
+document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
             
             // Small animation for loading the container
             const container = document.getElementById('booking-container');
