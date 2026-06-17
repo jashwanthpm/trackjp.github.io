@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hugo Bellamy | Award-winning photographer</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #fdfdfd;
+            color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            opacity: 0;
+            transform: translateY(20px);
+            animation: fadeUpIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+        }
+
+        @keyframes fadeUpIn {
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .font-serif { font-family: 'Playfair Display', serif; }
+
+        /* Hide scrollbar */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        /* Enhanced Scrolling Mechanics */
+        .scroll-container {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            scroll-snap-type: x mandatory; 
+            cursor: grab; 
+        }
+        
+        .scroll-container:active { cursor: grabbing; }
+        .snap-item { scroll-snap-align: start; }
+
+        /* Image Hover Mechanics */
+        .img-wrapper {
+            overflow: hidden;
+            background: #eee;
+            cursor: pointer;
+            position: relative;
+        }
+        
+        .gallery-img {
+            transition: transform var(--transition-smooth);
+            will-change: transform;
+            pointer-events: none;
+        }
+
+        .img-wrapper:hover .gallery-img { transform: scale(1.04); }
+
+        /* Lightbox (Modal) Styles */
+        #lightbox {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s ease;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+        }
+        
+        #lightbox.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #lightbox-img {
+            transform: scale(0.95);
+            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+        }
+
+        #lightbox.active #lightbox-img {
+            transform: scale(1);
+        }
+
+        /* Image Transition state for Next/Prev */
+        #lightbox-img.fade-out {
+            opacity: 0;
+            transform: scale(0.98);
+        }
+    </style>
+</head>
+<body class="antialiased selection:bg-black selection:text-white">
+
+    <header class="pt-32 pb-14 px-8 md:px-12 w-full max-w-[1800px] mx-auto">
+        <h1 class="text-[2rem] md:text-[2.5rem] text-[#111] font-serif font-medium mb-1 tracking-tight leading-none">Hugo Bellamy</h1>
+        <p class="text-lg md:text-[1.25rem] text-[#777] font-light tracking-wide">Award-winning photographer</p>
+    </header>
+
+    <main class="w-full mb-24 relative select-none">
+        <div id="gallery-track" class="flex overflow-x-auto hide-scrollbar scroll-container gap-5 pl-8 md:pl-12 pr-12 pb-8">
+            
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&fit=crop" alt="Portrait photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&fit=crop" alt="Fashion photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1550639524-a6f58345a0b1?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1550639524-a6f58345a0b1?q=80&w=800&fit=crop" alt="Studio photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1529139574466-a303027c028b?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1529139574466-a303027c028b?q=80&w=800&fit=crop" alt="Outdoor photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&fit=crop" alt="Editorial photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=100&w=2000">
+                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&fit=crop" alt="Minimalist photography" class="gallery-img w-full h-full object-cover shadow-sm">
+            </div>
+
+            <div class="flex-none w-[4px] md:w-[40px]"></div>
+        </div>
+    </main>
+
+    <footer class="mt-auto px-8 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center text-[12px] md:text-[13px] text-[#999] w-full max-w-[1800px] mx-auto gap-4 border-t border-gray-100">
+        <div class="flex space-x-3">
+            <a href="#" class="hover:text-black transition-colors duration-300">Privacy Policy</a>
+            <span>|</span>
+            <a href="#" class="hover:text-black transition-colors duration-300">Accessibility Statement</a>
+        </div>
+        <div>
+            &copy;2026 by Hugo Bellamy. Powered and secured by <a href="#" class="underline hover:text-black transition-colors duration-300">Wix</a>.
+        </div>
+    </footer>
+
+    <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-6 md:p-16">
+        
+        <button id="close-lightbox" class="absolute top-6 right-6 md:top-10 md:right-10 text-white/70 hover:text-white transition-colors cursor-pointer z-50 p-2">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+            </svg>
+        </button>
+
+        <button id="prev-btn" class="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
+            </svg>
+        </button>
+
+        <button id="next-btn" class="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+            </svg>
+        </button>
+
+        <img id="lightbox-img" src="" alt="Enlarged photography" class="max-w-full max-h-full object-contain shadow-2xl relative z-40">
+    </div>
+
+    <script>
+        const slider = document.getElementById('gallery-track');
+        const wrappers = Array.from(document.querySelectorAll('.img-wrapper')); 
+        const lightbox = document.getElementById('lightbox');
+        const lightboxImg = document.getElementById('lightbox-img');
+        const closeLightboxBtn = document.getElementById('close-lightbox');
+        const prevBtn = document.getElementById('prev-btn');
+        const nextBtn = document.getElementById('next-btn');
+
+        let isDown = false;
+        let startX;
+        let scrollLeft;
+        let dragDistance = 0;
+        let currentIndex = 0; 
+
+        // --- Drag to Scroll Logic ---
+        slider.addEventListener('mousedown', (e) => {
+            isDown = true;
+            dragDistance = 0;
+            slider.style.scrollSnapType = 'none'; 
+            startX = e.pageX - slider.offsetLeft;
+            scrollLeft = slider.scrollLeft;
+        });
+
+        slider.addEventListener('mouseleave', () => {
+            isDown = false;
+            slider.style.scrollSnapType = 'x mandatory';
+        });
+
+        slider.addEventListener('mouseup', () => {
+            isDown = false;
+            slider.style.scrollSnapType = 'x mandatory';
+        });
+
+        slider.addEventListener('mousemove', (e) => {
+            if (!isDown) return;
+            e.preventDefault();
+            const x = e.pageX - slider.offsetLeft;
+            const walk = (x - startX) * 2; 
+            slider.scrollLeft = scrollLeft - walk;
+            dragDistance = Math.abs(x - startX);
+        });
+
+        // --- Lightbox Enlarge & Navigation Logic ---
+        const updateLightboxImage = (index) => {
+            lightboxImg.classList.add('fade-out');
+            
+            setTimeout(() => {
+                const highResSrc = wrappers[index].getAttribute('data-src');
+                lightboxImg.src = highResSrc;
+                
+                lightboxImg.onload = () => {
+                    lightboxImg.classList.remove('fade-out');
+                };
+            }, 150); 
+        };
+
+        const showNextImage = (e) => {
+            if (e) e.stopPropagation(); 
+            currentIndex = (currentIndex + 1) % wrappers.length; 
+            updateLightboxImage(currentIndex);
+        };
+
+        const showPrevImage = (e) => {
+            if (e) e.stopPropagation(); 
+            currentIndex = (currentIndex - 1 + wrappers.length) % wrappers.length; 
+            updateLightboxImage(currentIndex);
+        };
+
+        wrappers.forEach((wrapper, index) => {
+            wrapper.addEventListener('click', () => {
+                if (dragDistance > 5) return; 
+
+                currentIndex = index;
+                updateLightboxImage(currentIndex);
+                
+                lightbox.classList.add('active');
+                document.body.style.overflow = 'hidden'; 
+            });
+        });
+
+        nextBtn.addEventListener('click', showNextImage);
+        prevBtn.addEventListener('click', showPrevImage);
+
+        const closeLightbox = () => {
+            lightbox.classList.remove('active');
+            document.body.style.overflow = ''; 
+            
+            setTimeout(() => {
+                lightboxImg.src = '';
+                lightboxImg.classList.remove('fade-out');
+            }, 500); 
+        };
+
+        closeLightboxBtn.addEventListener('click', closeLightbox);
+
+        lightbox.addEventListener('click', (e) => {
+            if (e.target === lightbox) {
+                closeLightbox();
+            }
+        });
+
+        document.addEventListener('keydown', (e) => {
+            if (!lightbox.classList.contains('active')) return;
+
+            if (e.key === 'Escape') closeLightbox();
+            if (e.key === 'ArrowRight') showNextImage();
+            if (e.key === 'ArrowLeft') showPrevImage();
+        });
+    </script>
+</body>
+</html>
