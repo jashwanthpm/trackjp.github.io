@@ -2762,13 +2762,14 @@ try {
         yPos += 11;
 
         shoots.forEach(s => {
+          doc.setFontSize(6);
           let cardH = 14;
-          if (s.expense || s.notes) cardH += 5;
           let splitNotes = [];
           if (s.notes) {
               splitNotes = doc.splitTextToSize('Notes: ' + s.notes, pageWidth - 2 * margin - 10);
               cardH += (splitNotes.length * 3);
           }
+          if (s.expense) cardH += 5;
 
           if (yPos + cardH > pageHeight - 10) {
             doc.addPage(); 
@@ -2809,14 +2810,22 @@ try {
           let nextY = yPos + 13;
           if (s.expense) {
             doc.setFontSize(7); 
+            doc.setFont(undefined, 'bold');
             doc.setTextColor(255, 152, 0);
-            const expLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
-            doc.text(`Exp: Rs. ${Number(s.expense).toLocaleString('en-IN')} (${expLabel})`, margin + 3, nextY);
-            nextY += 4;
+            doc.text(`Exp: Rs. ${Number(s.expense).toLocaleString('en-IN')}`, margin + 3, nextY);
+            
+            const expStatusLabel = s.expenseStatus === 'settled' ? 'SETTLED' : 'PENDING';
+            const expStatusColor = s.expenseStatus === 'settled' ? [76, 175, 80] : [220, 53, 69];
+            doc.setFontSize(6);
+            doc.setTextColor(...expStatusColor);
+            doc.text(`[EXP: ${expStatusLabel}]`, margin + 35, nextY);
+
+            nextY += 4.5;
           }
 
           if (s.notes && splitNotes.length) {
             doc.setFontSize(6); 
+            doc.setFont(undefined, 'normal');
             doc.setTextColor(120, 120, 120);
             doc.text(splitNotes, margin + 3, nextY);
           }
@@ -2847,7 +2856,6 @@ try {
       if (_profile.bank) {
         const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
         doc.text(splitBank, margin, yPos);
-        yPos += splitBank.length * 3.5;
       }
 
       doc.setFillColor(15, 15, 15); 
@@ -2857,10 +2865,569 @@ try {
       doc.setFontSize(7); 
       doc.setTextColor(100, 100, 100);
       doc.text('Complete Database Export', margin, pageHeight - 3);
+      
+      // Interactive Link Logic
+      doc.setTextColor(201, 169, 110);
       doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.link(pageWidth / 2 - 20, pageHeight - 6, 40, 5, { url: 'https://sakkhi.co.in' });
       
       doc.save(`Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Database report successfully generated as a PDF file.', 'success');
+    }
+
+    function downloadCompanyViewPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      let yPos = 12;
+      doc.setFillColor(5, 5, 5);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(201, 169, 110);
+      doc.setLineWidth(0.5);
+      doc.line(0, 26, pageWidth, 26);
+      doc.setFontSize(18);
+      doc.setTextColor(201, 169, 110);
+      doc.setFont(undefined, 'bold');
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
+      yPos = 32;
+      const companyFilter = document.getElementById('pay-filter-company')?.value || '';
+      if (!companyFilter) {
+        doc.setFontSize(10);
+        doc.setTextColor(220, 53, 69);
+        doc.text('Please select a company', margin, yPos);
+        showToast('Please select a targeted company context first.', 'error');
+        return;
+      }
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Company - ' + companyFilter, margin, yPos);
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      doc.text('Generated: ' + dateStr, margin, yPos + 6);
+      yPos += 14;
+      let filtered = _shoots.filter(s => s.company === companyFilter && s.amount);
+      if (filtered.length === 0) {
+        showToast('No logged data rows matching this context.', 'error');
+        return;
+      }
+      const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const totalExpenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const grossTotal = total + totalExpenses;
+      const received = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const due = (total + totalExpenses) - received;
+      const boxW = (pageWidth - 2 * margin - 8) / 3;
+      [{ label: 'TOTAL', value: grossTotal, color: [201, 169, 110] }, { label: 'DUE', value: due, color: [220, 53, 69] }, { label: 'EXPENSES', value: totalExpenses, color: [255, 152, 0] }].forEach((s, i) => {
+        const x = margin + i * (boxW + 4);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(x, yPos, boxW, 15, 'F');
+        doc.setDrawColor(50, 50, 50);
+        doc.rect(x, yPos, boxW, 15);
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        doc.text(s.label, x + 3, yPos + 4);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...s.color);
+        doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
+      });
+      yPos += 20;
+      const grouped = {};
+      filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(s => {
+        const k = s.date.slice(0, 7);
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(s);
+      });
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage();
+          doc.setFillColor(5, 5, 5);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
+          yPos = margin;
+        }
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+        doc.setDrawColor(80, 80, 80);
+        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(201, 169, 110);
+        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN'), pageWidth - margin - 30, yPos + 6);
+        yPos += 11;
+
+        shoots.forEach(s => {
+          doc.setFontSize(6);
+          let cardH = 11;
+          let splitNotes = [];
+          if (s.notes) {
+            splitNotes = doc.splitTextToSize('Notes: ' + s.notes, pageWidth - 2 * margin - 10);
+            cardH += (splitNotes.length * 3.5);
+          }
+          if (s.expense) cardH += 5;
+
+          if (yPos + cardH > pageHeight - 12) {
+            doc.addPage();
+            doc.setFillColor(5, 5, 5);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            yPos = margin;
+          }
+          doc.setFillColor(15, 15, 15);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH, 'F');
+          doc.setDrawColor(50, 50, 50);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH);
+          
+          const dateObj = new Date(s.date + 'T00:00:00');
+          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(255, 255, 255);
+          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+          
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(150, 150, 150);
+          doc.text(s.event, margin + 3, yPos + 7.5);
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(201, 169, 110);
+          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
+          
+          doc.setFontSize(6);
+          const statusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus];
+          doc.setTextColor(...statusColor);
+          const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
+          doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
+          
+          let nextY = yPos + 12;
+          if (s.expense) {
+            doc.setFontSize(7);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(255, 152, 0);
+            doc.text('Exp: Rs. ' + Number(s.expense).toLocaleString('en-IN'), margin + 3, nextY);
+            
+            const expStatusLabel = s.expenseStatus === 'settled' ? 'SETTLED' : 'PENDING';
+            const expStatusColor = s.expenseStatus === 'settled' ? [76, 175, 80] : [220, 53, 69];
+            doc.setFontSize(6);
+            doc.setTextColor(...expStatusColor);
+            doc.text(`[EXP: ${expStatusLabel}]`, margin + 35, nextY);
+
+            nextY += 5;
+          }
+          if (s.notes && splitNotes.length > 0) {
+            doc.setFontSize(6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(150, 150, 150);
+            doc.text(splitNotes, margin + 3, nextY);
+          }
+          yPos = yPos + cardH + 2;
+        });
+        yPos += 2;
+      });
+
+      if (yPos > pageHeight - 35) {
+        doc.addPage();
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        yPos = margin;
+      }
+      doc.setDrawColor(50, 50, 50);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('PAYMENT DETAILS', margin, yPos);
+      yPos += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
+      yPos += 4;
+      if (_profile.bank) {
+        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
+        doc.text(splitBank, margin, yPos);
+      }
+
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50);
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(companyFilter, margin, pageHeight - 3);
+      
+      // Interactive Link Logic
+      doc.setTextColor(201, 169, 110);
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.link(pageWidth / 2 - 20, pageHeight - 6, 40, 5, { url: 'https://sakkhi.co.in' });
+
+      doc.save(`${companyFilter}_Report_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Ledger data archived successfully.', 'success');
+    }
+
+    function downloadFullReportPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      let yPos = 12;
+      doc.setFillColor(5, 5, 5);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(201, 169, 110);
+      doc.setLineWidth(0.5);
+      doc.line(0, 26, pageWidth, 26);
+      doc.setFontSize(18);
+      doc.setTextColor(201, 169, 110);
+      doc.setFont(undefined, 'bold');
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
+      yPos = 32;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Full Financial Report', margin, yPos);
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      doc.text('Generated: ' + dateStr, margin, yPos + 6);
+      yPos += 14;
+      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const outstanding = gross - captured;
+      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const stats = [{ label: 'TOTAL', value: gross, color: [201, 169, 110] }, { label: 'RECEIVED', value: captured, color: [76, 175, 80] }, { label: 'DUE', value: outstanding, color: [220, 53, 69] }, { label: 'EXPENSES', value: expenses, color: [255, 152, 0] }];
+      const boxW = (pageWidth - 2 * margin - 4) / 2;
+      for (let i = 0; i < stats.length; i += 2) {
+        for (let j = 0; j < 2; j++) {
+          if (!stats[i + j]) continue;
+          const s = stats[i + j];
+          const x = margin + j * (boxW + 4);
+          doc.setFillColor(20, 20, 20);
+          doc.rect(x, yPos, boxW, 15, 'F');
+          doc.setDrawColor(50, 50, 50);
+          doc.rect(x, yPos, boxW, 15);
+          doc.setFontSize(7);
+          doc.setTextColor(120, 120, 120);
+          doc.text(s.label, x + 3, yPos + 4);
+          doc.setFontSize(10);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(...s.color);
+          doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
+        }
+        yPos += 17;
+      }
+      yPos += 2;
+      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const grouped = {};
+      filtered.forEach(s => {
+        const k = s.date.slice(0, 7);
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(s);
+      });
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage();
+          doc.setFillColor(5, 5, 5);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
+          yPos = margin;
+        }
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+        const monthExp = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+        doc.setDrawColor(80, 80, 80);
+        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(201, 169, 110);
+        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text('Rs. ' + monthTotal.toLocaleString('en-IN') + ' | Exp: Rs. ' + monthExp.toLocaleString('en-IN'), pageWidth - margin - 80, yPos + 6);
+        yPos += 11;
+
+        shoots.forEach(s => {
+          doc.setFontSize(6);
+          let cardH = 11;
+          let splitNotes = [];
+          if (s.notes) {
+            splitNotes = doc.splitTextToSize('Notes: ' + s.notes, pageWidth - 2 * margin - 10);
+            cardH += (splitNotes.length * 3.5);
+          }
+          if (s.expense) cardH += 5;
+
+          if (yPos + cardH > pageHeight - 12) {
+            doc.addPage();
+            doc.setFillColor(5, 5, 5);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            yPos = margin;
+          }
+          doc.setFillColor(15, 15, 15);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH, 'F');
+          doc.setDrawColor(50, 50, 50);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH);
+          
+          const dateObj = new Date(s.date + 'T00:00:00');
+          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(255, 255, 255);
+          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+          
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(150, 150, 150);
+          doc.text(s.event + ' • ' + (s.company || 'Direct'), margin + 3, yPos + 7.5);
+          
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(201, 169, 110);
+          doc.text('Rs. ' + Number(s.amount).toLocaleString('en-IN'), pageWidth - margin - 35, yPos + 3);
+          
+          doc.setFontSize(6);
+          const statusColor = { 'done': [76, 175, 80], 'part': [255, 152, 0], 'pending': [220, 53, 69] }[s.payStatus];
+          doc.setTextColor(...statusColor);
+          const statusLabel = { 'done': 'SETTLED', 'part': 'PARTIAL', 'pending': 'PENDING' }[s.payStatus];
+          doc.text(statusLabel, pageWidth - margin - 35, yPos + 7.5);
+
+          let nextY = yPos + 12;
+          if (s.expense) {
+            doc.setFontSize(7);
+            doc.setFont(undefined, 'bold');
+            doc.setTextColor(255, 152, 0);
+            doc.text('Exp: Rs. ' + Number(s.expense).toLocaleString('en-IN'), margin + 3, nextY);
+            
+            const expStatusLabel = s.expenseStatus === 'settled' ? 'SETTLED' : 'PENDING';
+            const expStatusColor = s.expenseStatus === 'settled' ? [76, 175, 80] : [220, 53, 69];
+            doc.setFontSize(6);
+            doc.setTextColor(...expStatusColor);
+            doc.text(`[EXP: ${expStatusLabel}]`, margin + 35, nextY);
+            
+            nextY += 5;
+          }
+
+          if (s.notes && splitNotes.length > 0) {
+            doc.setFontSize(6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(150, 150, 150);
+            doc.text(splitNotes, margin + 3, nextY);
+          }
+          yPos = yPos + cardH + 2;
+        });
+        yPos += 2;
+      });
+
+      if (yPos > pageHeight - 35) {
+        doc.addPage();
+        doc.setFillColor(5, 5, 5);
+        doc.rect(0, 0, pageWidth, pageHeight, 'F');
+        yPos = margin;
+      }
+      doc.setDrawColor(50, 50, 50);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 5;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(201, 169, 110);
+      doc.text('PAYMENT DETAILS', margin, yPos);
+      yPos += 5;
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(180, 180, 180);
+      doc.text(`UPI ID: ${_profile.upi || 'N/A'}`, margin, yPos);
+      yPos += 4;
+      if (_profile.bank) {
+        const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
+        doc.text(splitBank, margin, yPos);
+      }
+
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50);
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Full Report', margin, pageHeight - 3);
+      
+      // Interactive Link Logic
+      doc.setTextColor(201, 169, 110);
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.link(pageWidth / 2 - 20, pageHeight - 6, 40, 5, { url: 'https://sakkhi.co.in' });
+      
+      doc.save(`FullReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Full ledger documentation completed.', 'success');
+    }
+
+    function downloadShootsListPDF() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 14;
+      let yPos = 12;
+      doc.setFillColor(5, 5, 5);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(201, 169, 110);
+      doc.setLineWidth(0.5);
+      doc.line(0, 26, pageWidth, 26);
+      doc.setFontSize(18);
+      doc.setTextColor(201, 169, 110);
+      doc.setFont(undefined, 'bold');
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, yPos + 6);
+      yPos = 32;
+      doc.setFontSize(9);
+      doc.setFont(undefined, 'bold');
+      doc.setTextColor(255, 255, 255);
+      doc.text('Shoots List', margin, yPos);
+      doc.setFontSize(7);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(150, 150, 150);
+      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      doc.text('Generated: ' + dateStr, margin, yPos + 6);
+      yPos += 14;
+      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      const td = today();
+      
+      const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
+      const ft = document.getElementById('filter-timeline')?.value || '';
+      const fc = document.getElementById('filter-company')?.value || '';
+      const fl = document.getElementById('filter-loc')?.value || '';
+      
+      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company).toLowerCase().includes(q));
+      if (fc) filtered = filtered.filter(s => s.company === fc);
+      if (fl) filtered = filtered.filter(s => s.location === fl);
+      if (ft === 'upcoming') filtered = filtered.filter(s => s.date >= td);
+      else if (ft === 'completed') filtered = filtered.filter(s => s.date < td);
+      
+      const upcoming = filtered.filter(s => s.date >= td).length;
+      const stats = [{ label: 'TOTAL', value: filtered.length.toString(), color: [201, 169, 110] }, { label: 'UPCOMING', value: upcoming.toString(), color: [76, 175, 80] }];
+      const boxW = (pageWidth - 2 * margin - 4) / 2;
+      stats.forEach((s, i) => {
+        const x = margin + i * (boxW + 4);
+        doc.setFillColor(20, 20, 20);
+        doc.rect(x, yPos, boxW, 15, 'F');
+        doc.setDrawColor(50, 50, 50);
+        doc.rect(x, yPos, boxW, 15);
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        doc.text(s.label, x + 3, yPos + 4);
+        doc.setFontSize(10);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(...s.color);
+        doc.text(s.value, x + 3, yPos + 12);
+      });
+      yPos += 20;
+      const grouped = {};
+      filtered.forEach(s => {
+        const k = s.date.slice(0, 7);
+        if (!grouped[k]) grouped[k] = [];
+        grouped[k].push(s);
+      });
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+        if (yPos > pageHeight - 25) {
+          doc.addPage();
+          doc.setFillColor(5, 5, 5);
+          doc.rect(0, 0, pageWidth, pageHeight, 'F');
+          yPos = margin;
+        }
+        const shoots = grouped[monthKey];
+        const [year, month] = monthKey.split('-');
+        const monthName = MONTHS[parseInt(month) - 1];
+        doc.setFillColor(20, 20, 20);
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 8, 'F');
+        doc.setDrawColor(80, 80, 80);
+        doc.line(margin, yPos + 8, pageWidth - margin, yPos + 8);
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(201, 169, 110);
+        doc.text(monthName + ' ' + year, margin + 3, yPos + 6);
+        doc.setFontSize(7);
+        doc.setTextColor(150, 150, 150);
+        doc.text(shoots.length + ' shoots', pageWidth - margin - 30, yPos + 6);
+        yPos += 11;
+        
+        shoots.forEach(s => {
+          doc.setFontSize(6);
+          let cardH = 11;
+          let splitNotes = [];
+          if (s.notes) {
+            splitNotes = doc.splitTextToSize('Notes: ' + s.notes, pageWidth - 2 * margin - 10);
+            cardH += (splitNotes.length * 3.5);
+          }
+
+          if (yPos + cardH > pageHeight - 12) {
+            doc.addPage();
+            doc.setFillColor(5, 5, 5);
+            doc.rect(0, 0, pageWidth, pageHeight, 'F');
+            yPos = margin;
+          }
+          doc.setFillColor(15, 15, 15);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH, 'F');
+          doc.setDrawColor(50, 50, 50);
+          doc.rect(margin, yPos, pageWidth - 2 * margin, cardH);
+          
+          const dateObj = new Date(s.date + 'T00:00:00');
+          const dateFormatted = dateObj.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: '2-digit' });
+          doc.setFontSize(8);
+          doc.setFont(undefined, 'bold');
+          doc.setTextColor(255, 255, 255);
+          doc.text(dateFormatted + ' • ' + s.name, margin + 3, yPos + 3);
+          
+          doc.setFontSize(7);
+          doc.setFont(undefined, 'normal');
+          doc.setTextColor(150, 150, 150);
+          doc.text(s.event + ' • ' + (s.location || 'N/A'), margin + 3, yPos + 7.5);
+          
+          let nextY = yPos + 12;
+          if (s.notes && splitNotes.length > 0) {
+            doc.setFontSize(6);
+            doc.setFont(undefined, 'normal');
+            doc.setTextColor(150, 150, 150);
+            doc.text(splitNotes, margin + 3, nextY);
+          }
+          yPos = yPos + cardH + 2;
+        });
+        yPos += 2;
+      });
+      doc.setFillColor(15, 15, 15);
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50);
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text('Shoots Report', margin, pageHeight - 3);
+      
+      // Interactive Link Logic
+      doc.setTextColor(201, 169, 110);
+      doc.text('powered by SAKKHI', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.link(pageWidth / 2 - 20, pageHeight - 6, 40, 5, { url: 'https://sakkhi.co.in' });
+      
+      doc.save(`ShootsReport_${new Date().toISOString().split('T')[0]}.pdf`);
+      showToast('Shoots register successfully archived.', 'success');
     }
 
     function exportAllDataToCSV() {
