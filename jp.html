@@ -152,28 +152,38 @@
     </div>
 
     <script>
-        // ==========================================
-        // 🚀 PASTE YOUR GOOGLE SHEET CSV LINK HERE
-        // ==========================================
-        const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQO4ZuRMwreAK-SqH1zRw9AZXAS8weEn6rrt-QpAADw5KELUIVHea4sldDO_RZWeevg2N-FSJPp0gwn/pub?output=csv';
-        // ==========================================
-
-        let portfolioImages = [];
-        
-        const slider = document.getElementById('gallery-track');
-        const loader = document.getElementById('loader');
-        const lightbox = document.getElementById('lightbox');
-        const lightboxImg = document.getElementById('lightbox-img');
-        const closeLightboxBtn = document.getElementById('close-lightbox');
-        const prevBtn = document.getElementById('prev-btn');
-        const nextBtn = document.getElementById('next-btn');
-
-        let isDown = false;
-        let startX;
-        let scrollLeft;
-        let dragDistance = 0;
-        let currentIndex = 0; 
-        let wrappers = []; 
+        // --- Fetch Images from Google Sheets (BULLETPROOF VERSION) ---
+        async function fetchImages() {
+            try {
+                if(sheetUrl === 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQO4ZuRMwreAK-SqH1zRw9AZXAS8weEn6rrt-QpAADw5KELUIVHea4sldDO_RZWeevg2N-FSJPp0gwn/pub?output=csv') {
+                    console.log("Please add your Google Sheet link!");
+                    return;
+                } 
+                
+                const response = await fetch(sheetUrl);
+                const data = await response.text();
+                
+                // Split by new line (handles both Windows and Mac hidden formats)
+                const rows = data.split(/\r?\n/).slice(1); 
+                
+                portfolioImages = rows.map(row => {
+                    const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                    if(cols.length >= 2 && cols[0].trim() !== "") {
+                        return {
+                            // The regex /["\r]/g aggressively removes quotes and hidden returns
+                            thumb: cols[0].replace(/["\r]/g, '').trim(),
+                            highRes: cols[1].replace(/["\r]/g, '').trim(),
+                            alt: cols[2] ? cols[2].replace(/["\r]/g, '').trim() : "Portfolio Image"
+                        };
+                    }
+                }).filter(Boolean);
+                
+                renderGallery();
+            } catch (error) {
+                loader.innerText = "Error loading gallery. Check your console.";
+                console.error("Fetch Error:", error);
+            }
+        }
 
         // --- Fetch Images from Google Sheets ---
         async function fetchImages() {
