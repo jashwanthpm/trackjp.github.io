@@ -112,6 +112,7 @@
             <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.4)]"></div> Free</span>
             <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-amber-500 shadow-[0_0_8px_rgba(245,158,11,0.4)]"></div> Partial</span>
             <span class="flex items-center gap-1.5"><div class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.4)]"></div> Booked</span>
+            <span class="flex items-center gap-1"><i class="ti ti-lock text-[10px] text-red-500/70"></i> Blocked</span>
           </div>
         </div>
       </div>
@@ -202,6 +203,7 @@
     
     // Calendar state
     let dateStatusMap = {}; 
+    let blockedDatesMap = [];
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
 
@@ -261,6 +263,7 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
     // ==========================================
     async function fetchBlockedDates(userId, studioName) {
       try {
+        // 1. Fetch Existing Shoots
         const resAll = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date,session`, { headers: HEADERS });
         const dataAll = await resAll.json();
         
@@ -272,8 +275,17 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
             dateStatusMap[s.date].push(s.session);
           }
         });
+
+        // 2. Fetch Manually Blocked Dates from Dashboard
+        const resBlocked = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${userId}_blocked_dates&select=value`, { headers: HEADERS });
+        const blockedData = await resBlocked.json();
+        if (blockedData && blockedData.length > 0) {
+          blockedDatesMap = blockedData[0].value || [];
+        }
+
         renderCalendarGrid();
 
+        // 3. Fetch specific studio shoots for the list below
         const todayStr = new Date().toISOString().split('T')[0];
         const encodedStudio = encodeURIComponent(studioName);
         const resStudio = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&company=eq.${encodedStudio}&date=gte.${todayStr}&order=date.asc&select=name,date,event,location`, { headers: HEADERS });
@@ -282,7 +294,7 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
         renderStudioShoots(studioShoots);
 
       } catch (e) {
-        console.error("Could not fetch availability.");
+        console.error("Could not fetch availability.", e);
       }
     }
 
@@ -370,6 +382,7 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
         const thisDateObj = new Date(calYear, calMonth, d);
         
         const isPast = thisDateObj < today;
+        const isBlocked = blockedDatesMap.includes(dateStr); // Check if locked in dashboard
         const bookedSessions = dateStatusMap[dateStr] || [];
         
         let isMorningBooked = bookedSessions.includes('Morning Session');
@@ -378,14 +391,21 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
 
         // Apply glows to the dots
         let dotColor = 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'; 
-        if (isFullyBooked) dotColor = 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.5)]';
+        if (isFullyBooked || isBlocked) dotColor = 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.5)]';
         else if (isMorningBooked || isEveningBooked) dotColor = 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]';
 
         let buttonClasses = `w-10 h-10 rounded-full flex flex-col items-center justify-center transition-all duration-300 mx-auto group `;
         
-        if (isPast || isFullyBooked) {
-          buttonClasses += `text-neutral-600 bg-neutral-900/40 cursor-not-allowed ${isFullyBooked ? 'opacity-50' : ''}`;
-          html += `<div class="${buttonClasses}"><span class="text-sm leading-none mt-1">${d}</span><div class="w-1 h-1 rounded-full ${dotColor} mt-1"></div></div>`;
+        // Disable the button if past, fully booked, OR manually blocked
+        if (isPast || isFullyBooked || isBlocked) {
+          buttonClasses += `text-neutral-600 bg-neutral-900/40 cursor-not-allowed ${(isFullyBooked || isBlocked) ? 'opacity-50' : ''}`;
+          
+          let indicator = `<div class="w-1 h-1 rounded-full ${dotColor} mt-1"></div>`;
+          if (isBlocked) {
+             indicator = `<i class="ti ti-lock text-[8px] mt-1 text-red-500/70"></i>`;
+          }
+          
+          html += `<div class="${buttonClasses}"><span class="text-sm leading-none mt-1">${d}</span>${indicator}</div>`;
         } else {
           buttonClasses += `text-neutral-200 bg-neutral-900 hover:bg-[#c9a96e] hover:text-black hover:shadow-[0_0_15px_rgba(201,169,110,0.3)] cursor-pointer`;
           html += `<button type="button" onclick="selectDate('${dateStr}', ${isMorningBooked}, ${isEveningBooked})" class="${buttonClasses}">
