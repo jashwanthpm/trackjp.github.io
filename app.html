@@ -1155,6 +1155,32 @@
     
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
 
+<div id="payment-qr-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'payment-qr-modal-backdrop')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center relative">
+        <button onclick="closeModal('payment-qr-modal-backdrop')" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+        
+        <div class="w-12 h-12 bg-emerald-950/40 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-400 text-2xl mx-auto"><i class="ti ti-qrcode"></i></div>
+        
+        <div class="space-y-1">
+          <h4 class="text-white font-bold text-base tracking-wide">Scan to Pay</h4>
+          <p class="text-xs text-neutral-500" id="pay-modal-client-name">Client Name</p>
+        </div>
+        
+        <div class="bg-white p-3 rounded-xl inline-block mx-auto mt-4">
+          <img id="pay-modal-qr" src="" alt="UPI QR Code" class="w-48 h-48 object-contain" />
+        </div>
+        
+        <p class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target" id="pay-modal-amount">₹0</p>
+        
+        <div class="pt-2">
+          <button onclick="copyUpiLink()" id="btn-copy-upi" class="w-full py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition border border-[#c9a96e] flex items-center justify-center gap-2">
+            <i class="ti ti-link"></i> Copy Payment Link
+          </button>
+        </div>
+        <p class="text-[10px] text-neutral-600 mt-2">Powered by secure UPI intent routing.</p>
+      </div>
+    </div>
+    
   <script>
 
     // ==========================================
@@ -2389,30 +2415,27 @@ try {
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       
-      // SMART FILTER LOGIC: 
-      // If user wants to see Pending/Partial payments AND Pending Expenses, show EVERYTHING that owes money (OR logic)
+      // SMART FILTER LOGIC
       if ((fs === 'pending' || fs === 'part') && fe === 'pending') {
         filtered = filtered.filter(s => 
           s.payStatus === fs || 
           (Number(s.expense || 0) > 0 && s.expenseStatus === 'pending')
         );
       } else {
-        // Standard strict filtering (AND logic) for exact matches (e.g., Settled Payments + Pending Expenses)
         if (fs) filtered = filtered.filter(s => s.payStatus === fs);
         if (fe) filtered = filtered.filter(s => Number(s.expense || 0) > 0 && s.expenseStatus === fe);
       }
 
-      // 2. Calculate stats based on the FILTERED array
+      // 2. Calculate stats
       const gross = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       const outstanding = gross - captured;
 
-      // Expense calculations
       const expenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
       const expensesSettled = filtered.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
       const expensesPending = expenses - expensesSettled;
 
-      // 3. Render the updated stats cards
+      // 3. Render Stats Cards
       const payStatsContainer = document.getElementById('pay-stats');
       if (payStatsContainer) {
         payStatsContainer.innerHTML = `
@@ -2486,6 +2509,12 @@ try {
                 const paymentLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
                 const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
                 const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
+                
+                // Calculate total pending for this specific row to determine if we show the QR button
+                const shootPending = Number(s.amount || 0) - (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+                const expPending = s.expenseStatus === 'settled' ? 0 : Number(s.expense || 0);
+                const totalPending = shootPending + expPending;
+
                 return `
                   <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')">
                     <div class="flex items-center gap-3 min-w-0 flex-1">
@@ -2513,9 +2542,16 @@ try {
                         <p class="text-sm font-bold text-amber-500 privacy-target">Rs. ${Number(s.expense).toLocaleString('en-IN')}</p>
                         <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${expenseBadgeColor}">${expenseLabel}</span>
                       </div>` : ''}
-                      <button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
-                        <i class="ti ti-brand-whatsapp text-sm"></i>
-                      </button>
+                      
+                      <div class="flex items-center gap-1 sm:ml-2">
+                        ${totalPending > 0 ? `
+                        <button onclick="event.stopPropagation(); openPaymentQR('${s.id}')" class="p-2 bg-[#c9a96e]/10 text-[#c9a96e] border border-[#c9a96e]/20 rounded-lg hover:bg-[#c9a96e]/30 flex-shrink-0 transition" title="Show Payment QR">
+                          <i class="ti ti-qrcode text-sm"></i>
+                        </button>` : ''}
+                        <button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
+                          <i class="ti ti-brand-whatsapp text-sm"></i>
+                        </button>
+                      </div>
                     </div>
                   </div>
                 `;
@@ -2702,6 +2738,53 @@ try {
         btn.innerHTML = originalText;
         btn.disabled = false;
       }
+    }
+
+let _currentUpiLink = '';
+
+    function openPaymentQR(shootId) {
+      if (!_profile.upi) {
+        showToast('Please set your UPI ID in Account > Payment Settings first!', 'error');
+        switchTab('account');
+        switchAccountTab('payment');
+        return;
+      }
+      
+      const s = _shoots.find(x => x.id === shootId);
+      if (!s) return;
+
+      // Calculate total exact pending amount (Shoot Pending + Expense Pending)
+      const shootPending = Number(s.amount || 0) - (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+      const expPending = s.expenseStatus === 'settled' ? 0 : Number(s.expense || 0);
+      const totalPending = shootPending + expPending;
+
+      if (totalPending <= 0) {
+        showToast('This shoot is fully settled!', 'info');
+        return;
+      }
+
+      const upiId = _profile.upi;
+      const bizName = encodeURIComponent(_profile.bizName || 'Sakkhi Studio');
+      const trId = s.id.substring(0,8); 
+      
+      // Standard Banking UPI Intent URI
+      _currentUpiLink = `upi://pay?pa=${upiId}&pn=${bizName}&tr=${trId}&am=${totalPending}&cu=INR`;
+      
+      // Generate QR Code via free API
+      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(_currentUpiLink)}&margin=10`;
+
+      document.getElementById('pay-modal-client-name').textContent = `Pending balance for ${s.name}`;
+      document.getElementById('pay-modal-amount').textContent = `₹${totalPending.toLocaleString('en-IN')}`;
+      document.getElementById('pay-modal-qr').src = qrUrl;
+
+      openModal('payment-qr-modal-backdrop');
+    }
+
+    function copyUpiLink() {
+      if (!_currentUpiLink) return;
+      navigator.clipboard.writeText(_currentUpiLink).then(() => {
+        showToast('UPI Payment Link copied to clipboard!', 'success');
+      });
     }
     
     function exportAllDataToPDF() {
