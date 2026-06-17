@@ -3,71 +3,79 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Jashwanth JP | Wedding photographer</title>
+    <title>Portfolio | Award-winning photographer</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;500;600&family=Inter:wght@300;400&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Lora:wght@400;500&family=Inter:wght@300;400&display=swap" rel="stylesheet">
 
     <style>
         :root {
-            --transition-smooth: 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+            --transition-smooth: 0.6s cubic-bezier(0.16, 1, 0.3, 1);
         }
 
         body {
             font-family: 'Inter', sans-serif;
-            background-color: #fdfdfd;
-            color: #1a1a1a;
+            background-color: #ffffff;
+            color: #111;
             display: flex;
             flex-direction: column;
             min-height: 100vh;
+            margin: 0;
             opacity: 0;
-            transform: translateY(20px);
-            animation: fadeUpIn 1.2s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+            transform: translateY(15px);
+            animation: fadeUpIn 1s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
 
         @keyframes fadeUpIn {
             to { opacity: 1; transform: translateY(0); }
         }
 
-        .font-serif { font-family: 'Playfair Display', serif; }
+        .font-serif { font-family: 'Lora', serif; }
 
+        /* Hide scrollbar completely */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
+        /* Drag & Snap Scrolling */
         .scroll-container {
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
             scroll-snap-type: x mandatory; 
             cursor: grab; 
         }
-        
         .scroll-container:active { cursor: grabbing; }
         .snap-item { scroll-snap-align: start; }
 
+        /* Gallery Images */
         .img-wrapper {
-            overflow: hidden;
-            background: #eee;
+            background: #f5f5f5;
             cursor: pointer;
             position: relative;
+            overflow: hidden;
         }
         
         .gallery-img {
-            transition: transform var(--transition-smooth);
+            transition: transform var(--transition-smooth), filter var(--transition-smooth);
             will-change: transform;
             pointer-events: none;
         }
 
-        .img-wrapper:hover .gallery-img { transform: scale(1.04); }
+        /* Subtle cinematic hover */
+        .img-wrapper:hover .gallery-img { 
+            transform: scale(1.02); 
+            filter: brightness(0.95);
+        }
 
+        /* Lightbox Mechanics */
         #lightbox {
             opacity: 0;
             pointer-events: none;
-            transition: opacity 0.5s ease;
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
+            transition: opacity 0.4s ease;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
         }
         
         #lightbox.active {
@@ -76,8 +84,8 @@
         }
 
         #lightbox-img {
-            transform: scale(0.95);
-            transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.3s ease;
+            transform: scale(0.98);
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
         }
 
         #lightbox.active #lightbox-img {
@@ -86,70 +94,72 @@
 
         #lightbox-img.fade-out {
             opacity: 0;
-            transform: scale(0.98);
+            transform: scale(0.99);
         }
 
-        /* Loading Spinner */
         #loader {
             position: absolute;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            font-family: 'Inter', sans-serif;
-            color: #888;
-            font-size: 14px;
-            letter-spacing: 1px;
+            color: #aaa;
+            font-size: 13px;
+            letter-spacing: 0.05em;
             text-transform: uppercase;
         }
     </style>
 </head>
-<body class="antialiased selection:bg-black selection:text-white">
+<body class="antialiased selection:bg-gray-200 selection:text-black">
 
-    <header class="pt-32 pb-14 px-8 md:px-12 w-full max-w-[1800px] mx-auto">
-        <h1 class="text-[2rem] md:text-[2.5rem] text-[#111] font-serif font-medium mb-1 tracking-tight leading-none">Jashwanth JP</h1>
-        <p class="text-lg md:text-[1.25rem] text-[#777] font-light tracking-wide">Wedding photographer</p>
-    </header>
+    <div class="w-full max-w-[1600px] mx-auto flex flex-col min-h-screen">
+        
+        <header class="pt-32 md:pt-48 pb-10 px-8 md:px-16 w-full shrink-0">
+            <h1 class="text-[1.75rem] md:text-[2.1rem] text-[#222] font-serif tracking-tight leading-tight mb-1">Hugo Bellamy</h1>
+            <p class="text-[1.1rem] md:text-[1.3rem] text-[#888] font-light tracking-wide">Award-winning photographer</p>
+        </header>
 
-    <main class="w-full mb-24 relative select-none min-h-[400px]">
-        <div id="loader">Loading Gallery...</div>
-        <div id="gallery-track" class="flex overflow-x-auto hide-scrollbar scroll-container gap-5 pl-8 md:pl-12 pr-12 pb-8 opacity-0 transition-opacity duration-500">
+        <main class="w-full relative select-none flex-grow min-h-[400px]">
+            <div id="loader">Loading Gallery...</div>
+            
+            <div id="gallery-track" class="flex overflow-x-auto hide-scrollbar scroll-container gap-[6px] pl-8 md:pl-16 pr-8 md:pr-16 pb-8 opacity-0 transition-opacity duration-700">
+                </div>
+        </main>
+
+        <footer class="mt-auto px-8 md:px-16 py-12 flex flex-col md:flex-row justify-between items-center text-[13px] text-[#999] w-full shrink-0">
+            <div class="flex space-x-1 mb-4 md:mb-0">
+                <a href="#" class="hover:text-black transition-colors duration-300">Privacy Policy</a>
+                <span>,</span>
+                <a href="#" class="hover:text-black transition-colors duration-300 ml-1">Accessibility Statement</a>
             </div>
-    </main>
+            <div>
+                &copy;2026 by Hugo Bellamy. Powered and secured by <a href="#" class="underline hover:text-black transition-colors duration-300">Wix</a>.
+            </div>
+        </footer>
 
-    <footer class="mt-auto px-8 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center text-[12px] md:text-[13px] text-[#999] w-full max-w-[1800px] mx-auto gap-4 border-t border-gray-100">
-        <div class="flex space-x-3">
-            <a href="#" class="hover:text-black transition-colors duration-300">Privacy Policy</a>
-            <span>|</span>
-            <a href="#" class="hover:text-black transition-colors duration-300">Accessibility Statement</a>
-        </div>
-        <div>
-            &copy;2026 by Hugo Bellamy. Powered and secured by <a href="#" class="underline hover:text-black transition-colors duration-300">Wix</a>.
-        </div>
-    </footer>
+    </div>
 
-    <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-6 md:p-16">
-        <button id="close-lightbox" class="absolute top-6 right-6 md:top-10 md:right-10 text-white/70 hover:text-white transition-colors cursor-pointer z-50 p-2">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
+    <div id="lightbox" class="fixed inset-0 z-50 bg-white/95 flex items-center justify-center p-6 md:p-12">
+        <button id="close-lightbox" class="absolute top-6 right-6 md:top-8 md:right-8 text-gray-400 hover:text-black transition-colors cursor-pointer z-50 p-2">
+            <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
-        <button id="prev-btn" class="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
+        <button id="prev-btn" class="absolute left-2 md:left-6 top-1/2 -translate-y-1/2 text-gray-300 hover:text-black transition-colors cursor-pointer z-50 p-4">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-        <button id="next-btn" class="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
+        <button id="next-btn" class="absolute right-2 md:right-6 top-1/2 -translate-y-1/2 text-gray-300 hover:text-black transition-colors cursor-pointer z-50 p-4">
+            <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
-        <img id="lightbox-img" src="" alt="Enlarged photography" class="max-w-full max-h-full object-contain shadow-2xl relative z-40">
+        <img id="lightbox-img" src="" alt="Enlarged photography" class="max-w-full max-h-full object-contain shadow-[0_20px_50px_rgba(0,0,0,0.05)] relative z-40">
     </div>
 
     <script>
         // ==========================================
-        // PASTE YOUR GOOGLE SHEET CSV LINK HERE
+        // 🚀 PASTE YOUR GOOGLE SHEET CSV LINK HERE
         // ==========================================
         const sheetUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQO4ZuRMwreAK-SqH1zRw9AZXAS8weEn6rrt-QpAADw5KELUIVHea4sldDO_RZWeevg2N-FSJPp0gwn/pub?output=csv';
         // ==========================================
 
         let portfolioImages = [];
         
-        // --- Core Elements ---
         const slider = document.getElementById('gallery-track');
         const loader = document.getElementById('loader');
         const lightbox = document.getElementById('lightbox');
@@ -165,23 +175,21 @@
         let currentIndex = 0; 
         let wrappers = []; 
 
-        // --- Fetch Images from Google Sheet ---
+        // --- Fetch Images from Google Sheets ---
         async function fetchImages() {
             try {
-                // If you haven't put a real link in yet, load some fallback images so the site doesn't look broken
                 if(sheetUrl === 'YOUR_GOOGLE_SHEET_CSV_LINK_HERE') {
+                    // Demo data if link isn't pasted yet
                     portfolioImages = [
-                        { thumb: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=100&w=2000", alt: "Demo" },
-                        { thumb: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=100&w=2000", alt: "Demo" }
+                        { thumb: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=100&w=2000", alt: "Portrait" },
+                        { thumb: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=100&w=2000", alt: "Fashion" }
                     ];
                 } else {
                     const response = await fetch(sheetUrl);
                     const data = await response.text();
                     
-                    // Parse CSV data
-                    const rows = data.split('\\n').slice(1); // Remove header row
+                    const rows = data.split('\n').slice(1); // Remove header row
                     portfolioImages = rows.map(row => {
-                        // Split by comma, handling potential quotes
                         const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
                         if(cols.length >= 2 && cols[0].trim() !== "") {
                             return {
@@ -190,9 +198,8 @@
                                 alt: cols[2] ? cols[2].replace(/"/g, '').trim() : "Portfolio Image"
                             };
                         }
-                    }).filter(Boolean); // Remove empty rows
+                    }).filter(Boolean);
                 }
-                
                 renderGallery();
             } catch (error) {
                 loader.innerText = "Error loading gallery. Check your Google Sheet link.";
@@ -200,17 +207,16 @@
             }
         }
 
-        // --- Render Gallery Function ---
         const renderGallery = () => {
-            slider.innerHTML = ''; // Clear track
+            slider.innerHTML = ''; 
             
             portfolioImages.forEach((imgData, index) => {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper';
+                wrapper.className = 'snap-item flex-none w-[260px] md:w-[320px] lg:w-[380px] aspect-[4/5] img-wrapper';
                 wrapper.setAttribute('data-src', imgData.highRes);
                 
                 wrapper.innerHTML = `
-                    <img src="${imgData.thumb}" alt="${imgData.alt}" class="gallery-img w-full h-full object-cover shadow-sm" draggable="false">
+                    <img src="${imgData.thumb}" alt="${imgData.alt}" class="gallery-img w-full h-full object-cover" draggable="false">
                 `;
 
                 wrapper.addEventListener('click', () => {
@@ -226,16 +232,14 @@
             });
 
             const endPadding = document.createElement('div');
-            endPadding.className = 'flex-none w-[4px] md:w-[40px]';
+            endPadding.className = 'flex-none w-[20px] md:w-[60px]';
             slider.appendChild(endPadding);
 
-            // Hide loader and show gallery
             loader.style.display = 'none';
             slider.classList.remove('opacity-0');
         };
 
-
-        // --- Drag to Scroll Logic ---
+        // Scroll Logic
         slider.addEventListener('mousedown', (e) => {
             isDown = true;
             dragDistance = 0;
@@ -263,7 +267,7 @@
             dragDistance = Math.abs(x - startX);
         });
 
-        // --- Lightbox Logic ---
+        // Lightbox Logic
         const updateLightboxImage = (index) => {
             lightboxImg.classList.add('fade-out');
             setTimeout(() => {
@@ -294,7 +298,7 @@
             setTimeout(() => {
                 lightboxImg.src = '';
                 lightboxImg.classList.remove('fade-out');
-            }, 500); 
+            }, 400); 
         };
 
         closeLightboxBtn.addEventListener('click', closeLightbox);
@@ -307,9 +311,7 @@
             if (e.key === 'ArrowLeft') showPrevImage();
         });
 
-        // Kick off the script
         fetchImages();
-
     </script>
 </body>
 </html>
