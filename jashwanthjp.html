@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hugo Bellamy | Award-winning photographer</title>
+    <title>Jashwanth JP | Wedding photographer</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -34,11 +34,9 @@
 
         .font-serif { font-family: 'Playfair Display', serif; }
 
-        /* Hide scrollbar */
         .hide-scrollbar::-webkit-scrollbar { display: none; }
         .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
 
-        /* Enhanced Scrolling Mechanics */
         .scroll-container {
             scroll-behavior: smooth;
             -webkit-overflow-scrolling: touch;
@@ -49,7 +47,6 @@
         .scroll-container:active { cursor: grabbing; }
         .snap-item { scroll-snap-align: start; }
 
-        /* Image Hover Mechanics */
         .img-wrapper {
             overflow: hidden;
             background: #eee;
@@ -65,7 +62,6 @@
 
         .img-wrapper:hover .gallery-img { transform: scale(1.04); }
 
-        /* Lightbox (Modal) Styles */
         #lightbox {
             opacity: 0;
             pointer-events: none;
@@ -88,10 +84,22 @@
             transform: scale(1);
         }
 
-        /* Image Transition state for Next/Prev */
         #lightbox-img.fade-out {
             opacity: 0;
             transform: scale(0.98);
+        }
+
+        /* Loading Spinner */
+        #loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-family: 'Inter', sans-serif;
+            color: #888;
+            font-size: 14px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
         }
     </style>
 </head>
@@ -102,35 +110,10 @@
         <p class="text-lg md:text-[1.25rem] text-[#777] font-light tracking-wide">Award-winning photographer</p>
     </header>
 
-    <main class="w-full mb-24 relative select-none">
-        <div id="gallery-track" class="flex overflow-x-auto hide-scrollbar scroll-container gap-5 pl-8 md:pl-12 pr-12 pb-8">
-            
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&fit=crop" alt="Portrait photography" class="gallery-img w-full h-full object-cover shadow-sm">
+    <main class="w-full mb-24 relative select-none min-h-[400px]">
+        <div id="loader">Loading Gallery...</div>
+        <div id="gallery-track" class="flex overflow-x-auto hide-scrollbar scroll-container gap-5 pl-8 md:pl-12 pr-12 pb-8 opacity-0 transition-opacity duration-500">
             </div>
-
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&fit=crop" alt="Fashion photography" class="gallery-img w-full h-full object-cover shadow-sm">
-            </div>
-
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1550639524-a6f58345a0b1?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1550639524-a6f58345a0b1?q=80&w=800&fit=crop" alt="Studio photography" class="gallery-img w-full h-full object-cover shadow-sm">
-            </div>
-
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1529139574466-a303027c028b?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1529139574466-a303027c028b?q=80&w=800&fit=crop" alt="Outdoor photography" class="gallery-img w-full h-full object-cover shadow-sm">
-            </div>
-
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?q=80&w=800&fit=crop" alt="Editorial photography" class="gallery-img w-full h-full object-cover shadow-sm">
-            </div>
-
-            <div class="snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper" data-src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=100&w=2000">
-                <img src="https://images.unsplash.com/photo-1509631179647-0177331693ae?q=80&w=800&fit=crop" alt="Minimalist photography" class="gallery-img w-full h-full object-cover shadow-sm">
-            </div>
-
-            <div class="flex-none w-[4px] md:w-[40px]"></div>
-        </div>
     </main>
 
     <footer class="mt-auto px-8 md:px-12 py-10 flex flex-col md:flex-row justify-between items-center text-[12px] md:text-[13px] text-[#999] w-full max-w-[1800px] mx-auto gap-4 border-t border-gray-100">
@@ -145,31 +128,30 @@
     </footer>
 
     <div id="lightbox" class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-6 md:p-16">
-        
         <button id="close-lightbox" class="absolute top-6 right-6 md:top-10 md:right-10 text-white/70 hover:text-white transition-colors cursor-pointer z-50 p-2">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-            </svg>
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>
         </button>
-
         <button id="prev-btn" class="absolute left-4 md:left-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/>
-            </svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7"/></svg>
         </button>
-
         <button id="next-btn" class="absolute right-4 md:right-10 top-1/2 -translate-y-1/2 text-white/50 hover:text-white transition-colors cursor-pointer z-50 p-4">
-            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1">
-                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-            </svg>
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/></svg>
         </button>
-
         <img id="lightbox-img" src="" alt="Enlarged photography" class="max-w-full max-h-full object-contain shadow-2xl relative z-40">
     </div>
 
     <script>
+        // ==========================================
+        // PASTE YOUR GOOGLE SHEET CSV LINK HERE
+        // ==========================================
+        const sheetUrl = 'YOUR_GOOGLE_SHEET_CSV_LINK_HERE';
+        // ==========================================
+
+        let portfolioImages = [];
+        
+        // --- Core Elements ---
         const slider = document.getElementById('gallery-track');
-        const wrappers = Array.from(document.querySelectorAll('.img-wrapper')); 
+        const loader = document.getElementById('loader');
         const lightbox = document.getElementById('lightbox');
         const lightboxImg = document.getElementById('lightbox-img');
         const closeLightboxBtn = document.getElementById('close-lightbox');
@@ -181,6 +163,77 @@
         let scrollLeft;
         let dragDistance = 0;
         let currentIndex = 0; 
+        let wrappers = []; 
+
+        // --- Fetch Images from Google Sheet ---
+        async function fetchImages() {
+            try {
+                // If you haven't put a real link in yet, load some fallback images so the site doesn't look broken
+                if(sheetUrl === 'YOUR_GOOGLE_SHEET_CSV_LINK_HERE') {
+                    portfolioImages = [
+                        { thumb: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=100&w=2000", alt: "Demo" },
+                        { thumb: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=80&w=800&fit=crop", highRes: "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?q=100&w=2000", alt: "Demo" }
+                    ];
+                } else {
+                    const response = await fetch(sheetUrl);
+                    const data = await response.text();
+                    
+                    // Parse CSV data
+                    const rows = data.split('\\n').slice(1); // Remove header row
+                    portfolioImages = rows.map(row => {
+                        // Split by comma, handling potential quotes
+                        const cols = row.split(/,(?=(?:(?:[^"]*"){2})*[^"]*$)/);
+                        if(cols.length >= 2 && cols[0].trim() !== "") {
+                            return {
+                                thumb: cols[0].replace(/"/g, '').trim(),
+                                highRes: cols[1].replace(/"/g, '').trim(),
+                                alt: cols[2] ? cols[2].replace(/"/g, '').trim() : "Portfolio Image"
+                            };
+                        }
+                    }).filter(Boolean); // Remove empty rows
+                }
+                
+                renderGallery();
+            } catch (error) {
+                loader.innerText = "Error loading gallery. Check your Google Sheet link.";
+                console.error(error);
+            }
+        }
+
+        // --- Render Gallery Function ---
+        const renderGallery = () => {
+            slider.innerHTML = ''; // Clear track
+            
+            portfolioImages.forEach((imgData, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'snap-item flex-none w-[240px] md:w-[300px] lg:w-[340px] aspect-[3/4] img-wrapper';
+                wrapper.setAttribute('data-src', imgData.highRes);
+                
+                wrapper.innerHTML = `
+                    <img src="${imgData.thumb}" alt="${imgData.alt}" class="gallery-img w-full h-full object-cover shadow-sm" draggable="false">
+                `;
+
+                wrapper.addEventListener('click', () => {
+                    if (dragDistance > 5) return; 
+                    currentIndex = index;
+                    updateLightboxImage(currentIndex);
+                    lightbox.classList.add('active');
+                    document.body.style.overflow = 'hidden'; 
+                });
+
+                slider.appendChild(wrapper);
+                wrappers.push(wrapper);
+            });
+
+            const endPadding = document.createElement('div');
+            endPadding.className = 'flex-none w-[4px] md:w-[40px]';
+            slider.appendChild(endPadding);
+
+            // Hide loader and show gallery
+            loader.style.display = 'none';
+            slider.classList.remove('opacity-0');
+        };
+
 
         // --- Drag to Scroll Logic ---
         slider.addEventListener('mousedown', (e) => {
@@ -210,43 +263,27 @@
             dragDistance = Math.abs(x - startX);
         });
 
-        // --- Lightbox Enlarge & Navigation Logic ---
+        // --- Lightbox Logic ---
         const updateLightboxImage = (index) => {
             lightboxImg.classList.add('fade-out');
-            
             setTimeout(() => {
-                const highResSrc = wrappers[index].getAttribute('data-src');
-                lightboxImg.src = highResSrc;
-                
-                lightboxImg.onload = () => {
-                    lightboxImg.classList.remove('fade-out');
-                };
+                lightboxImg.src = portfolioImages[index].highRes;
+                lightboxImg.alt = portfolioImages[index].alt;
+                lightboxImg.onload = () => lightboxImg.classList.remove('fade-out');
             }, 150); 
         };
 
         const showNextImage = (e) => {
             if (e) e.stopPropagation(); 
-            currentIndex = (currentIndex + 1) % wrappers.length; 
+            currentIndex = (currentIndex + 1) % portfolioImages.length; 
             updateLightboxImage(currentIndex);
         };
 
         const showPrevImage = (e) => {
             if (e) e.stopPropagation(); 
-            currentIndex = (currentIndex - 1 + wrappers.length) % wrappers.length; 
+            currentIndex = (currentIndex - 1 + portfolioImages.length) % portfolioImages.length; 
             updateLightboxImage(currentIndex);
         };
-
-        wrappers.forEach((wrapper, index) => {
-            wrapper.addEventListener('click', () => {
-                if (dragDistance > 5) return; 
-
-                currentIndex = index;
-                updateLightboxImage(currentIndex);
-                
-                lightbox.classList.add('active');
-                document.body.style.overflow = 'hidden'; 
-            });
-        });
 
         nextBtn.addEventListener('click', showNextImage);
         prevBtn.addEventListener('click', showPrevImage);
@@ -254,7 +291,6 @@
         const closeLightbox = () => {
             lightbox.classList.remove('active');
             document.body.style.overflow = ''; 
-            
             setTimeout(() => {
                 lightboxImg.src = '';
                 lightboxImg.classList.remove('fade-out');
@@ -262,20 +298,18 @@
         };
 
         closeLightboxBtn.addEventListener('click', closeLightbox);
-
-        lightbox.addEventListener('click', (e) => {
-            if (e.target === lightbox) {
-                closeLightbox();
-            }
-        });
+        lightbox.addEventListener('click', (e) => { if (e.target === lightbox) closeLightbox(); });
 
         document.addEventListener('keydown', (e) => {
             if (!lightbox.classList.contains('active')) return;
-
             if (e.key === 'Escape') closeLightbox();
             if (e.key === 'ArrowRight') showNextImage();
             if (e.key === 'ArrowLeft') showPrevImage();
         });
+
+        // Kick off the script
+        fetchImages();
+
     </script>
 </body>
 </html>
