@@ -2373,34 +2373,8 @@ try {
         payCompDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
       }
 
-      const gross = _shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const captured = _shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const expenses = _shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const expensesSettled = _shoots.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
-      const outstanding = gross - captured;
-
-      document.getElementById('pay-stats').innerHTML = `
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
-          <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">All shoots</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
-          <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
-          <div class="text-[10px] text-emerald-600 mt-1">Settled payments</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
-          <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
-          <div class="text-[10px] text-red-600 mt-1">Outstanding</div>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-          <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
-          <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
-          <div class="text-[10px] text-neutral-600 mt-1">Run costs</div>
-        </div>`;
-
+      // We removed the stats calculation from here and moved it to renderPaymentsList()
+      // so it can react to the active filters.
       renderPaymentsList();
     }
 
@@ -2410,12 +2384,46 @@ try {
       const fc = document.getElementById('pay-filter-company')?.value || '';
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
 
+      // 1. Filter the shoots array first
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       if (fs) filtered = filtered.filter(s => s.payStatus === fs);
       if (fe) filtered = filtered.filter(s => s.expenseStatus === fe);
 
+      // 2. Calculate stats based on the FILTERED array (not the global _shoots)
+      const gross = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
+      const captured = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      const expenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
+      const outstanding = gross - captured;
+
+      // 3. Render the updated stats cards
+      const payStatsContainer = document.getElementById('pay-stats');
+      if (payStatsContainer) {
+        payStatsContainer.innerHTML = `
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
+            <div class="text-lg font-bold tracking-tight text-white mt-2 privacy-target">${fmtAmt(gross)}</div>
+            <div class="text-[10px] text-neutral-600 mt-1">Filtered shoots</div>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
+            <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-2 privacy-target">${fmtAmt(captured)}</div>
+            <div class="text-[10px] text-emerald-600 mt-1">Filtered settled payments</div>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
+            <div class="text-2xl font-bold tracking-tight text-red-400 mt-2 privacy-target">${fmtAmt(outstanding)}</div>
+            <div class="text-[10px] text-red-600 mt-1">Filtered outstanding</div>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+            <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
+            <div class="text-lg font-bold tracking-tight text-amber-500 mt-2 privacy-target">${fmtAmt(expenses)}</div>
+            <div class="text-[10px] text-neutral-600 mt-1">Filtered run costs</div>
+          </div>`;
+      }
+
+      // 4. Render the list view
       const rootList = document.getElementById('payments-list');
       if (!rootList) return;
       
