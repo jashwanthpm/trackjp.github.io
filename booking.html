@@ -223,11 +223,8 @@
             activeStudio = payload.s;
             targetUserName = payload.n;
 
-            // Make the main heading use the Business Name
-document.getElementById('photographer-name').textContent = `Book with ${activeStudio}`;
-
-// Put the photographer's personal name in the smaller sub-badge
-document.getElementById('studio-welcome').textContent = `Photographer: ${targetUserName}`;
+            document.getElementById('photographer-name').textContent = `Book with ${activeStudio}`;
+document.getElementById('studio-welcome').textContent = `Exclusive link for ${targetUserName}`;
             
             // Small animation for loading the container
             const container = document.getElementById('booking-container');
