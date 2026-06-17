@@ -1154,32 +1154,6 @@
     </div>
     
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
-
-<div id="payment-qr-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'payment-qr-modal-backdrop')">
-      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center relative">
-        <button onclick="closeModal('payment-qr-modal-backdrop')" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
-        
-        <div class="w-12 h-12 bg-emerald-950/40 border border-emerald-900/50 rounded-full flex items-center justify-center text-emerald-400 text-2xl mx-auto"><i class="ti ti-qrcode"></i></div>
-        
-        <div class="space-y-1">
-          <h4 class="text-white font-bold text-base tracking-wide">Scan to Pay</h4>
-          <p class="text-xs text-neutral-500" id="pay-modal-client-name">Client Name</p>
-        </div>
-        
-        <div class="bg-white p-3 rounded-xl inline-block mx-auto mt-4">
-          <img id="pay-modal-qr" src="" alt="UPI QR Code" class="w-48 h-48 object-contain" />
-        </div>
-        
-        <p class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target" id="pay-modal-amount">₹0</p>
-        
-        <div class="pt-2">
-          <button onclick="copyUpiLink()" id="btn-copy-upi" class="w-full py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition border border-[#c9a96e] flex items-center justify-center gap-2">
-            <i class="ti ti-link"></i> Copy Payment Link
-          </button>
-        </div>
-        <p class="text-[10px] text-neutral-600 mt-2">Powered by secure UPI intent routing.</p>
-      </div>
-    </div>
     
   <script>
 
@@ -2509,11 +2483,6 @@ try {
                 const paymentLabel = { 'done': 'Settled', 'part': 'Partial', 'pending': 'Pending' }[s.payStatus] || 'Pending';
                 const expenseBadgeColor = s.expenseStatus === 'settled' ? 'bg-emerald-950 text-emerald-400' : 'bg-amber-950 text-amber-400';
                 const expenseLabel = s.expenseStatus === 'settled' ? 'Settled' : 'Pending';
-                
-                // Calculate total pending for this specific row to determine if we show the QR button
-                const shootPending = Number(s.amount || 0) - (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-                const expPending = s.expenseStatus === 'settled' ? 0 : Number(s.expense || 0);
-                const totalPending = shootPending + expPending;
 
                 return `
                   <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3" onclick="openEditShootModal('${s.id}')">
@@ -2544,10 +2513,6 @@ try {
                       </div>` : ''}
                       
                       <div class="flex items-center gap-1 sm:ml-2">
-                        ${totalPending > 0 ? `
-                        <button onclick="event.stopPropagation(); openPaymentQR('${s.id}')" class="p-2 bg-[#c9a96e]/10 text-[#c9a96e] border border-[#c9a96e]/20 rounded-lg hover:bg-[#c9a96e]/30 flex-shrink-0 transition" title="Show Payment QR">
-                          <i class="ti ti-qrcode text-sm"></i>
-                        </button>` : ''}
                         <button onclick="triggerRowWhatsApp('${s.id}', event, 'payment')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 flex-shrink-0">
                           <i class="ti ti-brand-whatsapp text-sm"></i>
                         </button>
@@ -2739,53 +2704,7 @@ try {
         btn.disabled = false;
       }
     }
-
-let _currentUpiLink = '';
-
-    function openPaymentQR(shootId) {
-      if (!_profile.upi) {
-        showToast('Please set your UPI ID in Account > Payment Settings first!', 'error');
-        switchTab('account');
-        switchAccountTab('payment');
-        return;
-      }
-      
-      const s = _shoots.find(x => x.id === shootId);
-      if (!s) return;
-
-      // Calculate total exact pending amount (Shoot Pending + Expense Pending)
-      const shootPending = Number(s.amount || 0) - (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
-      const expPending = s.expenseStatus === 'settled' ? 0 : Number(s.expense || 0);
-      const totalPending = shootPending + expPending;
-
-      if (totalPending <= 0) {
-        showToast('This shoot is fully settled!', 'info');
-        return;
-      }
-
-      const upiId = _profile.upi;
-      const bizName = encodeURIComponent(_profile.bizName || 'Sakkhi Studio');
-      const trId = s.id.substring(0,8); 
-      
-      // Standard Banking UPI Intent URI
-      _currentUpiLink = `upi://pay?pa=${upiId}&pn=${bizName}&tr=${trId}&am=${totalPending}&cu=INR`;
-      
-      // Generate QR Code via free API
-      const qrUrl = `https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=${encodeURIComponent(_currentUpiLink)}&margin=10`;
-
-      document.getElementById('pay-modal-client-name').textContent = `Pending balance for ${s.name}`;
-      document.getElementById('pay-modal-amount').textContent = `₹${totalPending.toLocaleString('en-IN')}`;
-      document.getElementById('pay-modal-qr').src = qrUrl;
-
-      openModal('payment-qr-modal-backdrop');
-    }
-
-    function copyUpiLink() {
-      if (!_currentUpiLink) return;
-      navigator.clipboard.writeText(_currentUpiLink).then(() => {
-        showToast('UPI Payment Link copied to clipboard!', 'success');
-      });
-    }
+    
     
     function exportAllDataToPDF() {
       if (!_shoots.length) {
@@ -3005,7 +2924,6 @@ let _currentUpiLink = '';
         return;
       }
 
-      // Add a visual indicator if extra filters are active
       let subtitle = 'Company - ' + companyFilter;
       if (fs || fe || q) subtitle += ' (Filtered Results)';
 
@@ -3020,7 +2938,7 @@ let _currentUpiLink = '';
       doc.text('Generated: ' + dateStr, margin, yPos + 6);
       yPos += 14;
 
-      // 2. Apply the SMART FILTER LOGIC to match the UI perfectly
+      // 2. Apply SMART FILTER LOGIC
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       filtered = filtered.filter(s => s.company === companyFilter);
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
@@ -3040,7 +2958,6 @@ let _currentUpiLink = '';
         return;
       }
 
-      // Calculate totals for the PDF headers based on the filtered data
       const total = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
       const totalExpenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
       const grossTotal = total + totalExpenses;
@@ -3062,8 +2979,29 @@ let _currentUpiLink = '';
         doc.setTextColor(...s.color);
         doc.text('Rs. ' + s.value.toLocaleString('en-IN'), x + 3, yPos + 12);
       });
-      yPos += 20;
+      yPos += 22;
       
+      // ==========================================
+      // NEW: CLICKABLE "PAY NOW" BUTTON IN PDF
+      // ==========================================
+      if (due > 0 && _profile.upi) {
+        const upiLink = `upi://pay?pa=${_profile.upi}&pn=${encodeURIComponent(_profile.bizName || 'SAKKHI')}&am=${due}&cu=INR`;
+        
+        doc.setFillColor(16, 185, 129); // Emerald Green
+        doc.rect(margin, yPos, pageWidth - 2 * margin, 12, 'F');
+        
+        doc.setFontSize(9);
+        doc.setFont(undefined, 'bold');
+        doc.setTextColor(255, 255, 255);
+        doc.text(`CLICK HERE TO PAY PENDING BALANCE ( Rs. ${due.toLocaleString('en-IN')} ) VIA UPI`, pageWidth / 2, yPos + 7.5, { align: 'center' });
+        
+        // This makes the entire green rectangle clickable in the PDF!
+        doc.link(margin, yPos, pageWidth - 2 * margin, 12, { url: upiLink });
+        
+        yPos += 18;
+      }
+      // ==========================================
+
       const grouped = {};
       filtered.sort((a, b) => (b.date || '').localeCompare(a.date || '')).forEach(s => {
         const k = s.date.slice(0, 7);
@@ -3190,6 +3128,16 @@ let _currentUpiLink = '';
         const splitBank = doc.splitTextToSize(`Bank Account:\n${_profile.bank}`, pageWidth - 2 * margin);
         doc.text(splitBank, margin, yPos);
       }
+      
+      // Add a small clickable link in the footer details too
+      if (due > 0 && _profile.upi) {
+        yPos += (_profile.bank ? 10 : 4);
+        const upiLink = `upi://pay?pa=${_profile.upi}&pn=${encodeURIComponent(_profile.bizName || 'SAKKHI')}&am=${due}&cu=INR`;
+        doc.setTextColor(16, 185, 129); // Emerald
+        doc.setFont(undefined, 'bold');
+        doc.text('Tap here to pay total outstanding via UPI App', margin, yPos);
+        doc.link(margin, yPos - 4, 100, 6, { url: upiLink });
+      }
 
       doc.setFillColor(15, 15, 15);
       doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
@@ -3197,6 +3145,7 @@ let _currentUpiLink = '';
       doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
       doc.setFontSize(7);
       doc.setTextColor(100, 100, 100);
+      doc.setFont(undefined, 'normal');
       doc.text(companyFilter, margin, pageHeight - 3);
       
       doc.setTextColor(201, 169, 110);
