@@ -220,6 +220,7 @@
 
       if (refCode) {
         try {
+          // Fetch initial link payload
           const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.link_${refCode}&select=value`, { headers: HEADERS });
           const data = await res.json();
 
@@ -229,10 +230,49 @@
             activeStudio = payload.s;
             targetUserName = payload.n;
 
-            document.getElementById('photographer-name').textContent = `Book with ${targetUserName}`;
-document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
+            // Default fallbacks
+            let displayBizName = targetUserName; 
+            let isSubActive = false; 
+
+            try {
+              // 1 & 2. Fetch LIVE Business Name from the user's profile
+              const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${targetUserId}_profile&select=value`, { headers: HEADERS });
+              const profileData = await profileRes.json();
+              if (profileData && profileData.length > 0 && profileData[0].value.bizName) {
+                displayBizName = profileData[0].value.bizName;
+              }
+
+              // 3. Fetch LIVE Subscription Status
+              const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${targetUserId}&select=status,expires_at`, { headers: HEADERS });
+              const subData = await subRes.json();
+              if (subData && subData.length > 0) {
+                const sub = subData[0];
+                // Check if status is active and hasn't passed expiration date
+                if (sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date())) {
+                  isSubActive = true;
+                }
+              }
+            } catch (err) {
+              console.warn("Live check failed. Using fallbacks.", err);
+            }
+
+            // ENFORCE SUBSCRIPTION BLOCK (If inactive, show lock screen)
+            if (!isSubActive) {
+              const errContainer = document.getElementById('error-container');
+              errContainer.innerHTML = `
+                <div class="w-20 h-20 bg-amber-950/40 border border-amber-900/50 rounded-2xl flex items-center justify-center text-amber-500 text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(245,158,11,0.15)]"><i class="ti ti-lock"></i></div>
+                <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Booking Paused</h2>
+                <p class="text-sm text-neutral-500 font-light">This studio is currently not accepting automated bookings. Please contact them directly.</p>
+              `;
+              errContainer.classList.remove('hidden');
+              return; // Stop loading the booking form completely
+            }
+
+            // Update UI with the dynamic business name
+            document.getElementById('photographer-name').textContent = `Book with ${displayBizName}`;
+            document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
             
-            // Small animation for loading the container
+            // Reveal the form smoothly
             const container = document.getElementById('booking-container');
             container.classList.remove('hidden');
             container.style.opacity = '0';
@@ -253,6 +293,7 @@ document.getElementById('studio-welcome').textContent = `Exclusive link for ${ac
         document.getElementById('error-container').classList.remove('hidden');
       }
       
+      // Hide calendar if clicked outside
       document.addEventListener('click', (e) => {
         const cal = document.getElementById('calendar-dropdown');
         const trigger = document.getElementById('calendar-trigger');
