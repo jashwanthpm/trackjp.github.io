@@ -399,29 +399,31 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
 
  // Auto-trigger checkout if returning from login
   document.addEventListener('DOMContentLoaded', () => {
-    
-    // --- NEW CODE: Update Nav Button if Logged In ---
+    // Update the Nav Button if the user is already logged in
     const loggedInUser = localStorage.getItem('currentUser');
     const navBtn = document.getElementById('nav-auth-btn');
+    
     if (loggedInUser && navBtn) {
       navBtn.innerHTML = 'Open Dashboard <i class="ti ti-arrow-right ml-1"></i>';
+      // Change the button to go directly to the dashboard instead of showing 'Sign In'
+      navBtn.onclick = () => window.location.href = 'app.html'; 
     }
-    // ------------------------------------------------
 
+    // Handle the redirect back from app.html after a successful login
     const urlParams = new URLSearchParams(window.location.search);
     const planToCheckout = urlParams.get('checkout');
     
     if (planToCheckout) {
-      // Clean the URL so it doesn't loop if they refresh
+      // Clean the URL so it doesn't loop if they refresh the page
       window.history.replaceState(null, '', window.location.pathname + '#pricing');
       sessionStorage.removeItem('pendingPlan');
       
-      // Wait half a second for the page to load, then pop the payment window
+      // Add a slight delay to let the UI load before popping the Razorpay modal
       setTimeout(() => {
         initiateCheckout(planToCheckout);
       }, 500);
     }
-  });
+});
   // PASTE THIS NEW JAVASCRIPT HERE
   window.openModal = function(id) {
     const m = document.getElementById(id);
