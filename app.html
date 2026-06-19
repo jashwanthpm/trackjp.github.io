@@ -1329,6 +1329,14 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         showToast(`Welcome, ${currentUser.name}!`, 'success');
         
+        // --- NEW CHECKOUT REDIRECT LOGIC ---
+        const pendingPlan = sessionStorage.getItem('pendingPlan');
+        if (pendingPlan) {
+            window.location.href = `landing page.html?checkout=${pendingPlan}`;
+            return; // Stop loading the dashboard and redirect
+        }
+        // -----------------------------------
+        
         updateAccountDisplay();
         
         document.getElementById('login-modal').classList.remove('active');
@@ -1434,6 +1442,14 @@
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
         showToast(`Welcome back!`, 'success');
         
+        // --- NEW CHECKOUT REDIRECT LOGIC ---
+        const pendingPlan = sessionStorage.getItem('pendingPlan');
+        if (pendingPlan) {
+            window.location.href = `landing page.html?checkout=${pendingPlan}`;
+            return; // Stop loading the dashboard and redirect
+        }
+        // -----------------------------------
+        
         updateAccountDisplay();
         document.getElementById('login-modal').classList.remove('active');
         document.getElementById('main-app').style.display = 'block';
@@ -1461,6 +1477,15 @@
       const savedUser = localStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
+        
+        // --- NEW CHECKOUT REDIRECT LOGIC ---
+        const pendingPlan = sessionStorage.getItem('pendingPlan');
+        if (pendingPlan) {
+            window.location.href = `landing page.html?checkout=${pendingPlan}`;
+            return; // Stop loading the dashboard and redirect
+        }
+        // -----------------------------------
+
         document.getElementById('main-app').style.display = 'block';
         loadAll(); // Load data since they are logged in
       } else {
