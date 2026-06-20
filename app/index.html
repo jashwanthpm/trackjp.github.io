@@ -352,7 +352,7 @@
         <a href="config.html" class="inline-block px-4 py-2 bg-neutral-800 text-white text-xs font-semibold rounded-lg border border-neutral-700 hover:bg-neutral-700 transition">Go to Setup Config</a>
       </div>
 
-      <div class="flex items-center gap-4 -mt-3 mb-4 opacity-70 relative z-0">
+      <div class="flex items-center gap-4 -mt-5 mb-4 opacity-70 relative z-0">
         <hr class="flex-1 border-neutral-800">
         <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Or</span>
         <hr class="flex-1 border-neutral-800">
@@ -369,6 +369,8 @@
             <i id="password-eye-icon" class="ti ti-eye text-[18px] leading-none"></i>
           </button>
         </div>
+        
+        <p id="inline-error-msg" class="text-xs text-red-500 text-center font-medium hidden bg-red-950/20 py-2 rounded-lg border border-red-900/30"></p>
         
         <div class="flex items-center justify-between px-1">
           <label class="flex items-center gap-2 cursor-pointer group">
@@ -1475,9 +1477,18 @@
     async function handleEmailLogin() {
       const email = document.getElementById('email-input').value.trim();
       const password = document.getElementById('password-input').value;
+      const errorMsgEl = document.getElementById('inline-error-msg');
+      
+      // Helper to show inline text error
+      const showError = (msg) => {
+        errorMsgEl.textContent = msg;
+        errorMsgEl.classList.remove('hidden');
+      };
+      
+      errorMsgEl.classList.add('hidden'); // Clear previous errors on new attempt
 
       if (!email || !password) {
-        showToast('Please enter both email and password', 'error');
+        showError('Please enter both email and password.');
         return;
       }
 
@@ -1505,8 +1516,7 @@
            const errMsg = (data.error_description || data.msg || data.error || '').toLowerCase();
            
            if (errMsg.includes('invalid login credentials') || errMsg.includes('invalid_grant')) {
-               // Security Trick: We check if the email exists by attempting a fake signup with a 1-character password.
-               // Supabase will throw "already registered" if they exist, or "password too short" if they don't.
+               // Security Trick: We check if they exist by doing a fake sign up
                const checkRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                  method: 'POST',
                  headers: authHeaders,
@@ -1516,9 +1526,11 @@
                const checkMsg = (checkData.error_description || checkData.msg || '').toLowerCase();
                
                if (checkMsg.includes('already registered')) {
-                   throw new Error('Wrong password. Please try again.');
+                   // User exists, but typed the wrong password
+                   throw new Error('Incorrect password. Please try again.');
                } else {
-                   throw new Error('No account found. Please sign in with Google first.');
+                   // User does NOT exist in the database
+                   throw new Error('No account found. Please sign up with Google first.');
                }
            } else {
                throw new Error(data.error_description || data.msg || 'Login failed');
@@ -1527,30 +1539,27 @@
 
         // 3. Successful Login
         currentUser = {
-  id: data.user.id,
-  email: data.user.email,
-  name: data.user.user_metadata?.name || data.user.email.split('@')[0], 
-  token: data.access_token,
-  user_metadata: data.user.user_metadata || {}
-};
+          id: data.user.id,
+          email: data.user.email,
+          name: data.user.user_metadata?.name || data.user.email.split('@')[0], 
+          token: data.access_token,
+          user_metadata: data.user.user_metadata || {}
+        };
 
-// --- NEW LOGIC FOR REMEMBER ME ---
-const rememberMe = document.getElementById('remember-me').checked;
-if (rememberMe) {
-  localStorage.setItem('currentUser', JSON.stringify(currentUser));
-} else {
-  sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
-}
-// ---------------------------------
+        const rememberMe = document.getElementById('remember-me').checked;
+        if (rememberMe) {
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        } else {
+          sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+
         showToast(`Welcome back!`, 'success');
         
-        // --- NEW CHECKOUT REDIRECT LOGIC ---
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
             window.location.href = `/?checkout=${pendingPlan}`;
-            return; // Stop loading the dashboard and redirect
+            return; 
         }
-        // -----------------------------------
         
         updateAccountDisplay();
         document.getElementById('login-modal').classList.remove('active');
@@ -1561,7 +1570,8 @@ if (rememberMe) {
 
       } catch (error) {
         console.error("Auth Error:", error);
-        showToast(error.message, 'error');
+        // Show the error inside the form instead of a floating toast
+        showError(error.message); 
       } finally {
         btn.innerText = originalText;
       }
