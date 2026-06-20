@@ -340,38 +340,45 @@
   <div id="login-modal" class="login-modal">
     <div class="login-modal-content relative bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 sm:p-10 w-full max-w-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-xl">
       
-      <div class="text-center w-full flex flex-col items-center mb-8">
+      <div class="text-center w-full flex flex-col items-center mb-6">
         <img src="/SAKKHIheader.png" class="h-10 md:h-12 w-auto object-contain mb-3" alt="Sakkhi Logo" />
         <h2 class="text-[10px] tracking-[0.2em] text-neutral-500 uppercase font-semibold">Shoot Management</h2>
       </div>
 
-      <div id="google-signin-button" class="mb-6 w-full relative z-10"></div>
+      <div id="google-signin-button" class="mb-2 w-full relative z-10"></div>
       
-      <div id="config-warning" class="hidden mb-6 bg-red-950/30 border border-red-900/50 p-4 rounded-xl text-center">
+      <div id="config-warning" class="hidden mb-4 bg-red-950/30 border border-red-900/50 p-4 rounded-xl text-center">
         <p class="text-xs text-red-400 mb-3">Google Sign-In is not configured yet.</p>
         <a href="config.html" class="inline-block px-4 py-2 bg-neutral-800 text-white text-xs font-semibold rounded-lg border border-neutral-700 hover:bg-neutral-700 transition">Go to Setup Config</a>
       </div>
 
-      <div class="flex items-center gap-4 my-6 opacity-70">
+      <div class="flex items-center gap-4 my-4 opacity-70">
         <hr class="flex-1 border-neutral-800">
         <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Or</span>
         <hr class="flex-1 border-neutral-800">
       </div>
       
-      <div id="email-signin-form" class="space-y-4 relative z-10">
+      <form id="email-signin-form" class="space-y-4 relative z-10" onsubmit="event.preventDefault(); handleEmailLogin();">
         <div class="space-y-1.5">
-          <input type="email" id="email-input" placeholder="Email Address" class="w-full bg-[#050505] border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/30 transition-all placeholder:text-neutral-600">
+          <input type="email" id="email-input" autocomplete="username" placeholder="Email Address" class="w-full bg-[#050505] border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/30 transition-all placeholder:text-neutral-600">
         </div>
         <div class="space-y-1.5">
-          <input type="password" id="password-input" placeholder="Password" class="w-full bg-[#050505] border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/30 transition-all placeholder:text-neutral-600">
+          <input type="password" id="password-input" autocomplete="current-password" placeholder="Password" class="w-full bg-[#050505] border border-neutral-800 rounded-xl px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] focus:ring-1 focus:ring-[#c9a96e]/30 transition-all placeholder:text-neutral-600">
         </div>
         
-        <button onclick="handleEmailLogin()" class="w-full flex items-center justify-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold tracking-wide py-3 rounded-xl text-sm transition-all duration-300 shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.25)] mt-2">
+        <div class="flex items-center justify-between px-1">
+          <label class="flex items-center gap-2 cursor-pointer group">
+            <input type="checkbox" id="remember-me" checked class="w-3.5 h-3.5 rounded border-neutral-700 bg-neutral-900 text-[#c9a96e] focus:ring-[#c9a96e] focus:ring-offset-0 transition-colors">
+            <span class="text-xs text-neutral-400 select-none group-hover:text-neutral-300 transition-colors">Remember me</span>
+          </label>
+        </div>
+        
+        <button type="submit" class="w-full flex items-center justify-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold tracking-wide py-3 rounded-xl text-sm transition-all duration-300 shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.25)] mt-2">
           Sign In / Sign Up
         </button>
-      </div>
+      </form>
       
-      <p class="text-center text-[11px] text-neutral-500 mt-8 font-medium">Sign in securely to access your ledger.</p>
+      <p class="text-center text-[11px] text-neutral-500 mt-6 font-medium">Sign in securely to access your ledger.</p>
     </div>
   </div>
 
@@ -1528,15 +1535,22 @@
         }
 
         // 3. Successful Login
-        currentUser = {
-          id: data.user.id,
-          email: data.user.email,
-          name: data.user.user_metadata?.name || data.user.email.split('@')[0], 
-          token: data.access_token,
-          user_metadata: data.user.user_metadata || {}
-        };
+currentUser = {
+  id: data.user.id,
+  email: data.user.email,
+  name: data.user.user_metadata?.name || data.user.email.split('@')[0], 
+  token: data.access_token,
+  user_metadata: data.user.user_metadata || {}
+};
 
-        localStorage.setItem('currentUser', JSON.stringify(currentUser));
+// --- NEW LOGIC FOR REMEMBER ME ---
+const rememberMe = document.getElementById('remember-me').checked;
+if (rememberMe) {
+  localStorage.setItem('currentUser', JSON.stringify(currentUser));
+} else {
+  sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+}
+// ---------------------------------
         showToast(`Welcome back!`, 'success');
         
         // --- NEW CHECKOUT REDIRECT LOGIC ---
@@ -1571,7 +1585,7 @@
         return;
       }
 
-      const savedUser = localStorage.getItem('currentUser');
+      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
         
