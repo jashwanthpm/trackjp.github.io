@@ -127,35 +127,16 @@
       flex-wrap: nowrap !important;
     }
 
-    #google-signin-button > div > div {
-      width: auto !important;
-      display: flex !important;
-      justify-content: center !important;
-    }
-
-    #google-signin-button div > button,
-    #google-signin-button button {
-      width: auto !important;
-      min-width: 100% !important;
-      max-width: 100% !important;
-      height: auto !important;
-      padding: 10px 16px !important;
-      font-size: 14px !important;
-      display: flex !important;
-      justify-content: center !important;
-      align-items: center !important;
-    }
-
-    #google-signin-button iframe {
-      display: block !important;
-      visibility: visible !important;
-      opacity: 1 !important;
-      width: auto !important;
-      max-width: 100% !important;
-      height: auto !important;
-      min-height: 40px !important;
-      border: none !important;
-    }
+    /* Container stability without forcing internal Google iframe styles */
+#google-signin-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    width: 100%;
+    margin: 0 auto;
+    /* Reserve space to prevent layout jump */
+    min-height: 48px; 
+}
 
     /* Desktop Screen - Large */
     @media (min-width: 1024px) {
@@ -345,7 +326,15 @@
         <h2 class="text-[10px] tracking-[0.2em] text-neutral-500 uppercase font-semibold">Shoot Management</h2>
       </div>
 
-      <div id="google-signin-button" class="w-full flex justify-center relative z-20"></div>
+      <div class="w-full flex justify-center items-center" style="min-height: 50px;">
+  <div id="google-signin-button" class="w-full flex justify-center"></div>
+</div>
+
+<div class="flex items-center gap-4 py-4 opacity-70">
+  <hr class="flex-1 border-neutral-800">
+  <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-widest">Or</span>
+  <hr class="flex-1 border-neutral-800">
+</div>
       
       <div id="config-warning" class="hidden mt-2 bg-red-950/30 border border-red-900/50 p-4 rounded-xl text-center">
         <p class="text-xs text-red-400 mb-3">Google Sign-In is not configured yet.</p>
