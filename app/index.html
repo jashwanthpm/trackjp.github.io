@@ -1537,7 +1537,7 @@
         // --- NEW CHECKOUT REDIRECT LOGIC ---
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
-            window.location.href = `landing page.html?checkout=${pendingPlan}`;
+            window.location.href = `/?checkout=${pendingPlan}`;
             return; // Stop loading the dashboard and redirect
         }
         // -----------------------------------
@@ -1573,7 +1573,7 @@
         // --- NEW CHECKOUT REDIRECT LOGIC ---
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
-            window.location.href = `landing page.html?checkout=${pendingPlan}`;
+            window.location.href = `/?checkout=${pendingPlan}`;
             return; // Stop loading the dashboard and redirect
         }
         // -----------------------------------
@@ -3815,7 +3815,7 @@ async function toggleBlockDate(dateStr) {
     function openAddShootModal(dateStr) {
       if (!_isSubActive && !isDemoMode) {
     showToast('Your subscription is expired. Please renew to add shoots.', 'error');
-    window.location.href = 'index.html#pricing';
+    window.location.href = '/#pricing';
     return;
   }
       document.getElementById('edit-shoot-id').value = '';
@@ -4188,7 +4188,7 @@ function updateAccountDisplay() {
         
         <div class="pt-3 border-t border-neutral-800 flex items-center justify-between">
           <span class="text-[10px] px-2 py-1 rounded font-bold border ${subBadgeColor}">${subText}</span>
-          ${!_isSubActive ? `<button onclick="window.location.href='index.html#pricing'" class="text-[10px] bg-[#c9a96e] text-black px-3 py-1.5 rounded font-bold hover:bg-[#e6c98a] transition shadow-lg">Renew Plan</button>` : ''}
+          ${!_isSubActive ? `<button onclick="window.location.href='/#pricing'" class="text-[10px] bg-[#c9a96e] text-black px-3 py-1.5 rounded font-bold hover:bg-[#e6c98a] transition shadow-lg">Renew Plan</button>` : ''}
         </div>
       </div>
     `;
@@ -4218,7 +4218,7 @@ function updateAccountDisplay() {
     // Main logout function
     function logout() {
       if (isDemoMode) {
-         window.location.href = 'index.html'; 
+         window.location.href = '/'; 
          return;
       }
       try {
@@ -4250,7 +4250,7 @@ function updateAccountDisplay() {
         
         // Redirect after delay
         setTimeout(() => {
-          window.location.href = 'index.html';
+          window.location.href = '/';
         }, 1500);
       } catch (e) {
         console.error('Logout error:', e);
@@ -4267,7 +4267,7 @@ function updateAccountDisplay() {
       // PASTE SUBSCRIPTION CHECK HERE
           if (!_isSubActive && !isDemoMode) {
             showToast('Your subscription is expired. Please renew to import data.', 'error');
-            window.location.href = 'index.html#pricing';
+            window.location.href = '/#pricing';
             return;
           }
       
@@ -4513,9 +4513,7 @@ async function executeDeleteAll() {
 
         setSyncStatus('synced', 'Link Ready');
 
-        // Build the final tiny URL
-        const baseUrl = window.location.href.replace('app.html', '').replace('#', '').split('?')[0];
-        const magicLink = baseUrl + 'booking.html?ref=' + shortCode;
+        const magicLink = window.location.origin + '/booking?ref=' + shortCode;
         
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Short link for ${companyName} copied!`, 'success');
