@@ -1424,7 +1424,7 @@
         // --- NEW CHECKOUT REDIRECT LOGIC ---
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
-            window.location.href = `index.html?checkout=${pendingPlan}`;
+            window.location.href = `/?checkout=${pendingPlan}`;
             return; // Stop loading the dashboard and redirect
         }
         // -----------------------------------
