@@ -64,7 +64,7 @@
       <a href="#faq" class="text-sm font-medium text-neutral-400 hover:text-[#c9a96e] transition-colors">Help</a>
     </nav>
     <div class="flex gap-4 items-center">
-      <button id="nav-auth-btn" onclick="window.location.href='app.html'" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+      <button id="nav-auth-btn" onclick="window.location.href='/app'" class="bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-xs sm:text-sm px-6 py-2.5 rounded-xl shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
         Sign In
       </button>
     </div>
@@ -83,7 +83,7 @@
       <p class="text-base sm:text-xl text-neutral-400 max-w-2xl mx-auto leading-relaxed font-light">
 Stop tracking your shoots and payments on messy spreadsheets. Get a clear view of your upcoming shoots, payment reminders, and secure every rupee in one sleek dashboard.      </p>
       <div class="pt-4 flex flex-col sm:flex-row items-center justify-center gap-4">
-        <a href="app.html?mode=demo" target="_blank" class="w-full sm:w-auto bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm sm:text-base px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(201,169,110,0.2)] hover:shadow-[0_0_40px_rgba(201,169,110,0.4)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
+        <a href="/app?mode=demo" target="_blank" class="w-full sm:w-auto bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm sm:text-base px-8 py-4 rounded-xl shadow-[0_0_30px_rgba(201,169,110,0.2)] hover:shadow-[0_0_40px_rgba(201,169,110,0.4)] hover:-translate-y-1 transition-all duration-300 flex items-center justify-center gap-2">
           Start Your Free Demo <i class="ti ti-arrow-right"></i>
         </a>
       </div>
@@ -348,7 +348,7 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       // Save what they wanted to buy
       sessionStorage.setItem('pendingPlan', planType);
       // Silently redirect to the sign-in page
-      window.location.href = "app.html";
+      window.location.href = "/app";
       return;
     }
     const user = JSON.parse(userStr);
@@ -380,7 +380,7 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
           
           // Redirect after 1.5 seconds
           setTimeout(() => {
-            window.location.href = "app.html";
+            window.location.href = "/app";
           }, 1500);
           
           return; // Stop the checkout process here
@@ -413,7 +413,7 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
           plan: planType
         },
         handler: function (response) {
-          window.location.href = "app.html";
+          window.location.href = "/app";
         },
         prefill: { email: user.email },
         theme: { color: "#c9a96e" }
@@ -437,7 +437,7 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
     if (loggedInUser && navBtn) {
       navBtn.innerHTML = 'Open Dashboard <i class="ti ti-arrow-right ml-1"></i>';
       // Change the button to go directly to the dashboard instead of showing 'Sign In'
-      navBtn.onclick = () => window.location.href = 'app.html'; 
+      navBtn.onclick = () => window.location.href = '/app'; 
     }
 
     // Handle the redirect back from app.html after a successful login
