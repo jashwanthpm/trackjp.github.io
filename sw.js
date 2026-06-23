@@ -6,6 +6,8 @@ const urlsToCache = [
   '/index.html',
   '/app/',
   '/app/index.html',
+  '/booking/',
+  '/booking/index.html',
   '/manifest.json',
   '/sakkhi 300px.png',
   '/SAKKHIheader.png'
