@@ -1,7 +1,7 @@
 {
   "name": "Sakkhi Shoot Management",
   "short_name": "Sakkhi",
-  "start_url": "/app.html", 
+  "start_url": "/app/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
