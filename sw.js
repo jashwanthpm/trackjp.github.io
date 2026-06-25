@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sakkhi-v4'; // Increment this if you make changes in the future
+const CACHE_NAME = 'sakkhi-v5'; // Increment this if you make changes in the future
 
 self.addEventListener('install', (event) => {
   self.skipWaiting(); // Force the waiting service worker to become the active service worker
