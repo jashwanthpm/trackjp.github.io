@@ -4441,12 +4441,20 @@ function updateAccountDisplay() {
       buttons.forEach(btn => btn.classList.remove('active'));
       sections.forEach(sec => sec.classList.remove('active'));
       
-      document.querySelector(`[data-tab="${tab}"]`).classList.add('active');
-      document.getElementById(`account-${tab}`).classList.add('active');
+      const targetBtn = document.querySelector(`[data-tab="${tab}"]`);
+      if(targetBtn) targetBtn.classList.add('active');
+      
+      const targetSec = document.getElementById(`account-${tab}`);
+      if(targetSec) targetSec.classList.add('active');
 
       // Update account display when profile tab is opened
       if (tab === 'profile') {
         updateAccountDisplay();
+      }
+      
+      // Load the devices list when the devices tab is opened
+      if (tab === 'devices') {
+        renderDevicesList();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
