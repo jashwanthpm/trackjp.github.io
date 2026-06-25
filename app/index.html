@@ -586,6 +586,10 @@
                 <i class="ti ti-settings text-lg"></i>
                 <span>Management</span>
               </button>
+              <button onclick="switchAccountTab('devices')" class="account-sidebar-item" data-tab="devices">
+  <i class="ti ti-devices text-lg"></i>
+  <span>Devices</span>
+</button>
               <button onclick="switchAccountTab('data')" class="account-sidebar-item" data-tab="data">
                 <i class="ti ti-database text-lg"></i>
                 <span>Data</span>
@@ -958,7 +962,43 @@
         </div>
       </div>
     </div>
+<div id="account-devices" class="account-content-section">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+    <div class="border-b border-neutral-800 pb-4">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-devices text-[#c9a96e]"></i> Logged In Devices
+      </h3>
+      <p class="text-xs text-neutral-500 mt-1">Manage devices where your Sakkhi account is currently active.</p>
+    </div>
 
+    <div class="space-y-2">
+      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current Session</p>
+      <div class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-500">
+            <i class="ti ti-device-laptop text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-white">Mac OS • Chrome</p>
+            <p class="text-xs text-emerald-500/80 mt-0.5">Active Now — Bengaluru, IN</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="space-y-2 pt-2">
+      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Other Devices</p>
+      <div id="devices-list" class="space-y-3">
+        </div>
+    </div>
+
+    <div class="border-t border-neutral-800 pt-5 mt-2">
+      <button onclick="logoutAllOtherDevices()" class="flex items-center justify-center gap-2 w-full bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+        <i class="ti ti-logout"></i> Sign Out of All Other Devices
+      </button>
+    </div>
+  </div>
+</div>
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
       <div class="border-b border-neutral-800 pb-4">
         <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -1981,13 +2021,19 @@ try {
         'settings': ['account-settings'],
         'data': ['account-data'],
         'support': ['account-support']
+        'devices': ['account-devices']
       };
 
       (sections[tab] || []).forEach(id => {
         const el = document.getElementById(id);
         if (el) el.classList.add('active');
       });
+
+      // Fetch mock data when tab is opened
+      if (tab === 'devices') {
+        renderDevicesList();
       }
+    }
 
     function setAppTheme(theme, skipSave = false) {
       document.body.setAttribute('data-theme', theme);
@@ -4698,7 +4744,53 @@ async function executeDeleteAll() {
         icon.className = 'ti ti-eye text-[18px] leading-none';
       }
     }
-    
+
+    function renderDevicesList() {
+      // MOCK DATA: Replace this array with a real Supabase fetch once your backend is configured
+      const mockDevices = [
+        { id: 'dev_1', os: 'iOS', browser: 'Safari', location: 'Mumbai, IN', lastActive: '2 hours ago', icon: 'ti-device-mobile' },
+        { id: 'dev_2', os: 'Windows', browser: 'Chrome', location: 'Delhi, IN', lastActive: '3 days ago', icon: 'ti-device-desktop' }
+      ];
+
+      const container = document.getElementById('devices-list');
+      
+      if (mockDevices.length === 0) {
+        container.innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
+        return;
+      }
+
+      container.innerHTML = mockDevices.map(d => `
+        <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-neutral-700" id="device-${d.id}">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-800 rounded-full flex items-center justify-center text-neutral-400">
+              <i class="ti ${d.icon} text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-neutral-200">${d.os} • ${d.browser}</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Last active ${d.lastActive} — ${d.location}</p>
+            </div>
+          </div>
+          <button onclick="logoutDevice('${d.id}')" class="text-[10px] uppercase tracking-wider font-bold text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 bg-[#0a0a0a] hover:bg-red-950/30 px-3 py-1.5 rounded transition self-start sm:self-auto">
+            Revoke
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function logoutDevice(deviceId) {
+      // Remove element from DOM for visual feedback
+      const el = document.getElementById(`device-${deviceId}`);
+      if (el) {
+        el.style.opacity = '0';
+        setTimeout(() => el.remove(), 300);
+      }
+      showToast('Session revoked successfully.');
+    }
+
+    function logoutAllOtherDevices() {
+      document.getElementById('devices-list').innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
+      showToast('All other sessions have been terminated securely.');
+    }
     // Auto-load exactly 1 second after app loads so _shoots data has time to sync from Supabase
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
