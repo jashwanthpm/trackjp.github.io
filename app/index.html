@@ -2026,7 +2026,7 @@ try {
       if (tab === 'devices') {
         renderDevicesList();
       }
-    }
+    } // <--- THIS is the closing brace that was likely missing
 
     function setAppTheme(theme, skipSave = false) {
       document.body.setAttribute('data-theme', theme);
