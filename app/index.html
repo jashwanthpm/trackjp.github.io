@@ -961,44 +961,8 @@
           <a href="https://wa.me/919482819581" target="_blank" class="px-4 py-2 bg-emerald-950/30 border border-emerald-900 text-emerald-400 hover:bg-emerald-900/50 text-xs font-bold rounded-lg transition"><i class="ti ti-brand-whatsapp mr-1"></i> Message</a>
         </div>
       </div>
-  </div>
-</div> <div id="account-devices" class="account-content-section">
-  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
-    <div class="border-b border-neutral-800 pb-4">
-      <h3 class="text-lg font-bold text-white flex items-center gap-2">
-        <i class="ti ti-devices text-[#c9a96e]"></i> Logged In Devices
-      </h3>
-      <p class="text-xs text-neutral-500 mt-1">Manage devices where your Sakkhi account is currently active.</p>
     </div>
 
-    <div class="space-y-2">
-      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current Session</p>
-      <div class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-500">
-            <i class="ti ti-device-laptop text-xl"></i>
-          </div>
-          <div>
-            <p class="text-sm font-bold text-white">Mac OS • Chrome</p>
-            <p class="text-xs text-emerald-500/80 mt-0.5">Active Now — Bengaluru, IN</p>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div class="space-y-2 pt-2">
-      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Other Devices</p>
-      <div id="devices-list" class="space-y-3">
-        </div>
-    </div>
-
-    <div class="border-t border-neutral-800 pt-5 mt-2">
-      <button onclick="logoutAllOtherDevices()" class="flex items-center justify-center gap-2 w-full bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
-        <i class="ti ti-logout"></i> Sign Out of All Other Devices
-      </button>
-    </div>
-  </div>
-</div>
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
       <div class="border-b border-neutral-800 pb-4">
         <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -1008,7 +972,6 @@
       </div>
 
       <div class="space-y-2">
-        
         <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-brand-whatsapp text-emerald-500 text-lg"></i> How to send 1-Click WhatsApp Reminders?</div>
@@ -1073,12 +1036,49 @@
             You can change the Start and End date pickers at the top right of the chart to visualize any custom time range (e.g., Q1 vs Q2).
           </div>
         </details>
+      </div>
+    </div>
+  </div>
+</div>
 
+<div id="account-devices" class="account-content-section">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+    <div class="border-b border-neutral-800 pb-4">
+      <h3 class="text-lg font-bold text-white flex items-center gap-2">
+        <i class="ti ti-devices text-[#c9a96e]"></i> Logged In Devices
+      </h3>
+      <p class="text-xs text-neutral-500 mt-1">Manage devices where your Sakkhi account is currently active.</p>
+    </div>
+
+    <div class="space-y-2">
+      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current Session</p>
+      <div class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-4 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <div class="w-10 h-10 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-500">
+            <i class="ti ti-device-laptop text-xl"></i>
+          </div>
+          <div>
+            <p class="text-sm font-bold text-white">Mac OS • Chrome</p>
+            <p class="text-xs text-emerald-500/80 mt-0.5">Active Now — Bengaluru, IN</p>
+          </div>
+        </div>
       </div>
     </div>
 
+    <div class="space-y-2 pt-2">
+      <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Other Devices</p>
+      <div id="devices-list" class="space-y-3">
+        </div>
+    </div>
+
+    <div class="border-t border-neutral-800 pt-5 mt-2">
+      <button onclick="logoutAllOtherDevices()" class="flex items-center justify-center gap-2 w-full bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition">
+        <i class="ti ti-logout"></i> Sign Out of All Other Devices
+      </button>
+    </div>
   </div>
 </div>
+
           </div>
         </div>
       </section>
@@ -2020,7 +2020,7 @@ try {
         'whatsapp': ['account-whatsapp'],
         'settings': ['account-settings'],
         'data': ['account-data'],
-        'support': ['account-support']
+        'support': ['account-support'],
         'devices': ['account-devices']
       };
 
