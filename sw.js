@@ -34,3 +34,12 @@ self.addEventListener('fetch', event => {
       })
   );
 });
+// Force the new service worker to take over immediately
+self.addEventListener('install', (event) => {
+    self.skipWaiting();
+});
+
+// Force the new service worker to control all open tabs right away
+self.addEventListener('activate', (event) => {
+    event.waitUntil(self.clients.claim());
+});
