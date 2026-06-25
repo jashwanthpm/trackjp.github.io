@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sakkhi-cache-v1';
+const CACHE_NAME = 'sakkhi-cache-v2';
 
 // These are the exact paths based on your GitHub repository structure
 const urlsToCache = [
