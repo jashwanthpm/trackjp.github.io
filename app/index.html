@@ -2027,6 +2027,9 @@ try {
         renderDevicesList();
       }
     }
+
+    function setAppTheme(theme, skipSave = false) {
+      document.body.setAttribute('data-theme', theme);
       
       // Verify these IDs match the actual <div> IDs in your HTML!
       const sections = {
