@@ -4451,11 +4451,14 @@ function updateAccountDisplay() {
 
     // Initialize account display on profile tab switch
     function switchAccountTab(tab) {
-      const buttons = document.querySelectorAll('.account-sidebar-item');
-      const sections = document.querySelectorAll('.account-content-section');
+      if (!tab) {
+        console.error("switchAccountTab called without a tab name!");
+        return;
+      }
       
-      buttons.forEach(btn => btn.classList.remove('active'));
-      sections.forEach(sec => sec.classList.remove('active'));
+      _currentAccountTab = tab;
+      document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
+      document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
       
       const targetBtn = document.querySelector(`[data-tab="${tab}"]`);
       if(targetBtn) targetBtn.classList.add('active');
@@ -4463,12 +4466,10 @@ function updateAccountDisplay() {
       const targetSec = document.getElementById(`account-${tab}`);
       if(targetSec) targetSec.classList.add('active');
 
-      // Update account display when profile tab is opened
       if (tab === 'profile') {
         updateAccountDisplay();
       }
       
-      // Load the devices list when the devices tab is opened
       if (tab === 'devices') {
         renderDevicesList();
       }
