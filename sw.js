@@ -1,45 +1,29 @@
-const CACHE_NAME = 'sakkhi-cache-v2';
+const CACHE_NAME = 'sakkhi-v2'; // Increment this if you make changes in the future
 
-// These are the exact paths based on your GitHub repository structure
-const urlsToCache = [
-  '/',
-  '/index.html',
-  '/app/',
-  '/app/index.html',
-  '/booking/',
-  '/booking/index.html',
-  '/manifest.json',
-  '/sakkhi 300px.png',
-  '/SAKKHIheader.png'
-];
-
-// Install the service worker and cache the app shell
-self.addEventListener('install', event => {
-  event.waitUntil(
-    caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Opened cache');
-        return cache.addAll(urlsToCache);
-      })
-  );
-});
-
-// Intercept network requests and serve from cache if available
-self.addEventListener('fetch', event => {
-  event.respondWith(
-    caches.match(event.request)
-      .then(response => {
-        // Return the cached version if found, otherwise fetch from the network
-        return response || fetch(event.request);
-      })
-  );
-});
-// Force the new service worker to take over immediately
 self.addEventListener('install', (event) => {
-    self.skipWaiting();
+  self.skipWaiting(); // Force the waiting service worker to become the active service worker
 });
 
-// Force the new service worker to control all open tabs right away
 self.addEventListener('activate', (event) => {
-    event.waitUntil(self.clients.claim());
+  event.waitUntil(
+    caches.keys().then((cacheNames) => {
+      return Promise.all(
+        cacheNames.map((cache) => {
+          if (cache !== CACHE_NAME) {
+            console.log('Clearing old cache:', cache);
+            return caches.delete(cache); // This deletes the old cached version
+          }
+        })
+      );
+    }).then(() => self.clients.claim())
+  );
+});
+
+// Basic fetch handler
+self.addEventListener('fetch', (event) => {
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
+  );
 });
