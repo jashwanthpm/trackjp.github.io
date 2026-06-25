@@ -2011,6 +2011,23 @@ try {
       document.querySelectorAll('.account-content-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.account-sidebar-item').forEach(s => s.classList.remove('active'));
       
+      const targetBtn = document.querySelector(`[data-tab="${tab}"]`);
+      if(targetBtn) targetBtn.classList.add('active');
+      
+      const targetSec = document.getElementById(`account-${tab}`);
+      if(targetSec) targetSec.classList.add('active');
+
+      // Update account display when profile tab is opened
+      if (tab === 'profile') {
+        updateAccountDisplay();
+      }
+      
+      // Load the devices list when the devices tab is opened
+      if (tab === 'devices') {
+        renderDevicesList();
+      }
+    }
+      
       // Verify these IDs match the actual <div> IDs in your HTML!
       const sections = {
         'profile': ['account-profile'],
@@ -4797,6 +4814,71 @@ async function executeDeleteAll() {
 
     function logoutAllOtherDevices() {
       document.getElementById('devices-list').innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
+      showToast('All other sessions have been terminated securely.');
+    }
+    function getDevices() {
+      // 1. Define the base mock data
+      const initialDevices = [
+        { id: 'dev_1', os: 'iOS', browser: 'Safari', location: 'Mumbai, IN', lastActive: '2 hours ago', icon: 'ti-device-mobile' },
+        { id: 'dev_2', os: 'Windows', browser: 'Chrome', location: 'Delhi, IN', lastActive: '3 days ago', icon: 'ti-device-desktop' }
+      ];
+      
+      // 2. Check if the user has already "revoked" any devices in localStorage
+      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
+      
+      // 3. Return only the devices that have NOT been revoked
+      return initialDevices.filter(d => !revokedIds.includes(d.id));
+    }
+
+    function renderDevicesList() {
+      const devices = getDevices();
+      const container = document.getElementById('devices-list');
+      
+      if (devices.length === 0) {
+        container.innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
+        return;
+      }
+
+      container.innerHTML = devices.map(d => `
+        <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-neutral-700" id="device-${d.id}">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-800 rounded-full flex items-center justify-center text-neutral-400">
+              <i class="ti ${d.icon} text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-neutral-200">${d.os} • ${d.browser}</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Last active ${d.lastActive} — ${d.location}</p>
+            </div>
+          </div>
+          <button onclick="logoutDevice('${d.id}')" class="text-[10px] uppercase tracking-wider font-bold text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 bg-[#0a0a0a] hover:bg-red-950/30 px-3 py-1.5 rounded transition self-start sm:self-auto">
+            Revoke
+          </button>
+        </div>
+      `).join('');
+    }
+
+    function logoutDevice(deviceId) {
+      // 1. Get current revoked list
+      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
+      
+      // 2. Add this device ID to the list and save back to localStorage
+      revokedIds.push(deviceId);
+      localStorage.setItem('revoked_devices', JSON.stringify(revokedIds));
+      
+      // 3. Re-render the list so it disappears
+      renderDevicesList();
+      showToast('Session revoked successfully.');
+    }
+
+    function logoutAllOtherDevices() {
+      // Wipe the whole list by adding all currently visible IDs to the revoked list
+      const currentDevices = getDevices();
+      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
+      
+      currentDevices.forEach(d => revokedIds.push(d.id));
+      localStorage.setItem('revoked_devices', JSON.stringify(revokedIds));
+      
+      renderDevicesList();
       showToast('All other sessions have been terminated securely.');
     }
     // Auto-load exactly 1 second after app loads so _shoots data has time to sync from Supabase
