@@ -2028,33 +2028,7 @@ try {
       }
     } // <--- THIS is the closing brace that was likely missing
 
-    function setAppTheme(theme, skipSave = false) {
-      document.body.setAttribute('data-theme', theme);
-      
-      // Verify these IDs match the actual <div> IDs in your HTML!
-      const sections = {
-        'profile': ['account-profile'],
-        'payment': ['account-payment'],
-        'appearance': ['account-appearance'],
-        'security': ['account-security'],
-        'whatsapp': ['account-whatsapp'],
-        'settings': ['account-settings'],
-        'data': ['account-data'],
-        'support': ['account-support'],
-        'devices': ['account-devices']
-      };
-
-      (sections[tab] || []).forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.classList.add('active');
-      });
-
-      // Fetch mock data when tab is opened
-      if (tab === 'devices') {
-        renderDevicesList();
-      }
-
-    function setAppTheme(theme, skipSave = false) {
+  function setAppTheme(theme, skipSave = false) {
       document.body.setAttribute('data-theme', theme);
       
       document.querySelectorAll('.theme-option').forEach(el => {
