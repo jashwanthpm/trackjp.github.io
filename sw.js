@@ -39,13 +39,8 @@ self.addEventListener('fetch', event => {
   // =========================================================
   // 1. THE BOUNCER: Ignore all external APIs, CDNs, and Fonts
   // =========================================================
-  if (!url.origin.startsWith(self.location.origin)) {
-    return; // Bypass the Service Worker entirely. Let the browser handle it.
-  }
-
-  // Ignore Chrome extensions
-  if (url.protocol === 'chrome-extension:') {
-    return;
+  if (!url.origin.startsWith(self.location.origin) || url.protocol === 'chrome-extension:') {
+    return; // Bypass the Service Worker entirely.
   }
 
   // =========================================================
@@ -54,12 +49,13 @@ self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request).then(cachedResponse => {
       
-      // Fetch the latest version from the network in the background
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        // Only cache valid, local responses
+        // CLONE IMMEDIATELY before the browser uses the response
+        const responseToCache = networkResponse.clone();
+        
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
           caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, networkResponse.clone());
+            cache.put(event.request, responseToCache);
           });
         }
         return networkResponse;
@@ -67,7 +63,6 @@ self.addEventListener('fetch', event => {
         console.log('Network request failed, relying on cache.', err);
       });
 
-      // Return the lightning-fast cache immediately if we have it, otherwise wait for the network
       return cachedResponse || fetchPromise;
     })
   );
