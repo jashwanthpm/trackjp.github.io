@@ -1,5 +1,5 @@
 // Bump this version number if you ever make major updates to force a cache refresh
-const CACHE_NAME = 'sakkhi-app-v7.7'; 
+const CACHE_NAME = 'sakkhi-app-v7.8'; 
 
 const URLS_TO_CACHE = [
   '/',
@@ -7,20 +7,18 @@ const URLS_TO_CACHE = [
   '/manifest.json',
   '/sakkhi 300px.png',
   '/SAKKHIheader.png',
-  // Add your missing CSS and routes below:
-  '/app/', // or '/app/index.html'
-  '/admin/', // or '/admin/index.html'
-  // Example CSS paths (update these to match your actual file names/paths)
-  '/app/style.css',
-  '/admin/admin-style.css',
-  '/app/script.js' 
+  '/app/',
+  '/admin/'
 ];
 
 self.addEventListener('install', event => {
   self.skipWaiting(); // Force the new service worker to activate immediately
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => cache.addAll(URLS_TO_CACHE))
+      .then(cache => {
+        console.log('Opened cache: ', CACHE_NAME);
+        return cache.addAll(URLS_TO_CACHE);
+      })
       .catch(err => console.log('Cache install error:', err))
   );
 });
@@ -46,6 +44,7 @@ self.addEventListener('fetch', event => {
   // =========================================================
   // 1. THE BOUNCER: Ignore all external APIs, CDNs, and Fonts
   // =========================================================
+  // This explicitly allows cdn.tailwindcss.com and supabase to bypass the service worker entirely!
   if (!url.origin.startsWith(self.location.origin) || url.protocol === 'chrome-extension:') {
     return; // Bypass the Service Worker entirely.
   }
@@ -57,10 +56,9 @@ self.addEventListener('fetch', event => {
     caches.match(event.request).then(cachedResponse => {
       
       const fetchPromise = fetch(event.request).then(networkResponse => {
-        // CLONE IMMEDIATELY before the browser uses the response
-        const responseToCache = networkResponse.clone();
-        
+        // Only cache successful local requests
         if (networkResponse && networkResponse.status === 200 && networkResponse.type === 'basic') {
+          const responseToCache = networkResponse.clone();
           caches.open(CACHE_NAME).then(cache => {
             cache.put(event.request, responseToCache);
           });
