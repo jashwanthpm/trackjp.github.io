@@ -6,7 +6,14 @@ const URLS_TO_CACHE = [
   '/index.html',
   '/manifest.json',
   '/sakkhi 300px.png',
-  '/SAKKHIheader.png'
+  '/SAKKHIheader.png',
+  // Add your missing CSS and routes below:
+  '/app/', // or '/app/index.html'
+  '/admin/', // or '/admin/index.html'
+  // Example CSS paths (update these to match your actual file names/paths)
+  '/app/style.css',
+  '/admin/admin-style.css',
+  '/app/script.js' 
 ];
 
 self.addEventListener('install', event => {
