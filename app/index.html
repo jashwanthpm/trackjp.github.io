@@ -1571,6 +1571,27 @@
           sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
 
+        // --- REGISTER DEVICE TO CLOUD ---
+const thisDevice = getCurrentDeviceDetails();
+localStorage.setItem('current_device_id', thisDevice.id);
+
+try {
+  // Fetch existing devices
+  const existingRes = await sbFetch(`settings?key=eq.${currentUser.id}_active_devices&select=value`);
+  let activeDevices = [];
+  if (existingRes && existingRes.length > 0) {
+    activeDevices = existingRes[0].value || [];
+  }
+  
+  // Add new device
+  activeDevices.push(thisDevice);
+  
+  // Save back to cloud
+  await saveSettingToDB('active_devices', activeDevices);
+} catch (e) {
+  console.warn("Could not register device to cloud.");
+}
+        
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
             window.location.href = `/?checkout=${pendingPlan}`;
@@ -1984,6 +2005,32 @@ try {
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
+    // --- DEVICE TRACKING UTILITY ---
+function getCurrentDeviceDetails() {
+  const ua = navigator.userAgent;
+  let os = "Unknown OS";
+  let icon = "ti-device-desktop";
+  
+  if (/android/i.test(ua)) { os = "Android"; icon = "ti-device-mobile"; }
+  else if (/iPad|iPhone|iPod/.test(ua)) { os = "iOS"; icon = "ti-device-mobile"; }
+  else if (/Mac/.test(ua)) { os = "Mac OS"; }
+  else if (/Win/.test(ua)) { os = "Windows"; }
+
+  let browser = "Unknown Browser";
+  if (ua.indexOf("Chrome") > -1) browser = "Chrome";
+  else if (ua.indexOf("Safari") > -1) browser = "Safari";
+  else if (ua.indexOf("Firefox") > -1) browser = "Firefox";
+
+  return {
+    id: 'dev_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+    os: os,
+    browser: browser,
+    location: 'Active Session',
+    lastActive: 'Just now',
+    icon: icon
+  };
+}
+    
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(t => {
@@ -4747,21 +4794,40 @@ async function executeDeleteAll() {
       }
     }
 
-    function renderDevicesList() {
-      // MOCK DATA: Replace this array with a real Supabase fetch once your backend is configured
-      const mockDevices = [
-        { id: 'dev_1', os: 'iOS', browser: 'Safari', location: 'Mumbai, IN', lastActive: '2 hours ago', icon: 'ti-device-mobile' },
-        { id: 'dev_2', os: 'Windows', browser: 'Chrome', location: 'Delhi, IN', lastActive: '3 days ago', icon: 'ti-device-desktop' }
-      ];
+    // ==========================================
+    // CLOUD-SYNCED DEVICE MANAGEMENT (STEP 3)
+    // ==========================================
 
+    async function fetchActiveDevices() {
+      if (isDemoMode) return [];
+      const userId = currentUser?.id || currentUser?.email;
+      try {
+        const res = await sbFetch(`settings?key=eq.${userId}_active_devices&select=value`);
+        if (res && res.length > 0) {
+          return res[0].value || [];
+        }
+      } catch (e) {
+        console.error("Error fetching devices", e);
+      }
+      return [];
+    }
+
+    async function renderDevicesList() {
       const container = document.getElementById('devices-list');
+      container.innerHTML = '<p class="text-xs text-neutral-500"><i class="ti ti-loader animate-spin inline-block mr-1"></i> Syncing devices from cloud...</p>';
+
+      const currentDeviceId = localStorage.getItem('current_device_id');
+      const allDevices = await fetchActiveDevices();
       
-      if (mockDevices.length === 0) {
-        container.innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
+      // Filter out the device the user is currently holding
+      const otherDevices = allDevices.filter(d => d.id !== currentDeviceId);
+
+      if (otherDevices.length === 0) {
+        container.innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found on this account.</p>';
         return;
       }
 
-      container.innerHTML = mockDevices.map(d => `
+      container.innerHTML = otherDevices.map(d => `
         <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-neutral-700" id="device-${d.id}">
           <div class="flex items-center gap-3">
             <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-800 rounded-full flex items-center justify-center text-neutral-400">
@@ -4769,7 +4835,7 @@ async function executeDeleteAll() {
             </div>
             <div>
               <p class="text-sm font-bold text-neutral-200">${d.os} • ${d.browser}</p>
-              <p class="text-xs text-neutral-500 mt-0.5">Last active ${d.lastActive} — ${d.location}</p>
+              <p class="text-xs text-neutral-500 mt-0.5">Logged in device</p>
             </div>
           </div>
           <button onclick="logoutDevice('${d.id}')" class="text-[10px] uppercase tracking-wider font-bold text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 bg-[#0a0a0a] hover:bg-red-950/30 px-3 py-1.5 rounded transition self-start sm:self-auto">
@@ -4779,81 +4845,34 @@ async function executeDeleteAll() {
       `).join('');
     }
 
-    function logoutDevice(deviceId) {
-      // Remove element from DOM for visual feedback
+    async function logoutDevice(deviceId) {
+      // Visually remove immediately for snappy UI
       const el = document.getElementById(`device-${deviceId}`);
       if (el) {
         el.style.opacity = '0';
         setTimeout(() => el.remove(), 300);
       }
-      showToast('Session revoked successfully.');
+      
+      // Update the cloud database
+      const allDevices = await fetchActiveDevices();
+      const updatedDevices = allDevices.filter(d => d.id !== deviceId);
+      await saveSettingToDB('active_devices', updatedDevices);
+      
+      showToast('Session revoked successfully from cloud.');
+      renderDevicesList(); // Refresh list to ensure accuracy
     }
 
-    function logoutAllOtherDevices() {
-      document.getElementById('devices-list').innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
-      showToast('All other sessions have been terminated securely.');
-    }
-    function getDevices() {
-      // 1. Define the base mock data
-      const initialDevices = [
-        { id: 'dev_1', os: 'iOS', browser: 'Safari', location: 'Mumbai, IN', lastActive: '2 hours ago', icon: 'ti-device-mobile' },
-        { id: 'dev_2', os: 'Windows', browser: 'Chrome', location: 'Delhi, IN', lastActive: '3 days ago', icon: 'ti-device-desktop' }
-      ];
+    async function logoutAllOtherDevices() {
+      document.getElementById('devices-list').innerHTML = '<p class="text-xs text-neutral-600 italic"><i class="ti ti-loader animate-spin inline-block mr-1"></i> Terminating sessions...</p>';
       
-      // 2. Check if the user has already "revoked" any devices in localStorage
-      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
+      const currentDeviceId = localStorage.getItem('current_device_id');
+      const allDevices = await fetchActiveDevices();
       
-      // 3. Return only the devices that have NOT been revoked
-      return initialDevices.filter(d => !revokedIds.includes(d.id));
-    }
-
-    function renderDevicesList() {
-      const devices = getDevices();
-      const container = document.getElementById('devices-list');
+      // Keep ONLY the current device
+      const keepDevice = allDevices.find(d => d.id === currentDeviceId);
+      const updatedDevices = keepDevice ? [keepDevice] : [];
       
-      if (devices.length === 0) {
-        container.innerHTML = '<p class="text-xs text-neutral-600 italic">No other active devices found.</p>';
-        return;
-      }
-
-      container.innerHTML = devices.map(d => `
-        <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3 transition hover:border-neutral-700" id="device-${d.id}">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 bg-[#0f0f0f] border border-neutral-800 rounded-full flex items-center justify-center text-neutral-400">
-              <i class="ti ${d.icon} text-xl"></i>
-            </div>
-            <div>
-              <p class="text-sm font-bold text-neutral-200">${d.os} • ${d.browser}</p>
-              <p class="text-xs text-neutral-500 mt-0.5">Last active ${d.lastActive} — ${d.location}</p>
-            </div>
-          </div>
-          <button onclick="logoutDevice('${d.id}')" class="text-[10px] uppercase tracking-wider font-bold text-neutral-400 hover:text-red-400 border border-neutral-800 hover:border-red-900/50 bg-[#0a0a0a] hover:bg-red-950/30 px-3 py-1.5 rounded transition self-start sm:self-auto">
-            Revoke
-          </button>
-        </div>
-      `).join('');
-    }
-
-    function logoutDevice(deviceId) {
-      // 1. Get current revoked list
-      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
-      
-      // 2. Add this device ID to the list and save back to localStorage
-      revokedIds.push(deviceId);
-      localStorage.setItem('revoked_devices', JSON.stringify(revokedIds));
-      
-      // 3. Re-render the list so it disappears
-      renderDevicesList();
-      showToast('Session revoked successfully.');
-    }
-
-    function logoutAllOtherDevices() {
-      // Wipe the whole list by adding all currently visible IDs to the revoked list
-      const currentDevices = getDevices();
-      const revokedIds = JSON.parse(localStorage.getItem('revoked_devices') || '[]');
-      
-      currentDevices.forEach(d => revokedIds.push(d.id));
-      localStorage.setItem('revoked_devices', JSON.stringify(revokedIds));
+      await saveSettingToDB('active_devices', updatedDevices);
       
       renderDevicesList();
       showToast('All other sessions have been terminated securely.');
