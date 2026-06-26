@@ -1052,16 +1052,8 @@
 
     <div class="space-y-2">
       <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Current Session</p>
-      <div class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-4 flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <div class="w-10 h-10 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-500">
-            <i class="ti ti-device-laptop text-xl"></i>
-          </div>
-          <div>
-            <p class="text-sm font-bold text-white">Mac OS • Chrome</p>
-            <p class="text-xs text-emerald-500/80 mt-0.5">Active Now — Bengaluru, IN</p>
-          </div>
-        </div>
+      <div id="current-device-container" class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-4 flex items-center justify-between">
+        <!-- Javascript will inject the correct device details here -->
       </div>
     </div>
 
@@ -4814,11 +4806,35 @@ async function executeDeleteAll() {
 
     async function renderDevicesList() {
       const container = document.getElementById('devices-list');
+      const currentContainer = document.getElementById('current-device-container');
+      
       container.innerHTML = '<p class="text-xs text-neutral-500"><i class="ti ti-loader animate-spin inline-block mr-1"></i> Syncing devices from cloud...</p>';
 
       const currentDeviceId = localStorage.getItem('current_device_id');
       const allDevices = await fetchActiveDevices();
       
+      // --- NEW: Update the "Current Session" box dynamically ---
+      if (currentContainer) {
+        // Find this device in the cloud, or generate it locally if they haven't logged out/in yet
+        let currentDevice = allDevices.find(d => d.id === currentDeviceId);
+        if (!currentDevice) {
+          currentDevice = getCurrentDeviceDetails(); 
+        }
+        
+        currentContainer.innerHTML = `
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-500">
+              <i class="ti ${currentDevice.icon} text-xl"></i>
+            </div>
+            <div>
+              <p class="text-sm font-bold text-white">${currentDevice.os} • ${currentDevice.browser}</p>
+              <p class="text-xs text-emerald-500/80 mt-0.5">Active Now</p>
+            </div>
+          </div>
+        `;
+      }
+      // --------------------------------------------------------
+
       // Filter out the device the user is currently holding
       const otherDevices = allDevices.filter(d => d.id !== currentDeviceId);
 
