@@ -1562,27 +1562,6 @@
         } else {
           sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
         }
-
-        // --- REGISTER DEVICE TO CLOUD ---
-const thisDevice = getCurrentDeviceDetails();
-localStorage.setItem('current_device_id', thisDevice.id);
-
-try {
-  // Fetch existing devices
-  const existingRes = await sbFetch(`settings?key=eq.${currentUser.id}_active_devices&select=value`);
-  let activeDevices = [];
-  if (existingRes && existingRes.length > 0) {
-    activeDevices = existingRes[0].value || [];
-  }
-  
-  // Add new device
-  activeDevices.push(thisDevice);
-  
-  // Save back to cloud
-  await saveSettingToDB('active_devices', activeDevices);
-} catch (e) {
-  console.warn("Could not register device to cloud.");
-}
         
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
@@ -1827,6 +1806,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
       if (_profile.theme) {
         setAppTheme(_profile.theme, true);
       }
+      // --- RUN DEVICE SYNC ON LOAD ---
+    const devRow = configurations.find(r => r.key === 'active_devices');
+    await syncCurrentDevice(devRow ? devRow.value : []);
+    // ------------------------------------
     }
 try {
       const subRaw = await sbFetch(`subscriptions?user_id=eq.${userId}&select=*`);
@@ -2022,6 +2005,34 @@ function getCurrentDeviceDetails() {
     icon: icon
   };
 }
+
+    // --- AUTOMATIC DEVICE SYNC ---
+    async function syncCurrentDevice(cloudDevices) {
+      let currentDeviceId = localStorage.getItem('current_device_id');
+      let activeDevices = Array.isArray(cloudDevices) ? cloudDevices : [];
+      let needsSave = false;
+
+      // Check if we have no local ID, OR if our local ID is missing from the cloud array
+      if (!currentDeviceId || !activeDevices.some(d => d.id === currentDeviceId)) {
+        const newDevice = getCurrentDeviceDetails();
+        
+        // If we had a local ID but it was missing from cloud, keep the same ID
+        if (currentDeviceId) {
+            newDevice.id = currentDeviceId;
+        } else {
+            currentDeviceId = newDevice.id;
+            localStorage.setItem('current_device_id', currentDeviceId);
+        }
+        
+        activeDevices.push(newDevice);
+        needsSave = true;
+      }
+
+      // Automatically push to Supabase if this device wasn't tracked
+      if (needsSave) {
+        await saveSettingToDB('active_devices', activeDevices);
+      }
+    }
     
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
