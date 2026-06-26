@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Offline | Sakkhi</title>
+  
+  <link rel="icon" type="image/png" href="sakkhi 300px.png">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  
+  <style>
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #050505; 
+    }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center antialiased">
+
+  <div class="flex flex-col items-center text-center px-4 w-full max-w-md">
+    
+    <img src="SAKKHIheader.png" alt="Sakkhi Logo" class="h-8 md:h-10 w-auto object-contain mb-10 opacity-90" />
+    
+    <div class="inline-flex items-center gap-2 px-3 py-1 rounded-md bg-neutral-900 border border-neutral-800 text-neutral-400 text-xs font-semibold tracking-widest mb-5">
+      <i class="ti ti-wifi-off text-[#c9a96e]"></i> Connection Lost
+    </div>
+    
+    <h1 class="text-2xl md:text-3xl font-bold text-white tracking-tight mb-3">You're Offline</h1>
+    <p class="text-sm text-neutral-500 font-medium leading-relaxed mb-2">
+      It looks like you've lost your internet connection. Sakkhi needs an active network to sync your shoots and payments.
+    </p>
+    
+    <p class="text-xs text-neutral-600 flex items-center justify-center gap-1.5 mb-8">
+      <i class="ti ti-alert-triangle"></i> Please check your Wi-Fi or mobile data
+    </p>
+
+    <div class="flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
+      <button onclick="location.reload()" class="w-full sm:w-auto bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-sm px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+        <i class="ti ti-refresh text-lg"></i> Try Again
+      </button>
+      <a href="/" class="w-full sm:w-auto bg-neutral-900 border border-neutral-800 hover:bg-neutral-800 text-white font-semibold text-sm px-6 py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2">
+        <i class="ti ti-home text-lg"></i> Return Home
+      </a>
+    </div>
+
+    <div class="mt-12 text-[10px] text-neutral-700 font-medium tracking-widest uppercase">
+      Sakkhi v7.9 &copy; 2026
+    </div>
+
+  </div>
+
+  <script>
+    // Auto-check connection every 5 seconds
+    setInterval(() => {
+      fetch('/ping', { method: 'HEAD', cache: 'no-store' })
+        .then(() => {
+          // Connection restored, reload the page
+          location.reload();
+        })
+        .catch(() => {
+          // Still offline, fail silently and wait for next ping
+        });
+    }, 5000);
+  </script>
+</body>
+</html>
