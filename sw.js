@@ -1,5 +1,5 @@
 // Bump this version number if you ever make major updates to force a cache refresh
-const CACHE_NAME = 'sakkhi-app-v7.6'; 
+const CACHE_NAME = 'sakkhi-app-v7.7'; 
 
 const URLS_TO_CACHE = [
   '/',
