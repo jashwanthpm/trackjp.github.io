@@ -1,7 +1,7 @@
 // GITHUB PAGES OPTIMIZED SERVICE WORKER
 // GitHub Pages has some network restrictions, this version handles that
 
-const CACHE_NAME = 'sakkhi-github-v1.0';
+const CACHE_NAME = 'sakkhi-v9';
 
 const URLS_TO_CACHE = [
   '/',
