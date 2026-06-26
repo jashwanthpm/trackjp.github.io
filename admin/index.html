@@ -3,78 +3,139 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sakkhi | Admin Command Center</title>
-
+  <title>Sakkhi | Executive Command Center</title>
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; }
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030303; color: #e8e8e8; }
     .brand-serif { font-family: 'Cinzel', serif; }
-    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
+    
+    /* Subtle pulsing dot for live status */
+    .pulse-dot {
+      box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7);
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7); }
+      70% { box-shadow: 0 0 0 6px rgba(201, 169, 110, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0); }
+    }
   </style>
 </head>
-<body class="min-h-screen pb-10">
+<body class="min-h-screen pb-10 selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <div id="access-denied" class="fixed inset-0 z-50 bg-[#050505] flex flex-col items-center justify-center p-4">
-    <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mb-4"><i class="ti ti-shield-lock"></i></div>
-    <h1 class="text-xl font-bold text-white mb-2">Admin Access Required</h1>
-    <p class="text-sm text-neutral-500 text-center max-w-xs mb-6">You must be logged in as the master administrator to view this page.</p>
-    <button onclick="window.location.href='/'" class="px-6 py-2.5 bg-neutral-900 border border-neutral-800 text-white rounded-lg text-sm font-semibold hover:bg-neutral-800 transition">Return to Main App</button>
+  <!-- Access Denied Screen -->
+  <div id="access-denied" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
+    <div class="w-20 h-20 bg-red-950/20 border border-red-900/30 rounded-2xl flex items-center justify-center text-red-500 text-4xl mb-6 shadow-[0_0_30px_rgba(220,38,38,0.1)]"><i class="ti ti-shield-lock"></i></div>
+    <h1 class="text-2xl font-bold text-white mb-2 tracking-tight">Restricted Area</h1>
+    <p class="text-sm text-neutral-500 text-center max-w-sm mb-8 leading-relaxed">This terminal requires master administrator privileges. Please authenticate with a verified executive account.</p>
+    <button onclick="window.location.href='/'" class="px-8 py-3 bg-neutral-900 border border-neutral-800 text-white rounded-xl text-sm font-bold hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg">Return to Ledger</button>
   </div>
 
+  <!-- Main Admin Dashboard -->
   <div id="admin-dashboard" class="hidden">
-    <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-6 h-16 flex items-center justify-between">
-      <div class="flex items-center gap-3">
-        <h1 class="text-xl font-bold text-[#c9a96e] brand-serif tracking-widest">SAKKHI</h1>
-        <span class="px-2 py-0.5 rounded text-[9px] font-bold bg-red-950 text-red-400 border border-red-900 uppercase tracking-widest">Admin</span>
+    
+    <!-- Premium Header -->
+    <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#050505]/80 border-b border-neutral-900/80 px-6 h-16 flex items-center justify-between shadow-sm">
+      <div class="flex items-center gap-4">
+        <h1 class="text-xl font-bold text-white brand-serif tracking-widest flex items-center gap-2">
+          SAKKHI <span class="text-[#c9a96e]">.</span>
+        </h1>
+        <div class="h-4 w-[1px] bg-neutral-800"></div>
+        <div class="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#c9a96e]/10 border border-[#c9a96e]/20">
+          <div class="w-1.5 h-1.5 rounded-full bg-[#c9a96e] pulse-dot"></div>
+          <span class="text-[9px] font-bold text-[#c9a96e] uppercase tracking-widest">Live System</span>
+        </div>
       </div>
-      <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5"><i class="ti ti-arrow-left"></i> Exit Admin</button>
+      <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
+        <i class="ti ti-logout text-sm"></i> Exit Terminal
+      </button>
     </header>
 
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 py-8 space-y-6">
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
       
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-4" id="admin-stats">
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-          <div class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Total Users</div>
-          <div class="text-3xl font-bold text-white" id="stat-users">0</div>
+      <!-- Top Stats Row -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-5" id="admin-stats">
+        
+        <!-- Stat Card 1 -->
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-50"></div>
+          <i class="ti ti-users absolute -right-4 -bottom-4 text-8xl text-white opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500"></i>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-users text-blue-400 text-sm"></i> Total Registered Users
+            </div>
+            <div class="text-4xl font-bold text-white tabular-nums tracking-tight" id="stat-users">0</div>
+          </div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-          <div class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Total Shoots Logged</div>
-          <div class="text-3xl font-bold text-[#c9a96e]" id="stat-shoots">0</div>
+
+        <!-- Stat Card 2 -->
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c9a96e] to-yellow-600 opacity-50"></div>
+          <i class="ti ti-camera absolute -right-4 -bottom-4 text-8xl text-white opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500"></i>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-camera text-[#c9a96e] text-sm"></i> Total Shoots Logged
+            </div>
+            <div class="text-4xl font-bold text-white tabular-nums tracking-tight" id="stat-shoots">0</div>
+          </div>
         </div>
-        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5">
-          <div class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Platform Revenue</div>
-          <div class="text-3xl font-bold text-emerald-400" id="stat-revenue">₹0</div>
+
+        <!-- Stat Card 3 -->
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-50"></div>
+          <i class="ti ti-cash absolute -right-4 -bottom-4 text-8xl text-white opacity-[0.02] group-hover:opacity-[0.04] transition-opacity duration-500"></i>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-chart-bar text-emerald-400 text-sm"></i> Combined Platform GMV
+            </div>
+            <div class="text-4xl font-bold text-emerald-400 tabular-nums tracking-tight" id="stat-revenue">₹0</div>
+          </div>
         </div>
       </div>
 
-      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl overflow-hidden">
-        <div class="p-5 border-b border-neutral-900 flex items-center justify-between">
-          <h2 class="text-lg font-bold text-white"><i class="ti ti-users text-[#c9a96e] mr-2"></i>User Database</h2>
-          <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-1.5">
-            <i class="ti ti-search text-neutral-500 text-sm"></i>
-            <input type="text" id="admin-search" placeholder="Search users..." class="bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600 w-48" onkeyup="filterTable()">
+      <!-- Data Table Section -->
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl shadow-xl overflow-hidden flex flex-col">
+        
+        <!-- Table Toolbar -->
+        <div class="p-5 border-b border-neutral-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0a0a0a]">
+          <div>
+            <h2 class="text-lg font-bold text-white tracking-wide">Client Database</h2>
+            <p class="text-xs text-neutral-500 mt-0.5">Manage and view all registered photographer accounts.</p>
+          </div>
+          <div class="flex items-center gap-2 bg-[#050505] border border-neutral-800 focus-within:border-[#c9a96e]/50 transition-colors rounded-xl px-3 py-2 w-full sm:w-64 shadow-inner">
+            <i class="ti ti-search text-neutral-500 text-base"></i>
+            <input type="text" id="admin-search" placeholder="Search accounts..." class="bg-transparent text-sm font-medium border-none outline-none text-white placeholder-neutral-600 w-full" onkeyup="filterTable()">
           </div>
         </div>
         
+        <!-- The Table -->
         <div class="overflow-x-auto">
           <table class="w-full text-left border-collapse whitespace-nowrap">
-            <thead>
-              <tr class="bg-neutral-950 border-b border-neutral-900 text-[10px] uppercase tracking-wider text-neutral-500">
-                <th class="p-4 font-bold">User Details</th>
-                <th class="p-4 font-bold">Business Info</th>
-                <th class="p-4 font-bold">Subscription</th>
-                <th class="p-4 font-bold text-right">Shoots</th>
-                <th class="p-4 font-bold text-right">Total Value</th>
-                <th class="p-4 font-bold text-right">Last Active</th>
+            <thead class="bg-[#050505]/50 sticky top-0 z-10 backdrop-blur-md">
+              <tr class="border-b border-neutral-800/80 text-[10px] uppercase tracking-widest text-neutral-500">
+                <th class="px-6 py-4 font-bold">User Identity</th>
+                <th class="px-6 py-4 font-bold">Studio Details</th>
+                <th class="px-6 py-4 font-bold">Subscription</th>
+                <th class="px-6 py-4 font-bold text-right">Shoots</th>
+                <th class="px-6 py-4 font-bold text-right">Processed Value</th>
+                <th class="px-6 py-4 font-bold text-right">Last Sync</th>
               </tr>
             </thead>
-            <tbody id="user-table-body" class="divide-y divide-neutral-900 text-sm">
-              <tr><td colspan="6" class="p-8 text-center text-neutral-500"><i class="ti ti-loader animate-spin text-xl"></i> Loading data...</td></tr>
+            <tbody id="user-table-body" class="divide-y divide-neutral-800/50 text-sm bg-[#0a0a0a]">
+              <tr>
+                <td colspan="6" class="p-12 text-center text-neutral-500">
+                  <i class="ti ti-loader animate-spin text-3xl mb-3 text-[#c9a96e]"></i>
+                  <p class="font-medium tracking-wide">Encrypting connection & fetching data...</p>
+                </td>
+              </tr>
             </tbody>
           </table>
         </div>
@@ -102,18 +163,18 @@
       if (user.email === MASTER_ADMIN_EMAIL) {
         document.getElementById('access-denied').style.display = 'none';
         document.getElementById('admin-dashboard').classList.remove('hidden');
-        fetchAdminData(user.token);
+        fetchAdminData();
       }
     });
 
     // --- DATA FETCHING ---
-    async function fetchAdminData(token) {
+    async function fetchAdminData() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_overview?select=*`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_overview?select=*&order=total_platform_revenue.desc`, {
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}` // Using Anon key since we granted public read access
+            'Authorization': `Bearer ${SUPABASE_KEY}` 
           }
         });
         
@@ -123,53 +184,101 @@
         renderDashboard();
       } catch (error) {
         console.error(error);
-        document.getElementById('user-table-body').innerHTML = `<tr><td colspan="6" class="p-8 text-center text-red-400">Error loading data. Check console.</td></tr>`;
+        document.getElementById('user-table-body').innerHTML = `
+          <tr>
+            <td colspan="6" class="p-12 text-center text-red-400">
+              <i class="ti ti-alert-triangle text-3xl mb-2"></i>
+              <p class="font-bold">Database Connection Failed</p>
+              <p class="text-xs text-red-500/70 mt-1">Please ensure your SQL View and Permissions are configured correctly.</p>
+            </td>
+          </tr>`;
       }
     }
 
     // --- RENDER LOGIC ---
     function renderDashboard() {
-      // Calculate Totals
       const totalUsers = allUsers.length;
       const totalShoots = allUsers.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
       const totalRev = allUsers.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
       
-      document.getElementById('stat-users').innerText = totalUsers;
-      document.getElementById('stat-shoots').innerText = totalShoots;
+      document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
+      document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
       document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
 
       renderTable(allUsers);
+    }
+
+    // Generate Initials for Avatar
+    function getInitials(name, email) {
+      if (name && name.trim().length > 0) {
+        const parts = name.trim().split(' ');
+        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+      }
+      return email ? email.substring(0, 2).toUpperCase() : '??';
     }
 
     function renderTable(data) {
       const tbody = document.getElementById('user-table-body');
       
       if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-8 text-center text-neutral-500">No users found on the platform.</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-neutral-500 font-medium">No records matching your search.</td></tr>`;
         return;
       }
 
       tbody.innerHTML = data.map(u => {
-        const planBadge = u.is_plan_active === 'Yes' 
-          ? `<span class="px-2 py-1 rounded text-[10px] font-bold bg-emerald-950/40 text-emerald-400 border border-emerald-900 uppercase">${u.plan_type}</span>`
-          : `<span class="px-2 py-1 rounded text-[10px] font-bold bg-red-950/40 text-red-400 border border-red-900 uppercase">Expired / Free</span>`;
+        // Plan Badge Styling
+        const isPremium = u.is_plan_active === 'Yes' && u.plan_type !== 'free';
+        const planColor = isPremium 
+          ? 'bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30' 
+          : 'bg-neutral-900/50 text-neutral-400 border-neutral-800';
+        
+        const planText = isPremium ? `${u.plan_type} PLAN` : 'FREE / EXPIRED';
+
+        // Formatting
+        const lastActiveDate = u.last_active_shoot 
+          ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
+          : '<span class="text-neutral-600 italic">Never</span>';
           
-        const lastActiveDate = u.last_active_shoot ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) : 'Never';
+        const initials = getInitials(u.full_name, u.email);
 
         return `
-          <tr class="hover:bg-neutral-900/50 transition">
-            <td class="p-4">
-              <div class="font-bold text-white">${u.full_name || 'No Name Setup'}</div>
-              <div class="text-xs text-neutral-500 mt-0.5">${u.email}</div>
+          <tr class="hover:bg-[#121212] transition-colors duration-200 group">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="font-bold text-white">${u.full_name || 'Unconfigured Profile'}</div>
+                  <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                    <i class="ti ti-mail text-[10px]"></i> ${u.email}
+                  </div>
+                </div>
+              </div>
             </td>
-            <td class="p-4">
-              <div class="font-semibold text-neutral-300">${u.business_name || '—'}</div>
-              <div class="text-xs text-neutral-500 mt-0.5">${u.phone_number || '—'}</div>
+            <td class="px-6 py-4">
+              <div class="font-semibold text-neutral-300 flex items-center gap-1.5">
+                 ${u.business_name || '<span class="text-neutral-600 italic">No Studio Name</span>'}
+              </div>
+              <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                <i class="ti ti-phone text-[10px]"></i> ${u.phone_number || 'No Phone Added'}
+              </div>
             </td>
-            <td class="p-4">${planBadge}</td>
-            <td class="p-4 text-right font-medium text-neutral-300">${u.total_shoots_logged}</td>
-            <td class="p-4 text-right font-bold text-[#c9a96e]">₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}</td>
-            <td class="p-4 text-right text-xs text-neutral-500">${lastActiveDate}</td>
+            <td class="px-6 py-4">
+              <span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest ${planColor}">
+                ${planText}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right font-medium text-neutral-300 tabular-nums">
+              ${Number(u.total_shoots_logged).toLocaleString()}
+            </td>
+            <td class="px-6 py-4 text-right font-bold text-[#c9a96e] tabular-nums">
+              ₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}
+            </td>
+            <td class="px-6 py-4 text-right text-xs text-neutral-500 tabular-nums">
+              ${lastActiveDate}
+            </td>
           </tr>
         `;
       }).join('');
