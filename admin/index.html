@@ -184,8 +184,11 @@
           <i class="ti ti-copy"></i> Copy UUID
         </button>
         <a id="drawer-mailto" href="#" class="flex-1 py-2.5 bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/30 text-[#c9a96e] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-          <i class="ti ti-mail-forward"></i> Email User
+          <i class="ti ti-mail-forward"></i> Email
         </a>
+        <button id="delete-user-btn" class="flex-1 py-2.5 bg-red-950/20 hover:bg-red-900/40 border border-red-900/30 text-red-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-trash"></i> Delete
+        </button>
       </div>
     </div>
   </div>
@@ -618,7 +621,11 @@ function renderTable(data) {
       
       document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
       document.getElementById('drawer-expiry').innerHTML = expiryText;
-
+      
+// Attach current user data to the delete button
+      const safeUserName = (user.full_name || 'this user').replace(/'/g, "\\'");
+      document.getElementById('delete-user-btn').setAttribute('onclick', `deleteUser('${user.user_id}', '${safeUserName}')`);
+      
       // 5. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
       setTimeout(() => {
@@ -649,6 +656,48 @@ function renderTable(data) {
       });
     }
 
+// --- DELETE USER LOGIC ---
+    async function deleteUser(userId, userName) {
+      // 1. Double confirmation to prevent accidental clicks
+      const isConfirmed = confirm(`CRITICAL WARNING:\n\nAre you absolutely sure you want to PERMANENTLY delete the account for ${userName}?\n\nThis action cannot be undone.`);
+      
+      if (!isConfirmed) return;
+
+      const btn = document.getElementById('delete-user-btn');
+      const originalHTML = btn.innerHTML;
+      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Deleting...';
+
+      try {
+        // IMPORTANT: Change 'users' to the actual name of your base table if it is different.
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/users?user_id=eq.${userId}`, {
+          method: 'DELETE',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}`,
+            'Prefer': 'return=minimal'
+          }
+        });
+
+        if (!res.ok) {
+          const errorData = await res.json();
+          throw new Error(errorData.message || 'Failed to delete user record.');
+        }
+
+        // Close drawer and refresh the dashboard data
+        closeUserDrawer();
+        await fetchAdminData();
+        
+        // Optional success notification
+        setTimeout(() => alert(`${userName} has been successfully deleted.`), 300);
+
+      } catch (error) {
+        console.error(error);
+        alert('Error deleting user: ' + error.message);
+        btn.innerHTML = originalHTML;
+      }
+    }
+    
     // --- SEARCH, FILTER & SORT LOGIC ---
     function sortTable(column) {
       // If clicking the same column, toggle direction. Otherwise, default to High-to-Low.
