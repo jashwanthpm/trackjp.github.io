@@ -77,7 +77,7 @@
   <!-- User Details Drawer -->
   <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-md bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
     <!-- Drawer Header -->
-    <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505] relative overflow-hidden">
+    <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505] relative overflow-hidden shrink-0">
       <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
       <div class="flex items-center gap-3">
         <div id="drawer-initials" class="w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/30 flex items-center justify-center text-sm font-bold text-[#c9a96e]">
@@ -96,21 +96,32 @@
     <!-- Drawer Content -->
     <div class="p-6 flex-1 overflow-y-auto space-y-6">
       
-      <!-- Quick Stats -->
-      <div class="grid grid-cols-2 gap-4">
-        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
-          <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Total Shoots</p>
-          <p id="drawer-shoots" class="text-xl font-bold text-white tabular-nums">0</p>
-        </div>
-        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
-          <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
-          <p id="drawer-revenue" class="text-xl font-bold text-[#c9a96e] tabular-nums">₹0</p>
+      <!-- A to Z Performance Stats -->
+      <div>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-chart-pie text-neutral-400"></i> Performance Metrics</h4>
+        <div class="grid grid-cols-2 gap-3">
+          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Total Shoots</p>
+            <p id="drawer-shoots" class="text-lg font-bold text-white tabular-nums">0</p>
+          </div>
+          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
+            <p id="drawer-revenue" class="text-lg font-bold text-[#c9a96e] tabular-nums">₹0</p>
+          </div>
+          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Avg. Shoot Value</p>
+            <p id="drawer-avg-value" class="text-lg font-bold text-emerald-400 tabular-nums">₹0</p>
+          </div>
+          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Total Clients</p>
+            <p id="drawer-clients" class="text-lg font-bold text-blue-400 tabular-nums">0</p>
+          </div>
         </div>
       </div>
 
-      <!-- NEW: Financial Overview -->
+      <!-- Financial Overview -->
       <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-receipt text-neutral-400"></i> Financial Overview</h4>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-receipt text-neutral-400"></i> Financial Ledger</h4>
         <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-3">
           <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-neutral-400">Pending Payments Due</span>
@@ -123,58 +134,51 @@
         </div>
       </div>
 
-      <!-- NEW: Business Network -->
+      <!-- Contact & Network -->
       <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-building text-neutral-400"></i> Business Network</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4">
-          <div class="flex flex-col gap-1.5">
-            <span class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Primary Clients / Companies</span>
-            <span id="drawer-companies" class="text-xs font-medium text-neutral-300 leading-relaxed">No client data synced</span>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-address-book text-neutral-400"></i> Identity & Network</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 divide-y divide-neutral-800/80">
+          <div class="p-3.5 flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-mail text-sm"></i></div>
+            <div class="flex-1 overflow-hidden">
+              <p class="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Email</p>
+              <p id="drawer-email" class="text-xs font-medium text-neutral-300 truncate select-all">--</p>
+            </div>
+          </div>
+          <div class="p-3.5 flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-phone text-sm"></i></div>
+            <div class="flex-1">
+              <p class="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">Phone</p>
+              <p id="drawer-phone" class="text-xs font-medium text-neutral-300 select-all">--</p>
+            </div>
+          </div>
+          <div class="p-3.5 flex items-center gap-3">
+            <div class="w-7 h-7 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-map-pin text-sm"></i></div>
+            <div class="flex-1">
+              <p class="text-[9px] text-neutral-500 uppercase font-bold tracking-wider">City / Location</p>
+              <p id="drawer-city" class="text-xs font-medium text-neutral-300">--</p>
+            </div>
+          </div>
+          <div class="p-3.5">
+            <p class="text-[9px] text-neutral-500 uppercase font-bold tracking-wider mb-1">Top Clients / Companies</p>
+            <p id="drawer-companies" class="text-xs font-medium text-neutral-300 leading-relaxed">No client data synced</p>
           </div>
         </div>
       </div>
 
-      <!-- System Identity -->
+      <!-- System Status -->
       <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-id-badge text-neutral-400"></i> System Identity</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-3">
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-server text-neutral-400"></i> System Status</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-4">
           <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-neutral-400">Master UUID</span>
-            <span id="drawer-user-id" class="text-[10px] font-mono text-neutral-500 bg-neutral-900 px-2 py-1 rounded truncate max-w-[150px]" title="User ID">--</span>
+            <span id="drawer-user-id" class="text-[10px] font-mono text-neutral-500 bg-neutral-900 px-2 py-1 rounded truncate max-w-[120px]" title="User ID">--</span>
           </div>
           <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-neutral-400">Account Created</span>
             <span id="drawer-joined" class="text-xs font-semibold text-neutral-300">--</span>
           </div>
-        </div>
-      </div>
-
-      <!-- Contact Details -->
-      <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-address-book text-neutral-400"></i> Contact Profile</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 divide-y divide-neutral-800/80">
-          <div class="p-4 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-mail"></i></div>
-            <div class="flex-1 overflow-hidden">
-              <p class="text-[10px] text-neutral-500">Email Address</p>
-              <p id="drawer-email" class="text-xs font-medium text-neutral-300 truncate select-all">--</p>
-            </div>
-          </div>
-          <div class="p-4 flex items-center gap-3">
-            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-phone"></i></div>
-            <div>
-              <p class="text-[10px] text-neutral-500">Phone Number</p>
-              <p id="drawer-phone" class="text-xs font-medium text-neutral-300 select-all">--</p>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Account Status -->
-      <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-shield-check text-neutral-400"></i> Subscription Lifecycle</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-4">
-          <div class="flex justify-between items-center">
+          <div class="flex justify-between items-center pt-3 border-t border-neutral-800/80">
             <span class="text-xs font-medium text-neutral-400">Active Tier</span>
             <span id="drawer-plan-badge">--</span>
           </div>
@@ -182,7 +186,7 @@
             <span class="text-xs font-medium text-neutral-400">Expiration Date</span>
             <span id="drawer-expiry" class="text-xs font-semibold text-neutral-300">--</span>
           </div>
-          <div class="flex justify-between items-center pt-3 border-t border-neutral-800/80">
+          <div class="flex justify-between items-center">
             <span class="text-xs font-medium text-neutral-400">Last Database Sync</span>
             <span id="drawer-last-sync" class="text-xs font-semibold text-neutral-300">--</span>
           </div>
@@ -198,7 +202,6 @@
           <i class="ti ti-mail-forward"></i> Email User
         </a>
       </div>
-
     </div>
   </div>
 
@@ -506,31 +509,40 @@
       const user = allUsers.find(u => u.user_id === userId);
       if (!user) return;
 
-      // 1. Header & Identity
+      // 1. Header Details
       document.getElementById('drawer-initials').innerText = getInitials(user.full_name, user.email);
       document.getElementById('drawer-name').innerText = user.full_name || 'Unconfigured Profile';
       document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
+      
+      // 2. Performance Metrics
+      const shoots = Number(user.total_shoots_logged || 0);
+      const revenue = Number(user.total_platform_revenue || 0);
+      const avgValue = shoots > 0 ? (revenue / shoots) : 0;
+      
+      document.getElementById('drawer-shoots').innerText = shoots.toLocaleString();
+      document.getElementById('drawer-revenue').innerText = '₹' + revenue.toLocaleString('en-IN');
+      document.getElementById('drawer-avg-value').innerText = '₹' + Math.round(avgValue).toLocaleString('en-IN');
+      document.getElementById('drawer-clients').innerText = Number(user.total_clients || 0).toLocaleString();
+
+      // 3. Financial Ledger (Requires backend update to populate properly)
+      document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
+
+      // 4. Contact & Network
+      document.getElementById('drawer-email').innerText = user.email || 'N/A';
+      document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
+      document.getElementById('drawer-city').innerText = user.city || user.location || 'Unknown Location';
+      document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
+      document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
+
+      // 5. System Status
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
       const joinedDate = user.created_at 
           ? new Date(user.created_at).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
-          : 'Unknown';
+          : 'Unknown (Check DB Sync)';
       document.getElementById('drawer-joined').innerText = joinedDate;
 
-      // 2. Base Stats & Contact
-      document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
-      document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
-      document.getElementById('drawer-email').innerText = user.email || 'N/A';
-      document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
-      document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
-
-      // 3. NEW: Deep Dive Financials & Network
-      // Note: If these columns don't exist in your Supabase view yet, they will gracefully fallback to 0 / 'No client data synced'
-      document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
-      document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
-      document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
-
-      // 4. Subscription & Sync
       const lastActiveDate = user.last_active_shoot 
           ? new Date(user.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
           : '<span class="text-neutral-600 italic">Never synced</span>';
@@ -568,12 +580,19 @@
       document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
       document.getElementById('drawer-expiry').innerHTML = expiryText;
 
-      // 5. Open Animation
+      // 6. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
+
+    window.closeUserDrawer = function() {
+      document.getElementById('user-drawer').classList.add('translate-x-full');
+      setTimeout(() => {
+        document.getElementById('drawer-overlay').classList.add('hidden');
+      }, 300); 
+    };
 
     // Explicitly defining the close function globally so it fires correctly
     window.closeUserDrawer = function() {
