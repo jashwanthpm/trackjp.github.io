@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>x
+<head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sakkhi | Executive Command Center</title>
   
   <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
-<!-- Replace your existing Tailwind script tag with this one -->
-<script src="https://cdn.tailwindcss.com"></script>
+  <!-- Replace your existing Tailwind script tag with this one -->
+  <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   
@@ -53,10 +53,10 @@
         <div>
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Plan Tier</label>
           <select id="edit-plan-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
-    <option value="free">Free</option>
-    <option value="monthly">Monthly</option>
-    <option value="yearly">Yearly</option>
-</select>
+            <option value="free">Free</option>
+            <option value="monthly">Monthly</option>
+            <option value="yearly">Yearly</option>
+          </select>
         </div>
         <div>
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Expiration Date</label>
@@ -67,6 +67,79 @@
       <div class="flex gap-3 mt-8">
         <button onclick="closePlanModal()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:bg-neutral-900 hover:text-white transition">Cancel</button>
         <button onclick="saveUserPlan()" id="save-plan-btn" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-1">Update Plan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- User Details Drawer Overlay -->
+  <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity"></div>
+
+  <!-- User Details Drawer -->
+  <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-md bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    <!-- Drawer Header -->
+    <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505]">
+      <div class="flex items-center gap-3">
+        <div id="drawer-initials" class="w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/30 flex items-center justify-center text-sm font-bold text-[#c9a96e]">
+          --
+        </div>
+        <div>
+          <h3 id="drawer-name" class="text-base font-bold text-white tracking-wide">Loading...</h3>
+          <p id="drawer-studio" class="text-xs text-neutral-500">Loading...</p>
+        </div>
+      </div>
+      <button onclick="closeUserDrawer()" class="text-neutral-500 hover:text-white transition-colors p-2 bg-neutral-900 rounded-full">
+        <i class="ti ti-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Drawer Content -->
+    <div class="p-6 flex-1 overflow-y-auto space-y-6">
+      <!-- Quick Stats -->
+      <div class="grid grid-cols-2 gap-4">
+        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80">
+          <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Total Shoots</p>
+          <p id="drawer-shoots" class="text-xl font-bold text-white tabular-nums">0</p>
+        </div>
+        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80">
+          <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
+          <p id="drawer-revenue" class="text-xl font-bold text-[#c9a96e] tabular-nums">₹0</p>
+        </div>
+      </div>
+
+      <!-- Contact Details -->
+      <div>
+        <h4 class="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-3">Contact Information</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 divide-y divide-neutral-800/80">
+          <div class="p-4 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-mail"></i></div>
+            <div>
+              <p class="text-[10px] text-neutral-500">Email Address</p>
+              <p id="drawer-email" class="text-sm font-medium text-neutral-300 select-all">--</p>
+            </div>
+          </div>
+          <div class="p-4 flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-phone"></i></div>
+            <div>
+              <p class="text-[10px] text-neutral-500">Phone Number</p>
+              <p id="drawer-phone" class="text-sm font-medium text-neutral-300 select-all">--</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Account Status -->
+      <div>
+        <h4 class="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-3">Account Status</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4">
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm text-neutral-400">Current Plan</span>
+            <span id="drawer-plan-badge">--</span>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <span class="text-sm text-neutral-400">Last Active Sync</span>
+            <span id="drawer-last-sync" class="text-sm font-medium text-neutral-300">--</span>
+          </div>
+        </div>
       </div>
     </div>
   </div>
@@ -133,14 +206,27 @@
       <!-- Data Table Section -->
       <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl shadow-xl overflow-hidden flex flex-col">
         
-        <div class="p-5 border-b border-neutral-800/80 flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-[#0a0a0a]">
+        <!-- Data Controls Header -->
+        <div class="p-5 border-b border-neutral-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0a0a0a]">
           <div>
             <h2 class="text-lg font-bold text-white tracking-wide">Client Database</h2>
             <p class="text-xs text-neutral-500 mt-0.5">Manage and view all registered photographer accounts.</p>
           </div>
-          <div class="flex items-center gap-2 bg-[#050505] border border-neutral-800 focus-within:border-[#c9a96e]/50 transition-colors rounded-xl px-3 py-2 w-full sm:w-64 shadow-inner">
-            <i class="ti ti-search text-neutral-500 text-base"></i>
-            <input type="text" id="admin-search" placeholder="Search accounts..." class="bg-transparent text-sm font-medium border-none outline-none text-white placeholder-neutral-600 w-full" onkeyup="filterTable()">
+          
+          <div class="flex flex-col sm:flex-row items-center gap-3">
+            <!-- Plan Filter -->
+            <select id="plan-filter" onchange="filterTable()" class="bg-[#050505] border border-neutral-800 rounded-xl px-3 py-2.5 text-sm text-neutral-300 outline-none focus:border-[#c9a96e]/50 transition-colors w-full sm:w-auto cursor-pointer">
+              <option value="all">All Plans</option>
+              <option value="free">Free Tier</option>
+              <option value="monthly">Monthly</option>
+              <option value="yearly">Yearly</option>
+            </select>
+
+            <!-- Search Bar -->
+            <div class="flex items-center gap-2 bg-[#050505] border border-neutral-800 focus-within:border-[#c9a96e]/50 transition-colors rounded-xl px-3 py-2 w-full sm:w-64 shadow-inner">
+              <i class="ti ti-search text-neutral-500 text-base"></i>
+              <input type="text" id="admin-search" placeholder="Search accounts..." class="bg-transparent text-sm font-medium border-none outline-none text-white placeholder-neutral-600 w-full" onkeyup="filterTable()">
+            </div>
           </div>
         </div>
         
@@ -311,7 +397,7 @@
         const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
 
         return `
-          <tr class="hover:bg-[#121212] transition-colors duration-200 group">
+          <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
             <td class="px-6 py-4">
               <div class="flex items-center gap-3">
                 <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
@@ -338,7 +424,7 @@
                 ${planBadge}
                 ${daysText}
                 ${dateText}
-                <button onclick="openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition">
+                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
                   <i class="ti ti-pencil"></i> Modify Plan
                 </button>
               </div>
@@ -357,14 +443,62 @@
       }).join('');
     }
 
-    // --- SEARCH LOGIC ---
+    // --- USER DRAWER LOGIC ---
+    function openUserDrawer(userId) {
+      const user = allUsers.find(u => u.user_id === userId);
+      if (!user) return;
+
+      // Populate Data
+      document.getElementById('drawer-initials').innerText = getInitials(user.full_name, user.email);
+      document.getElementById('drawer-name').innerText = user.full_name || 'Unconfigured Profile';
+      document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
+      document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
+      document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-email').innerText = user.email || 'N/A';
+      document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
+      
+      const lastActiveDate = user.last_active_shoot 
+          ? new Date(user.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
+          : 'Never synced';
+      document.getElementById('drawer-last-sync').innerText = lastActiveDate;
+
+      const planType = (user.plan_type || 'free').toUpperCase();
+      document.getElementById('drawer-plan-badge').innerHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType}</span>`;
+
+      // Show Drawer
+      document.getElementById('drawer-overlay').classList.remove('hidden');
+      // Small timeout ensures the transition triggers properly
+      setTimeout(() => {
+        document.getElementById('user-drawer').classList.remove('translate-x-full');
+      }, 10);
+    }
+
+    function closeUserDrawer() {
+      document.getElementById('user-drawer').classList.add('translate-x-full');
+      setTimeout(() => {
+        document.getElementById('drawer-overlay').classList.add('hidden');
+      }, 300); // Wait for sliding animation to finish
+    }
+
+    // --- SEARCH AND FILTER LOGIC ---
     function filterTable() {
       const query = document.getElementById('admin-search').value.toLowerCase();
-      const filtered = allUsers.filter(u => 
-        (u.email || '').toLowerCase().includes(query) || 
-        (u.full_name || '').toLowerCase().includes(query) ||
-        (u.business_name || '').toLowerCase().includes(query)
-      );
+      const planFilter = document.getElementById('plan-filter').value.toLowerCase();
+
+      const filtered = allUsers.filter(u => {
+        const matchesSearch = (u.email || '').toLowerCase().includes(query) || 
+                              (u.full_name || '').toLowerCase().includes(query) ||
+                              (u.business_name || '').toLowerCase().includes(query);
+        
+        let matchesPlan = true;
+        if (planFilter !== 'all') {
+          const userPlan = u.plan_type ? u.plan_type.toLowerCase() : 'free';
+          matchesPlan = userPlan === planFilter;
+        }
+
+        return matchesSearch && matchesPlan;
+      });
+
       renderTable(filtered);
     }
 
