@@ -324,16 +324,24 @@
 
     // --- INITIALIZATION & SECURITY CHECK ---
     document.addEventListener('DOMContentLoaded', () => {
-      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
-      
-      if (!savedUser) return; 
-      
-      const user = JSON.parse(savedUser);
-      
-      if (user.email === MASTER_ADMIN_EMAIL) {
+      let isMasterAdmin = false;
+
+      // Smart Scan: Check all browser storage for your Supabase login session
+      for (let i = 0; i < localStorage.length; i++) {
+        const val = localStorage.getItem(localStorage.key(i));
+        // If your master email is found anywhere in the active session data, unlock it.
+        if (val && val.includes(MASTER_ADMIN_EMAIL)) {
+          isMasterAdmin = true;
+          break;
+        }
+      }
+
+      if (isMasterAdmin) {
         document.getElementById('access-denied').style.display = 'none';
         document.getElementById('admin-dashboard').classList.remove('hidden');
         fetchAdminData();
+      } else {
+        console.warn("Access Denied: No matching master session found.");
       }
     });
 
