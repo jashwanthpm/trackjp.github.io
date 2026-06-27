@@ -430,13 +430,12 @@ function renderDashboard() {
       inactiveUsersCount++; // Free tier
     }
 
-    // 2. Calculate YOUR earnings based on their premium plans
-    if (isPlanActive) {
-      if (planType === 'monthly') {
-        totalPlatformEarnings += MONTHLY_PRICE;
-      } else if (planType === 'yearly') {
-        totalPlatformEarnings += YEARLY_PRICE;
-      }
+    // 2. Calculate YOUR earnings based on their premium plans (ALL-TIME)
+    if (planType === 'monthly') {
+      totalPlatformEarnings += MONTHLY_PRICE;
+    } else if (planType === 'yearly') {
+      totalPlatformEarnings += YEARLY_PRICE;
+    }
     }
   });
   
@@ -467,11 +466,15 @@ function renderDashboard() {
         return;
       }
 
-      tbody.innerHTML = data.map(u => {
-        // --- UPGRADED PLAN BADGE LOGIC ---
+      // --- CALCULATE TABLE TOTALS ---
+      const totalShoots = data.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
+      const totalProcessedValue = data.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
+
+      // Generate the user rows
+      const rowsHTML = data.map(u => {
         let planBadge = '';
         let daysText = '';
-        let dateText = ''; // New variable for the exact calendar date
+        let dateText = '';
         
         if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
           planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
@@ -480,38 +483,29 @@ function renderDashboard() {
         } else {
           const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
           const today = new Date();
-          
-          // Normalize today to midnight for accurate day calculations
           today.setHours(0, 0, 0, 0); 
           const planName = u.plan_type.toUpperCase();
           
           if (expiresDate) {
-            // Format the date nicely (e.g., "24 Jun 2026")
             const formattedDate = expiresDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            
-            // Normalize expiration date to midnight
             expiresDate.setHours(0, 0, 0, 0);
             const diffTime = expiresDate.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
             if (diffDays > 0) {
-              // Active Subscription
               planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
               daysText = `<span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-clock"></i> ${diffDays} days to renew</span>`;
               dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Renews: ${formattedDate}</span>`;
             } else if (diffDays === 0) {
-              // Expires exactly today
               planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-yellow-950/40 text-yellow-500 border-yellow-900/50">${planName} • EXPIRING</span>`;
               daysText = `<span class="text-yellow-500 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-triangle"></i> Renews Today</span>`;
               dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Date: ${formattedDate}</span>`;
             } else {
-              // Expired Subscription
               planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planName} • EXPIRED</span>`;
               daysText = `<span class="text-red-500/80 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-circle"></i> Overdue by ${Math.abs(diffDays)} days</span>`;
               dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
             }
           } else {
-             // Edge case: Paid plan but missing expiration date
              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
              daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
              dateText = '';
@@ -570,6 +564,25 @@ function renderDashboard() {
           </tr>
         `;
       }).join('');
+
+      // --- CREATE THE NEW TOTALS FOOTER ROW ---
+      const totalsRowHTML = `
+        <tr class="bg-[#c9a96e]/5 border-t border-[#c9a96e]/30 font-bold group">
+          <td colspan="3" class="px-6 py-5 text-right text-[10px] uppercase tracking-widest text-[#c9a96e]">
+            <i class="ti ti-calculator mr-1"></i> Aggregate Totals
+          </td>
+          <td class="px-6 py-5 text-right text-white tabular-nums text-base">
+            ${totalShoots.toLocaleString()}
+          </td>
+          <td class="px-6 py-5 text-right text-[#c9a96e] tabular-nums text-base">
+            ₹${totalProcessedValue.toLocaleString('en-IN')}
+          </td>
+          <td class="px-6 py-5"></td>
+        </tr>
+      `;
+
+      // Inject the user rows + the final totals row
+      tbody.innerHTML = rowsHTML + totalsRowHTML;
     }
 
     // --- USER DRAWER LOGIC ---
