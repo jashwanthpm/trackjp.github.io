@@ -72,7 +72,7 @@
   </div>
 
   <!-- User Details Drawer Overlay -->
-  <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity"></div>
+  <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
   <!-- User Details Drawer -->
   <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-md bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
@@ -88,7 +88,7 @@
           <p id="drawer-studio" class="text-xs text-neutral-500">Loading...</p>
         </div>
       </div>
-      <button onclick="closeUserDrawer()" class="text-neutral-500 hover:text-white transition-colors p-2 bg-neutral-900 border border-neutral-800 rounded-full shadow-sm">
+      <button onclick="closeUserDrawer()" class="text-neutral-500 hover:text-white transition-colors p-2 bg-neutral-900 border border-neutral-800 rounded-full shadow-sm relative z-50 cursor-pointer">
         <i class="ti ti-x text-lg"></i>
       </button>
     </div>
@@ -105,6 +105,32 @@
         <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
           <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
           <p id="drawer-revenue" class="text-xl font-bold text-[#c9a96e] tabular-nums">₹0</p>
+        </div>
+      </div>
+
+      <!-- NEW: Financial Overview -->
+      <div>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-receipt text-neutral-400"></i> Financial Overview</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Pending Payments Due</span>
+            <span id="drawer-pending" class="text-xs font-bold text-yellow-500 tabular-nums">₹0</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Total Expenses Logged</span>
+            <span id="drawer-expenses" class="text-xs font-bold text-red-400 tabular-nums">₹0</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- NEW: Business Network -->
+      <div>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-building text-neutral-400"></i> Business Network</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4">
+          <div class="flex flex-col gap-1.5">
+            <span class="text-[10px] font-medium text-neutral-500 uppercase tracking-wide">Primary Clients / Companies</span>
+            <span id="drawer-companies" class="text-xs font-medium text-neutral-300 leading-relaxed">No client data synced</span>
+          </div>
         </div>
       </div>
 
@@ -131,14 +157,14 @@
             <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-mail"></i></div>
             <div class="flex-1 overflow-hidden">
               <p class="text-[10px] text-neutral-500">Email Address</p>
-              <p id="drawer-email" class="text-xs font-medium text-neutral-300 truncate">--</p>
+              <p id="drawer-email" class="text-xs font-medium text-neutral-300 truncate select-all">--</p>
             </div>
           </div>
           <div class="p-4 flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-phone"></i></div>
             <div>
               <p class="text-[10px] text-neutral-500">Phone Number</p>
-              <p id="drawer-phone" class="text-xs font-medium text-neutral-300">--</p>
+              <p id="drawer-phone" class="text-xs font-medium text-neutral-300 select-all">--</p>
             </div>
           </div>
         </div>
@@ -164,7 +190,7 @@
       </div>
       
       <!-- Admin Actions -->
-      <div class="pt-2 flex gap-3">
+      <div class="pt-2 flex gap-3 pb-6">
         <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-copy"></i> Copy UUID
         </button>
@@ -486,22 +512,25 @@
       document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
-      // Assume created_at exists, otherwise fallback
       const joinedDate = user.created_at 
           ? new Date(user.created_at).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
           : 'Unknown';
       document.getElementById('drawer-joined').innerText = joinedDate;
 
-      // 2. Stats & Contact
+      // 2. Base Stats & Contact
       document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
       document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
       document.getElementById('drawer-email').innerText = user.email || 'N/A';
       document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
-      
-      // Setup Mailto button
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
 
-      // 3. Subscription & Sync
+      // 3. NEW: Deep Dive Financials & Network
+      // Note: If these columns don't exist in your Supabase view yet, they will gracefully fallback to 0 / 'No client data synced'
+      document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
+
+      // 4. Subscription & Sync
       const lastActiveDate = user.last_active_shoot 
           ? new Date(user.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
           : '<span class="text-neutral-600 italic">Never synced</span>';
@@ -539,12 +568,20 @@
       document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
       document.getElementById('drawer-expiry').innerHTML = expiryText;
 
-      // Show Drawer
+      // 5. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
+
+    // Explicitly defining the close function globally so it fires correctly
+    window.closeUserDrawer = function() {
+      document.getElementById('user-drawer').classList.add('translate-x-full');
+      setTimeout(() => {
+        document.getElementById('drawer-overlay').classList.add('hidden');
+      }, 300); 
+    };
 
     // Tools
     function copyUserIdToClipboard() {
