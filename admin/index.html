@@ -230,7 +230,7 @@
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
       
-      <!-- Top Stats Row (Upgraded) -->
+      <!-- Top Stats Row -->
 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="admin-stats">
   
   <!-- Total Registered Users -->
@@ -255,25 +255,25 @@
     </div>
   </div>
 
-  <!-- Inactive/Free Users -->
+  <!-- Total Shoots Logged -->
   <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-neutral-600 to-neutral-800 opacity-50"></div>
+    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50"></div>
     <div class="relative z-10">
       <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-circle-x text-neutral-400 text-sm"></i> Inactive / Free Tier
+        <i class="ti ti-camera text-purple-400 text-sm"></i> Total Shoots Logged
       </div>
-      <div class="text-3xl font-bold text-neutral-400 tabular-nums tracking-tight" id="stat-inactive-users">0</div>
+      <div class="text-3xl font-bold text-white tabular-nums tracking-tight" id="stat-shoots">0</div>
     </div>
   </div>
 
-  <!-- Combined Razorpay Intake -->
+  <!-- Total Processed Amount -->
   <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c9a96e] to-yellow-600 opacity-50"></div>
     <div class="relative z-10">
       <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-credit-card text-[#c9a96e] text-sm"></i> Razorpay Gross Income
+        <i class="ti ti-cash text-[#c9a96e] text-sm"></i> Total Processed Value
       </div>
-      <div class="text-3xl font-bold text-[#c9a96e] tabular-nums tracking-tight" id="stat-razorpay-revenue">₹0</div>
+      <div class="text-3xl font-bold text-[#c9a96e] tabular-nums tracking-tight" id="stat-revenue">₹0</div>
     </div>
   </div>
 
@@ -403,197 +403,158 @@
       }
     }
 
-    // --- RENDER LOGIC ---
 // --- RENDER LOGIC ---
 function renderDashboard() {
-  // 💰 SET YOUR PLAN PRICES HERE (Change these numbers to your actual prices)
-  const MONTHLY_PRICE = 150; 
-  const YEARLY_PRICE = 1499;
-
   const today = new Date();
   today.setHours(0,0,0,0);
 
   const totalUsers = allUsers.length;
-  
   let activeUsersCount = 0;
-  let inactiveUsersCount = 0;
-  let totalPlatformEarnings = 0;
+
+  // Calculate Total Shoots and Total Amount from all users combined
+  const totalShoots = allUsers.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
+  const totalRev = allUsers.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
 
   allUsers.forEach(u => {
     const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
-    let isPlanActive = false;
-
-    // 1. Check if the subscription is currently active
+    
+    // Calculate Active Users
     if (planType !== 'free') {
       if (u.expires_at) {
         const expiresDate = new Date(u.expires_at);
         expiresDate.setHours(0,0,0,0);
-        if (expiresDate >= today) {
-          isPlanActive = true;
-          activeUsersCount++;
-        } else {
-          inactiveUsersCount++; // Plan expired
-        }
+        if (expiresDate >= today) activeUsersCount++;
       } else {
-        isPlanActive = true;
         activeUsersCount++;
       }
-    } else {
-      inactiveUsersCount++; // Free tier
     }
-
-    // 2. Calculate YOUR earnings based on their premium plans (ALL-TIME)
-    if (planType === 'monthly') {
-      totalPlatformEarnings += MONTHLY_PRICE;
-    } else if (planType === 'yearly') {
-      totalPlatformEarnings += YEARLY_PRICE;
-    }
-  }); // <-- The extra bracket that was here is now gone!
+  });
   
   // Update UI Elements
   document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
   document.getElementById('stat-active-users').innerText = activeUsersCount.toLocaleString();
-  document.getElementById('stat-inactive-users').innerText = inactiveUsersCount.toLocaleString();
-  document.getElementById('stat-razorpay-revenue').innerText = '₹' + totalPlatformEarnings.toLocaleString('en-IN');
+  document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
+  document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
 
   // Trigger the table render
   renderTable(allUsers);
 }
-    function getInitials(name, email) {
-      if (name && name.trim().length > 0) {
-        const parts = name.trim().split(' ');
-        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
-        return name.substring(0, 2).toUpperCase();
-      }
-      return email ? email.substring(0, 2).toUpperCase() : '??';
-    }
 
-    function renderTable(data) {
-      const tbody = document.getElementById('user-table-body');
+function getInitials(name, email) {
+  if (name && name.trim().length > 0) {
+    const parts = name.trim().split(' ');
+    if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+    return name.substring(0, 2).toUpperCase();
+  }
+  return email ? email.substring(0, 2).toUpperCase() : '??';
+}
+
+function renderTable(data) {
+  const tbody = document.getElementById('user-table-body');
+  
+  if (data.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-neutral-500 font-medium">No records matching your search.</td></tr>`;
+    return;
+  }
+
+  // Generate the user rows (Removed the bottom totals footer)
+  const rowsHTML = data.map(u => {
+    let planBadge = '';
+    let daysText = '';
+    let dateText = '';
+    
+    if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
+      planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
+      daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
+      dateText = `<span class="text-neutral-600 text-[9px] block mt-0.5">No renewal needed</span>`;
+    } else {
+      const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
+      const today = new Date();
+      today.setHours(0, 0, 0, 0); 
+      const planName = u.plan_type.toUpperCase();
       
-      if (data.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-neutral-500 font-medium">No records matching your search.</td></tr>`;
-        return;
-      }
-
-      // --- CALCULATE TABLE TOTALS ---
-      const totalShoots = data.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
-      const totalProcessedValue = data.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
-
-      // Generate the user rows
-      const rowsHTML = data.map(u => {
-        let planBadge = '';
-        let daysText = '';
-        let dateText = '';
+      if (expiresDate) {
+        const formattedDate = expiresDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        expiresDate.setHours(0, 0, 0, 0);
+        const diffTime = expiresDate.getTime() - today.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
         
-        if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
-          daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
-          dateText = `<span class="text-neutral-600 text-[9px] block mt-0.5">No renewal needed</span>`;
+        if (diffDays > 0) {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
+          daysText = `<span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-clock"></i> ${diffDays} days to renew</span>`;
+          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Renews: ${formattedDate}</span>`;
+        } else if (diffDays === 0) {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-yellow-950/40 text-yellow-500 border-yellow-900/50">${planName} • EXPIRING</span>`;
+          daysText = `<span class="text-yellow-500 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-triangle"></i> Renews Today</span>`;
+          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Date: ${formattedDate}</span>`;
         } else {
-          const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
-          const today = new Date();
-          today.setHours(0, 0, 0, 0); 
-          const planName = u.plan_type.toUpperCase();
-          
-          if (expiresDate) {
-            const formattedDate = expiresDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-            expiresDate.setHours(0, 0, 0, 0);
-            const diffTime = expiresDate.getTime() - today.getTime();
-            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-            
-            if (diffDays > 0) {
-              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
-              daysText = `<span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-clock"></i> ${diffDays} days to renew</span>`;
-              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Renews: ${formattedDate}</span>`;
-            } else if (diffDays === 0) {
-              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-yellow-950/40 text-yellow-500 border-yellow-900/50">${planName} • EXPIRING</span>`;
-              daysText = `<span class="text-yellow-500 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-triangle"></i> Renews Today</span>`;
-              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Date: ${formattedDate}</span>`;
-            } else {
-              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planName} • EXPIRED</span>`;
-              daysText = `<span class="text-red-500/80 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-circle"></i> Overdue by ${Math.abs(diffDays)} days</span>`;
-              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
-            }
-          } else {
-             planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
-             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
-             dateText = '';
-          }
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planName} • EXPIRED</span>`;
+          daysText = `<span class="text-red-500/80 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-circle"></i> Overdue by ${Math.abs(diffDays)} days</span>`;
+          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
         }
-
-        const lastActiveDate = u.last_active_shoot 
-          ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
-          : '<span class="text-neutral-600 italic">Never</span>';
-          
-        const initials = getInitials(u.full_name, u.email);
-        const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
-
-        return `
-          <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
-            <td class="px-6 py-4">
-              <div class="flex items-center gap-3">
-                <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
-                  ${initials}
-                </div>
-                <div>
-                  <div class="font-bold text-white">${u.full_name || 'Unconfigured Profile'}</div>
-                  <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
-                    <i class="ti ti-mail text-[10px]"></i> ${u.email}
-                  </div>
-                </div>
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="font-semibold text-neutral-300 flex items-center gap-1.5">
-                 ${u.business_name || '<span class="text-neutral-600 italic">No Studio Name</span>'}
-              </div>
-              <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
-                <i class="ti ti-phone text-[10px]"></i> ${u.phone_number || 'No Phone Added'}
-              </div>
-            </td>
-            <td class="px-6 py-4">
-              <div class="flex flex-col items-start">
-                ${planBadge}
-                ${daysText}
-                ${dateText}
-                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
-                  <i class="ti ti-pencil"></i> Modify Plan
-                </button>
-              </div>
-            </td>
-            <td class="px-6 py-4 text-right font-medium text-neutral-300 tabular-nums">
-              ${Number(u.total_shoots_logged).toLocaleString()}
-            </td>
-            <td class="px-6 py-4 text-right font-bold text-[#c9a96e] tabular-nums">
-              ₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}
-            </td>
-            <td class="px-6 py-4 text-right text-xs text-neutral-500 tabular-nums">
-              ${lastActiveDate}
-            </td>
-          </tr>
-        `;
-      }).join('');
-
-      // --- CREATE THE NEW TOTALS FOOTER ROW ---
-      const totalsRowHTML = `
-        <tr class="bg-[#c9a96e]/5 border-t border-[#c9a96e]/30 font-bold group">
-          <td colspan="3" class="px-6 py-5 text-right text-[10px] uppercase tracking-widest text-[#c9a96e]">
-            <i class="ti ti-calculator mr-1"></i> Aggregate Totals
-          </td>
-          <td class="px-6 py-5 text-right text-white tabular-nums text-base">
-            ${totalShoots.toLocaleString()}
-          </td>
-          <td class="px-6 py-5 text-right text-[#c9a96e] tabular-nums text-base">
-            ₹${totalProcessedValue.toLocaleString('en-IN')}
-          </td>
-          <td class="px-6 py-5"></td>
-        </tr>
-      `;
-
-      // Inject the user rows + the final totals row
-      tbody.innerHTML = rowsHTML + totalsRowHTML;
+      } else {
+         planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
+         daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
+         dateText = '';
+      }
     }
+
+    const lastActiveDate = u.last_active_shoot 
+      ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
+      : '<span class="text-neutral-600 italic">Never</span>';
+      
+    const initials = getInitials(u.full_name, u.email);
+    const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
+
+    return `
+      <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
+        <td class="px-6 py-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
+              ${initials}
+            </div>
+            <div>
+              <div class="font-bold text-white">${u.full_name || 'Unconfigured Profile'}</div>
+              <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                <i class="ti ti-mail text-[10px]"></i> ${u.email}
+              </div>
+            </div>
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="font-semibold text-neutral-300 flex items-center gap-1.5">
+             ${u.business_name || '<span class="text-neutral-600 italic">No Studio Name</span>'}
+          </div>
+          <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+            <i class="ti ti-phone text-[10px]"></i> ${u.phone_number || 'No Phone Added'}
+          </div>
+        </td>
+        <td class="px-6 py-4">
+          <div class="flex flex-col items-start">
+            ${planBadge}
+            ${daysText}
+            ${dateText}
+            <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
+              <i class="ti ti-pencil"></i> Modify Plan
+            </button>
+          </div>
+        </td>
+        <td class="px-6 py-4 text-right font-medium text-neutral-300 tabular-nums">
+          ${Number(u.total_shoots_logged).toLocaleString()}
+        </td>
+        <td class="px-6 py-4 text-right font-bold text-[#c9a96e] tabular-nums">
+          ₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}
+        </td>
+        <td class="px-6 py-4 text-right text-xs text-neutral-500 tabular-nums">
+          ${lastActiveDate}
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Inject the user rows back without the totals row
+  tbody.innerHTML = rowsHTML;
+}
 
     // --- USER DRAWER LOGIC ---
     function openUserDrawer(userId) {
