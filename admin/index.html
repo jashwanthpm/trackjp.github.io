@@ -313,8 +313,15 @@
                 <th class="px-6 py-4 font-bold">User Identity</th>
                 <th class="px-6 py-4 font-bold">Studio Details</th>
                 <th class="px-6 py-4 font-bold">Subscription Status</th>
-                <th class="px-6 py-4 font-bold text-right">Shoots</th>
-                <th class="px-6 py-4 font-bold text-right">Processed Value</th>
+                
+                <th class="px-6 py-4 font-bold text-right cursor-pointer hover:text-white group transition-colors select-none" onclick="sortTable('shoots')">
+                  Shoots <i class="ti ti-arrows-sort text-[10px] ml-1 text-neutral-600 group-hover:text-[#c9a96e] transition-colors"></i>
+                </th>
+                
+                <th class="px-6 py-4 font-bold text-right cursor-pointer hover:text-white group transition-colors select-none" onclick="sortTable('revenue')">
+                  Processed Value <i class="ti ti-arrows-sort text-[10px] ml-1 text-neutral-600 group-hover:text-[#c9a96e] transition-colors"></i>
+                </th>
+                
                 <th class="px-6 py-4 font-bold text-right">Last Sync</th>
               </tr>
             </thead>
@@ -340,6 +347,10 @@
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
     let allUsers = [];
+    
+    // --- SORTING STATE ---
+    let currentSortColumn = '';
+    let isSortDescending = true;
 
     // --- INITIALIZATION & SECURITY CHECK ---
     document.addEventListener('DOMContentLoaded', () => {
@@ -668,12 +679,25 @@ document.getElementById('drawer-user-razorpay').innerText = '₹' + userSpecific
       });
     }
 
-    // --- SEARCH AND FILTER LOGIC ---
+    // --- SEARCH, FILTER & SORT LOGIC ---
+    function sortTable(column) {
+      // If clicking the same column, toggle direction. Otherwise, default to High-to-Low.
+      if (currentSortColumn === column) {
+        isSortDescending = !isSortDescending;
+      } else {
+        currentSortColumn = column;
+        isSortDescending = true;
+      }
+      // Re-run the filter so search text, dropdowns, and sorting all apply together
+      filterTable();
+    }
+
     function filterTable() {
       const query = document.getElementById('admin-search').value.toLowerCase();
       const planFilter = document.getElementById('plan-filter').value.toLowerCase();
 
-      const filtered = allUsers.filter(u => {
+      // 1. Apply Search and Plan Filters
+      let filtered = allUsers.filter(u => {
         const matchesSearch = (u.email || '').toLowerCase().includes(query) || 
                               (u.full_name || '').toLowerCase().includes(query) ||
                               (u.business_name || '').toLowerCase().includes(query);
@@ -687,9 +711,32 @@ document.getElementById('drawer-user-razorpay').innerText = '₹' + userSpecific
         return matchesSearch && matchesPlan;
       });
 
+      // 2. Apply Sorting Logic
+      if (currentSortColumn) {
+        filtered.sort((a, b) => {
+          let valA = 0;
+          let valB = 0;
+
+          if (currentSortColumn === 'shoots') {
+            valA = Number(a.total_shoots_logged || 0);
+            valB = Number(b.total_shoots_logged || 0);
+          } else if (currentSortColumn === 'revenue') {
+            valA = Number(a.total_platform_revenue || 0);
+            valB = Number(b.total_platform_revenue || 0);
+          }
+
+          // Return based on direction (High-to-Low vs Low-to-High)
+          if (isSortDescending) {
+            return valB - valA; 
+          } else {
+            return valA - valB; 
+          }
+        });
+      }
+
+      // 3. Render the updated list
       renderTable(filtered);
     }
-
     // --- SUBSCRIPTION OVERRIDE LOGIC ---
     function openPlanModal(userId, currentPlan, expiryDateStr, userName) {
       document.getElementById('edit-plan-user-id').value = userId;
