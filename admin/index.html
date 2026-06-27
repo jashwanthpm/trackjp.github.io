@@ -404,6 +404,7 @@
     }
 
     // --- RENDER LOGIC ---
+// --- RENDER LOGIC ---
 function renderDashboard() {
   // 💰 SET YOUR PLAN PRICES HERE (Change these numbers to your actual prices)
   const MONTHLY_PRICE = 150; 
@@ -447,8 +448,7 @@ function renderDashboard() {
     } else if (planType === 'yearly') {
       totalPlatformEarnings += YEARLY_PRICE;
     }
-    }
-  });
+  }); // <-- The extra bracket that was here is now gone!
   
   // Update UI Elements
   document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
@@ -459,7 +459,6 @@ function renderDashboard() {
   // Trigger the table render
   renderTable(allUsers);
 }
-
     function getInitials(name, email) {
       if (name && name.trim().length > 0) {
         const parts = name.trim().split(' ');
