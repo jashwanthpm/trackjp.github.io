@@ -394,6 +394,10 @@
 
     // --- RENDER LOGIC ---
 function renderDashboard() {
+  // 💰 SET YOUR PLAN PRICES HERE (Change these numbers to your actual prices)
+  const MONTHLY_PRICE = 150; 
+  const YEARLY_PRICE = 1499;
+
   const today = new Date();
   today.setHours(0,0,0,0);
 
@@ -401,35 +405,46 @@ function renderDashboard() {
   
   let activeUsersCount = 0;
   let inactiveUsersCount = 0;
-  let totalRazorpayCollected = 0;
+  let totalPlatformEarnings = 0;
 
   allUsers.forEach(u => {
-    // 1. Calculate Active vs Inactive state counters safely
     const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
-    
-    if (planType === 'free') {
-      inactiveUsersCount++;
-    } else if (u.expires_at) {
-      const expiresDate = new Date(u.expires_at);
-      expiresDate.setHours(0,0,0,0);
-      if (expiresDate >= today) {
-        activeUsersCount++;
+    let isPlanActive = false;
+
+    // 1. Check if the subscription is currently active
+    if (planType !== 'free') {
+      if (u.expires_at) {
+        const expiresDate = new Date(u.expires_at);
+        expiresDate.setHours(0,0,0,0);
+        if (expiresDate >= today) {
+          isPlanActive = true;
+          activeUsersCount++;
+        } else {
+          inactiveUsersCount++; // Plan expired
+        }
       } else {
-        inactiveUsersCount++; // Expired plans go to inactive metrics
+        isPlanActive = true;
+        activeUsersCount++;
       }
     } else {
-      activeUsersCount++;
+      inactiveUsersCount++; // Free tier
     }
 
-    // 2. Razorpay Calculations
-    totalRazorpayCollected += Number(u.payments_received || u.total_platform_revenue || 0);
+    // 2. Calculate YOUR earnings based on their premium plans
+    if (isPlanActive) {
+      if (planType === 'monthly') {
+        totalPlatformEarnings += MONTHLY_PRICE;
+      } else if (planType === 'yearly') {
+        totalPlatformEarnings += YEARLY_PRICE;
+      }
+    }
   });
   
   // Update UI Elements
   document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
   document.getElementById('stat-active-users').innerText = activeUsersCount.toLocaleString();
   document.getElementById('stat-inactive-users').innerText = inactiveUsersCount.toLocaleString();
-  document.getElementById('stat-razorpay-revenue').innerText = '₹' + totalRazorpayCollected.toLocaleString('en-IN');
+  document.getElementById('stat-razorpay-revenue').innerText = '₹' + totalPlatformEarnings.toLocaleString('en-IN');
 
   // Trigger the table render
   renderTable(allUsers);
