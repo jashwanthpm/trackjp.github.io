@@ -77,7 +77,8 @@
   <!-- User Details Drawer -->
   <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-md bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
     <!-- Drawer Header -->
-    <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505]">
+    <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505] relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
       <div class="flex items-center gap-3">
         <div id="drawer-initials" class="w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/30 flex items-center justify-center text-sm font-bold text-[#c9a96e]">
           --
@@ -87,41 +88,57 @@
           <p id="drawer-studio" class="text-xs text-neutral-500">Loading...</p>
         </div>
       </div>
-      <button onclick="closeUserDrawer()" class="text-neutral-500 hover:text-white transition-colors p-2 bg-neutral-900 rounded-full">
+      <button onclick="closeUserDrawer()" class="text-neutral-500 hover:text-white transition-colors p-2 bg-neutral-900 border border-neutral-800 rounded-full shadow-sm">
         <i class="ti ti-x text-lg"></i>
       </button>
     </div>
 
     <!-- Drawer Content -->
     <div class="p-6 flex-1 overflow-y-auto space-y-6">
+      
       <!-- Quick Stats -->
       <div class="grid grid-cols-2 gap-4">
-        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80">
+        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
           <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Total Shoots</p>
           <p id="drawer-shoots" class="text-xl font-bold text-white tabular-nums">0</p>
         </div>
-        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80">
+        <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
           <p class="text-[10px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
           <p id="drawer-revenue" class="text-xl font-bold text-[#c9a96e] tabular-nums">₹0</p>
         </div>
       </div>
 
+      <!-- System Identity -->
+      <div>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-id-badge text-neutral-400"></i> System Identity</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-3">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Master UUID</span>
+            <span id="drawer-user-id" class="text-[10px] font-mono text-neutral-500 bg-neutral-900 px-2 py-1 rounded truncate max-w-[150px]" title="User ID">--</span>
+          </div>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Account Created</span>
+            <span id="drawer-joined" class="text-xs font-semibold text-neutral-300">--</span>
+          </div>
+        </div>
+      </div>
+
       <!-- Contact Details -->
       <div>
-        <h4 class="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-3">Contact Information</h4>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-address-book text-neutral-400"></i> Contact Profile</h4>
         <div class="bg-[#050505] rounded-xl border border-neutral-800/80 divide-y divide-neutral-800/80">
           <div class="p-4 flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-mail"></i></div>
-            <div>
+            <div class="flex-1 overflow-hidden">
               <p class="text-[10px] text-neutral-500">Email Address</p>
-              <p id="drawer-email" class="text-sm font-medium text-neutral-300 select-all">--</p>
+              <p id="drawer-email" class="text-xs font-medium text-neutral-300 truncate">--</p>
             </div>
           </div>
           <div class="p-4 flex items-center gap-3">
             <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-neutral-400"><i class="ti ti-phone"></i></div>
             <div>
               <p class="text-[10px] text-neutral-500">Phone Number</p>
-              <p id="drawer-phone" class="text-sm font-medium text-neutral-300 select-all">--</p>
+              <p id="drawer-phone" class="text-xs font-medium text-neutral-300">--</p>
             </div>
           </div>
         </div>
@@ -129,18 +146,33 @@
 
       <!-- Account Status -->
       <div>
-        <h4 class="text-xs uppercase font-bold text-neutral-500 tracking-wider mb-3">Account Status</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4">
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-sm text-neutral-400">Current Plan</span>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-shield-check text-neutral-400"></i> Subscription Lifecycle</h4>
+        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-4">
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Active Tier</span>
             <span id="drawer-plan-badge">--</span>
           </div>
-          <div class="flex justify-between items-center mb-2">
-            <span class="text-sm text-neutral-400">Last Active Sync</span>
-            <span id="drawer-last-sync" class="text-sm font-medium text-neutral-300">--</span>
+          <div class="flex justify-between items-center">
+            <span class="text-xs font-medium text-neutral-400">Expiration Date</span>
+            <span id="drawer-expiry" class="text-xs font-semibold text-neutral-300">--</span>
+          </div>
+          <div class="flex justify-between items-center pt-3 border-t border-neutral-800/80">
+            <span class="text-xs font-medium text-neutral-400">Last Database Sync</span>
+            <span id="drawer-last-sync" class="text-xs font-semibold text-neutral-300">--</span>
           </div>
         </div>
       </div>
+      
+      <!-- Admin Actions -->
+      <div class="pt-2 flex gap-3">
+        <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-copy"></i> Copy UUID
+        </button>
+        <a id="drawer-mailto" href="#" class="flex-1 py-2.5 bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/30 text-[#c9a96e] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-mail-forward"></i> Email User
+        </a>
+      </div>
+
     </div>
   </div>
 
@@ -448,36 +480,85 @@
       const user = allUsers.find(u => u.user_id === userId);
       if (!user) return;
 
-      // Populate Data
+      // 1. Header & Identity
       document.getElementById('drawer-initials').innerText = getInitials(user.full_name, user.email);
       document.getElementById('drawer-name').innerText = user.full_name || 'Unconfigured Profile';
       document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
+      document.getElementById('drawer-user-id').innerText = user.user_id;
+      
+      // Assume created_at exists, otherwise fallback
+      const joinedDate = user.created_at 
+          ? new Date(user.created_at).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
+          : 'Unknown';
+      document.getElementById('drawer-joined').innerText = joinedDate;
+
+      // 2. Stats & Contact
       document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
       document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
       document.getElementById('drawer-email').innerText = user.email || 'N/A';
       document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
       
+      // Setup Mailto button
+      document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
+
+      // 3. Subscription & Sync
       const lastActiveDate = user.last_active_shoot 
           ? new Date(user.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
-          : 'Never synced';
-      document.getElementById('drawer-last-sync').innerText = lastActiveDate;
+          : '<span class="text-neutral-600 italic">Never synced</span>';
+      document.getElementById('drawer-last-sync').innerHTML = lastActiveDate;
 
-      const planType = (user.plan_type || 'free').toUpperCase();
-      document.getElementById('drawer-plan-badge').innerHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType}</span>`;
+      const planType = (user.plan_type || 'free').toLowerCase();
+      let badgeHTML = '';
+      let expiryText = '';
+
+      if (planType === 'free') {
+          badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-neutral-900 text-neutral-400 border-neutral-800">FREE TIER</span>`;
+          expiryText = '<span class="text-neutral-500 italic">Lifetime</span>';
+      } else {
+          badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType.toUpperCase()}</span>`;
+          
+          if (user.expires_at) {
+              const expDate = new Date(user.expires_at);
+              const today = new Date();
+              today.setHours(0,0,0,0);
+              expDate.setHours(0,0,0,0);
+              
+              const formattedExp = expDate.toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'});
+              
+              if (expDate >= today) {
+                  expiryText = `<span class="text-emerald-400">${formattedExp}</span>`;
+              } else {
+                  expiryText = `<span class="text-red-400">${formattedExp} (Expired)</span>`;
+                  badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planType.toUpperCase()}</span>`;
+              }
+          } else {
+              expiryText = '<span class="text-neutral-500 italic">Unknown</span>';
+          }
+      }
+      
+      document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
+      document.getElementById('drawer-expiry').innerHTML = expiryText;
 
       // Show Drawer
       document.getElementById('drawer-overlay').classList.remove('hidden');
-      // Small timeout ensures the transition triggers properly
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
 
-    function closeUserDrawer() {
-      document.getElementById('user-drawer').classList.add('translate-x-full');
-      setTimeout(() => {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-      }, 300); // Wait for sliding animation to finish
+    // Tools
+    function copyUserIdToClipboard() {
+      const idText = document.getElementById('drawer-user-id').innerText;
+      navigator.clipboard.writeText(idText).then(() => {
+        const btn = document.getElementById('copy-id-btn');
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="ti ti-check text-emerald-400"></i> <span class="text-emerald-400">Copied!</span>';
+        btn.classList.add('border-emerald-500/50');
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.remove('border-emerald-500/50');
+        }, 2000);
+      });
     }
 
     // --- SEARCH AND FILTER LOGIC ---
