@@ -340,7 +340,7 @@
     // --- DATA FETCHING ---
     async function fetchAdminData() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_overview?select=*&order=total_platform_revenue.desc`, {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_details?select=*`, {
           headers: {
             'Content-Type': 'application/json',
             'apikey': SUPABASE_KEY,
