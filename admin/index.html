@@ -344,14 +344,25 @@
     // --- INITIALIZATION & SECURITY CHECK ---
     document.addEventListener('DOMContentLoaded', () => {
       let isMasterAdmin = false;
+      const targetEmail = MASTER_ADMIN_EMAIL.toLowerCase();
 
-      // Smart Scan: Check all browser storage for your Supabase login session
+      // 1. Smart Scan: Check Local Storage (Case-Insensitive)
       for (let i = 0; i < localStorage.length; i++) {
         const val = localStorage.getItem(localStorage.key(i));
-        // If your master email is found anywhere in the active session data, unlock it.
-        if (val && val.includes(MASTER_ADMIN_EMAIL)) {
+        if (val && val.toLowerCase().includes(targetEmail)) {
           isMasterAdmin = true;
           break;
+        }
+      }
+
+      // 2. Backup Scan: Check Session Storage
+      if (!isMasterAdmin) {
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const val = sessionStorage.getItem(sessionStorage.key(i));
+          if (val && val.toLowerCase().includes(targetEmail)) {
+            isMasterAdmin = true;
+            break;
+          }
         }
       }
 
