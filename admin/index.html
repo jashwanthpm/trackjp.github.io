@@ -179,14 +179,20 @@
         </div>
       </div>
       
-      <div class="pt-2 flex gap-3 pb-6">
-        <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+      <div class="pt-2 grid grid-cols-2 gap-3 pb-6">
+        <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-copy"></i> Copy UUID
         </button>
-        <a id="drawer-mailto" href="#" class="flex-1 py-2.5 bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/30 text-[#c9a96e] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+        
+        <a id="drawer-mailto" href="#" class="py-2.5 bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/30 text-[#c9a96e] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-mail-forward"></i> Email
         </a>
-        <button id="delete-user-btn" class="flex-1 py-2.5 bg-red-950/20 hover:bg-red-900/40 border border-red-900/30 text-red-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+
+        <button id="view-dashboard-btn" class="py-2.5 bg-blue-950/20 hover:bg-blue-900/40 border border-blue-900/30 text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-external-link"></i> View App
+        </button>
+        
+        <button id="delete-user-btn" class="py-2.5 bg-red-950/20 hover:bg-red-900/40 border border-red-900/30 text-red-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-trash"></i> Delete
         </button>
       </div>
@@ -625,6 +631,9 @@ function renderTable(data) {
 // Attach current user data to the delete button
       const safeUserName = (user.full_name || 'this user').replace(/'/g, "\\'");
       document.getElementById('delete-user-btn').setAttribute('onclick', `deleteUser('${user.user_id}', '${safeUserName}')`);
+
+      // Attach current user data to the View App button
+      document.getElementById('view-dashboard-btn').setAttribute('onclick', `openUserApp('${user.user_id}')`);
       
       // 5. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
@@ -656,6 +665,16 @@ function renderTable(data) {
       });
     }
 
+// --- VIEW USER APP LOGIC ---
+    function openUserApp(userId) {
+      // You will need to change this URL to match wherever your actual app dashboard lives.
+      // We pass the user_id in the URL so your app knows who to load.
+      const targetUrl = `../app/index.html?admin_override=${userId}`;
+      
+      // Opens the user's app in a new tab
+      window.open(targetUrl, '_blank');
+    }
+    
 // --- DELETE USER LOGIC ---
     async function deleteUser(userId, userName) {
       // 1. Double confirmation to prevent accidental clicks
