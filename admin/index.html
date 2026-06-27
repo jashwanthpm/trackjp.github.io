@@ -394,14 +394,44 @@
 
     // --- RENDER LOGIC ---
 function renderDashboard() {
-  const totalUsers = allUsers.length;
-  const totalShoots = allUsers.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
-  const totalRev = allUsers.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
-  
-  document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
-  document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
-  document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
+  const today = new Date();
+  today.setHours(0,0,0,0);
 
+  const totalUsers = allUsers.length;
+  
+  let activeUsersCount = 0;
+  let inactiveUsersCount = 0;
+  let totalRazorpayCollected = 0;
+
+  allUsers.forEach(u => {
+    // 1. Calculate Active vs Inactive state counters safely
+    const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
+    
+    if (planType === 'free') {
+      inactiveUsersCount++;
+    } else if (u.expires_at) {
+      const expiresDate = new Date(u.expires_at);
+      expiresDate.setHours(0,0,0,0);
+      if (expiresDate >= today) {
+        activeUsersCount++;
+      } else {
+        inactiveUsersCount++; // Expired plans go to inactive metrics
+      }
+    } else {
+      activeUsersCount++;
+    }
+
+    // 2. Razorpay Calculations
+    totalRazorpayCollected += Number(u.payments_received || u.total_platform_revenue || 0);
+  });
+  
+  // Update UI Elements
+  document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
+  document.getElementById('stat-active-users').innerText = activeUsersCount.toLocaleString();
+  document.getElementById('stat-inactive-users').innerText = inactiveUsersCount.toLocaleString();
+  document.getElementById('stat-razorpay-revenue').innerText = '₹' + totalRazorpayCollected.toLocaleString('en-IN');
+
+  // Trigger the table render
   renderTable(allUsers);
 }
 
