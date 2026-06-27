@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sakkhi | Executive Command Center</title>
   
+  <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
 <!-- Replace your existing Tailwind script tag with this one -->
 <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -77,7 +78,7 @@
     <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#050505]/80 border-b border-neutral-900/80 px-6 h-16 flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-4">
         <!-- Replaced text with the Sakkhi image logo -->
-        <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-6 md:h-7 w-auto object-contain" style="max-width: 100%; height: auto;" />
+        <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-8 md:h-10 w-auto object-contain" />
         
         <div class="h-4 w-[1px] bg-neutral-800"></div>
         <div class="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#c9a96e]/10 border border-[#c9a96e]/20">
@@ -256,31 +257,36 @@
         let planBadge = '';
         let daysText = '';
         
-        if (!u.plan_type || u.plan_type === 'free') {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE</span>`;
-          daysText = `<span class="text-neutral-500 text-[10px] font-medium italic">No expiration</span>`;
+        if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE PLAN</span>`;
+          daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1">No expiration</span>`;
         } else {
           const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
           const today = new Date();
           
+          // Normalize both dates to midnight to get an accurate whole-day difference
+          today.setHours(0, 0, 0, 0); 
+          
           if (expiresDate) {
-            const diffTime = expiresDate - today;
+            expiresDate.setHours(0, 0, 0, 0);
+            const diffTime = expiresDate.getTime() - today.getTime();
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
             
             if (diffDays >= 0) {
-              // Badge color for active Monthly/Yearly plans
-              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${u.plan_type.toUpperCase()}</span>`;
-              daysText = `<span class="text-emerald-400 text-[10px] font-medium flex items-center gap-1 mt-1"><i class="ti ti-clock"></i> ${diffDays} days left</span>`;
+              // Active Subscription
+              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${u.plan_type.toUpperCase()} • ACTIVE</span>`;
+              daysText = `<span class="text-emerald-400 text-[10px] font-medium flex items-center gap-1 mt-1"><i class="ti ti-clock"></i> ${diffDays} days pending to renew</span>`;
             } else {
-              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">EXPIRED</span>`;
+              // Expired Subscription
+              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${u.plan_type.toUpperCase()} • EXPIRED</span>`;
               daysText = `<span class="text-red-500/80 text-[10px] font-medium flex items-center gap-1 mt-1"><i class="ti ti-alert-circle"></i> Expired ${Math.abs(diffDays)} days ago</span>`;
             }
           } else {
-             planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${u.plan_type.toUpperCase()}</span>`;
-             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic">Active</span>`;
+             // Edge case: Paid plan but missing expiration date
+             planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${u.plan_type.toUpperCase()} • ACTIVE</span>`;
+             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1">Expiration unknown</span>`;
           }
         }
-
         const lastActiveDate = u.last_active_shoot 
           ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
           : '<span class="text-neutral-600 italic">Never</span>';
