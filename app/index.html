@@ -1486,22 +1486,28 @@
       } catch(e) { return {}; }
     }
 // ==========================================
-    // EMAIL & PASSWORD AUTHENTICATION
+    // EMAIL & PASSWORD AUTHENTICATION (SMART LOGIN/SIGNUP)
     // ==========================================
     async function handleEmailLogin() {
       const email = document.getElementById('email-input').value.trim();
       const password = document.getElementById('password-input').value;
       const errorMsgEl = document.getElementById('inline-error-msg');
       
-      const showError = (msg) => {
-        errorMsgEl.innerHTML = `<i class="ti ti-alert-circle mr-1"></i>${msg}`;
+      const showMessage = (msg, type = 'error') => {
+        if (type === 'success') {
+            errorMsgEl.className = 'text-[11px] text-emerald-400 text-center font-semibold bg-emerald-950/20 py-2.5 px-3 rounded-lg border border-emerald-900/30';
+            errorMsgEl.innerHTML = `<i class="ti ti-mail-check mr-1"></i>${msg}`;
+        } else {
+            errorMsgEl.className = 'text-[11px] text-red-400 text-center font-semibold bg-red-950/20 py-2.5 px-3 rounded-lg border border-red-900/30';
+            errorMsgEl.innerHTML = `<i class="ti ti-alert-circle mr-1"></i>${msg}`;
+        }
         errorMsgEl.classList.remove('hidden');
       };
       
       errorMsgEl.classList.add('hidden');
 
       if (!email || !password) {
-        showError('Please enter both email and password.');
+        showMessage('Please enter both email and password.');
         return;
       }
 
@@ -1529,19 +1535,27 @@
            const errMsg = (data.error_description || data.msg || data.error || '').toLowerCase();
            
            if (errMsg.includes('invalid login credentials') || errMsg.includes('invalid_grant')) {
-               const checkRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
+               // The user doesn't exist or has wrong password. Let's try to Sign Up!
+               const signupRes = await fetch(`${SUPABASE_URL}/auth/v1/signup`, {
                  method: 'POST',
                  headers: authHeaders,
-                 body: JSON.stringify({ email, password: '1' })
+                 body: JSON.stringify({ email, password })
                });
-               const checkData = await checkRes.json();
-               const checkMsg = (checkData.error_description || checkData.msg || '').toLowerCase();
+               const signupData = await signupRes.json();
+               const signupMsg = (signupData.error_description || signupData.msg || '').toLowerCase();
                
-               if (checkMsg.includes('already registered')) {
+               if (signupMsg.includes('already registered') || signupMsg.includes('user already exists')) {
+                   // If they are already registered, they just typed the wrong password
                    throw new Error('Incorrect password. Please try again.');
+               } else if (!signupRes.ok) {
+                   throw new Error(signupData.error_description || signupData.msg || 'Sign up failed.');
                } else {
-                   throw new Error('No account found. Please Sign up with Google for the first time.');
+                   // Successfully created a new account! Trigger green verification message.
+                   showMessage('Account created! Please check your email to verify before logging in.', 'success');
+                   return; // Stop execution here so it doesn't throw a red error
                }
+           } else if (errMsg.includes('email not confirmed')) {
+               throw new Error('Please check your email and verify your account before logging in.');
            } else {
                throw new Error(data.error_description || data.msg || 'Login failed');
            }
@@ -1576,9 +1590,11 @@
         loadAll();
 
       } catch (error) {
-        showError(error.message);
+        showMessage(error.message);
       } finally {
-        btn.innerText = originalText;
+        if (btn.innerText === 'Processing...') {
+            btn.innerText = originalText;
+        }
       }
     }
     // Initialize Auth Logic on page load
