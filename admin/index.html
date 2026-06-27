@@ -664,11 +664,13 @@ function renderTable(data) {
       if (!isConfirmed) return;
 
       const btn = document.getElementById('delete-user-btn');
-      const originalHTML = btn.innerHTML;
+      
+      // 2. Change text and lock the button to prevent double-clicks
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Deleting...';
+      btn.disabled = true;
+      btn.classList.add('opacity-50', 'cursor-not-allowed');
 
       try {
-        // Trigger the custom Postgres function via RPC (Remote Procedure Call)
         const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_auth_user`, {
           method: 'POST',
           headers: {
@@ -684,6 +686,11 @@ function renderTable(data) {
           throw new Error(errorData.message || 'Failed to delete user record.');
         }
 
+        // 3. SUCCESS: Reset the button back to normal BEFORE closing the drawer
+        btn.innerHTML = '<i class="ti ti-trash"></i> Delete';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
+
         // Close drawer and refresh the dashboard data
         closeUserDrawer();
         await fetchAdminData();
@@ -694,7 +701,11 @@ function renderTable(data) {
       } catch (error) {
         console.error(error);
         alert('Error deleting user: ' + error.message);
-        btn.innerHTML = originalHTML;
+        
+        // 4. ERROR: Reset the button back to normal so you can try again
+        btn.innerHTML = '<i class="ti ti-trash"></i> Delete';
+        btn.disabled = false;
+        btn.classList.remove('opacity-50', 'cursor-not-allowed');
       }
     }
     
