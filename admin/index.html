@@ -717,50 +717,30 @@
         btn.innerHTML = 'Update Plan';
       }
     }
-async function handlePlanChange(userId, newPlanType) {
-    // 1. Get the current date
-    const now = new Date();
-    let newExpiresAt = new Date();
-    let newStatus = 'active';
-
-    // 2. Calculate the exact expiration date based on the selection
-    if (newPlanType === 'monthly') {
-        newExpiresAt.setMonth(now.getMonth() + 1);
-    } else if (newPlanType === 'yearly') {
-        newExpiresAt.setFullYear(now.getFullYear() + 1);
-    } else if (newPlanType === 'free' || newPlanType === 'none') {
-        newExpiresAt = null; // Free tier doesn't expire
-        newStatus = 'inactive'; // Or whatever your default status is for free
+    function closePlanModal() {
+      document.getElementById('plan-modal').classList.add('hidden');
+      document.getElementById('save-plan-btn').innerHTML = 'Update Plan';
     }
 
-    // 3. Format the date so PostgreSQL/Supabase can read it
-    const expiresAtString = newExpiresAt ? newExpiresAt.toISOString() : null;
+    // --- NEW: AUTO-CALCULATE DATE ON DROPDOWN CHANGE ---
+    document.getElementById('edit-plan-type').addEventListener('change', function(e) {
+      const selectedPlan = e.target.value;
+      const expiryInput = document.getElementById('edit-plan-expiry');
+      const now = new Date();
 
-    try {
-        // 4. Send the update to Supabase
-        const { data, error } = await supabase
-            .from('subscriptions')
-            .update({ 
-                plan_type: newPlanType, 
-                expires_at: expiresAtString,
-                status: newStatus,
-                updated_at: new Date().toISOString()
-            })
-            .eq('user_id', userId);
+      if (selectedPlan === 'monthly') {
+        now.setMonth(now.getMonth() + 1);
+        expiryInput.value = now.toISOString().split('T')[0];
+      } else if (selectedPlan === 'yearly') {
+        now.setFullYear(now.getFullYear() + 1);
+        expiryInput.value = now.toISOString().split('T')[0];
+      } else {
+        expiryInput.value = ''; // Clear for free tier
+      }
+    });
+    // ---------------------------------------------------
 
-        if (error) throw error;
-
-        alert('Plan successfully updated!');
-        
-        // Refresh your dashboard data here so the UI instantly updates!
-        // fetchAdminData(); 
-
-    } catch (error) {
-        console.error("Error updating subscription:", error.message);
-        alert("Failed to update the plan. Check the console for details.");
-    }
-}
-    
+    async function saveUserPlan() {
   </script>
   <script>
   if ('serviceWorker' in navigator) {
