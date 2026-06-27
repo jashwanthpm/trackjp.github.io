@@ -75,8 +75,8 @@
   <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
   <!-- User Details Drawer -->
-  <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-md bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
-    <!-- Drawer Header -->
+  <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-xl bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
+    
     <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505] relative overflow-hidden shrink-0">
       <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
       <div class="flex items-center gap-3">
@@ -93,51 +93,35 @@
       </button>
     </div>
 
-    <!-- Drawer Content -->
     <div class="p-6 flex-1 overflow-y-auto space-y-6">
       
-      <!-- Performance Metrics (Simplified) -->
       <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-chart-pie text-neutral-400"></i> Performance Metrics</h4>
+        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-layout-dashboard text-neutral-400"></i> User Performance Dashboard</h4>
         <div class="grid grid-cols-2 gap-3">
-          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
-            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Total Shoots</p>
-            <p id="drawer-shoots" class="text-lg font-bold text-white tabular-nums">0</p>
+          <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Total Shoots Completed</p>
+            <p id="drawer-shoots" class="text-2xl font-bold text-white tabular-nums">0</p>
           </div>
-          <div class="bg-[#050505] p-3 rounded-xl border border-neutral-800/80 shadow-inner">
-            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Generated GMV</p>
-            <p id="drawer-revenue" class="text-lg font-bold text-[#c9a96e] tabular-nums">₹0</p>
+          <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Studio GMV Generated</p>
+            <p id="drawer-revenue" class="text-2xl font-bold text-[#c9a96e] tabular-nums">₹0</p>
+          </div>
+          <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Payments Received</p>
+            <p id="drawer-received" class="text-lg font-bold text-emerald-500 tabular-nums">₹0</p>
+          </div>
+          <div class="bg-[#050505] p-4 rounded-xl border border-neutral-800/80 shadow-inner">
+            <p class="text-[9px] uppercase font-bold text-neutral-500 mb-1">Pending Invoices</p>
+            <p id="drawer-pending" class="text-lg font-bold text-yellow-500 tabular-nums">₹0</p>
           </div>
         </div>
       </div>
 
-      <!-- Financial Ledger (Upgraded with Individual User Breakdown) -->
-      <div>
-        <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-receipt text-neutral-400"></i> User Financial Footprint</h4>
-        <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-3">
-          
-          <!-- NEW RAZORPAY LINE -->
-          <div class="flex justify-between items-center bg-[#c9a96e]/5 p-2 rounded-lg border border-[#c9a96e]/10">
-            <span class="text-xs font-semibold text-[#c9a96e]">Paid via Razorpay</span>
-            <span id="drawer-user-razorpay" class="text-xs font-bold text-[#c9a96e] tabular-nums">₹0</span>
-          </div>
-          
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-medium text-neutral-400">Payments Received (Total)</span>
-            <span id="drawer-received" class="text-xs font-bold text-emerald-500 tabular-nums">₹0</span>
-          </div>
-          <div class="flex justify-between items-center">
-            <span class="text-xs font-medium text-neutral-400">Pending Payments</span>
-            <span id="drawer-pending" class="text-xs font-bold text-yellow-500 tabular-nums">₹0</span>
-          </div>
-          <div class="flex justify-between items-center pt-2 border-t border-neutral-800/80">
-            <span class="text-xs font-medium text-neutral-400">Expenses Logged</span>
-            <span id="drawer-expenses" class="text-xs font-bold text-red-400 tabular-nums">₹0</span>
-          </div>
-        </div>
+      <div class="flex justify-between items-center bg-[#050505] rounded-xl border border-neutral-800/80 p-4">
+        <span class="text-xs font-medium text-neutral-400">Studio Expenses Logged</span>
+        <span id="drawer-expenses" class="text-sm font-bold text-red-400 tabular-nums">₹0</span>
       </div>
       
-      <!-- Contact & Network -->
       <div>
         <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-address-book text-neutral-400"></i> Identity & Network</h4>
         <div class="bg-[#050505] rounded-xl border border-neutral-800/80 divide-y divide-neutral-800/80">
@@ -169,7 +153,6 @@
         </div>
       </div>
 
-      <!-- System Status -->
       <div>
         <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-3 flex items-center gap-1.5"><i class="ti ti-server text-neutral-400"></i> System Status</h4>
         <div class="bg-[#050505] rounded-xl border border-neutral-800/80 p-4 space-y-4">
@@ -196,7 +179,6 @@
         </div>
       </div>
       
-      <!-- Admin Actions -->
       <div class="pt-2 flex gap-3 pb-6">
         <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="flex-1 py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-copy"></i> Copy UUID
@@ -568,6 +550,7 @@ function renderTable(data) {
 }
 
     // --- USER DRAWER LOGIC ---
+    // --- USER DRAWER LOGIC ---
     function openUserDrawer(userId) {
       const user = allUsers.find(u => u.user_id === userId);
       if (!user) return;
@@ -577,27 +560,21 @@ function renderTable(data) {
       document.getElementById('drawer-name').innerText = user.full_name || 'Unconfigured Profile';
       document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
       
-      // 2. Performance Metrics
+      // 2. Mini-Dashboard Grid
       document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
       document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-received').innerText = '₹' + Number(user.payments_received || 0).toLocaleString('en-IN');
+      document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
 
-      // 3. Financial Ledger
-document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
-document.getElementById('drawer-received').innerText = '₹' + Number(user.payments_received || 0).toLocaleString('en-IN');
-document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
-
-// --- NEW RAZERPAY INDIVIDUAL INTAKE LINE ---
-const userSpecificRazorpayIntake = Number(user.payments_received || user.total_platform_revenue || 0);
-document.getElementById('drawer-user-razorpay').innerText = '₹' + userSpecificRazorpayIntake.toLocaleString('en-IN');
-
-      // 4. Contact & Network
+      // 3. Contact & Network
       document.getElementById('drawer-email').innerText = user.email || 'N/A';
       document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
       document.getElementById('drawer-city').innerText = user.city || user.location || 'Unknown Location';
       document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
 
-      // 5. System Status
+      // 4. System Status
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
       const joinedDate = user.created_at 
@@ -642,19 +619,12 @@ document.getElementById('drawer-user-razorpay').innerText = '₹' + userSpecific
       document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
       document.getElementById('drawer-expiry').innerHTML = expiryText;
 
-      // 6. Open Animation
+      // 5. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
-
-    window.closeUserDrawer = function() {
-      document.getElementById('user-drawer').classList.add('translate-x-full');
-      setTimeout(() => {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-      }, 300); 
-    };
 
     // Explicitly defining the close function globally so it fires correctly
     window.closeUserDrawer = function() {
