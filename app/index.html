@@ -1597,6 +1597,35 @@
         }
       }
     }
+// ==========================================
+    // CATCH EMAIL VERIFICATION REDIRECTS
+    // ==========================================
+    function catchEmailVerificationToken() {
+      const hash = window.location.hash;
+      // If the URL has an access token from an email link
+      if (hash && hash.includes('access_token=')) {
+        const params = new URLSearchParams(hash.substring(1));
+        const token = params.get('access_token');
+        
+        if (token) {
+           const decoded = parseJwt(token);
+           const verifiedUser = {
+             id: decoded.sub,
+             email: decoded.email || '',
+             name: decoded.user_metadata?.name || (decoded.email ? decoded.email.split('@')[0] : 'User'),
+             token: token,
+             user_metadata: decoded.user_metadata || {}
+           };
+           
+           // Save it so the app instantly knows we are logged in
+           localStorage.setItem('currentUser', JSON.stringify(verifiedUser));
+           
+           // Scrub the messy tokens out of the address bar for a clean look
+           window.history.replaceState(null, null, window.location.pathname);
+        }
+      }
+    }
+    
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', () => {
       // Check for Demo Mode first
@@ -1607,6 +1636,9 @@
         return;
       }
 
+      // NEW: Catch verification keys from the URL before doing anything else
+      catchEmailVerificationToken();
+
       const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
@@ -1615,12 +1647,12 @@
         const pendingPlan = sessionStorage.getItem('pendingPlan');
         if (pendingPlan) {
             window.location.href = `/?checkout=${pendingPlan}`;
-            return; // Stop loading the dashboard and redirect
+            return; 
         }
         // -----------------------------------
 
         document.getElementById('main-app').style.display = 'block';
-        loadAll(); // Load data since they are logged in
+        loadAll(); 
       } else {
         document.getElementById('loading-screen').classList.add('hidden');
         document.getElementById('login-modal').classList.add('active');
