@@ -2094,25 +2094,52 @@ function getCurrentDeviceDetails() {
       let currentDeviceId = localStorage.getItem('current_device_id');
       let activeDevices = Array.isArray(cloudDevices) ? cloudDevices : [];
       let needsSave = false;
+      const currentDetails = getCurrentDeviceDetails();
 
-      // Check if we have no local ID, OR if our local ID is missing from the cloud array
-      if (!currentDeviceId || !activeDevices.some(d => d.id === currentDeviceId)) {
-        const newDevice = getCurrentDeviceDetails();
+      // 1. If no local ID exists, check if this exact OS + Browser combo is already in the cloud
+      if (!currentDeviceId) {
+        const existingMatch = activeDevices.find(d => d.os === currentDetails.os && d.browser === currentDetails.browser);
+        if (existingMatch) {
+          currentDeviceId = existingMatch.id;
+          localStorage.setItem('current_device_id', currentDeviceId);
+        }
+      }
+
+      // 2. Clean up any existing duplicates (from before this fix was applied)
+      const cleanedDevices = [];
+      const seenCombos = new Set();
+      let arrayChanged = false;
+
+      // Iterate backwards to keep the most recently active sessions
+      for (let i = activeDevices.length - 1; i >= 0; i--) {
+        const d = activeDevices[i];
+        const combo = `${d.os}_${d.browser}`;
         
-        // If we had a local ID but it was missing from cloud, keep the same ID
+        // Keep it if it's our current device, OR if it's the first time seeing this combo
+        if (d.id === currentDeviceId || !seenCombos.has(combo)) {
+          cleanedDevices.unshift(d);
+          seenCombos.add(combo);
+        } else {
+          arrayChanged = true; // Duplicate found and safely dropped
+        }
+      }
+      activeDevices = cleanedDevices;
+
+      // 3. Add the device if it's still completely missing
+      if (!currentDeviceId || !activeDevices.some(d => d.id === currentDeviceId)) {
+        const newDevice = currentDetails;
         if (currentDeviceId) {
             newDevice.id = currentDeviceId;
         } else {
             currentDeviceId = newDevice.id;
             localStorage.setItem('current_device_id', currentDeviceId);
         }
-        
         activeDevices.push(newDevice);
         needsSave = true;
       }
 
-      // Automatically push to Supabase if this device wasn't tracked
-      if (needsSave) {
+      // 4. Save to cloud if a new device was added OR if old duplicates were wiped
+      if (needsSave || arrayChanged) {
         await saveSettingToDB('active_devices', activeDevices);
       }
     }
@@ -4395,9 +4422,17 @@ function updateAccountDisplay() {
         _profile = {};
         _appPin = '';
         
+        // --- FIX: Save the device tracking ID before clearing storage ---
+        const savedDeviceId = localStorage.getItem('current_device_id');
+        
         // Clear all storage
         localStorage.clear();
         sessionStorage.clear();
+        
+        // --- FIX: Restore the device tracking ID securely ---
+        if (savedDeviceId) {
+          localStorage.setItem('current_device_id', savedDeviceId);
+        }
         
        // Reset UI
         document.getElementById('main-app').style.display = 'none';
