@@ -820,44 +820,58 @@
 
             <div id="account-settings" class="account-content-section">
               <div class="space-y-5">
-                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                
+                <!-- Studio Companies (Collapsible) -->
+                <details class="group bg-[#0f0f0f] border border-neutral-900 rounded-xl [&_summary::-webkit-details-marker]:hidden" open>
+                  <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
                     </h3>
+                    <i class="ti ti-chevron-down text-neutral-500 transition-transform duration-300 group-open:rotate-180 text-lg"></i>
+                  </summary>
+                  <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
+                    <div id="settings-companies" class="divide-y divide-neutral-900 mb-4"></div>
+                    <div class="flex gap-2">
+                      <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                    </div>
                   </div>
-                  <div id="settings-companies" class="divide-y divide-neutral-900 mb-4"></div>
-                  <div class="flex gap-2">
-                    <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                    <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                  </div>
-                </div>
+                </details>
 
-                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                <!-- Shoot Locations (Collapsible) -->
+                <details class="group bg-[#0f0f0f] border border-neutral-900 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+                  <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
                     </h3>
+                    <i class="ti ti-chevron-down text-neutral-500 transition-transform duration-300 group-open:rotate-180 text-lg"></i>
+                  </summary>
+                  <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
+                    <div id="settings-locations" class="divide-y divide-neutral-900 mb-4"></div>
+                    <div class="flex gap-2">
+                      <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                    </div>
                   </div>
-                  <div id="settings-locations" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                  <div class="flex gap-2">
-                    <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                    <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                  </div>
-                </div>
+                </details>
 
-                <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6">
-                  <div class="border-b border-neutral-800 pb-4 mb-4">
+                <!-- Event Categories (Collapsible) -->
+                <details class="group bg-[#0f0f0f] border border-neutral-900 rounded-xl [&_summary::-webkit-details-marker]:hidden">
+                  <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
                     </h3>
+                    <i class="ti ti-chevron-down text-neutral-500 transition-transform duration-300 group-open:rotate-180 text-lg"></i>
+                  </summary>
+                  <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
+                    <div id="settings-events" class="divide-y divide-neutral-900 mb-4"></div>
+                    <div class="flex gap-2">
+                      <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
+                    </div>
                   </div>
-                  <div id="settings-events" class="divide-y divide-neutral-900 max-h-40 overflow-y-auto mb-4 pr-1"></div>
-                  <div class="flex gap-2">
-                    <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
-                    <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
-                  </div>
-                </div>
+                </details>
+
               </div>
             </div>
 
