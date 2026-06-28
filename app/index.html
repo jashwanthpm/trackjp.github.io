@@ -1625,9 +1625,45 @@
         }
       }
     }
+
+// ==========================================
+    // ADMIN OVERRIDE BANNER
+    // ==========================================
+    function showAdminBanner() {
+      const banner = document.createElement('div');
+      banner.className = "fixed top-0 left-0 w-full bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest text-center py-1.5 z-[100] shadow-md";
+      banner.innerHTML = '<i class="ti ti-eye"></i> ADMIN OVERRIDE MODE ACTIVE &mdash; VIEWING CLIENT DATA';
+      document.body.prepend(banner);
+    }
     
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', () => {
+      
+      // --- NEW: ADMIN OVERRIDE CHECK ---
+      const urlParams = new URLSearchParams(window.location.search);
+      const adminOverrideId = urlParams.get('admin_override');
+      
+      if (adminOverrideId) {
+        // Trick the app into using the target user's ID
+        currentUser = {
+          id: adminOverrideId,
+          email: 'admin@sakkhi',
+          name: 'Admin Override',
+          user_metadata: { name: 'Admin Override' }
+        };
+        
+        document.getElementById('login-modal').classList.remove('active');
+        document.getElementById('main-app').style.display = 'block';
+        
+        // Show the warning banner
+        showAdminBanner();
+        
+        // Load the targeted user's data
+        loadAll();
+        return; // Stop the normal login process
+      }
+      // ---------------------------------
+
       // Check for Demo Mode first
       if (isDemoMode) {
         document.getElementById('login-modal').classList.remove('active');
@@ -1659,7 +1695,6 @@
         initGoogleSignIn();
       }
     });
-
     // ==========================================
     // MAIN APP LOGIC
     // ==========================================
