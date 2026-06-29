@@ -493,7 +493,10 @@
         <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
       </section>
 
-      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
+      <!-- THIS IS THE MISSING LINE -->
+      <section id="section-shoots" class="app-section hidden space-y-4">
+      
+        <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
           <div class="flex items-center justify-between w-full md:w-auto">
             <h2 class="text-xl font-bold text-white">Shoots List</h2>
             <button onclick="downloadShootsListPDF()" class="md:hidden flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> PDF</button>
