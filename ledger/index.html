@@ -114,11 +114,21 @@
           </div>
           <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
         </div>
-      
-      <div id="settled-section" class="hidden mt-6 bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-6 text-center">
-        <div class="w-12 h-12 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-400 text-2xl mx-auto mb-3"><i class="ti ti-check"></i></div>
-        <h3 class="text-base font-bold text-white mb-1">Ledger Settled</h3>
-        <p class="text-xs text-emerald-500/80">Thank you! All accounts are currently clear.</p>
+
+<!-- TRUST SIGNAL GOES HERE -->
+    <div class="flex items-center justify-center gap-1.5 pt-2 pb-2 text-neutral-600">
+      <i class="ti ti-lock text-[10px]"></i>
+      <span class="text-[9px] uppercase tracking-widest font-bold">Secure Encrypted Ledger</span>
+    </div>
+
+</div>
+        
+      <div id="settled-section" class="hidden mt-6 bg-gradient-to-b from-emerald-950/40 to-[#0f0f0f] border border-emerald-900/40 rounded-xl p-8 text-center shadow-[0_0_30px_rgba(16,185,129,0.05)]">
+        <div class="w-16 h-16 bg-emerald-950/50 border border-emerald-800/50 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto mb-4 shadow-[0_0_20px_rgba(16,185,129,0.2)]">
+          <i class="ti ti-check"></i>
+        </div>
+        <h3 class="text-lg font-bold text-white mb-1 tracking-tight">All Caught Up!</h3>
+        <p class="text-xs text-emerald-500/80 leading-relaxed">Thank you for your prompt payments. Your ledger is completely clear.</p>
       </div>
 
     </div>
@@ -159,6 +169,14 @@
       
       <div class="text-3xl font-bold text-[#c9a96e] tracking-tight mb-2" id="qr-amount"></div>
       <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold bg-neutral-900 border border-white/5 inline-block px-3 py-1.5 rounded-lg" id="qr-upi-id"></p>
+
+      <!-- ========================================== -->
+      <!-- ADD THE SCREENSHOT HINT RIGHT HERE         -->
+      <!-- ========================================== -->
+      <p class="text-[10px] text-neutral-500 mt-4 max-w-[200px] mx-auto leading-relaxed">
+        <span class="font-bold text-neutral-400">Viewing on mobile?</span><br> Take a screenshot and upload it inside your UPI app to pay.
+      </p>
+      
     </div>
   </div>
 
