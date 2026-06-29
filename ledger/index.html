@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
   <title>Company Ledger Portal | Sakkhi</title>
   <meta name="theme-color" content="#030303">
+
+  <link rel="icon" type="image/png" href="/sakkhi 300px.png">
+  <link rel="shortcut icon" href="/sakkhi 300px.png">
+  <link rel="apple-touch-icon" href="/sakkhi 300px.png">
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -66,6 +70,11 @@
         <div class="flex justify-between items-center border-b border-white/5 pb-4">
           <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Total Billed</span>
           <span id="ui-total" class="text-sm font-bold text-white">₹0</span>
+        </div>
+        
+        <div class="flex justify-between items-center border-b border-white/5 pb-4">
+          <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Total Expenses</span>
+          <span id="ui-expenses" class="text-sm font-bold text-amber-500">₹0</span>
         </div>
         
         <div class="flex justify-between items-center border-b border-white/5 pb-4">
@@ -242,25 +251,36 @@
         // --- CALCULATE TOTALS ---
         let totalBilled = 0;
         let totalPaid = 0;
+        let totalExpenses = 0;
+        let totalPendingExpenses = 0;
 
         shootData.forEach(s => {
           const amount = Number(s.amount || 0);
+          const expense = Number(s.expense || 0);
+          
           totalBilled += amount;
+          totalExpenses += expense;
           
           if (s.pay_status === 'done') {
             totalPaid += amount;
           } else if (s.pay_status === 'part') {
             totalPaid += Number(s.part_paid || 0);
           }
+
+          if (expense > 0 && s.expense_status !== 'settled') {
+            totalPendingExpenses += expense;
+          }
         });
 
-        const due = totalBilled - totalPaid;
+        // Due = (Gross Billed - Payments Received) + Unsettled Expenses
+        const due = (totalBilled - totalPaid) + totalPendingExpenses;
 
         // --- POPULATE UI ---
         document.getElementById('ui-company-name').textContent = companyName;
         document.getElementById('ui-biz-name').textContent = `Ledger • ${profile.bizName || 'Sakkhi Studio'}`;
         
         document.getElementById('ui-total').textContent = formatAmt(totalBilled);
+        document.getElementById('ui-expenses').textContent = formatAmt(totalExpenses);
         document.getElementById('ui-paid').textContent = formatAmt(totalPaid);
         document.getElementById('ui-due').textContent = formatAmt(due);
 
@@ -340,8 +360,9 @@
                   </div>` : ''}
 
                   ${hasNotes ? `
-                  <div class="bg-neutral-900/50 rounded-lg p-2.5 border border-white/5 mt-0.5">
-                    <p class="text-[10px] text-neutral-400 leading-relaxed italic"><i class="ti ti-notes mr-1 opacity-70"></i>${s.notes}</p>
+                  <div class="bg-neutral-900/50 rounded-lg p-2.5 border border-white/5 mt-0.5 flex gap-1.5 items-start">
+                    <i class="ti ti-notes text-neutral-500 mt-0.5 text-xs opacity-70"></i>
+                    <p class="text-[10px] text-neutral-400 leading-relaxed italic whitespace-pre-wrap">${s.notes}</p>
                   </div>` : ''}
                   
                 </div>` : ''}
