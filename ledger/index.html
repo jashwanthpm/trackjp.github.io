@@ -103,11 +103,17 @@
           <i class="ti ti-qrcode text-lg text-[#c9a96e]"></i> Show QR Code
         </button>
         
-        <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-white/5 rounded-xl p-5 hidden mt-3">
-          <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-3">Or Pay via Bank Transfer</p>
+        <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-white/5 rounded-xl p-5 hidden mt-3 relative group">
+          <div class="flex justify-between items-center mb-3">
+             <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Or Pay via Bank Transfer</p>
+             
+             <button onclick="copyBankDetails()" id="copy-bank-btn" class="text-[10px] uppercase tracking-wider font-bold text-[#c9a96e] bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/10 px-2 py-1 rounded transition-all flex items-center gap-1 active:scale-95">
+               <i class="ti ti-copy text-xs"></i> Copy
+             </button>
+             
+          </div>
           <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
         </div>
-      </div>
       
       <div id="settled-section" class="hidden mt-6 bg-emerald-950/20 border border-emerald-900/40 rounded-xl p-6 text-center">
         <div class="w-12 h-12 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-400 text-2xl mx-auto mb-3"><i class="ti ti-check"></i></div>
@@ -227,7 +233,33 @@
         modal.style.display = 'none';
       }, 300);
     }
-
+    
+// --- Tap to Copy Logic ---
+    function copyBankDetails() {
+      const bankText = document.getElementById('ui-bank-details').innerText;
+      
+      // Copy to clipboard
+      navigator.clipboard.writeText(bankText).then(() => {
+        const btn = document.getElementById('copy-bank-btn');
+        const originalHTML = btn.innerHTML;
+        
+        // Visual feedback: Turn green and say "Copied!"
+        btn.innerHTML = '<i class="ti ti-check text-xs"></i> Copied!';
+        btn.classList.remove('text-[#c9a96e]', 'bg-[#c9a96e]/10', 'hover:bg-[#c9a96e]/20', 'border-[#c9a96e]/10');
+        btn.classList.add('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
+        
+        // Revert back after 2 seconds
+        setTimeout(() => {
+          btn.innerHTML = originalHTML;
+          btn.classList.add('text-[#c9a96e]', 'bg-[#c9a96e]/10', 'hover:bg-[#c9a96e]/20', 'border-[#c9a96e]/10');
+          btn.classList.remove('text-emerald-400', 'bg-emerald-400/10', 'border-emerald-400/20');
+        }, 2000);
+      }).catch(err => {
+        console.error('Failed to copy: ', err);
+        alert('Could not copy text. Please try selecting it manually.');
+      });
+    }
+    
     async function loadPortal() {
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = urlParams.get('ref');
