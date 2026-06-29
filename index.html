@@ -593,7 +593,7 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
   };
   // END OF PASTED JAVASCRIPT
 </script>
-  <!-- Terms of Service Modal -->
+ <!-- Terms of Service Modal -->
 <div id="tos-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'tos-modal-backdrop')">
   <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-2xl p-6 shadow-2xl flex flex-col max-h-[80vh]">
     <div class="flex items-center justify-between border-b border-neutral-800 pb-4 mb-4">
@@ -601,18 +601,22 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       <button onclick="closeModal('tos-modal-backdrop')" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
     </div>
     <div class="overflow-y-auto pr-2 space-y-4 text-xs text-neutral-400 leading-relaxed hide-scrollbar">
-      <p><strong class="text-white text-sm">1. Acceptance of Terms</strong><br>By accessing and using Sakkhi Shoot Management, you accept and agree to be bound by the terms and provision of this agreement.</p>
+      <p><strong class="text-white text-sm">1. Acceptance of Terms</strong><br>By accessing and using Sakkhi Shoot Management, you accept and agree to be bound by the terms and provision of this agreement. If you do not agree, you must not use our services.</p>
       
-      <p><strong class="text-white text-sm">2. Use of Service</strong><br>Our service is provided to help freelancers and independent professionals manage their shoot schedules, ledgers, and client data. You agree not to misuse the service, attempt to bypass security measures, or use the platform for any illegal activities.</p>
+      <p><strong class="text-white text-sm">2. Use of Service</strong><br>Our service is provided to help creative professionals manage their shoot schedules, financial ledgers, and client communications. You agree not to misuse the service, attempt to bypass security measures, or use the platform for any illegal, fraudulent, or unauthorized activities.</p>
       
-      <p><strong class="text-white text-sm">3. Account Security</strong><br>You are responsible for safeguarding the password and financial PIN that you use to access the service. Sakkhi cannot and will not be liable for any loss or damage arising from your failure to comply with security obligations.</p>
+      <p><strong class="text-white text-sm">3. Account & Data Security</strong><br>You are responsible for safeguarding your authentication credentials and your in-app financial PIN. Sakkhi utilizes enterprise-grade security, but we cannot be held liable for any loss or damage arising from your failure to secure your local devices or accounts.</p>
       
-      <p><strong class="text-white text-sm">4. Data Ownership & Export</strong><br>You retain full ownership of all data you input into the platform. You may export your database at any time. If you choose to erase your data, it is permanently removed from our active servers.</p>
-      
-      <p><strong class="text-white text-sm">5. Modifications</strong><br>We reserve the right to modify these terms at any time. Continued use of the platform constitutes acceptance of the updated terms.</p>
+      <p><strong class="text-white text-sm">4. Data Ownership & Export</strong><br>You retain 100% ownership of all data you input into the platform. We do not claim any rights to your client lists, financial records, or schedule. You may export your database to a standard CSV or PDF format at any time without restriction.</p>
+
+      <p><strong class="text-white text-sm">5. Subscriptions, Payments & Cancellations</strong><br>Premium features require a paid subscription, processed securely via Razorpay. Subscriptions are billed in advance on a monthly or annual basis. You may cancel your subscription at any time; however, there are no prorated refunds for partially used billing periods.</p>
+
+      <p><strong class="text-white text-sm">6. Service Availability & Updates</strong><br>We strive for 99.9% uptime but do not guarantee that the service will be uninterrupted or error-free. We reserve the right to update, modify, or discontinue features to improve the overall platform experience.</p>
+
+      <p><strong class="text-white text-sm">7. Limitation of Liability</strong><br>In no event shall Sakkhi, its developers, or affiliates be liable for any indirect, incidental, or consequential damages, including loss of profits, data, or business opportunities arising out of the use or inability to use the platform.</p>
     </div>
     <div class="pt-4 border-t border-neutral-800 mt-4 text-right">
-      <button onclick="closeModal('tos-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand</button>
+      <button onclick="closeModal('tos-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand & Agree</button>
     </div>
   </div>
 </div>
@@ -625,18 +629,22 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       <button onclick="closeModal('privacy-modal-backdrop')" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
     </div>
     <div class="overflow-y-auto pr-2 space-y-4 text-xs text-neutral-400 leading-relaxed hide-scrollbar">
-      <p><strong class="text-white text-sm">1. Information We Collect</strong><br>We collect information you provide directly to us when you create an account, such as your name, email address, and authentication credentials via Google OAuth.</p>
+      <p><strong class="text-white text-sm">1. Information We Collect</strong><br>We collect basic information you provide directly to us when you create an account, such as your name, email address, and authentication credentials via secure Google OAuth.</p>
       
-      <p><strong class="text-white text-sm">2. How We Use Your Data</strong><br>Your data (shoot details, financial ledger, client notes) is stored securely on cloud servers solely to provide the management service to you. We do not sell your personal or financial data to third parties.</p>
+      <p><strong class="text-white text-sm">2. How We Use Your Data</strong><br>Your data (shoot details, financial ledger, client notes) is stored securely on cloud servers solely to provide the management service to you. We do not—and will never—sell, rent, or lease your personal or financial data to third parties or advertisers.</p>
       
-      <p><strong class="text-white text-sm">3. Financial Privacy Feature</strong><br>We offer a built-in privacy PIN feature to mask your ledger amounts locally on your device to protect against shoulder surfing. This PIN is stored as a setting and does not encrypt the backend database.</p>
+      <p><strong class="text-white text-sm">3. Client Data Protection</strong><br>We understand the importance of your clients' privacy. The names, phone numbers, and shoot details of your clients entered into Sakkhi are strictly treated as confidential data belonging to you. We do not access or use your client lists for any marketing purposes.</p>
+
+      <p><strong class="text-white text-sm">4. Data Security & Hosting</strong><br>All database records are hosted on Supabase (PostgreSQL), protected by strict Row Level Security (RLS) policies. This means the database physically blocks anyone (including other users) from querying data that doesn't belong to their specific authenticated User ID. All data is encrypted in transit and at rest.</p>
       
-      <p><strong class="text-white text-sm">4. Data Deletion</strong><br>If you utilize the "Danger Zone" to erase your database, your records are permanently wiped from the active cloud storage immediately.</p>
+      <p><strong class="text-white text-sm">5. Financial Privacy Feature</strong><br>We offer a built-in privacy PIN feature to mask your ledger amounts locally on your device to protect against shoulder surfing while on set. This PIN is stored securely as a local preference.</p>
       
-      <p><strong class="text-white text-sm">5. Third-Party Services</strong><br>We use secure third-party providers (like Supabase and Google) for database hosting and authentication. Their respective privacy policies apply to the infrastructural data they process.</p>
+      <p><strong class="text-white text-sm">6. Third-Party Services</strong><br>We use secure, industry-standard third-party providers for infrastructure: Supabase (database hosting), Google (authentication), and Razorpay (subscription processing). We do not store your credit card or UPI details on our servers; payments are processed securely directly by Razorpay.</p>
+
+      <p><strong class="text-white text-sm">7. Total Data Deletion</strong><br>You have the absolute right to be forgotten. If you utilize the "Danger Zone" in your Account Settings to erase your database, your records are permanently and irreversibly wiped from our active cloud storage immediately.</p>
     </div>
     <div class="pt-4 border-t border-neutral-800 mt-4 text-right">
-      <button onclick="closeModal('privacy-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand</button>
+      <button onclick="closeModal('privacy-modal-backdrop')" class="px-5 py-2.5 bg-neutral-900 border border-neutral-800 text-white text-xs font-bold rounded-lg hover:bg-neutral-800 transition">I Understand & Agree</button>
     </div>
   </div>
 </div>
