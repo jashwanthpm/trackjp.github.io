@@ -408,10 +408,18 @@
     <main class="max-w-7xl mx-auto px-4 md:px-8 py-6">
 
       <section id="section-dashboard" class="app-section space-y-6">
-        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
           <div>
             <h2 class="text-2xl font-bold tracking-tight text-white">Dashboard</h2>
             <p id="dash-date" class="text-xs text-neutral-400 mt-1"></p>
+          </div>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <select id="dash-filter-fy" onchange="handleTimeFilterChange('dash', 'renderDashboard')" class="bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-[#c9a96e] font-bold outline-none focus:border-[#c9a96e] transition cursor-pointer"></select>
+            <div id="dash-custom-dates" class="hidden items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded-lg p-1.5 px-2">
+              <input type="date" id="dash-start-date" onchange="renderDashboard()" class="custom-start-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+              <span class="text-neutral-600 text-xs">-</span>
+              <input type="date" id="dash-end-date" onchange="renderDashboard()" class="custom-end-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+            </div>
           </div>
         </div>
 
@@ -485,10 +493,20 @@
         <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
       </section>
 
-      <section id="section-shoots" class="app-section hidden space-y-4">
-        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
-          <h2 class="text-xl font-bold text-white">Shoots List</h2>
-          <button onclick="downloadShootsListPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Download PDF</button>
+      <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
+          <div class="flex items-center justify-between w-full md:w-auto">
+            <h2 class="text-xl font-bold text-white">Shoots List</h2>
+            <button onclick="downloadShootsListPDF()" class="md:hidden flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> PDF</button>
+          </div>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full md:w-auto">
+            <select id="shoots-filter-fy" onchange="handleTimeFilterChange('shoots', 'renderShootsList')" class="bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-[#c9a96e] font-bold outline-none focus:border-[#c9a96e] transition cursor-pointer"></select>
+            <div id="shoots-custom-dates" class="hidden items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded-lg p-1.5 px-2">
+              <input type="date" id="shoots-start-date" onchange="renderShootsList()" class="custom-start-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+              <span class="text-neutral-600 text-xs">-</span>
+              <input type="date" id="shoots-end-date" onchange="renderShootsList()" class="custom-end-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+            </div>
+            <button onclick="downloadShootsListPDF()" class="hidden md:flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> PDF</button>
+          </div>
         </div>
 
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
@@ -523,11 +541,19 @@
       </section>
 
       <section id="section-payments" class="app-section hidden space-y-4">
-        <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
+        <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
           <h2 class="text-xl font-bold text-white">Payments Ledger</h2>
-          <div class="flex gap-2">
-            <button onclick="downloadCompanyViewPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Share (Company)</button>
-            <button onclick="downloadFullReportPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Full Report</button>
+          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2">
+            <select id="pay-filter-fy" onchange="handleTimeFilterChange('pay', 'renderPaymentsList')" class="bg-neutral-950 border border-neutral-800 rounded-lg px-3 py-2 text-xs text-[#c9a96e] font-bold outline-none focus:border-[#c9a96e] transition cursor-pointer"></select>
+            <div id="pay-custom-dates" class="hidden items-center gap-1.5 bg-neutral-950 border border-neutral-800 rounded-lg p-1.5 px-2">
+              <input type="date" id="pay-start-date" onchange="renderPaymentsList()" class="custom-start-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+              <span class="text-neutral-600 text-xs">-</span>
+              <input type="date" id="pay-end-date" onchange="renderPaymentsList()" class="custom-end-date bg-transparent text-[10px] font-bold text-white outline-none cursor-pointer w-[95px] uppercase [color-scheme:dark]"/>
+            </div>
+            <div class="flex gap-2">
+              <button onclick="downloadCompanyViewPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Share</button>
+              <button onclick="downloadFullReportPDF()" class="flex items-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition"><i class="ti ti-download"></i> Report</button>
+            </div>
           </div>
         </div>
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="pay-stats"></div>
@@ -2017,6 +2043,8 @@ try {
       document.getElementById('loading-screen').classList.add('hidden');
       applyPrivacyUIVisibility();
       updateAccountDisplay();
+      
+      initTimeFilters(); // <--- ADD THIS LINE RIGHT HERE
       renderDashboard();
 
       // Show notification if external bookings came in
@@ -2288,12 +2316,80 @@ function getCurrentDeviceDetails() {
       }
     }
 
+// ==========================================
+    // UNIFIED TIME FILTER ENGINE
+    // ==========================================
+    let _dashFilteredShoots = []; 
+
+    function initTimeFilters() {
+      const today = new Date();
+      const currentYear = today.getFullYear();
+      // Indian Financial Year starts in April
+      const fyStartYear = today.getMonth() >= 3 ? currentYear : currentYear - 1;
+      
+      const optionsHtml = `
+        <option value="fy_${fyStartYear}">FY ${fyStartYear}-${(fyStartYear+1).toString().slice(2)} (Current)</option>
+        <option value="fy_${fyStartYear-1}">FY ${fyStartYear-1}-${fyStartYear.toString().slice(2)}</option>
+        <option value="fy_${fyStartYear-2}">FY ${fyStartYear-2}-${(fyStartYear-1).toString().slice(2)}</option>
+        <option value="custom">Custom Range</option>
+        <option value="all">All Time (Full)</option>
+      `;
+
+      // Inject dropdowns into all 3 tabs
+      ['dash', 'shoots', 'pay'].forEach(prefix => {
+        const select = document.getElementById(`${prefix}-filter-fy`);
+        if (select) select.innerHTML = optionsHtml;
+      });
+
+      // Set default custom dates to the current month
+      const firstDay = new Date(currentYear, today.getMonth(), 1).toISOString().split('T')[0];
+      const lastDay = new Date(currentYear, today.getMonth() + 1, 0).toISOString().split('T')[0];
+      
+      document.querySelectorAll('.custom-start-date').forEach(el => el.value = firstDay);
+      document.querySelectorAll('.custom-end-date').forEach(el => el.value = lastDay);
+    }
+
+    function handleTimeFilterChange(prefix, renderFn) {
+       const val = document.getElementById(`${prefix}-filter-fy`).value;
+       const customWrap = document.getElementById(`${prefix}-custom-dates`);
+       if (val === 'custom') {
+         customWrap.classList.remove('hidden');
+         customWrap.classList.add('flex');
+       } else {
+         customWrap.classList.add('hidden');
+         customWrap.classList.remove('flex');
+       }
+       window[renderFn]();
+    }
+
+    function applyTimeFilter(shootsArray, prefix) {
+      const filterVal = document.getElementById(`${prefix}-filter-fy`)?.value || 'all';
+      if (filterVal === 'all') return shootsArray;
+
+      if (filterVal.startsWith('fy_')) {
+        const fyYear = parseInt(filterVal.split('_')[1]);
+        const startDate = `${fyYear}-04-01`;
+        const endDate = `${fyYear + 1}-03-31`;
+        return shootsArray.filter(s => s.date >= startDate && s.date <= endDate);
+      } else if (filterVal === 'custom') {
+        const startDate = document.getElementById(`${prefix}-start-date`).value;
+        const endDate = document.getElementById(`${prefix}-end-date`).value;
+        if (startDate && endDate) {
+          return shootsArray.filter(s => s.date >= startDate && s.date <= endDate);
+        }
+      }
+      return shootsArray;
+    }
+    
     function renderDashboard() {
-      const shoots = _shoots;
+      // ---> NEW FILTER APPLY <---
+      let shoots = applyTimeFilter([..._shoots], 'dash');
+      _dashFilteredShoots = shoots; // Save for Top Companies
+
       const td = today();
       const now = new Date();
-
       document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+      // ... rest of the function stays exactly the same
 
       const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
@@ -2409,8 +2505,10 @@ function getCurrentDeviceDetails() {
     }
 
     function renderTopCompanies() {
-      const companyStats = {};
-      _shoots.forEach(s => {
+  const companyStats = {};
+  const sourceData = typeof _dashFilteredShoots !== 'undefined' ? _dashFilteredShoots : _shoots;
+  
+  sourceData.forEach(s => {
         const comp = s.company || 'Direct';
         if (!companyStats[comp]) {
           companyStats[comp] = { shoots: 0, revenue: 0, pending: 0 };
@@ -2719,15 +2817,22 @@ async function toggleBlockDate(dateStr) {
     function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
 
     function renderShootsList() {
+      // ---> NEW FILTER APPLY <---
+      let baseShoots = applyTimeFilter([..._shoots], 'shoots');
+
       const q = (document.getElementById('shoot-search')?.value || '').toLowerCase();
       const ft = document.getElementById('filter-timeline')?.value || '';
       const fc = document.getElementById('filter-company')?.value || '';
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
 
-      const totalShoots = _shoots.length;
-      const upcomingShoots = _shoots.filter(s => s.date >= td).length;
-      const completedShoots = _shoots.filter(s => s.date < td).length;
+      const totalShoots = baseShoots.length;
+      const upcomingShoots = baseShoots.filter(s => s.date >= td).length;
+      const completedShoots = baseShoots.filter(s => s.date < td).length;
+      // ... continue with your DOM updates ...
+      
+      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      // ... rest of the function stays exactly the same
       
       document.getElementById('stat-total').textContent = totalShoots;
       document.getElementById('stat-upcoming').textContent = upcomingShoots;
@@ -2806,10 +2911,16 @@ async function toggleBlockDate(dateStr) {
     }
 
     function renderPaymentsList() {
+      // ---> NEW FILTER APPLY <---
+      let baseShoots = applyTimeFilter(_shoots.filter(s => s.amount), 'pay');
+
       const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
       const fs = document.getElementById('pay-filter-status')?.value || '';
       const fc = document.getElementById('pay-filter-company')?.value || '';
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
+
+      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      // ... rest of the function stays exactly the same
 
       // 1. Filter the shoots array first
       let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
