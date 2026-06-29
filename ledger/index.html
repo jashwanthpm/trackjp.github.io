@@ -300,9 +300,23 @@
 
         // 3. Fetch ALL shoots for this company
         const encodedCompany = encodeURIComponent(companyName);
-        const shootData = await sbFetch(`shoots?user_id=eq.${userId}&company=eq.${encodedCompany}&order=date.desc&select=*`);
+        const allShootData = await sbFetch(`shoots?user_id=eq.${userId}&company=eq.${encodedCompany}&order=date.desc&select=*`);
         
-        // --- CALCULATE TOTALS ---
+        // --- SMART FILTER: ACTIVE LEDGER ONLY ---
+        // Calculate the date for 6 months ago
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+        // Filter the shoots
+        const shootData = allShootData.filter(s => {
+          const isFullySettled = s.pay_status === 'done' && (Number(s.expense || 0) === 0 || s.expense_status === 'settled');
+          const shootDate = new Date(s.date);
+          
+          // Keep it if it is NOT settled, OR if it happened in the last 6 months
+          return !isFullySettled || shootDate >= sixMonthsAgo;
+        });
+
+        // --- CALCULATE TOTALS (Now only using the filtered active shoots) ---
         let totalBilled = 0;
         let totalPaid = 0;
         let totalExpenses = 0;
