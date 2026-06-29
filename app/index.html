@@ -831,10 +831,17 @@
                   </summary>
                   <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
                     <div id="settings-companies" class="divide-y divide-neutral-900 mb-4"></div>
-                    <div class="flex gap-2">
+                    <div class="flex gap-2 mb-4">
                       <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                       <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 rounded-lg transition border border-neutral-700">Add</button>
                     </div>
+                    
+                    <!-- Disclaimer for the User -->
+                    <div class="flex items-start gap-1.5 text-[11px] text-neutral-500 bg-white/5 p-2.5 rounded-lg border border-white/10">
+                      <i class="ti ti-info-circle mt-0.5 text-blue-400"></i>
+                      <p><strong>Note:</strong> Client Ledger links automatically hide fully settled shoots older than 6 months to prevent invoice bloat. Unpaid shoots will always remain visible.</p>
+                    </div>
+                    
                   </div>
                 </details>
 
