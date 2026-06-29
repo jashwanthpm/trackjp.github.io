@@ -1280,6 +1280,8 @@
         <div class="space-y-1">
           <h4 class="text-white font-bold text-base tracking-wide">Unlock Dashboard Ledger</h4>
           <p class="text-xs text-neutral-500">Provide security verification to reveal ledger amounts.</p>
+          
+          <p id="demo-pin-hint" class="text-[10px] text-[#c9a96e]/70 mt-2 font-bold uppercase tracking-wider"></p>
         </div>
         <div class="space-y-3">
           <input type="password" id="privacy-pass-input" placeholder="••••••••" class="w-full text-center bg-neutral-950 border border-neutral-800 rounded-xl px-3 py-2.5 text-lg text-white tracking-widest outline-none focus:border-amber-500 transition"/>
@@ -4207,14 +4209,27 @@ async function toggleBlockDate(dateStr) {
       });
     }
 
+    // --- ADD THE NEW FUNCTION HERE ---
+    function updatePinHint() {
+      const hintEl = document.getElementById('demo-pin-hint');
+      if (!hintEl) return;
+      
+      // If the current PIN is still the default '1234', show the hint
+      if (_appPin === '1234') {
+        hintEl.textContent = "Default PIN: 1234";
+      } else {
+        hintEl.textContent = ""; // Clear it if they've changed it
+      }
+    }
+
     function togglePrivacyMode() {
       if (_privacyModeActive) {
         if (isDemoMode) {
-          // Bypass the password prompt completely in demo mode
           _privacyModeActive = false;
           applyPrivacyUIVisibility();
           document.getElementById('privacy-icon').className = 'ti ti-eye text-lg';
         } else {
+          updatePinHint(); // <--- ADD THIS CALL
           document.getElementById('privacy-pass-input').value = '';
           document.getElementById('privacy-error-lbl').classList.add('hidden');
           openModal('privacy-prompt-backdrop');
