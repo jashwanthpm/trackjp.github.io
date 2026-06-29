@@ -2352,18 +2352,43 @@ function getCurrentDeviceDetails() {
       document.querySelectorAll('.custom-end-date').forEach(el => el.value = lastDay);
     }
 
-    function handleTimeFilterChange(prefix, renderFn) {
-       const val = document.getElementById(`${prefix}-filter-fy`).value;
-       const customWrap = document.getElementById(`${prefix}-custom-dates`);
-       if (val === 'custom') {
-         customWrap.classList.remove('hidden');
-         customWrap.classList.add('flex');
-       } else {
-         customWrap.classList.add('hidden');
-         customWrap.classList.remove('flex');
-       }
-       window[renderFn]();
+   function handleTimeFilterChange(sourcePrefix, renderFn) {
+       // 1. Get the value the user just selected
+       const selectedValue = document.getElementById(`${sourcePrefix}-filter-fy`).value;
+       
+       // 2. Loop through all three sections and sync them to match
+       ['dash', 'shoots', 'pay'].forEach(prefix => {
+         const select = document.getElementById(`${prefix}-filter-fy`);
+         if (select) select.value = selectedValue; // Sync the dropdown!
+         
+         const customWrap = document.getElementById(`${prefix}-custom-dates`);
+         if (customWrap) {
+           if (selectedValue === 'custom') {
+             customWrap.classList.remove('hidden');
+             customWrap.classList.add('flex');
+           } else {
+             customWrap.classList.add('hidden');
+             customWrap.classList.remove('flex');
+           }
+         }
+       });
+       
+       // 3. Re-render the current active page
+       if (window[renderFn]) window[renderFn]();
     }
+
+    // Add this tiny function to sync custom date typed inputs globally too
+    document.addEventListener('change', function(e) {
+      if (e.target.classList.contains('custom-start-date') || e.target.classList.contains('custom-end-date')) {
+        const isStart = e.target.classList.contains('custom-start-date');
+        const newValue = e.target.value;
+        const targetClass = isStart ? '.custom-start-date' : '.custom-end-date';
+        
+        document.querySelectorAll(targetClass).forEach(input => {
+          input.value = newValue;
+        });
+      }
+    });
 
     function applyTimeFilter(shootsArray, prefix) {
       const filterVal = document.getElementById(`${prefix}-filter-fy`)?.value || 'all';
