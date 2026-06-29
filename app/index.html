@@ -2829,10 +2829,6 @@ async function toggleBlockDate(dateStr) {
       const totalShoots = baseShoots.length;
       const upcomingShoots = baseShoots.filter(s => s.date >= td).length;
       const completedShoots = baseShoots.filter(s => s.date < td).length;
-      // ... continue with your DOM updates ...
-      
-      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      // ... rest of the function stays exactly the same
       
       document.getElementById('stat-total').textContent = totalShoots;
       document.getElementById('stat-upcoming').textContent = upcomingShoots;
@@ -2850,7 +2846,8 @@ async function toggleBlockDate(dateStr) {
         locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
       }
 
-      let filtered = [..._shoots].sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      // ONLY DECLARE THIS ONCE
+      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       
       if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
@@ -2919,11 +2916,9 @@ async function toggleBlockDate(dateStr) {
       const fc = document.getElementById('pay-filter-company')?.value || '';
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
 
+      // ONLY DECLARE THIS ONCE
       let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      // ... rest of the function stays exactly the same
-
-      // 1. Filter the shoots array first
-      let filtered = _shoots.filter(s => s.amount).sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
       
