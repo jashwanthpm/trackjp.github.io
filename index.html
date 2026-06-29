@@ -262,43 +262,47 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
     <p class="text-neutral-500 text-sm">Managing a creative studio in Excel is prone to errors. Sakkhi automates the administrative clutter.</p>
   </div>
 
-  <div class="bg-[#050505] border border-white/5 rounded-2xl overflow-hidden shadow-2xl">
-    <table class="w-full text-left border-collapse">
-      <thead>
-        <tr class="bg-[#0a0a0a] border-b border-white/10">
-          <th class="p-6 text-neutral-500 text-xs uppercase tracking-widest font-bold">Feature</th>
-          <th class="p-6 text-neutral-400 text-xs uppercase tracking-widest font-bold text-center">Spreadsheets</th>
-          <th class="p-6 text-[#c9a96e] text-xs uppercase tracking-widest font-bold text-center">Sakkhi</th>
-        </tr>
-      </thead>
-      <tbody class="divide-y divide-white/5">
-        <tr class="hover:bg-white/[0.02] transition-colors">
-          <td class="p-6 text-sm text-neutral-300 font-medium">WhatsApp Reminders</td>
-          <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
-          <td class="p-6 text-center text-emerald-400 font-bold"><i class="ti ti-check"></i> 1-Click</td>
-        </tr>
-        <tr class="hover:bg-white/[0.02] transition-colors">
-          <td class="p-6 text-sm text-neutral-300 font-medium">Client Payment Portal</td>
-          <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
-          <td class="p-6 text-center text-emerald-400 font-bold"><i class="ti ti-check"></i> Live QR/Ledger</td>
-        </tr>
-        <tr class="hover:bg-white/[0.02] transition-colors">
-          <td class="p-6 text-sm text-neutral-300 font-medium">Financial Privacy</td>
-          <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
-          <td class="p-6 text-center text-emerald-400 font-bold"><i class="ti ti-check"></i> PIN Blur</td>
-        </tr>
-        <tr class="hover:bg-white/[0.02] transition-colors">
-          <td class="p-6 text-sm text-neutral-300 font-medium">PDF Reports</td>
-          <td class="p-6 text-center text-neutral-600"><i class="ti ti-minus"></i> Manual</td>
-          <td class="p-6 text-center text-emerald-400 font-bold"><i class="ti ti-check"></i> Automated</td>
-        </tr>
-        <tr class="hover:bg-white/[0.02] transition-colors">
-          <td class="p-6 text-sm text-neutral-300 font-medium">Booking Link Conflicts</td>
-          <td class="p-6 text-center text-neutral-600"><i class="ti ti-minus"></i> Manual Check</td>
-          <td class="p-6 text-center text-emerald-400 font-bold"><i class="ti ti-check"></i> Auto-Blocked</td>
-        </tr>
-      </tbody>
-    </table>
+  <!-- FIXED CONTAINER: Added 'overflow-x-auto' wrapper -->
+  <div class="bg-[#050505] border border-white/5 rounded-2xl shadow-2xl relative w-full">
+    <div class="overflow-x-auto w-full rounded-2xl">
+      <!-- FIXED TABLE: Added 'min-w-[600px]' to force scroll on small screens -->
+      <table class="w-full text-left border-collapse min-w-[600px]">
+        <thead>
+          <tr class="bg-[#0a0a0a] border-b border-white/10">
+            <th class="p-6 text-neutral-500 text-xs uppercase tracking-widest font-bold">Feature</th>
+            <th class="p-6 text-neutral-400 text-xs uppercase tracking-widest font-bold text-center">Spreadsheets</th>
+            <th class="p-6 text-[#c9a96e] text-xs uppercase tracking-widest font-bold text-center">Sakkhi</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-white/5">
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="p-6 text-sm text-neutral-300 font-medium whitespace-nowrap">WhatsApp Reminders</td>
+            <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
+            <td class="p-6 text-center text-emerald-400 font-bold whitespace-nowrap"><i class="ti ti-check"></i> 1-Click</td>
+          </tr>
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="p-6 text-sm text-neutral-300 font-medium whitespace-nowrap">Client Payment Portal</td>
+            <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
+            <td class="p-6 text-center text-emerald-400 font-bold whitespace-nowrap"><i class="ti ti-check"></i> Live QR/Ledger</td>
+          </tr>
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="p-6 text-sm text-neutral-300 font-medium whitespace-nowrap">Financial Privacy</td>
+            <td class="p-6 text-center text-red-500/60"><i class="ti ti-x"></i></td>
+            <td class="p-6 text-center text-emerald-400 font-bold whitespace-nowrap"><i class="ti ti-check"></i> PIN Blur</td>
+          </tr>
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="p-6 text-sm text-neutral-300 font-medium whitespace-nowrap">PDF Reports</td>
+            <td class="p-6 text-center text-neutral-600 whitespace-nowrap"><i class="ti ti-minus"></i> Manual</td>
+            <td class="p-6 text-center text-emerald-400 font-bold whitespace-nowrap"><i class="ti ti-check"></i> Automated</td>
+          </tr>
+          <tr class="hover:bg-white/[0.02] transition-colors">
+            <td class="p-6 text-sm text-neutral-300 font-medium whitespace-nowrap">Booking Link Conflicts</td>
+            <td class="p-6 text-center text-neutral-600 whitespace-nowrap"><i class="ti ti-minus"></i> Manual Check</td>
+            <td class="p-6 text-center text-emerald-400 font-bold whitespace-nowrap"><i class="ti ti-check"></i> Auto-Blocked</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
   </div>
 </section>
   
@@ -706,12 +710,6 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
         });
     });
   }
- <head>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <style>
-     /* Your custom CSS goes here, at the end */
-     </style>
-  </head>
-   </body>
-  </html>
+  </script>
+</body>
 </html>
