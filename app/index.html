@@ -1292,7 +1292,20 @@
     </div>
       
     </div>
-    
+    <!-- Command Palette Modal -->
+    <div id="command-palette-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-start justify-center pt-20 px-4 opacity-0 pointer-events-none transition-all duration-200" onclick="if(event.target === this) closeCommandPalette()">
+      <div id="command-palette-modal" class="bg-[#0f0f0f] border border-neutral-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden transform scale-95 transition-all duration-200">
+        <div class="flex items-center px-4 py-3 border-b border-neutral-900">
+          <i class="ti ti-search text-[#c9a96e] text-lg"></i>
+          <input type="text" id="command-input" class="w-full bg-transparent border-none outline-none text-white px-3 text-sm placeholder-neutral-500" placeholder="Search shoots, jump to tabs, or type a command..." oninput="filterCommands()">
+          <span class="text-[10px] bg-neutral-900 text-neutral-500 px-1.5 py-0.5 rounded border border-neutral-800 font-mono select-none">ESC</span>
+        </div>
+        <div class="max-h-[60vh] overflow-y-auto p-2" id="command-results">
+          <!-- Results injected via JS -->
+        </div>
+      </div>
+    </div>
+      
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
     
   <script>
@@ -1763,6 +1776,92 @@ let _isSubActive = false;
     // Create delayed versions of your search functions
     const debouncedShootSearch = debounce(renderShootsList, 300);
     const debouncedPaySearch = debounce(renderPaymentsList, 300);
+
+// ==========================================
+    // COMMAND PALETTE (CTRL+K)
+    // ==========================================
+    document.addEventListener('keydown', function(event) {
+      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
+        event.preventDefault();
+        openCommandPalette();
+      }
+      if (event.key === 'Escape') closeCommandPalette(); 
+    });
+
+    function openCommandPalette() {
+      const backdrop = document.getElementById('command-palette-backdrop');
+      const modal = document.getElementById('command-palette-modal');
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      modal.classList.remove('scale-95');
+      document.getElementById('command-input').value = '';
+      filterCommands(); // Load default list
+      setTimeout(() => document.getElementById('command-input').focus(), 100);
+    }
+
+    function closeCommandPalette() {
+      const backdrop = document.getElementById('command-palette-backdrop');
+      const modal = document.getElementById('command-palette-modal');
+      if (backdrop) {
+        backdrop.classList.add('opacity-0', 'pointer-events-none');
+        modal.classList.add('scale-95');
+      }
+    }
+
+    function filterCommands() {
+      const query = document.getElementById('command-input').value.toLowerCase();
+      const resultsContainer = document.getElementById('command-results');
+      let html = '';
+
+      // 1. Static App Commands
+      const commands = [
+        { title: 'New Shoot', icon: 'ti-plus', color: 'text-[#c9a96e]', action: 'closeCommandPalette(); openAddShootModal();' },
+        { title: 'Go to Dashboard', icon: 'ti-layout-dashboard', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("dashboard");' },
+        { title: 'Go to Calendar', icon: 'ti-calendar', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("calendar");' },
+        { title: 'Go to Ledger', icon: 'ti-wallet', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("payments");' },
+        { title: 'Export Full Database (PDF)', icon: 'ti-file-type-pdf', color: 'text-red-400', action: 'closeCommandPalette(); exportAllDataToPDF();' },
+        { title: 'Toggle Privacy Blur', icon: 'ti-eye-off', color: 'text-amber-500', action: 'closeCommandPalette(); togglePrivacyMode();' }
+      ];
+
+      const filteredCommands = commands.filter(c => c.title.toLowerCase().includes(query));
+      
+      if (filteredCommands.length > 0) {
+        html += '<div class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-2 pt-2 pb-1">Actions</div>';
+        filteredCommands.forEach(c => {
+          html += `<div onclick="${c.action}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-neutral-900 cursor-pointer transition group">
+            <i class="ti ${c.icon} ${c.color} text-lg group-hover:scale-110 transition-transform"></i>
+            <span class="text-sm font-medium text-neutral-200 group-hover:text-white">${c.title}</span>
+          </div>`;
+        });
+      }
+
+      // 2. Dynamic Shoot Search (Only shows if typing)
+      if (query.length > 1) {
+        const matchingShoots = _shoots.filter(s => 
+          (s.name || '').toLowerCase().includes(query) || 
+          (s.company || '').toLowerCase().includes(query) || 
+          (s.location || '').toLowerCase().includes(query)
+        ).slice(0, 5); // Limit to top 5 hits
+
+        if (matchingShoots.length > 0) {
+          html += '<div class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-2 pt-4 pb-1">Matching Shoots</div>';
+          matchingShoots.forEach(s => {
+            html += `<div onclick="closeCommandPalette(); openEditShootModal('${s.id}')" class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-neutral-900 cursor-pointer transition">
+              <div>
+                <div class="text-sm font-bold text-[#c9a96e]">${s.name}</div>
+                <div class="text-xs text-neutral-500">${s.event} • ${s.date}</div>
+              </div>
+              <i class="ti ti-edit text-neutral-600"></i>
+            </div>`;
+          });
+        }
+      }
+
+      if (html === '') {
+        html = '<div class="text-center py-6 text-xs text-neutral-500 italic">No matches found.</div>';
+      }
+
+      resultsContainer.innerHTML = html;
+    }
     
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
