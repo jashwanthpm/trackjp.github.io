@@ -1790,7 +1790,7 @@ let _isSubActive = false;
         setSyncStatus('synced', 'Link Ready');
 
         // Added .html to the path to ensure it works properly on GitHub Pages
-        const magicLink = window.location.origin + '/client.html?ref=' + shortCode;
+        const magicLink = window.location.origin + '/ledger?ref=' + shortCode;
         
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Ledger Portal link for ${companyName} copied!`, 'success');
