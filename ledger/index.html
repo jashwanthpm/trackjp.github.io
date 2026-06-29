@@ -81,12 +81,16 @@
       </div>
 
       <!-- Payment Actions -->
-      <div id="payment-section" class="mt-6 space-y-4">
+      <div id="payment-section" class="mt-6 space-y-3">
         <a id="ui-pay-btn" href="#" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold tracking-wide py-4 rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5">
           <i class="ti ti-device-mobile-bolt text-lg"></i> Pay Now via UPI App
         </a>
         
-        <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-white/5 rounded-xl p-5 hidden">
+        <button id="ui-qr-btn" class="w-full flex items-center justify-center gap-2 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold tracking-wide py-3.5 rounded-xl text-sm transition-all shadow-lg hover:shadow-xl">
+          <i class="ti ti-qrcode text-lg text-[#c9a96e]"></i> Show QR Code
+        </button>
+        
+        <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-white/5 rounded-xl p-5 hidden mt-3">
           <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-3">Or Pay via Bank Transfer</p>
           <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
         </div>
@@ -112,6 +116,31 @@
       </div>
     </div>
 
+  </div>
+
+  <!-- QR Code Modal -->
+  <div id="qr-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
+    <div class="bg-[#0f0f0f] border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center transform scale-95 transition-transform duration-300" id="qr-modal-content">
+      <button onclick="closeQRModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-xl"></i></button>
+      
+      <div class="w-16 h-16 bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-2xl flex items-center justify-center text-[#c9a96e] text-3xl mx-auto mb-4">
+        <i class="ti ti-qrcode"></i>
+      </div>
+      
+      <h3 class="text-xl font-bold text-white mb-1">Scan to Pay</h3>
+      <p class="text-xs text-neutral-400 mb-6">Use any UPI app to scan and clear your pending balance.</p>
+      
+      <div class="bg-white p-3 rounded-2xl inline-block mb-4 shadow-[0_0_30px_rgba(201,169,110,0.15)] relative">
+        <!-- Loading spinner for QR image -->
+        <div id="qr-loader" class="absolute inset-0 flex items-center justify-center">
+            <div class="spinner w-6 h-6 border-2 border-black/10 border-l-[#c9a96e]"></div>
+        </div>
+        <img id="qr-image" src="" alt="UPI QR Code" class="w-48 h-48 rounded-xl object-contain relative z-10 opacity-0 transition-opacity duration-300" onload="this.style.opacity=1; document.getElementById('qr-loader').style.display='none';"/>
+      </div>
+      
+      <div class="text-3xl font-bold text-[#c9a96e] tracking-tight mb-2" id="qr-amount"></div>
+      <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold bg-neutral-900 border border-white/5 inline-block px-3 py-1.5 rounded-lg" id="qr-upi-id"></p>
+    </div>
   </div>
 
   <!-- Error State -->
@@ -149,6 +178,42 @@
     }
 
     function formatAmt(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+
+    // --- QR Modal Logic ---
+    function openQRModal(upi, name, amount) {
+      const upiUri = `upi://pay?pa=${upi}&pn=${encodeURIComponent(name)}&am=${amount}&cu=INR`;
+      
+      // Reset image state for smooth loading
+      document.getElementById('qr-image').style.opacity = '0';
+      document.getElementById('qr-loader').style.display = 'flex';
+      
+      // Set the external QR code generator API URL
+      document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&margin=10&data=${encodeURIComponent(upiUri)}`;
+      document.getElementById('qr-amount').textContent = formatAmt(amount);
+      document.getElementById('qr-upi-id').textContent = `UPI: ${upi}`;
+      
+      const modal = document.getElementById('qr-modal');
+      const content = document.getElementById('qr-modal-content');
+      modal.classList.remove('hidden');
+      modal.style.display = 'flex';
+      
+      // Micro-timeout for CSS animation to trigger
+      setTimeout(() => {
+        modal.classList.remove('opacity-0');
+        content.classList.remove('scale-95');
+      }, 10);
+    }
+
+    function closeQRModal() {
+      const modal = document.getElementById('qr-modal');
+      const content = document.getElementById('qr-modal-content');
+      modal.classList.add('opacity-0');
+      content.classList.add('scale-95');
+      setTimeout(() => {
+        modal.classList.add('hidden');
+        modal.style.display = 'none';
+      }, 300);
+    }
 
     async function loadPortal() {
       const urlParams = new URLSearchParams(window.location.search);
@@ -207,8 +272,14 @@
           if (profile.upi) {
             const upiLink = `upi://pay?pa=${profile.upi}&pn=${encodeURIComponent(profile.bizName || 'Sakkhi Studio')}&am=${due}&cu=INR`;
             document.getElementById('ui-pay-btn').href = upiLink;
+            
+            // Connect QR button logic
+            document.getElementById('ui-qr-btn').onclick = () => {
+              openQRModal(profile.upi, profile.bizName || 'Sakkhi Studio', due);
+            };
           } else {
             document.getElementById('ui-pay-btn').style.display = 'none';
+            document.getElementById('ui-qr-btn').style.display = 'none';
           }
           if (profile.bank) {
             document.getElementById('ui-bank-details-wrap').classList.remove('hidden');
@@ -224,24 +295,56 @@
           listContainer.innerHTML = shootData.map(s => {
             const [y, m, d] = s.date.split('-');
             const monthName = MONTHS[parseInt(m)-1].substring(0,3);
+            
+            // Core logic
             const amt = Number(s.amount || 0);
+            const exp = Number(s.expense || 0);
+            const hasExp = exp > 0;
+            const hasNotes = s.notes && s.notes.trim() !== '';
+            
+            // Badges
             const payStatusColor = s.pay_status === 'done' ? 'text-emerald-400' : (s.pay_status === 'part' ? 'text-amber-400' : 'text-red-400');
             const payStatusLabel = s.pay_status === 'done' ? 'Settled' : (s.pay_status === 'part' ? 'Partial' : 'Pending');
+            const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
+            const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
             return `
-              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-3 flex items-center gap-4 transition-colors hover:border-white/10">
-                <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
-                  <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
-                  <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">${monthName}</span>
+              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 flex flex-col gap-3 transition-colors hover:border-white/10">
+                <!-- Main Shoot Info -->
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
+                    <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
+                    <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">${monthName}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-bold text-white truncate">${s.name}</div>
+                    <div class="text-[10px] text-neutral-400 mt-1 font-medium truncate">${s.event} • ${s.location || 'TBA'}</div>
+                  </div>
+                  <div class="text-right flex-shrink-0 pl-2">
+                    <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
+                    <div class="text-[9px] uppercase font-bold tracking-wider mt-1 ${payStatusColor}">${payStatusLabel}</div>
+                  </div>
                 </div>
-                <div class="min-w-0 flex-1">
-                  <div class="text-sm font-bold text-white truncate">${s.name}</div>
-                  <div class="text-[10px] text-neutral-400 mt-1 font-medium truncate">${s.event} • ${s.location || 'TBA'}</div>
-                </div>
-                <div class="text-right flex-shrink-0 pl-2">
-                  <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
-                  <div class="text-[9px] uppercase font-bold tracking-wider mt-1 ${payStatusColor}">${payStatusLabel}</div>
-                </div>
+                
+                <!-- Expanded Info (Expenses & Notes) -->
+                ${(hasExp || hasNotes) ? `
+                <div class="pt-3 border-t border-white/5 flex flex-col gap-2.5">
+                  
+                  ${hasExp ? `
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="ti ti-receipt text-amber-500/70 text-xs"></i>Shoot Expenses</span>
+                    <div class="text-right flex items-center gap-2">
+                      <span class="text-xs font-bold text-amber-500">${formatAmt(exp)}</span>
+                      <span class="text-[8px] uppercase font-bold tracking-wider ${expStatusColor}">[${expStatusLabel}]</span>
+                    </div>
+                  </div>` : ''}
+
+                  ${hasNotes ? `
+                  <div class="bg-neutral-900/50 rounded-lg p-2.5 border border-white/5 mt-0.5">
+                    <p class="text-[10px] text-neutral-400 leading-relaxed italic"><i class="ti ti-notes mr-1 opacity-70"></i>${s.notes}</p>
+                  </div>` : ''}
+                  
+                </div>` : ''}
               </div>
             `;
           }).join('');
@@ -263,6 +366,23 @@
       document.getElementById('main-content').classList.add('hidden');
       document.getElementById('error-state').classList.remove('hidden');
     }
+
+    // Close modal on Escape key press
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        const modal = document.getElementById('qr-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeQRModal();
+        }
+      }
+    });
+
+    // Close modal when clicking on the backdrop
+    document.getElementById('qr-modal').addEventListener('click', function(event) {
+      if (event.target === this) {
+        closeQRModal();
+      }
+    });
 
     window.addEventListener('DOMContentLoaded', loadPortal);
   </script>
