@@ -509,7 +509,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
           <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
             <i class="ti ti-search text-neutral-500"></i>
-            <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="debouncedShootSearch()"/>
+            <input type="text" id="shoot-search" placeholder="Search shoots..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderShootsList()"/>
           </div>
           <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="filter-timeline" onchange="renderShootsList()">
             <option value="">All Timelines</option>
@@ -534,7 +534,7 @@
         <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
           <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
             <i class="ti ti-search text-neutral-500"></i>
-            <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="debouncedPaySearch()"/>
+            <input type="text" id="pay-search" placeholder="Filter by name..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="renderPaymentsList()"/>
           </div>
           <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="pay-filter-company" onchange="renderPaymentsList()">
             <option value="">All Companies</option>
@@ -1292,20 +1292,7 @@
     </div>
       
     </div>
-    <!-- Command Palette Modal -->
-    <div id="command-palette-backdrop" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[1000] flex items-start justify-center pt-20 px-4 opacity-0 pointer-events-none transition-all duration-200" onclick="if(event.target === this) closeCommandPalette()">
-      <div id="command-palette-modal" class="bg-[#0f0f0f] border border-neutral-800 rounded-xl w-full max-w-lg shadow-2xl overflow-hidden transform scale-95 transition-all duration-200">
-        <div class="flex items-center px-4 py-3 border-b border-neutral-900">
-          <i class="ti ti-search text-[#c9a96e] text-lg"></i>
-          <input type="text" id="command-input" class="w-full bg-transparent border-none outline-none text-white px-3 text-sm placeholder-neutral-500" placeholder="Search shoots, jump to tabs, or type a command..." oninput="filterCommands()">
-          <span class="text-[10px] bg-neutral-900 text-neutral-500 px-1.5 py-0.5 rounded border border-neutral-800 font-mono select-none">ESC</span>
-        </div>
-        <div class="max-h-[60vh] overflow-y-auto p-2" id="command-results">
-          <!-- Results injected via JS -->
-        </div>
-      </div>
-    </div>
-      
+    
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
     
   <script>
@@ -1351,13 +1338,7 @@
       _locs = [...new Set(_shoots.map(s => s.location).filter(Boolean))];
       _events = [...new Set([...DEFAULT_EVENTS, ..._shoots.map(s => s.event)])];
 
-      const loader = document.getElementById('loading-screen');
-loader.style.transition = 'opacity 0.4s ease';
-loader.style.opacity = '0';
-setTimeout(() => {
-  loader.classList.add('hidden');
-  loader.style.opacity = '1'; // Reset for next time
-}, 400);
+      document.getElementById('loading-screen').classList.add('hidden');
       updateAccountDisplay();
       setSyncStatus('synced', 'Demo Mode');
       
@@ -1731,9 +1712,9 @@ setTimeout(() => {
     // ==========================================
     // MAIN APP LOGIC
     // ==========================================
-    const DEFAULT_COMPANIES = [];
-    const DEFAULT_LOCS = [];
-    const DEFAULT_EVENTS = ['Wedding','Reception'];
+    const DEFAULT_COMPANIES = ['Colors & Emotions','it takes two.co.in','Blueberry','Forever by Gayathri','Stories by RG'];
+    const DEFAULT_LOCS = ['Bangalore','Hyderabad','Goa'];
+    const DEFAULT_EVENTS = ['Wedding','Reception','Sangeet','Haldi','Pellikoduku','Pellikuthuru','House Warming'];
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
     let _shoots = [];
@@ -1762,107 +1743,6 @@ let _isSubActive = false;
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
 
-// ==========================================
-    // PERFORMANCE ENHANCEMENTS (DEBOUNCING)
-    // ==========================================
-    function debounce(func, wait) {
-      let timeout;
-      return function(...args) {
-        clearTimeout(timeout);
-        timeout = setTimeout(() => func.apply(this, args), wait);
-      };
-    }
-    
-    // Create delayed versions of your search functions
-    const debouncedShootSearch = debounce(renderShootsList, 300);
-    const debouncedPaySearch = debounce(renderPaymentsList, 300);
-
-// ==========================================
-    // COMMAND PALETTE (CTRL+K)
-    // ==========================================
-    document.addEventListener('keydown', function(event) {
-      if ((event.ctrlKey || event.metaKey) && event.key === 'k') {
-        event.preventDefault();
-        openCommandPalette();
-      }
-      if (event.key === 'Escape') closeCommandPalette(); 
-    });
-
-    function openCommandPalette() {
-      const backdrop = document.getElementById('command-palette-backdrop');
-      const modal = document.getElementById('command-palette-modal');
-      backdrop.classList.remove('opacity-0', 'pointer-events-none');
-      modal.classList.remove('scale-95');
-      document.getElementById('command-input').value = '';
-      filterCommands(); // Load default list
-      setTimeout(() => document.getElementById('command-input').focus(), 100);
-    }
-
-    function closeCommandPalette() {
-      const backdrop = document.getElementById('command-palette-backdrop');
-      const modal = document.getElementById('command-palette-modal');
-      if (backdrop) {
-        backdrop.classList.add('opacity-0', 'pointer-events-none');
-        modal.classList.add('scale-95');
-      }
-    }
-
-    function filterCommands() {
-      const query = document.getElementById('command-input').value.toLowerCase();
-      const resultsContainer = document.getElementById('command-results');
-      let html = '';
-
-      // 1. Static App Commands
-      const commands = [
-        { title: 'New Shoot', icon: 'ti-plus', color: 'text-[#c9a96e]', action: 'closeCommandPalette(); openAddShootModal();' },
-        { title: 'Go to Dashboard', icon: 'ti-layout-dashboard', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("dashboard");' },
-        { title: 'Go to Calendar', icon: 'ti-calendar', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("calendar");' },
-        { title: 'Go to Ledger', icon: 'ti-wallet', color: 'text-neutral-400', action: 'closeCommandPalette(); switchTab("payments");' },
-        { title: 'Export Full Database (PDF)', icon: 'ti-file-type-pdf', color: 'text-red-400', action: 'closeCommandPalette(); exportAllDataToPDF();' },
-        { title: 'Toggle Privacy Blur', icon: 'ti-eye-off', color: 'text-amber-500', action: 'closeCommandPalette(); togglePrivacyMode();' }
-      ];
-
-      const filteredCommands = commands.filter(c => c.title.toLowerCase().includes(query));
-      
-      if (filteredCommands.length > 0) {
-        html += '<div class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-2 pt-2 pb-1">Actions</div>';
-        filteredCommands.forEach(c => {
-          html += `<div onclick="${c.action}" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-neutral-900 cursor-pointer transition group">
-            <i class="ti ${c.icon} ${c.color} text-lg group-hover:scale-110 transition-transform"></i>
-            <span class="text-sm font-medium text-neutral-200 group-hover:text-white">${c.title}</span>
-          </div>`;
-        });
-      }
-
-      // 2. Dynamic Shoot Search (Only shows if typing)
-      if (query.length > 1) {
-        const matchingShoots = _shoots.filter(s => 
-          (s.name || '').toLowerCase().includes(query) || 
-          (s.company || '').toLowerCase().includes(query) || 
-          (s.location || '').toLowerCase().includes(query)
-        ).slice(0, 5); // Limit to top 5 hits
-
-        if (matchingShoots.length > 0) {
-          html += '<div class="text-[10px] font-bold uppercase tracking-wider text-neutral-500 px-2 pt-4 pb-1">Matching Shoots</div>';
-          matchingShoots.forEach(s => {
-            html += `<div onclick="closeCommandPalette(); openEditShootModal('${s.id}')" class="flex items-center justify-between px-3 py-2.5 rounded-lg hover:bg-neutral-900 cursor-pointer transition">
-              <div>
-                <div class="text-sm font-bold text-[#c9a96e]">${s.name}</div>
-                <div class="text-xs text-neutral-500">${s.event} • ${s.date}</div>
-              </div>
-              <i class="ti ti-edit text-neutral-600"></i>
-            </div>`;
-          });
-        }
-      }
-
-      if (html === '') {
-        html = '<div class="text-center py-6 text-xs text-neutral-500 italic">No matches found.</div>';
-      }
-
-      resultsContainer.innerHTML = html;
-    }
-    
     function setSyncStatus(state, label) {
       const dot = document.getElementById('sync-dot');
       const lbl = document.getElementById('sync-label');
@@ -5180,29 +5060,6 @@ async function executeDeleteAll() {
         updateDashboardChart();
       }, 1000); 
     });
-
-    // Close modals on Escape key press
-    document.addEventListener('keydown', function(event) {
-      if (event.key === 'Escape') {
-        // Find whichever modal is currently active/visible and close it
-        const activeModals = [
-          'shoot-modal-backdrop', 
-          'confirm-modal-backdrop', 
-          'privacy-prompt-backdrop', 
-          'delete-all-modal-backdrop', 
-          'password-pin-modal-backdrop'
-        ];
-        
-        activeModals.forEach(id => {
-          const modal = document.getElementById(id);
-          // If it has opacity-100, it means it's currently open
-          if (modal && modal.classList.contains('opacity-100')) {
-            closeModal(id);
-          }
-        });
-      }
-    });
-    
   </script>
     <script>
   if ('serviceWorker' in navigator) {
