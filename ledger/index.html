@@ -64,27 +64,31 @@
         <p id="ui-biz-name" class="text-[10px] text-[#c9a96e] mt-2 font-bold tracking-widest uppercase bg-[#c9a96e]/10 inline-block px-3 py-1 rounded-full border border-[#c9a96e]/20">Studio Ledger</p>
       </div>
 
-      <!-- Financial Breakdown -->
+      <!-- Financial Breakdown (Restructured to avoid sticker shock) -->
       <div class="bg-[#0f0f0f] border border-white/5 rounded-2xl p-6 shadow-inner space-y-5">
         
-        <div class="flex justify-between items-center border-b border-white/5 pb-4">
-          <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Total Billed</span>
-          <span id="ui-total" class="text-sm font-bold text-white">₹0</span>
+        <!-- 1. Pending Balance moved to the top (Action-oriented) -->
+        <div class="pb-4 border-b border-white/5 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-1">Pending Balance</span>
+          <span id="ui-due" class="text-4xl font-bold text-[#c9a96e] tracking-tight drop-shadow-[0_0_15px_rgba(201,169,110,0.2)]">₹0</span>
+        </div>
+
+        <!-- 2. Amount Paid (Positive reinforcement that they are making progress) -->
+        <div class="flex justify-between items-center border-b border-white/5 pb-4 pt-1">
+          <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Amount Paid</span>
+          <span id="ui-paid" class="text-sm font-bold text-emerald-400">₹0</span>
         </div>
         
+        <!-- 3. Pending Expenses -->
         <div class="flex justify-between items-center border-b border-white/5 pb-4">
           <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Pending Expenses</span>
           <span id="ui-expenses" class="text-sm font-bold text-amber-500">₹0</span>
         </div>
         
-        <div class="flex justify-between items-center border-b border-white/5 pb-4">
-          <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Amount Paid</span>
-          <span id="ui-paid" class="text-sm font-bold text-emerald-400">₹0</span>
-        </div>
-        
-        <div class="pt-2 flex flex-col items-center justify-center text-center">
-          <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-1">Pending Balance</span>
-          <span id="ui-due" class="text-4xl font-bold text-[#c9a96e] tracking-tight drop-shadow-[0_0_15px_rgba(201,169,110,0.2)]">₹0</span>
+        <!-- 4. Total Billed demoted to the bottom and slightly muted -->
+        <div class="flex justify-between items-center pt-1">
+          <span class="text-xs uppercase tracking-wider font-bold text-neutral-600">Total Billed</span>
+          <span id="ui-total" class="text-sm font-bold text-neutral-400">₹0</span>
         </div>
         
       </div>
