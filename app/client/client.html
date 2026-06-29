@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Client Payment Portal | Sakkhi</title>
+  <meta name="theme-color" content="#050505">
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050505;
+      color: #e8e8e8;
+    }
+    .brand-serif { font-family: 'Cinzel', serif; }
+    
+    /* Loading Spinner */
+    .spinner {
+      border: 3px solid rgba(255,255,255,0.1);
+      width: 36px; height: 36px; border-radius: 50%;
+      border-left-color: #c9a96e;
+      animation: spin 1s linear infinite;
+    }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center justify-center p-4 sm:p-8 relative">
+
+  <!-- Background Accents -->
+  <div class="fixed top-0 left-0 w-full h-96 bg-gradient-to-b from-[#c9a96e]/10 to-transparent pointer-events-none -z-10"></div>
+  <div class="fixed top-[-10%] left-[-10%] w-96 h-96 bg-[#c9a96e]/5 blur-[120px] rounded-full pointer-events-none -z-10"></div>
+
+  <!-- Loading State -->
+  <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full max-w-md">
+    <div class="spinner"></div>
+    <p class="text-sm text-neutral-400 font-medium tracking-wide">Retrieving your secure ledger...</p>
+  </div>
+
+  <!-- Error State -->
+  <div id="error-state" class="hidden flex-col items-center justify-center gap-4 w-full max-w-md text-center bg-[#0f0f0f] border border-neutral-900 rounded-2xl p-8 shadow-2xl">
+    <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-full flex items-center justify-center text-red-500 text-3xl mx-auto"><i class="ti ti-link-off"></i></div>
+    <h2 class="text-xl font-bold text-white">Link Expired or Invalid</h2>
+    <p class="text-sm text-neutral-400 leading-relaxed">We couldn't find the details for this portal. Please ask your photographer to generate a new link for you.</p>
+  </div>
+
+  <!-- Main Content State -->
+  <div id="main-content" class="hidden w-full max-w-md space-y-6 opacity-0 transition-opacity duration-700 pb-10">
+    
+    <!-- Header -->
+    <div class="text-center space-y-2">
+      <h1 id="ui-biz-name" class="text-2xl font-bold text-white brand-serif tracking-widest uppercase">Sakkhi</h1>
+      <p class="text-xs text-[#c9a96e] font-semibold uppercase tracking-[0.2em]">Client Payment Portal</p>
+    </div>
+
+    <!-- Shoot Details Card -->
+    <div class="bg-[#0f0f0f]/80 backdrop-blur-md border border-neutral-800 rounded-2xl p-6 shadow-xl">
+      <h2 id="ui-client-name" class="text-xl font-bold text-white mb-4 border-b border-neutral-800 pb-4">Loading Name...</h2>
+      
+      <div class="space-y-4">
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-400 flex-shrink-0 mt-0.5"><i class="ti ti-calendar-event"></i></div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date & Event</p>
+            <p id="ui-date-event" class="text-sm font-semibold text-white mt-0.5">Loading...</p>
+          </div>
+        </div>
+        
+        <div class="flex items-start gap-3">
+          <div class="w-8 h-8 rounded-full bg-neutral-900 flex items-center justify-center text-neutral-400 flex-shrink-0 mt-0.5"><i class="ti ti-map-pin"></i></div>
+          <div>
+            <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Location</p>
+            <p id="ui-location" class="text-sm font-semibold text-white mt-0.5">Loading...</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Financial Breakdown Card -->
+    <div class="bg-[#0f0f0f]/80 backdrop-blur-md border border-neutral-800 rounded-2xl p-1 shadow-xl">
+      <div class="bg-neutral-950 rounded-xl p-5 space-y-4">
+        
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-neutral-400 font-medium">Total Amount</span>
+          <span id="ui-total" class="text-sm font-bold text-white">₹0</span>
+        </div>
+        
+        <div class="flex justify-between items-center">
+          <span class="text-sm text-neutral-400 font-medium">Amount Paid</span>
+          <span id="ui-paid" class="text-sm font-bold text-emerald-400">₹0</span>
+        </div>
+        
+        <div class="pt-4 border-t border-neutral-800 flex flex-col items-center justify-center text-center">
+          <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Pending Balance Due</span>
+          <span id="ui-due" class="text-4xl font-bold text-[#c9a96e] tracking-tight">₹0</span>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Payment Actions -->
+    <div id="payment-section" class="space-y-4">
+      <a id="ui-pay-btn" href="#" class="w-full flex items-center justify-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold tracking-wide py-4 rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(201,169,110,0.2)]">
+        <i class="ti ti-device-mobile-bolt text-lg"></i> Pay Now via UPI App
+      </a>
+      
+      <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-neutral-800 rounded-xl p-5 hidden">
+        <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-3">Or Pay via Bank Transfer</p>
+        <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
+      </div>
+    </div>
+    
+    <div id="settled-section" class="hidden bg-emerald-950/20 border border-emerald-900/40 rounded-2xl p-6 text-center shadow-xl">
+      <div class="w-16 h-16 bg-emerald-950/50 rounded-full flex items-center justify-center text-emerald-400 text-3xl mx-auto mb-3"><i class="ti ti-check"></i></div>
+      <h3 class="text-lg font-bold text-white mb-1">Payment Settled</h3>
+      <p class="text-xs text-emerald-500/80">Thank you! Your balance is fully cleared.</p>
+    </div>
+
+  </div>
+
+  <script>
+    // Database Config (Same as app.html)
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    
+    const HEADERS = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY
+    };
+
+    async function sbFetch(path) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, { headers: HEADERS });
+      if (!res.ok) throw new Error('Database Error');
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
+    }
+
+    function formatAmt(n) { return '₹' + Number(n).toLocaleString('en-IN'); }
+
+    async function loadPortal() {
+      const urlParams = new URLSearchParams(window.location.search);
+      const refCode = urlParams.get('ref');
+
+      if (!refCode) return showError();
+
+      try {
+        // 1. Get the portal link data from settings
+        const linkData = await sbFetch(`settings?key=eq.client_portal_${refCode}&select=value`);
+        if (!linkData || linkData.length === 0) return showError();
+        
+        const payload = linkData[0].value;
+        const userId = payload.user_id;
+        const shootId = payload.shoot_id;
+
+        // 2. Fetch the actual shoot details securely
+        const shootData = await sbFetch(`shoots?id=eq.${shootId}&user_id=eq.${userId}&select=*`);
+        if (!shootData || shootData.length === 0) return showError();
+        const shoot = shootData[0];
+
+        // 3. Fetch the photographer's profile (for Bank/UPI info)
+        const profileData = await sbFetch(`settings?key=eq.${userId}_profile&select=value`);
+        let profile = {};
+        if (profileData && profileData.length > 0) profile = profileData[0].value;
+
+        // --- POPULATE UI ---
+        
+        // Branding
+        document.getElementById('ui-biz-name').textContent = profile.bizName || 'Sakkhi Studio';
+        
+        // Details
+        document.getElementById('ui-client-name').textContent = shoot.name;
+        
+        const dateObj = new Date(shoot.date + 'T00:00:00');
+        const formattedDate = dateObj.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+        document.getElementById('ui-date-event').textContent = `${formattedDate} • ${shoot.event}`;
+        document.getElementById('ui-location').textContent = shoot.location || 'TBA';
+
+        // Financials
+        const total = Number(shoot.amount || 0);
+        const paid = shoot.pay_status === 'done' ? total : (shoot.pay_status === 'part' ? Number(shoot.part_paid || 0) : 0);
+        const due = total - paid;
+
+        document.getElementById('ui-total').textContent = formatAmt(total);
+        document.getElementById('ui-paid').textContent = formatAmt(paid);
+        document.getElementById('ui-due').textContent = formatAmt(due);
+
+        // Payment Logic
+        if (due <= 0) {
+          document.getElementById('payment-section').classList.add('hidden');
+          document.getElementById('settled-section').classList.remove('hidden');
+        } else {
+          // Setup UPI Button
+          const payBtn = document.getElementById('ui-pay-btn');
+          if (profile.upi) {
+            const upiLink = `upi://pay?pa=${profile.upi}&pn=${encodeURIComponent(profile.bizName || 'Sakkhi Studio')}&am=${due}&cu=INR`;
+            payBtn.href = upiLink;
+          } else {
+            payBtn.style.display = 'none'; // Hide button if photographer has no UPI set
+          }
+
+          // Setup Bank Details
+          if (profile.bank) {
+            document.getElementById('ui-bank-details-wrap').classList.remove('hidden');
+            document.getElementById('ui-bank-details').textContent = profile.bank;
+          }
+        }
+
+        // Transition UI
+        document.getElementById('loading-state').style.display = 'none';
+        const mainContent = document.getElementById('main-content');
+        mainContent.classList.remove('hidden');
+        setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
+
+      } catch (err) {
+        console.error(err);
+        showError();
+      }
+    }
+
+    function showError() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('main-content').classList.add('hidden');
+      document.getElementById('error-state').style.display = 'flex';
+    }
+
+    // Initialize
+    window.addEventListener('DOMContentLoaded', loadPortal);
+  </script>
+</body>
+</html>
