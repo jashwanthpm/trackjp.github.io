@@ -319,12 +319,16 @@
             // Core logic
             const amt = Number(s.amount || 0);
             const exp = Number(s.expense || 0);
+            const partPaid = Number(s.part_paid || 0); // Get partial amount
             const hasExp = exp > 0;
             const hasNotes = s.notes && s.notes.trim() !== '';
             
-            // Badges
+            // Badges & Logic
             const payStatusColor = s.pay_status === 'done' ? 'text-emerald-400' : (s.pay_status === 'part' ? 'text-amber-400' : 'text-red-400');
             const payStatusLabel = s.pay_status === 'done' ? 'Settled' : (s.pay_status === 'part' ? 'Partial' : 'Pending');
+            // If partial, show the paid amount, otherwise just the status label
+            const payStatusDisplay = s.pay_status === 'part' ? `Partial (${formatAmt(partPaid)})` : payStatusLabel;
+            
             const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
@@ -342,7 +346,7 @@
                   </div>
                   <div class="text-right flex-shrink-0 pl-2">
                     <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
-                    <div class="text-[9px] uppercase font-bold tracking-wider mt-1 ${payStatusColor}">${payStatusLabel}</div>
+                    <div class="text-[9px] uppercase font-bold tracking-wider mt-1 ${payStatusColor}">${payStatusDisplay}</div>
                   </div>
                 </div>
                 
