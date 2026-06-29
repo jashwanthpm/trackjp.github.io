@@ -4110,7 +4110,6 @@ async function toggleBlockDate(dateStr) {
       document.getElementById('shoot-modal-title').textContent = 'New Shoot';
       document.getElementById('modal-delete-btn').classList.add('hidden');
       document.getElementById('modal-whatsapp-btn').classList.add('hidden');
-      document.getElementById('modal-client-link-btn').classList.add('hidden');
       clearModalFields();
       
       const cSel = document.getElementById('f-shoot-company');
@@ -4138,7 +4137,6 @@ async function toggleBlockDate(dateStr) {
       document.getElementById('shoot-modal-title').textContent = 'Edit Shoot';
       document.getElementById('modal-delete-btn').classList.remove('hidden');
       document.getElementById('modal-whatsapp-btn').classList.remove('hidden');
-      document.getElementById('modal-client-link-btn').classList.remove('hidden');
       
       document.getElementById('f-shoot-name').value = s.name;
       document.getElementById('f-shoot-date').value = s.date;
