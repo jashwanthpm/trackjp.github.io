@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sakkhi | Enterprise Hub</title>
+  
+  <!-- Added Favicon -->
+  <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; }
+    
+    /* Active State for Sub-Links */
+    .nav-link.active {
+      background: linear-gradient(90deg, rgba(201, 169, 110, 0.1) 0%, transparent 100%);
+      border-left: 2px solid #c9a96e;
+      color: #c9a96e;
+    }
+    .nav-link { border-left: 2px solid transparent; }
+
+    /* Custom Scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 10px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
+
+    /* Fade Animation for Dropdowns */
+    .dropdown-anim {
+      animation: dropFade 0.2s ease-out forwards;
+      transform-origin: top right;
+    }
+    @keyframes dropFade {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
+    }
+  </style>
+</head>
+<body class="h-screen overflow-hidden flex selection:bg-[#c9a96e]/30 selection:text-white">
+
+  <!-- Mobile Overlay -->
+  <div id="mobile-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
+
+  <!-- ==========================================
+       SIDEBAR (FOLDER SYSTEM)
+       ========================================== -->
+  <aside id="sidebar" class="w-64 bg-[#050505] border-r border-neutral-900/80 flex flex-col h-full z-50 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300">
+    
+    <!-- BRANDING: Top Left Logo -->
+    <div class="h-16 flex items-center px-6 border-b border-neutral-900/80 shrink-0 justify-between bg-[#0a0a0a]/50">
+      <div class="flex items-center gap-2">
+        <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-7 w-auto" onerror="this.src='https://placehold.co/100x30/050505/c9a96e?text=SAKKHI'"/>
+        <span class="text-[8px] border border-[#c9a96e]/30 bg-[#c9a96e]/10 text-[#c9a96e] px-1.5 py-0.5 rounded uppercase font-bold tracking-widest hidden lg:block">Enterprise</span>
+      </div>
+      <!-- Mobile Close Button -->
+      <button class="md:hidden text-neutral-500 hover:text-white transition" onclick="toggleSidebar()">
+        <i class="ti ti-x text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Navigation Folders -->
+    <div class="flex-1 overflow-y-auto py-4 space-y-2">
+      
+      <!-- FOLDER 1: MAIN MENU -->
+      <div>
+        <button onclick="toggleFolder('folder-main', 'icon-main')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
+          <div class="flex items-center gap-2"><i class="ti ti-apps text-neutral-500"></i> Main Menu</div>
+          <i id="icon-main" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
+        </button>
+        <div id="folder-main" class="flex flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
+          <a href="dashboard.html" target="app-viewer" onclick="setActive(this)" class="nav-link active w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Overview
+          </a>
+          <a href="calendar.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Master Calendar
+          </a>
+        </div>
+      </div>
+
+      <!-- FOLDER 2: PRODUCTION -->
+      <div>
+        <button onclick="toggleFolder('folder-prod', 'icon-prod')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
+          <div class="flex items-center gap-2"><i class="ti ti-video text-neutral-500"></i> Production</div>
+          <i id="icon-prod" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
+        </button>
+        <div id="folder-prod" class="flex flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
+          <a href="pipelines.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Active Pipelines
+          </a>
+          <a href="shooters.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Shooters Roster
+          </a>
+        </div>
+      </div>
+
+      <!-- FOLDER 3: LEDGERS (Finance) -->
+      <div>
+        <button onclick="toggleFolder('folder-finance', 'icon-finance')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
+          <div class="flex items-center gap-2"><i class="ti ti-wallet text-neutral-500"></i> Ledgers</div>
+          <i id="icon-finance" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
+        </button>
+        <div id="folder-finance" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
+          <a href="clients.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Studio Clients
+          </a>
+          <a href="invoices.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Invoices & Dues
+          </a>
+        </div>
+      </div>
+
+      <!-- FOLDER 4: MANAGEMENT (Settings) -->
+      <div class="mt-8 border-t border-neutral-900/80 pt-2">
+        <button onclick="toggleFolder('folder-mgmt', 'icon-mgmt')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
+          <div class="flex items-center gap-2"><i class="ti ti-settings text-neutral-500"></i> Management</div>
+          <i id="icon-mgmt" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
+        </button>
+        <div id="folder-mgmt" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
+          <a href="account.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Company Settings
+          </a>
+          <a href="team.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            Team Access
+          </a>
+        </div>
+      </div>
+
+    </div>
+  </aside>
+
+  <!-- ==========================================
+       TOP BAR & DYNAMIC CONTENT AREA
+       ========================================== -->
+  <main class="flex-1 flex flex-col h-full bg-[#0a0a0a] min-w-0">
+    
+    <!-- Top Header -->
+    <header class="h-16 border-b border-neutral-900/80 bg-[#050505]/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 shrink-0 z-30">
+      
+      <!-- Left side: Mobile menu toggle + Search -->
+      <div class="flex items-center gap-4 w-full max-w-md">
+        <button class="md:hidden text-neutral-400 hover:text-white transition" onclick="toggleSidebar()">
+          <i class="ti ti-menu-2 text-xl"></i>
+        </button>
+        
+        <div class="relative w-full hidden sm:block">
+          <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+          <input type="text" placeholder="Global Search... (Press '/')" class="w-full bg-[#121212] border border-neutral-800 rounded-full pl-10 pr-4 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]/50 transition">
+        </div>
+      </div>
+
+      <!-- Right side: Notifications & Profile -->
+      <div class="flex items-center gap-4 sm:gap-5">
+        
+        <!-- NOTIFICATIONS -->
+        <div class="relative">
+          <button onclick="toggleDropdown('notif-dropdown')" id="notif-btn" class="relative text-neutral-400 hover:text-white transition mt-1.5">
+            <i class="ti ti-bell text-xl"></i>
+            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-[#050505]"></span>
+          </button>
+          
+          <!-- Notifications Dropdown Panel -->
+          <div id="notif-dropdown" class="hidden absolute right-0 mt-4 w-72 sm:w-80 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
+            <div class="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0a0a0a]">
+              <h4 class="text-sm font-bold text-white">Notifications</h4>
+              <button class="text-[10px] text-[#c9a96e] hover:underline">Mark all read</button>
+            </div>
+            <div class="max-h-72 overflow-y-auto">
+              <a href="#" class="block p-4 border-b border-neutral-800/50 hover:bg-[#121212] transition">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-emerald-950/40 text-emerald-500 flex items-center justify-center shrink-0 mt-0.5"><i class="ti ti-cash"></i></div>
+                  <div>
+                    <p class="text-xs font-bold text-white mb-0.5">Payment Received</p>
+                    <p class="text-[10px] text-neutral-400 leading-relaxed">TechCorp Media Hub paid ₹1,20,000 for the Keynote project.</p>
+                    <p class="text-[9px] text-neutral-600 mt-1">10 mins ago</p>
+                  </div>
+                </div>
+              </a>
+              <a href="#" class="block p-4 hover:bg-[#121212] transition">
+                <div class="flex items-start gap-3">
+                  <div class="w-8 h-8 rounded-full bg-red-950/40 text-red-400 flex items-center justify-center shrink-0 mt-0.5"><i class="ti ti-alert-circle"></i></div>
+                  <div>
+                    <p class="text-xs font-bold text-red-400 mb-0.5">Pipeline Alert</p>
+                    <p class="text-[10px] text-neutral-400 leading-relaxed">Oberoi Wedding edits are currently past the client deadline.</p>
+                    <p class="text-[9px] text-neutral-600 mt-1">2 hours ago</p>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class="p-2 border-t border-neutral-800 bg-[#0a0a0a] text-center">
+              <button class="text-xs text-neutral-400 hover:text-white font-medium transition py-1">View All Activity</button>
+            </div>
+          </div>
+        </div>
+
+        <div class="w-px h-5 bg-neutral-800 hidden sm:block"></div>
+
+        <!-- PROFILE MENU -->
+        <div class="relative">
+          <button onclick="toggleDropdown('profile-dropdown')" id="profile-btn" class="flex items-center gap-2 hover:opacity-80 transition">
+            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#c9a96e] to-[#a3854a] text-black flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(201,169,110,0.2)]">HQ</div>
+            <i class="ti ti-chevron-down text-neutral-500 text-xs hidden sm:block"></i>
+          </button>
+
+          <!-- Profile Dropdown Panel -->
+          <div id="profile-dropdown" class="hidden absolute right-0 mt-4 w-56 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
+            <div class="p-4 border-b border-neutral-800 bg-[#0a0a0a]">
+              <p class="text-xs font-bold text-white mb-0.5">Sakkhi Enterprise</p>
+              <p class="text-[10px] text-neutral-500 truncate">admin@sakkhi.co.in</p>
+            </div>
+            <div class="py-2">
+              <a href="account.html" target="app-viewer" onclick="hideAllDropdowns()" class="block px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#121212] transition"><i class="ti ti-settings mr-2 text-neutral-500"></i> Account Settings</a>
+              <a href="team.html" target="app-viewer" onclick="hideAllDropdowns()" class="block px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#121212] transition"><i class="ti ti-users mr-2 text-neutral-500"></i> Manage Team</a>
+            </div>
+            <div class="py-2 border-t border-neutral-800">
+              <a href="/app" class="block px-4 py-2 text-xs font-medium text-blue-400 hover:bg-blue-950/20 transition"><i class="ti ti-switch-horizontal mr-2"></i> Switch to Solo App</a>
+              <a href="#" class="block px-4 py-2 text-xs font-medium text-red-400 hover:bg-red-950/20 transition"><i class="ti ti-logout mr-2"></i> Sign Out</a>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </header>
+
+    <!-- THE IFRAME: Pages load here when clicked -->
+    <iframe name="app-viewer" src="dashboard.html" class="w-full flex-1 border-none bg-[#0a0a0a]"></iframe>
+
+  </main>
+
+  <script>
+    // 1. Script to handle opening/closing folders in sidebar
+    function toggleFolder(folderId, iconId) {
+      const folder = document.getElementById(folderId);
+      const icon = document.getElementById(iconId);
+      
+      if (folder.classList.contains('hidden')) {
+        // Open it
+        folder.classList.remove('hidden');
+        folder.classList.add('flex');
+        icon.classList.remove('-rotate-90'); // Point arrow down
+      } else {
+        // Close it
+        folder.classList.add('hidden');
+        folder.classList.remove('flex');
+        icon.classList.add('-rotate-90'); // Point arrow right
+      }
+    }
+
+    // 2. Script to highlight the active sub-link and close sidebar on mobile
+    function setActive(clickedElement) {
+      document.querySelectorAll('.nav-link').forEach(link => {
+        link.classList.remove('active');
+      });
+      clickedElement.classList.add('active');
+      
+      // Auto-close sidebar on mobile after clicking a link
+      if (window.innerWidth < 768) {
+        toggleSidebar();
+      }
+    }
+
+    // 3. Mobile Sidebar Toggle
+    function toggleSidebar() {
+      const sidebar = document.getElementById('sidebar');
+      const overlay = document.getElementById('mobile-overlay');
+      
+      if (sidebar.classList.contains('-translate-x-full')) {
+        sidebar.classList.remove('-translate-x-full');
+        overlay.classList.remove('hidden');
+      } else {
+        sidebar.classList.add('-translate-x-full');
+        overlay.classList.add('hidden');
+      }
+    }
+
+    // 4. Dropdown Toggle Logic
+    function toggleDropdown(id) {
+      const dropdown = document.getElementById(id);
+      const isHidden = dropdown.classList.contains('hidden');
+      
+      // Close all dropdowns first
+      hideAllDropdowns();
+      
+      // If it was hidden, open it
+      if (isHidden) {
+        dropdown.classList.remove('hidden');
+      }
+    }
+
+    function hideAllDropdowns() {
+      document.getElementById('notif-dropdown').classList.add('hidden');
+      document.getElementById('profile-dropdown').classList.add('hidden');
+    }
+
+    // Close dropdowns when clicking outside
+    document.addEventListener('click', (event) => {
+      const notifBtn = document.getElementById('notif-btn');
+      const profileBtn = document.getElementById('profile-btn');
+      const notifDrop = document.getElementById('notif-dropdown');
+      const profileDrop = document.getElementById('profile-dropdown');
+
+      // If the click is not inside the dropdowns AND not on the buttons, close them
+      if (!notifBtn.contains(event.target) && !notifDrop.contains(event.target)) {
+        notifDrop.classList.add('hidden');
+      }
+      if (!profileBtn.contains(event.target) && !profileDrop.contains(event.target)) {
+        profileDrop.classList.add('hidden');
+      }
+    });
+
+    // Handle slash '/' shortcut for search
+    document.addEventListener('keydown', (e) => {
+      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
+        e.preventDefault();
+        const searchInput = document.querySelector('input[type="text"]');
+        if (searchInput) searchInput.focus();
+      }
+    });
+  </script>
+</body>
+</html>
