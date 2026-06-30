@@ -33,12 +33,7 @@
 </head>
 <body class="p-4 sm:p-8">
 
-  <div id="loading-overlay" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center gap-4 transition-opacity duration-300">
-    <i class="ti ti-loader animate-spin text-3xl text-[#c9a96e]"></i>
-    <p class="text-xs text-neutral-500 tracking-wide font-medium">Fetching Live Data from Sakkhi Cloud...</p>
-  </div>
-
-  <div class="max-w-5xl mx-auto space-y-6" id="main-content" style="opacity: 0; transition: opacity 0.3s ease;">
+  <div class="max-w-5xl mx-auto space-y-6" id="main-content">
     
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
@@ -101,7 +96,8 @@
         </div>
       </div>
 
-      <div id="shooters-list" class="flex flex-col gap-3"></div>
+      <div id="shooters-list" class="flex flex-col gap-3">
+        </div>
     </div>
     
   </div>
@@ -184,13 +180,18 @@
       const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
-        await loadShooters();
         
-        document.getElementById('loading-overlay').style.opacity = '0';
-        setTimeout(() => {
-          document.getElementById('loading-overlay').classList.add('hidden');
-          document.getElementById('main-content').style.opacity = '1';
-        }, 300);
+        // Show subtle inline loading states immediately
+        updateSyncUI('syncing');
+        document.getElementById('shooters-list').innerHTML = `
+          <div class="flex flex-col items-center justify-center py-12 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30">
+            <i class="ti ti-loader animate-spin text-3xl text-[#c9a96e] mb-3"></i>
+            <p class="text-xs font-medium text-neutral-400">Syncing active team roster...</p>
+          </div>
+        `;
+
+        await loadShooters();
+        updateSyncUI('synced');
       } else {
         document.body.innerHTML = `<div class="flex flex-col items-center justify-center h-screen bg-[#050505]"><p class="text-sm text-neutral-400">Authentication Required.</p></div>`;
       }
@@ -382,7 +383,17 @@
       });
 
       if (!filteredShooters.length) {
-        container.innerHTML = `<div class="text-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30 text-xs text-neutral-500">No active team members matched your filter fields.</div>`;
+        if (!shooters.length) {
+          container.innerHTML = `
+            <div class="flex flex-col items-center justify-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30">
+              <i class="ti ti-users text-3xl text-neutral-700 mb-2"></i>
+              <p class="text-sm font-medium text-neutral-400">No team members added yet.</p>
+              <p class="text-xs text-neutral-600 mt-1">Add their Sakkhi email above to link their accounts.</p>
+            </div>
+          `;
+        } else {
+          container.innerHTML = `<div class="text-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30 text-xs text-neutral-500">No active team members matched your filter fields.</div>`;
+        }
         return;
       }
       
