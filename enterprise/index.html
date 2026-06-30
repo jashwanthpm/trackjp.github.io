@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Sakkhi | Enterprise Hub</title>
   
-  <!-- Added Favicon -->
   <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
   
   <script src="https://cdn.tailwindcss.com"></script>
@@ -41,30 +40,22 @@
 </head>
 <body class="h-screen overflow-hidden flex selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <!-- Mobile Overlay -->
   <div id="mobile-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
 
-  <!-- ==========================================
-       SIDEBAR (FOLDER SYSTEM)
-       ========================================== -->
   <aside id="sidebar" class="w-64 bg-[#050505] border-r border-neutral-900/80 flex flex-col h-full z-50 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300">
     
-    <!-- BRANDING: Top Left Logo -->
     <div class="h-16 flex items-center px-6 border-b border-neutral-900/80 shrink-0 justify-between bg-[#0a0a0a]/50">
       <div class="flex items-center gap-2">
         <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-7 w-auto" onerror="this.src='https://placehold.co/100x30/050505/c9a96e?text=SAKKHI'"/>
         <span class="text-[8px] border border-[#c9a96e]/30 bg-[#c9a96e]/10 text-[#c9a96e] px-1.5 py-0.5 rounded uppercase font-bold tracking-widest hidden lg:block">Enterprise</span>
       </div>
-      <!-- Mobile Close Button -->
       <button class="md:hidden text-neutral-500 hover:text-white transition" onclick="toggleSidebar()">
         <i class="ti ti-x text-lg"></i>
       </button>
     </div>
 
-    <!-- Navigation Folders -->
     <div class="flex-1 overflow-y-auto py-4 space-y-2">
       
-      <!-- FOLDER 1: MAIN MENU -->
       <div>
         <button onclick="toggleFolder('folder-main', 'icon-main')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
           <div class="flex items-center gap-2"><i class="ti ti-apps text-neutral-500"></i> Main Menu</div>
@@ -80,7 +71,6 @@
         </div>
       </div>
 
-      <!-- FOLDER 2: PRODUCTION -->
       <div>
         <button onclick="toggleFolder('folder-prod', 'icon-prod')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
           <div class="flex items-center gap-2"><i class="ti ti-video text-neutral-500"></i> Production</div>
@@ -96,7 +86,6 @@
         </div>
       </div>
 
-      <!-- FOLDER 3: LEDGERS (Finance) -->
       <div>
         <button onclick="toggleFolder('folder-finance', 'icon-finance')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
           <div class="flex items-center gap-2"><i class="ti ti-wallet text-neutral-500"></i> Ledgers</div>
@@ -112,7 +101,6 @@
         </div>
       </div>
 
-      <!-- FOLDER 4: MANAGEMENT (Settings) -->
       <div class="mt-8 border-t border-neutral-900/80 pt-2">
         <button onclick="toggleFolder('folder-mgmt', 'icon-mgmt')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
           <div class="flex items-center gap-2"><i class="ti ti-settings text-neutral-500"></i> Management</div>
@@ -131,15 +119,10 @@
     </div>
   </aside>
 
-  <!-- ==========================================
-       TOP BAR & DYNAMIC CONTENT AREA
-       ========================================== -->
   <main class="flex-1 flex flex-col h-full bg-[#0a0a0a] min-w-0">
     
-    <!-- Top Header -->
     <header class="h-16 border-b border-neutral-900/80 bg-[#050505]/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 shrink-0 z-30">
       
-      <!-- Left side: Mobile menu toggle + Search -->
       <div class="flex items-center gap-4 w-full max-w-md">
         <button class="md:hidden text-neutral-400 hover:text-white transition" onclick="toggleSidebar()">
           <i class="ti ti-menu-2 text-xl"></i>
@@ -151,17 +134,14 @@
         </div>
       </div>
 
-      <!-- Right side: Notifications & Profile -->
       <div class="flex items-center gap-4 sm:gap-5">
         
-        <!-- NOTIFICATIONS -->
         <div class="relative">
           <button onclick="toggleDropdown('notif-dropdown')" id="notif-btn" class="relative text-neutral-400 hover:text-white transition mt-1.5">
             <i class="ti ti-bell text-xl"></i>
             <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-[#050505]"></span>
           </button>
           
-          <!-- Notifications Dropdown Panel -->
           <div id="notif-dropdown" class="hidden absolute right-0 mt-4 w-72 sm:w-80 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
             <div class="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0a0a0a]">
               <h4 class="text-sm font-bold text-white">Notifications</h4>
@@ -197,18 +177,16 @@
 
         <div class="w-px h-5 bg-neutral-800 hidden sm:block"></div>
 
-        <!-- PROFILE MENU -->
         <div class="relative">
           <button onclick="toggleDropdown('profile-dropdown')" id="profile-btn" class="flex items-center gap-2 hover:opacity-80 transition">
-            <div class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#c9a96e] to-[#a3854a] text-black flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(201,169,110,0.2)]">HQ</div>
+            <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#c9a96e] to-[#a3854a] text-black flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(201,169,110,0.2)]">HQ</div>
             <i class="ti ti-chevron-down text-neutral-500 text-xs hidden sm:block"></i>
           </button>
 
-          <!-- Profile Dropdown Panel -->
           <div id="profile-dropdown" class="hidden absolute right-0 mt-4 w-56 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
             <div class="p-4 border-b border-neutral-800 bg-[#0a0a0a]">
-              <p class="text-xs font-bold text-white mb-0.5">Sakkhi Enterprise</p>
-              <p class="text-[10px] text-neutral-500 truncate">admin@sakkhi.co.in</p>
+              <p id="user-name" class="text-xs font-bold text-white mb-0.5">Sakkhi Enterprise</p>
+              <p id="user-email" class="text-[10px] text-neutral-500 truncate">admin@sakkhi.co.in</p>
             </div>
             <div class="py-2">
               <a href="account.html" target="app-viewer" onclick="hideAllDropdowns()" class="block px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#121212] transition"><i class="ti ti-settings mr-2 text-neutral-500"></i> Account Settings</a>
@@ -216,7 +194,7 @@
             </div>
             <div class="py-2 border-t border-neutral-800">
               <a href="/app" class="block px-4 py-2 text-xs font-medium text-blue-400 hover:bg-blue-950/20 transition"><i class="ti ti-switch-horizontal mr-2"></i> Switch to Solo App</a>
-              <a href="#" class="block px-4 py-2 text-xs font-medium text-red-400 hover:bg-red-950/20 transition"><i class="ti ti-logout mr-2"></i> Sign Out</a>
+              <a href="#" onclick="handleSignOut(event)" class="block px-4 py-2 text-xs font-medium text-red-400 hover:bg-red-950/20 transition"><i class="ti ti-logout mr-2"></i> Sign Out</a>
             </div>
           </div>
         </div>
@@ -224,7 +202,6 @@
       </div>
     </header>
 
-    <!-- THE IFRAME: Pages load here when clicked -->
     <iframe name="app-viewer" src="dashboard.html" class="w-full flex-1 border-none bg-[#0a0a0a]"></iframe>
 
   </main>
@@ -318,6 +295,64 @@
         if (searchInput) searchInput.focus();
       }
     });
+
+    // 5. Auth State Session Synchronization Check
+    document.addEventListener('DOMContentLoaded', () => {
+      // Pull authorization data matching Solo Creator Storage layout
+      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      
+      if (savedUser) {
+        try {
+          const currentUser = JSON.parse(savedUser);
+          
+          // Extract profile identities dynamically
+          const email = currentUser.email || '';
+          const name = currentUser.user_metadata?.name || currentUser.name || email.split('@')[0] || 'User';
+          
+          // Update enterprise dashboard header nodes natively
+          if (document.getElementById('user-name')) {
+            document.getElementById('user-name').textContent = name;
+          }
+          if (document.getElementById('user-email')) {
+            document.getElementById('user-email').textContent = email;
+          }
+          if (document.getElementById('user-avatar')) {
+            // Generate automatic two-letter initials placeholder
+            document.getElementById('user-avatar').textContent = name.substring(0, 2).toUpperCase();
+          }
+        } catch (e) {
+          console.error("Failed parsing valid security credentials context:", e);
+          redirectToAuth();
+        }
+      } else {
+        // No active user detected; kick out to the core sign-in portal
+        redirectToAuth();
+      }
+    });
+
+    function redirectToAuth() {
+      // Direct unauthenticated users back to the main app index
+      window.location.href = '/'; 
+    }
+
+    function handleSignOut(event) {
+      if (event) event.preventDefault();
+      
+      // Cache the unique device tracking asset to avoid resetting session device limits
+      const currentDeviceId = localStorage.getItem('current_device_id');
+      
+      // Wipe session allocations safely
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Re-establish hardware signatures
+      if (currentDeviceId) {
+        localStorage.setItem('current_device_id', currentDeviceId);
+      }
+      
+      // Purge to homepage sign-in viewport layout
+      window.location.href = '/';
+    }
   </script>
 </body>
 </html>
