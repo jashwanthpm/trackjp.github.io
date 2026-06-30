@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sakkhi | Shooters Roster</title>
+  <title>Sakkhi | Shooters </title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-          <i class="ti ti-camera text-[#c9a96e]"></i> Shooters Roster
+          <i class="ti ti-camera text-[#c9a96e]"></i> Shooters
         </h2>
         <p class="text-xs text-neutral-500 mt-1">Manage your production team and link them to their Solo accounts.</p>
       </div>
@@ -161,7 +161,7 @@
       }
     }
 
-   async function addShooter() {
+  async function addShooter() {
   const nameInput = document.getElementById('shooter-name');
   const emailInput = document.getElementById('shooter-email');
   const roleSelect = document.getElementById('shooter-role');
@@ -185,34 +185,42 @@
     return;
   }
   
-  // --- NEW: VERIFY EMAIL EXISTS IN SAKKHI CLOUD ---
+  // Get button to show loading state safely
   const btn = document.querySelector('button[onclick="addShooter()"]');
-  const originalText = btn.innerHTML;
-  btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
-  btn.disabled = true;
+  const originalText = btn ? btn.innerHTML : 'Add';
+  if (btn) {
+    btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
+    btn.disabled = true;
+  }
 
   try {
+    console.log("Checking Sakkhi Database for email:", email);
+    
+    // Call the Supabase SQL function
     const isRegistered = await sbFetch('rpc/check_user_exists', {
       method: 'POST',
       body: JSON.stringify({ lookup_email: email })
     });
 
-    if (!isRegistered) {
+    console.log("Supabase Response:", isRegistered);
+
+    // STRICT CHECK: If it is anything OTHER than true, block it immediately.
+    if (isRegistered !== true) {
       showToast('This email is not registered in Sakkhi. Ask them to sign up first.', 'error');
-      btn.innerHTML = originalText;
-      btn.disabled = false;
-      return; // Stop the function here
+      if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+      return; // 🛑 STRICT STOP: Does not execute code below
     }
+
   } catch (err) {
     console.error("Database Verification Error:", err);
     showToast('Error verifying email. Did you run the SQL script in Supabase?', 'error');
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-    return;
+    if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
+    return; // 🛑 STRICT STOP
   }
-  // ------------------------------------------------
   
-  // If the code reaches here, the user exists. Proceed with adding.
+  // ✅ If the code reaches this line, the user 100% exists.
+  console.log("User verified! Adding to roster...");
+  
   const newShooter = {
     id: 'shtr_' + Date.now().toString(36),
     name: name,
@@ -226,11 +234,12 @@
   nameInput.value = ''; 
   emailInput.value = '';
   roleSelect.value = 'Lead Photographer';
-  handleRoleChange(); // Reset custom input state
+  handleRoleChange(); 
   
-  // Restore button text
-  btn.innerHTML = originalText;
-  btn.disabled = false;
+  if (btn) {
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+  }
   
   renderShooters();
   await pushToCloud();
