@@ -35,12 +35,11 @@
 
   <div id="loading-overlay" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center gap-4 transition-opacity duration-300">
     <i class="ti ti-loader animate-spin text-3xl text-[#c9a96e]"></i>
-    <p class="text-xs text-neutral-500 tracking-wide font-medium">Syncing roster with Sakkhi Cloud...</p>
+    <p class="text-xs text-neutral-500 tracking-wide font-medium">Fetching Live Data from Sakkhi Cloud...</p>
   </div>
 
   <div class="max-w-5xl mx-auto space-y-6" id="main-content" style="opacity: 0; transition: opacity 0.3s ease;">
     
-    <!-- Header -->
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
@@ -49,22 +48,19 @@
         <p class="text-xs text-neutral-500 mt-1">Manage your production team and link them to their Solo accounts.</p>
       </div>
       <div id="sync-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-950 text-xs font-medium text-neutral-400">
-        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Synced
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Live
       </div>
     </div>
 
-    <!-- Add Shooter Form -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
       <h3 class="text-sm font-bold text-white mb-4">Add New Shooter</h3>
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
         
-        <!-- 1. EMAIL INPUT -->
         <div class="flex flex-col gap-1.5 md:col-span-4">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">1. Sakkhi Account Email *</label>
           <input type="email" id="shooter-email" onblur="checkEmailForProfile()" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
 
-        <!-- 2. NAME INPUT (Read Only live look) -->
         <div class="flex flex-col gap-1.5 md:col-span-3">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">2. Full Name</label>
           <div class="relative">
@@ -73,7 +69,6 @@
           </div>
         </div>
         
-        <!-- 3. ROLE INPUT -->
         <div class="flex flex-col gap-1.5 md:col-span-3">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">3. Primary Role</label>
           <select id="shooter-role" onchange="handleRoleChange()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
@@ -88,7 +83,6 @@
           <input type="text" id="custom-role-input" placeholder="Type custom role..." class="hidden w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition mt-1"/>
         </div>
         
-        <!-- 4. ADD BUTTON -->
         <div class="flex items-end md:col-span-2">
           <button onclick="addShooter()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-sm px-4 py-2.5 rounded-lg transition flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,169,110,0.15)]">
             <i class="ti ti-plus"></i> Add
@@ -98,10 +92,7 @@
       </div>
     </div>
 
-    <!-- Active Roster List -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
-      
-      <!-- List Header with Search Bar -->
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-neutral-900/50 pb-4">
         <h3 class="text-sm font-bold text-white">Active Team Members</h3>
         <div class="relative w-full sm:w-64">
@@ -110,14 +101,11 @@
         </div>
       </div>
 
-      <!-- Single Row List layout -->
       <div id="shooters-list" class="flex flex-col gap-3"></div>
-
     </div>
     
   </div>
 
-  <!-- Profile Details Modal -->
   <div id="details-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" onclick="if(event.target === this) closeDetailsModal()">
     <div id="details-modal-content" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden modal-anim-enter">
       
@@ -189,8 +177,8 @@
     };
 
     let currentUser = null;
-    let shooters = [];       // Core linked array keys saved on Enterprise settings table: [{id, email, role}]
-    let liveProfiles = {};   // Dynamic lookup table fetched on app render: {email: {name, phone, upi, bank}}
+    let shooters = [];       
+    let liveProfiles = {};   
 
     document.addEventListener('DOMContentLoaded', async () => {
       const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
@@ -208,8 +196,10 @@
       }
     });
 
+    // CRITICAL FIX: cache: 'no-store' bypasses the Service Worker and forces fresh data
     async function sbFetch(path, opts = {}) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        cache: 'no-store', 
         ...opts,
         headers: { ...HEADERS, ...(opts.headers || {}) }
       });
@@ -226,7 +216,6 @@
         
         if (res && res.length > 0) shooters = res[0].value || [];
         
-        // Fetch fresh profiles for entire team lists automatically on load
         await fetchLiveProfiles();
         renderShooters();
       } catch (e) {
@@ -235,21 +224,19 @@
       }
     }
 
-    // Pull real-time data states directly for all registered emails
     async function fetchLiveProfiles() {
       if (!shooters.length) return;
       try {
-         const emails = shooters.map(s => s.email);
+         const emails = shooters.map(s => s.email.toLowerCase());
          const profilesArray = await sbFetch('rpc/get_multiple_shooter_profiles', {
             method: 'POST',
             body: JSON.stringify({ lookup_emails: emails })
          });
          
-         // Map objects back to global profiles state lookup dict
          liveProfiles = {};
-         if (profilesArray) {
+         if (Array.isArray(profilesArray)) {
            profilesArray.forEach(p => {
-              liveProfiles[p.email] = p;
+              if (p && p.email) liveProfiles[p.email.toLowerCase()] = p;
            });
          }
       } catch(e) {
@@ -273,20 +260,21 @@
        spinner.classList.remove('hidden');
 
        try {
-         const profileData = await sbFetch('rpc/get_shooter_profile', {
+         // Using the array version even for a single check ensures we hit the new optimized logic
+         const profileData = await sbFetch('rpc/get_multiple_shooter_profiles', {
             method: 'POST',
-            body: JSON.stringify({ lookup_email: email })
+            body: JSON.stringify({ lookup_emails: [email] })
          });
          
-         if (profileData && profileData.name) {
-           nameInput.value = profileData.name;
+         if (profileData && profileData.length > 0 && profileData[0].name) {
+           nameInput.value = profileData[0].name;
            nameInput.classList.add('text-emerald-400');
          } else {
            nameInput.value = 'User not found in Sakkhi';
            nameInput.classList.add('text-red-400');
          }
        } catch(e) {
-         nameInput.value = 'Error matching verification checks';
+         nameInput.value = 'Error connecting to database';
          nameInput.classList.add('text-red-400');
        } finally {
          spinner.classList.add('hidden');
@@ -320,13 +308,12 @@
       }
       
       if (!email) { showToast('Please enter an account email.', 'error'); return; }
-      if (shooters.find(s => s.email === email)) { showToast('User already on roster list.', 'error'); return; }
+      if (shooters.find(s => s.email.toLowerCase() === email)) { showToast('User already on roster list.', 'error'); return; }
       if (!name || name.includes('not found') || name.includes('Error') || name.includes('Verifying')) {
         showToast('Valid registered account required.', 'error');
         return;
       }
       
-      // We only save basic links. Deep profile variables look up dynamically
       const newShooter = {
         id: 'shtr_' + Date.now().toString(36),
         email: email,
@@ -342,6 +329,7 @@
       roleSelect.value = 'Lead Photographer';
       handleRoleChange(); 
       
+      updateSyncUI('syncing');
       await fetchLiveProfiles();
       renderShooters();
       await pushToCloud();
@@ -385,7 +373,7 @@
       const searchQuery = (document.getElementById('roster-search')?.value || '').toLowerCase();
       
       const filteredShooters = shooters.filter(s => {
-         const profile = liveProfiles[s.email] || {};
+         const profile = liveProfiles[s.email.toLowerCase()] || {};
          const name = profile.name || s.email.split('@')[0];
          const phone = profile.phone || '';
          return name.toLowerCase().includes(searchQuery) || 
@@ -400,7 +388,8 @@
       }
       
       container.innerHTML = filteredShooters.map(s => {
-        const profile = liveProfiles[s.email] || {};
+        const safeEmail = s.email.toLowerCase();
+        const profile = liveProfiles[safeEmail] || {};
         const displayName = profile.name || s.email.split('@')[0];
         const displayPhone = profile.phone && profile.phone !== 'N/A' ? profile.phone : '';
 
@@ -414,7 +403,7 @@
         const initials = displayName.substring(0, 2).toUpperCase();
 
         return `
-        <div onclick="openDetailsModal('${s.email}', '${s.role}')" class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-[#c9a96e]/30 hover:bg-[#121212] transition group w-full cursor-pointer gap-4">
+        <div onclick="openDetailsModal('${safeEmail}', '${s.role}')" class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-[#c9a96e]/30 hover:bg-[#121212] transition group w-full cursor-pointer gap-4">
           <div class="flex items-center gap-4 min-w-0">
             <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-bold text-sm shrink-0">
               ${initials}
@@ -440,9 +429,8 @@
       }).join('');
     }
 
-    // Modal View pulls directly from lookups data dictionary
     function openDetailsModal(email, role) {
-      const profile = liveProfiles[email] || { name: email.split('@')[0], phone: 'N/A', upi: 'Not provided', bank: 'Not provided' };
+      const profile = liveProfiles[email.toLowerCase()] || { name: email.split('@')[0], phone: 'N/A', upi: 'Not provided', bank: 'Not provided' };
 
       document.getElementById('modal-initials').textContent = profile.name.substring(0, 2).toUpperCase();
       document.getElementById('modal-name').textContent = profile.name;
@@ -472,7 +460,7 @@
     function updateSyncUI(state) {
       const syncEl = document.getElementById('sync-status');
       if (state === 'syncing') syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing...`;
-      else if (state === 'synced') syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Synced`;
+      else if (state === 'synced') syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Live`;
       else syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline`;
     }
 
