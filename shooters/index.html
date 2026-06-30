@@ -40,7 +40,6 @@
 
   <div class="max-w-5xl mx-auto space-y-6" id="main-content" style="opacity: 0; transition: opacity 0.3s ease;">
     
-    <!-- Header -->
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
@@ -53,7 +52,6 @@
       </div>
     </div>
 
-    <!-- Add Shooter Form -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
       <h3 class="text-sm font-bold text-white mb-4">Add New Shooter</h3>
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
@@ -94,7 +92,6 @@
       </div>
     </div>
 
-    <!-- Active Roster List -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-neutral-900/50 pb-4">
         <h3 class="text-sm font-bold text-white">Active Team Members</h3>
@@ -109,7 +106,6 @@
     
   </div>
 
-  <!-- Profile Details Modal -->
   <div id="details-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" onclick="if(event.target === this) closeDetailsModal()">
     <div id="details-modal-content" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden modal-anim-enter">
       
@@ -276,6 +272,7 @@
            nameInput.classList.add('text-red-400');
          }
        } catch(e) {
+         console.error("Database connection error: ", e);
          nameInput.value = 'Error connecting to database';
          nameInput.classList.add('text-red-400');
        } finally {
