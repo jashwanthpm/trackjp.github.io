@@ -19,6 +19,17 @@
     ::-webkit-scrollbar { width: 4px; height: 4px; }
     ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
     ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
+
+    /* Modal Animation */
+    .modal-anim-enter {
+      opacity: 0;
+      transform: scale(0.95) translateY(10px);
+      transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .modal-anim-active {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   </style>
 </head>
 <body class="p-4 sm:p-8">
@@ -48,13 +59,13 @@
         
         <div class="flex flex-col gap-1.5 md:col-span-4">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">1. Sakkhi Account Email *</label>
-          <input type="email" id="shooter-email" onblur="checkEmailForName()" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          <input type="email" id="shooter-email" onblur="checkEmailForProfile()" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
 
         <div class="flex flex-col gap-1.5 md:col-span-3">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">2. Full Name</label>
           <div class="relative">
-             <input type="text" id="shooter-name" readonly placeholder="Auto-fetched on email input..." class="w-full bg-neutral-950/50 border border-neutral-900 border-dashed rounded-lg px-4 py-2.5 text-sm text-neutral-400 outline-none cursor-not-allowed font-semibold transition-colors"/>
+             <input type="text" id="shooter-name" readonly placeholder="Auto-fetched..." class="w-full bg-neutral-950/50 border border-neutral-900 border-dashed rounded-lg px-4 py-2.5 text-sm text-neutral-400 outline-none cursor-not-allowed font-semibold transition-colors"/>
              <i id="name-spinner" class="ti ti-loader animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-[#c9a96e] hidden"></i>
           </div>
         </div>
@@ -62,12 +73,12 @@
         <div class="flex flex-col gap-1.5 md:col-span-3">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">3. Primary Role</label>
           <select id="shooter-role" onchange="handleRoleChange()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-            <option value="Lead Photographer">Photographer</option>
-            <option value="Candid Photographer">Traditional Photographer</option>
+            <option value="Lead Photographer">Lead Photographer</option>
+            <option value="Candid Photographer">Candid Photographer</option>
             <option value="Cinematographer">Cinematographer</option>
             <option value="Traditional Videographer">Traditional Videographer</option>
             <option value="Drone Operator">Drone Operator</option>
-            <option value="Lighting Assistant">Assistant</option>
+            <option value="Lighting Assistant">Lighting Assistant</option>
             <option value="__custom__">Custom Role...</option>
           </select>
           <input type="text" id="custom-role-input" placeholder="Type custom role..." class="hidden w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition mt-1"/>
@@ -97,6 +108,65 @@
 
     </div>
     
+  </div>
+
+  <div id="details-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-300" onclick="if(event.target === this) closeDetailsModal()">
+    <div id="details-modal-content" class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md shadow-2xl overflow-hidden modal-anim-enter">
+      
+      <div class="p-6 border-b border-neutral-800 bg-[#0a0a0a] flex items-center gap-4">
+        <div id="modal-initials" class="w-14 h-14 rounded-full bg-gradient-to-tr from-[#c9a96e] to-[#a3854a] flex items-center justify-center text-black font-bold text-xl shrink-0 shadow-[0_0_15px_rgba(201,169,110,0.2)]"></div>
+        <div class="flex-1 min-w-0">
+          <h3 id="modal-name" class="text-lg font-bold text-white truncate">Name</h3>
+          <p id="modal-role" class="text-xs text-[#c9a96e] font-semibold tracking-wide uppercase mt-0.5">Role</p>
+        </div>
+        <button onclick="closeDetailsModal()" class="text-neutral-500 hover:text-white transition bg-neutral-900 hover:bg-neutral-800 p-2 rounded-lg"><i class="ti ti-x text-lg"></i></button>
+      </div>
+
+      <div class="p-6 space-y-5">
+        
+        <div class="space-y-3">
+          <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider border-b border-neutral-900 pb-2">Contact Details</h4>
+          
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-blue-400"><i class="ti ti-mail"></i></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] text-neutral-500">Email Address</p>
+              <p id="modal-email" class="text-sm font-semibold text-white truncate"></p>
+            </div>
+          </div>
+          
+          <div class="flex items-center gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-emerald-400"><i class="ti ti-phone"></i></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] text-neutral-500">Phone Number</p>
+              <p id="modal-phone" class="text-sm font-semibold text-white truncate"></p>
+            </div>
+            <a id="modal-wa-link" href="#" target="_blank" class="px-3 py-1.5 bg-emerald-950/30 text-emerald-400 border border-emerald-900/50 rounded-lg text-xs font-bold hover:bg-emerald-900/50 transition"><i class="ti ti-brand-whatsapp mr-1"></i>Chat</a>
+          </div>
+        </div>
+
+        <div class="space-y-3 pt-2">
+          <h4 class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider border-b border-neutral-900 pb-2">Payment Details</h4>
+          
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-purple-400 mt-1"><i class="ti ti-qrcode"></i></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] text-neutral-500">UPI ID</p>
+              <p id="modal-upi" class="text-sm font-semibold text-white bg-neutral-950 border border-neutral-800 p-2.5 rounded-lg mt-1 break-all"></p>
+            </div>
+          </div>
+          
+          <div class="flex items-start gap-3">
+            <div class="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center text-amber-400 mt-1"><i class="ti ti-building-bank"></i></div>
+            <div class="flex-1 min-w-0">
+              <p class="text-[10px] text-neutral-500">Bank Account</p>
+              <p id="modal-bank" class="text-sm font-semibold text-white bg-neutral-950 border border-neutral-800 p-2.5 rounded-lg mt-1 whitespace-pre-wrap leading-relaxed text-xs"></p>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
   </div>
 
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
@@ -161,32 +231,39 @@
       }
     }
 
-    // --- AUTO FETCH USER NAME LOGIC ---
-    async function checkEmailForName() {
+    // --- AUTO FETCH FULL PROFILE LOGIC ---
+    async function checkEmailForProfile() {
        const email = document.getElementById('shooter-email').value.trim().toLowerCase();
        const nameInput = document.getElementById('shooter-name');
        const spinner = document.getElementById('name-spinner');
        
-       // Clean slate if empty
        if (!email || !email.includes('@')) {
           nameInput.value = '';
           nameInput.classList.remove('text-emerald-400', 'text-red-400');
+          delete nameInput.dataset.phone;
+          delete nameInput.dataset.upi;
+          delete nameInput.dataset.bank;
           return;
        }
        
-       nameInput.value = 'Searching database...';
+       nameInput.value = 'Searching Sakkhi cloud...';
        nameInput.classList.remove('text-emerald-400', 'text-red-400');
        spinner.classList.remove('hidden');
 
        try {
-         const fetchedName = await sbFetch('rpc/get_sakkhi_user_name', {
+         const profileData = await sbFetch('rpc/get_shooter_profile', {
             method: 'POST',
             body: JSON.stringify({ lookup_email: email })
          });
          
-         if (fetchedName) {
-           nameInput.value = fetchedName;
+         if (profileData && profileData.name) {
+           nameInput.value = profileData.name;
            nameInput.classList.add('text-emerald-400');
+           
+           // Store the extra data temporarily so addShooter() can grab it
+           nameInput.dataset.phone = profileData.phone;
+           nameInput.dataset.upi = profileData.upi;
+           nameInput.dataset.bank = profileData.bank;
          } else {
            nameInput.value = 'User not found in Sakkhi';
            nameInput.classList.add('text-red-400');
@@ -220,7 +297,6 @@
       const email = emailInput.value.trim().toLowerCase();
       const name = nameInput.value;
       
-      // Determine final role
       let role = roleSelect.value;
       if (role === '__custom__') {
         role = customInput.value.trim();
@@ -231,7 +307,6 @@
         }
       }
       
-      // Validations
       if (!email) {
         showToast('Please enter their Sakkhi account email.', 'error');
         emailInput.focus();
@@ -243,17 +318,19 @@
          return;
       }
 
-      if (!name || name.includes('User not found') || name.includes('Error') || name.includes('Searching')) {
+      if (!name || name.includes('not found') || name.includes('Error') || name.includes('Searching')) {
         showToast('Valid Sakkhi account required. Ensure email is correct.', 'error');
         return;
       }
       
-      // Build Object & Add to array
       const newShooter = {
         id: 'shtr_' + Date.now().toString(36),
         name: name,
         email: email,
         role: role,
+        phone: nameInput.dataset.phone || 'N/A',
+        upi: nameInput.dataset.upi || 'Not provided',
+        bank: nameInput.dataset.bank || 'Not provided',
         addedAt: new Date().toISOString()
       };
       
@@ -263,6 +340,9 @@
       emailInput.value = ''; 
       nameInput.value = '';
       nameInput.classList.remove('text-emerald-400');
+      delete nameInput.dataset.phone;
+      delete nameInput.dataset.upi;
+      delete nameInput.dataset.bank;
       roleSelect.value = 'Lead Photographer';
       handleRoleChange(); 
       
@@ -271,8 +351,10 @@
       showToast(`${name} securely linked to team!`, 'success');
     }
 
-    async function deleteShooter(id, name) {
+    async function deleteShooter(id, name, event) {
+      if (event) event.stopPropagation(); // Prevents the modal from opening
       if (!confirm(`Are you sure you want to remove ${name} from your team?`)) return;
+      
       shooters = shooters.filter(s => s.id !== id);
       renderShooters();
       await pushToCloud();
@@ -308,11 +390,11 @@
       const container = document.getElementById('shooters-list');
       const searchQuery = (document.getElementById('roster-search')?.value || '').toLowerCase();
       
-      // Filter list based on Search Input
       const filteredShooters = shooters.filter(s => 
         (s.name || '').toLowerCase().includes(searchQuery) || 
         (s.email || '').toLowerCase().includes(searchQuery) || 
-        (s.role || '').toLowerCase().includes(searchQuery)
+        (s.role || '').toLowerCase().includes(searchQuery) ||
+        (s.phone || '').toLowerCase().includes(searchQuery)
       );
 
       if (filteredShooters.length === 0) {
@@ -326,7 +408,6 @@
         return;
       }
       
-      // Render One Row per user (Flex column)
       container.innerHTML = filteredShooters.map(s => {
         let roleBadge = 'bg-neutral-900/50 text-neutral-400 border-neutral-800';
         let icon = 'ti-user';
@@ -346,7 +427,7 @@
         const initials = s.name.substring(0, 2).toUpperCase();
 
         return `
-        <div class="flex items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-neutral-700 hover:bg-[#121212] transition group w-full">
+        <div onclick="openDetailsModal('${s.id}')" class="flex flex-col sm:flex-row sm:items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-[#c9a96e]/30 hover:bg-[#121212] transition group w-full cursor-pointer gap-4">
           <div class="flex items-center gap-4 min-w-0">
             <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
               ${initials}
@@ -357,16 +438,61 @@
                 <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border font-bold ${roleBadge}">
                   <i class="ti ${icon} text-xs"></i> ${s.role}
                 </span>
-                <span class="text-xs text-blue-400 font-medium tracking-wide truncate"><i class="ti ti-mail text-neutral-500 mr-1"></i>${s.email}</span>
+                <span class="text-xs text-neutral-400 font-medium tracking-wide truncate flex items-center"><i class="ti ti-mail mr-1"></i>${s.email}</span>
+                ${s.phone && s.phone !== 'N/A' ? `<span class="text-xs text-emerald-400/80 font-medium tracking-wide truncate flex items-center"><i class="ti ti-phone mr-1"></i>${s.phone}</span>` : ''}
               </div>
             </div>
           </div>
-          <button onclick="deleteShooter('${s.id}', '${s.name}')" class="p-2.5 text-neutral-600 hover:text-red-400 hover:bg-red-950/30 rounded-lg md:opacity-0 md:group-hover:opacity-100 transition shrink-0" title="Remove Shooter">
-            <i class="ti ti-trash text-lg"></i>
-          </button>
+          <div class="flex items-center gap-3 self-end sm:self-auto">
+            <span class="text-[10px] font-bold text-neutral-500 uppercase tracking-widest sm:hidden group-hover:text-[#c9a96e] transition">View Details <i class="ti ti-arrow-right"></i></span>
+            <button onclick="deleteShooter('${s.id}', '${s.name}', event)" class="p-2.5 text-neutral-600 hover:text-red-400 hover:bg-red-950/30 rounded-lg md:opacity-0 md:group-hover:opacity-100 transition shrink-0" title="Remove Shooter">
+              <i class="ti ti-trash text-lg"></i>
+            </button>
+          </div>
         </div>
         `;
       }).join('');
+    }
+
+    // --- MODAL LOGIC ---
+    function openDetailsModal(id) {
+      const shooter = shooters.find(s => s.id === id);
+      if (!shooter) return;
+
+      document.getElementById('modal-initials').textContent = shooter.name.substring(0, 2).toUpperCase();
+      document.getElementById('modal-name').textContent = shooter.name;
+      document.getElementById('modal-role').textContent = shooter.role;
+      
+      document.getElementById('modal-email').textContent = shooter.email;
+      document.getElementById('modal-phone').textContent = shooter.phone || 'N/A';
+      document.getElementById('modal-upi').textContent = shooter.upi || 'Not provided';
+      document.getElementById('modal-bank').textContent = shooter.bank || 'Not provided';
+      
+      // Setup WhatsApp quick link
+      const waBtn = document.getElementById('modal-wa-link');
+      if (shooter.phone && shooter.phone !== 'N/A') {
+        // Strip out any non-numeric characters for the link
+        const cleanPhone = shooter.phone.replace(/\D/g, '');
+        waBtn.href = `https://wa.me/${cleanPhone}`;
+        waBtn.style.display = 'inline-flex';
+      } else {
+        waBtn.style.display = 'none';
+      }
+
+      // Display animations
+      const backdrop = document.getElementById('details-modal-backdrop');
+      const content = document.getElementById('details-modal-content');
+      
+      backdrop.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.add('modal-anim-active');
+    }
+
+    function closeDetailsModal() {
+      const backdrop = document.getElementById('details-modal-backdrop');
+      const content = document.getElementById('details-modal-content');
+      
+      backdrop.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.remove('modal-anim-active');
     }
 
     function updateSyncUI(state) {
