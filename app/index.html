@@ -1982,31 +1982,96 @@ function handleNotificationClick(targetId) {
 function updateNotificationUI() {
   const badge = document.getElementById('notif-badge');
   const list = document.getElementById('notification-list');
+  if (!badge || !list) return;
+
+  // Calculate only actual unread entries for the unread status badge marker
+  const unreadCount = _notifications.filter(n => !n.isRead).length;
   
-  if (!badge || !list) return; 
-  
-  if (_notifications.length > 0) {
+  if (unreadCount > 0) {
     badge.classList.remove('hidden');
+    // Change simple red dot into a smart text badge overlay count configuration
+    badge.className = "absolute -top-1.5 -right-1.5 min-w-4 h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-lg";
+    badge.textContent = unreadCount;
+  } else {
+    badge.classList.add('hidden');
+    // Reset standard red dot classes just in case
+    badge.className = "hidden absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.8)]";
+  }
+
+  if (_notifications.length > 0) {
     list.innerHTML = _notifications.map(n => {
-      // Fallback for older notifications that only had 'n.date' string saved
-      const displayTime = n.timestamp ? formatNotificationTime(n.timestamp) : (n.date || '');
+      const displayTime = n.timestamp ? formatNotificationTime(n.timestamp) : '';
       
+      // Determine iconography styles based on type string configurations
+      const typeConfig = {
+        alert: { icon: 'ti-alert-triangle text-amber-400', bg: 'bg-amber-950/20 border-amber-900/30' },
+        feature: { icon: 'ti-sparkles text-emerald-400', bg: 'bg-emerald-950/20 border-emerald-900/30' },
+        welcome: { icon: 'ti-crown text-[#c9a96e]', bg: 'bg-[#c9a96e]/10 border-[#c9a96e]/20' },
+        info: { icon: 'ti-info-circle text-blue-400', bg: 'bg-blue-950/20 border-blue-900/30' }
+      }[n.type || 'info'];
+
+      const readStateStyle = n.isRead ? 'opacity-60 grayscale' : 'border-l-2 border-l-[#c9a96e]';
+
       return `
-      <div onclick="handleNotificationClick('${n.targetId || ''}')" class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition cursor-pointer">
-        <div class="pr-6">
-            <p class="text-[11px] font-bold text-[#c9a96e] mb-0.5">${n.title}</p>
-            <p class="text-xs text-neutral-300 font-medium">${n.message}</p>
-            <p class="text-[9px] text-neutral-600 mt-1.5">${displayTime}</p>
+      <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-3.5 relative group hover:border-neutral-700 transition ${readStateStyle}">
+        <div class="flex items-start gap-3">
+          <div class="w-7 h-7 rounded-lg ${typeConfig.bg} flex items-center justify-center flex-shrink-0 mt-0.5">
+            <i class="ti ${typeConfig.icon} text-sm"></i>
+          </div>
+          <div class="flex-1 min-w-0 pr-5">
+            <div class="flex items-center gap-2">
+              <p class="text-xs font-bold text-white truncate">${n.title}</p>
+              ${!n.isRead ? `<span class="w-1.5 h-1.5 bg-[#c9a96e] rounded-full flex-shrink-0 animate-pulse"></span>` : ''}
+            </div>
+            <p class="text-xs text-neutral-400 font-medium leading-relaxed mt-0.5">${n.message}</p>
+            
+            ${n.actionLabel && n.actionUrl ? `
+              <button onclick="executeNotificationAction('${n.id}', '${n.actionUrl}')" class="mt-2.5 px-3 py-1 bg-[#c9a96e] hover:bg-[#e6c98a] text-black text-[10px] font-bold rounded-md transition flex items-center gap-1 shadow-sm">
+                <span>${n.actionLabel}</span><i class="ti ti-arrow-up-right text-[11px]"></i>
+              </button>
+            ` : ''}
+            
+            <p class="text-[9px] text-neutral-600 mt-2 tracking-wide font-medium">${displayTime}</p>
+          </div>
         </div>
-        <button onclick="event.stopPropagation(); removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1" title="Dismiss">
-          <i class="ti ti-x text-sm"></i>
+        <button onclick="event.stopPropagation(); removeNotification('${n.id}')" class="absolute top-3 right-3 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1" title="Dismiss">
+          <i class="ti ti-x text-xs"></i>
         </button>
       </div>
       `;
     }).join('');
   } else {
-    badge.classList.add('hidden');
-    list.innerHTML = '<div class="p-6 text-center text-xs text-neutral-500 italic">No new notifications</div>';
+    list.innerHTML = '<div class="p-8 text-center text-xs text-neutral-600 italic tracking-wide">Command Center Logs Cleared.</div>';
+  }
+}
+
+    async function executeNotificationAction(id, actionUrl) {
+  // Mark as read in the array structure configuration
+  const target = _notifications.find(n => n.id === id);
+  if (target && !target.isRead) {
+    target.isRead = true;
+    saveNotifications();
+    updateNotificationUI();
+    
+    // Update structural persistence state inside Supabase backend 
+    if (!id.toString().startsWith('notif_')) {
+      try {
+        await sbFetch(`notifications?id=eq.${id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ is_read: true })
+        });
+      } catch(e) { console.error("Could not sync mutation trace down pipeline:", e); }
+    }
+  }
+
+  // Execute structural workspace view state transitions
+  if (actionUrl.startsWith('#')) {
+    // Navigate straight to external subelements configuration paths
+    window.location.href = window.location.origin + '/' + actionUrl;
+  } else {
+    // Trigger localized layout switch tab trace operations within the application view matrices
+    document.getElementById('notification-dropdown').classList.add('hidden');
+    switchTab(actionUrl);
   }
 }
 
@@ -2185,29 +2250,28 @@ try {
       console.warn("Could not load subscription data.");
     }
 
-    // --- PASTE THE NEW NOTIFICATION LOGIC HERE ---
+   // --- PASTE THE NEW NOTIFICATION LOGIC HERE ---
     try {
       const dbNotifs = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc`);
-      if (dbNotifs && dbNotifs.length > 0) {
-        // Map database records to match the existing UI array structure
-        const remoteAlerts = dbNotifs.map(n => ({
+      if (dbNotifs) {
+        _notifications = dbNotifs.map(n => ({
           id: n.id,
           title: n.title,
           message: n.message,
           timestamp: n.created_at,
-          targetId: null 
+          type: n.type || 'info',
+          actionLabel: n.action_label,
+          actionUrl: n.action_url,
+          isRead: n.is_read
         }));
-        
-        // Merge with any local notifications, keeping remote ones at the top
-        _notifications = [...remoteAlerts];
         saveNotifications();
         updateNotificationUI();
       }
-    } catch (err) {
-      console.warn("Could not fetch remote notifications.");
+    } catch (err) { 
+      console.warn("Could not load rich notification parameters."); 
     }
     // ---------------------------------------------
-
+    
     if(bar) bar.style.width = "100%";
     
     // --- ROBUST MAGIC LINK NOTIFICATION LOGIC ---
