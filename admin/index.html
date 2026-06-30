@@ -71,6 +71,39 @@
     </div>
   </div>
 
+<!-- Bulk Notification Modal -->
+  <div id="notif-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+    <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+      <h3 class="text-lg font-bold text-white mb-4"><i class="ti ti-broadcast text-[#c9a96e] mr-2"></i>Broadcast Notification</h3>
+      
+      <div class="space-y-4">
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Audience</label>
+          <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+            <option value="all">All Registered Users</option>
+            <option value="active">Active Plan Users</option>
+            <option value="expiring_3">Expiring in <= 3 Days</option>
+            <option value="free">Free Tier Users</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Name / Title</label>
+          <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition" />
+        </div>
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Content</label>
+          <textarea id="notif-msg" placeholder="Type your message here..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition h-24 resize-none"></textarea>
+        </div>
+      </div>
+      
+      <div class="flex gap-3 mt-8">
+        <button onclick="document.getElementById('notif-modal').classList.add('hidden')" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:bg-neutral-900 hover:text-white transition">Cancel</button>
+        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-1">Send Alert</button>
+      </div>
+    </div>
+  </div>
+  
   <!-- User Details Drawer Overlay -->
   <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
@@ -214,9 +247,19 @@
           <span class="text-[9px] font-bold text-[#c9a96e] uppercase tracking-widest hidden sm:inline">Live System</span>
         </div>
       </div>
-      <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
-        <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
-      </button>
+      
+      <!-- New Container for Right-Side Buttons -->
+      <div class="flex items-center gap-3">
+        <!-- NEW: Broadcast Button -->
+        <button onclick="document.getElementById('notif-modal').classList.remove('hidden')" class="text-xs font-semibold text-black bg-[#c9a96e] hover:bg-[#e6c98a] px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+          <i class="ti ti-broadcast text-sm"></i> <span class="hidden sm:inline">Send Broadcast</span>
+        </button>
+
+        <!-- EXISTING: Exit Terminal Button -->
+        <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
+          <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
+        </button>
+      </div>
     </header>
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
@@ -953,6 +996,81 @@ function renderTable(data) {
       }
     }
 
+// ... your existing admin functions ...
+
+    // --- BULK NOTIFICATION LOGIC ---
+    async function sendBulkNotification() {
+      const target = document.getElementById('notif-target').value;
+      const title = document.getElementById('notif-title').value.trim();
+      const msg = document.getElementById('notif-msg').value.trim();
+      const btn = document.getElementById('send-notif-btn');
+
+      if (!msg || !title) {
+        alert("Title and Message are required.");
+        return;
+      }
+
+      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Sending...';
+      btn.disabled = true;
+
+      // 1. Filter Users Based on Selection
+      let targetedUsers = [];
+      const today = new Date();
+      today.setHours(0,0,0,0);
+
+      allUsers.forEach(u => {
+        const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
+        let diffDays = 9999;
+        
+        if (u.expires_at) {
+          const expiresDate = new Date(u.expires_at);
+          expiresDate.setHours(0,0,0,0);
+          diffDays = Math.ceil((expiresDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        if (target === 'all') targetedUsers.push(u);
+        else if (target === 'free' && planType === 'free') targetedUsers.push(u);
+        else if (target === 'active' && planType !== 'free' && diffDays >= 0) targetedUsers.push(u);
+        else if (target === 'expiring_3' && planType !== 'free' && diffDays >= 0 && diffDays <= 3) targetedUsers.push(u);
+      });
+
+      if (targetedUsers.length === 0) {
+        alert("No users match this filter.");
+        btn.innerHTML = 'Send Alert';
+        btn.disabled = false;
+        return;
+      }
+
+      // 2. Build Bulk Insert Payload for Supabase
+      const payload = targetedUsers.map(u => ({
+        user_id: u.user_id,
+        title: title,
+        message: msg
+      }));
+
+      // 3. Send to Database
+      try {
+        await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: 'POST',
+          headers: { 
+            'Content-Type': 'application/json', 
+            'apikey': SUPABASE_KEY, 
+            'Authorization': `Bearer ${SUPABASE_KEY}` 
+          },
+          body: JSON.stringify(payload)
+        });
+
+        document.getElementById('notif-modal').classList.add('hidden');
+        document.getElementById('notif-msg').value = '';
+        alert(`Successfully sent notification to ${targetedUsers.length} users!`);
+      } catch(e) {
+        alert('Error sending notifications: ' + e.message);
+      } finally {
+        btn.innerHTML = 'Send Alert';
+        btn.disabled = false;
+      }
+    }
+
     // --- CLEANUP ZOMBIE SERVICE WORKERS ---
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
@@ -966,3 +1084,4 @@ function renderTable(data) {
   </script>
 </body>
 </html>
+    
