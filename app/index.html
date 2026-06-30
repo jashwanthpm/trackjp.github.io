@@ -1878,8 +1878,17 @@ let _isSubActive = false;
 // ==========================================
 let _notifications = [];
 
-function addNotification(title, message, id) {
-  _notifications.unshift({ id: id || uid(), title, message, date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+// Notice we now accept 'targetId' (which will be the shoot ID)
+function addNotification(title, message, targetId) {
+  // Generate a unique ID for the notification itself so we can dismiss them individually
+  const notifId = 'notif_' + Date.now() + Math.random().toString(36).substr(2, 5);
+  _notifications.unshift({ 
+    id: notifId, 
+    targetId: targetId, 
+    title, 
+    message, 
+    date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+  });
   updateNotificationUI();
 }
 
@@ -1898,6 +1907,17 @@ function toggleNotifications() {
   dropdown.classList.toggle('hidden');
 }
 
+// Function to handle clicking on the notification body
+function handleNotificationClick(targetId) {
+  if (targetId) {
+    // Open the shoot using your existing modal function
+    openEditShootModal(targetId);
+    
+    // Close the notification dropdown
+    document.getElementById('notification-dropdown').classList.add('hidden');
+  }
+}
+
 function updateNotificationUI() {
   const badge = document.getElementById('notif-badge');
   const list = document.getElementById('notification-list');
@@ -1905,13 +1925,14 @@ function updateNotificationUI() {
   if (_notifications.length > 0) {
     badge.classList.remove('hidden');
     list.innerHTML = _notifications.map(n => `
-      <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition">
+      <div onclick="handleNotificationClick('${n.targetId}')" class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition cursor-pointer">
         <div class="pr-6">
             <p class="text-[11px] font-bold text-[#c9a96e] mb-0.5">${n.title}</p>
             <p class="text-xs text-neutral-300 font-medium">${n.message}</p>
             <p class="text-[9px] text-neutral-600 mt-1.5">${n.date}</p>
         </div>
-        <button onclick="removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1">
+        <!-- Added event.stopPropagation() so clicking 'X' doesn't open the modal -->
+        <button onclick="event.stopPropagation(); removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1" title="Dismiss">
           <i class="ti ti-x text-sm"></i>
         </button>
       </div>
