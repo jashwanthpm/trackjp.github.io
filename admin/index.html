@@ -287,17 +287,19 @@
       
       <!-- New Container for Right-Side Buttons -->
       <div class="flex items-center gap-3">
-        <!-- NEW: Broadcast Button -->
-        <button onclick="document.getElementById('notif-modal').classList.remove('hidden')" class="text-xs font-semibold text-black bg-[#c9a96e] hover:bg-[#e6c98a] px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
-          <i class="ti ti-broadcast text-sm"></i> <span class="hidden sm:inline">Send Broadcast</span>
-        </button>
+      
+      <a href="/notifications" class="text-xs font-semibold text-neutral-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+        <i class="ti ti-history text-sm"></i> Logs
+      </a>
 
-        <!-- EXISTING: Exit Terminal Button -->
-        <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
-          <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
-        </button>
-      </div>
-    </header>
+      <button onclick="document.getElementById('notif-modal').classList.remove('hidden')" class="text-xs font-semibold text-black bg-[#c9a96e] hover:bg-[#e6c98a] px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+        <i class="ti ti-broadcast text-sm"></i> <span class="hidden sm:inline">Send Broadcast</span>
+      </button>
+
+      <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
+        <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
+      </button>
+    </div>
 
     <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
       
