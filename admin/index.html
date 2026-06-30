@@ -71,35 +71,72 @@
     </div>
   </div>
 
-<!-- Bulk Notification Modal -->
+<!-- Advanced Broadcast Command Console -->
   <div id="notif-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
-    <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden">
+    <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 w-full max-w-lg shadow-2xl relative overflow-hidden">
       <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
-      <h3 class="text-lg font-bold text-white mb-4"><i class="ti ti-broadcast text-[#c9a96e] mr-2"></i>Broadcast Notification</h3>
       
-      <div class="space-y-4">
-        <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Audience</label>
-          <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
-            <option value="all">All Registered Users</option>
-            <option value="active">Active Plan Users</option>
-            <option value="expiring_3">Expiring in <= 3 Days</option>
-            <option value="free">Free Tier Users</option>
-          </select>
+      <div class="mb-4">
+        <h3 class="text-base font-bold text-white tracking-wide"><i class="ti ti-broadcast text-[#c9a96e] mr-1.5"></i>Advanced Target Campaign Builder</h3>
+        <p class="text-xs text-neutral-500 mt-0.5">Build smart system alerts, conversion campaigns, or custom features notifications.</p>
+      </div>
+      
+      <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-1">
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Segment</label>
+            <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1">
+              <option value="all">All Ecosystem Accounts</option>
+              <option value="active">Active Plan Subscribers</option>
+              <option value="expiring_3">Sub Overdue/Expiring (<= 3 Days)</option>
+              <option value="free">Free Tier Pipelines</option>
+            </select>
+          </div>
+          <div>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Campaign Style Template</label>
+            <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1">
+              <option value="info">System Bulletin (Info Indicator)</option>
+              <option value="alert">Subscription Notice (Amber Flash Alert)</option>
+              <option value="feature">Feature Drop (Sparkle Emerald Icon)</option>
+              <option value="welcome">Onboarding Welcome (Branded Gold Display)</option>
+            </select>
+          </div>
         </div>
+
         <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Name / Title</label>
-          <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition" />
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Identity Title</label>
+          <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1" />
         </div>
+
         <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Content</label>
-          <textarea id="notif-msg" placeholder="Type your message here..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition h-24 resize-none"></textarea>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Markup Content</label>
+          <textarea id="notif-msg" placeholder="Write dynamic copy context to inject into user feeds..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 h-20 resize-none"></textarea>
+        </div>
+
+        <div class="border-t border-neutral-900 pt-3">
+          <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2"><i class="ti ti-link text-neutral-500 mr-1"></i>Interactive Conversion Call-To-Action (Optional)</p>
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[9px] uppercase font-semibold text-neutral-500">Action Button Display Text</label>
+              <input type="text" id="notif-action-label" placeholder="e.g., Upgrade Ledger Tier" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1" />
+            </div>
+            <div>
+              <label class="text-[9px] uppercase font-semibold text-neutral-500">Target UI Action Link Path</label>
+              <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1">
+                <option value="">None (Plain Notification Modal)</option>
+                <option value="#pricing">Deep link to Pricing Hub Grid</option>
+                <option value="payments">Switch Workspace view onto Ledger Portal</option>
+                <option value="account">Redirect to Account Management Settings</option>
+                <option value="calendar">Jump to Schedule Calendar Matrix</option>
+              </select>
+            </div>
+          </div>
         </div>
       </div>
       
-      <div class="flex gap-3 mt-8">
-        <button onclick="document.getElementById('notif-modal').classList.add('hidden')" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:bg-neutral-900 hover:text-white transition">Cancel</button>
-        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-1">Send Alert</button>
+      <div class="flex gap-3 mt-6">
+        <button onclick="document.getElementById('notif-modal').classList.add('hidden')" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:bg-neutral-900 transition">Discard</button>
+        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-1/2 py-2 text-xs font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-1">Execute Campaign</button>
       </div>
     </div>
   </div>
@@ -1001,30 +1038,26 @@ function renderTable(data) {
     // --- BULK NOTIFICATION LOGIC ---
     async function sendBulkNotification() {
       const target = document.getElementById('notif-target').value;
+      const type = document.getElementById('notif-type').value;
       const title = document.getElementById('notif-title').value.trim();
       const msg = document.getElementById('notif-msg').value.trim();
+      const actionLabel = document.getElementById('notif-action-label').value.trim();
+      const actionUrl = document.getElementById('notif-action-url').value;
       const btn = document.getElementById('send-notif-btn');
 
-      if (!msg || !title) {
-        alert("Title and Message are required.");
-        return;
-      }
+      if (!msg || !title) { alert("Title and Message copy values are required inputs."); return; }
 
-      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Sending...';
+      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Processing...';
       btn.disabled = true;
 
-      // 1. Filter Users Based on Selection
       let targetedUsers = [];
-      const today = new Date();
-      today.setHours(0,0,0,0);
+      const today = new Date(); today.setHours(0,0,0,0);
 
       allUsers.forEach(u => {
         const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
         let diffDays = 9999;
-        
         if (u.expires_at) {
-          const expiresDate = new Date(u.expires_at);
-          expiresDate.setHours(0,0,0,0);
+          const expiresDate = new Date(u.expires_at); expiresDate.setHours(0,0,0,0);
           diffDays = Math.ceil((expiresDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
         }
 
@@ -1035,40 +1068,32 @@ function renderTable(data) {
       });
 
       if (targetedUsers.length === 0) {
-        alert("No users match this filter.");
-        btn.innerHTML = 'Send Alert';
-        btn.disabled = false;
-        return;
+        alert("Target selection yields 0 operational users.");
+        btn.innerHTML = 'Execute Campaign'; btn.disabled = false; return;
       }
 
-      // 2. Build Bulk Insert Payload for Supabase
       const payload = targetedUsers.map(u => ({
         user_id: u.user_id,
         title: title,
-        message: msg
+        message: msg,
+        type: type,
+        action_label: actionLabel || null,
+        action_url: actionUrl || null
       }));
 
-      // 3. Send to Database
       try {
         await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
           method: 'POST',
-          headers: { 
-            'Content-Type': 'application/json', 
-            'apikey': SUPABASE_KEY, 
-            'Authorization': `Bearer ${SUPABASE_KEY}` 
-          },
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
           body: JSON.stringify(payload)
         });
 
         document.getElementById('notif-modal').classList.add('hidden');
         document.getElementById('notif-msg').value = '';
-        alert(`Successfully sent notification to ${targetedUsers.length} users!`);
-      } catch(e) {
-        alert('Error sending notifications: ' + e.message);
-      } finally {
-        btn.innerHTML = 'Send Alert';
-        btn.disabled = false;
-      }
+        document.getElementById('notif-action-label').value = '';
+        alert(`Dispatched advanced alerts down pipeline to ${targetedUsers.length} targets!`);
+      } catch(e) { alert('Broadcast failure signature: ' + e.message); }
+      finally { btn.innerHTML = 'Execute Campaign'; btn.disabled = false; }
     }
 
     // --- CLEANUP ZOMBIE SERVICE WORKERS ---
