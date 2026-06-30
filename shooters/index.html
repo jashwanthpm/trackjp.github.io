@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sakkhi | Shooters Roster</title>
+  
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  
+  <style>
+    body { 
+      font-family: 'Plus Jakarta Sans', sans-serif; 
+      background-color: #0a0a0a; 
+      color: #e8e8e8; 
+    }
+    
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
+  </style>
+</head>
+<body class="p-4 sm:p-8">
+
+  <div id="loading-overlay" class="fixed inset-0 bg-[#0a0a0a] z-50 flex flex-col items-center justify-center gap-4 transition-opacity duration-300">
+    <i class="ti ti-loader animate-spin text-3xl text-[#c9a96e]"></i>
+    <p class="text-xs text-neutral-500 tracking-wide font-medium">Syncing roster with Sakkhi Cloud...</p>
+  </div>
+
+  <div class="max-w-5xl mx-auto space-y-6" id="main-content" style="opacity: 0; transition: opacity 0.3s ease;">
+    
+    <!-- Header -->
+    <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
+      <div>
+        <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+          <i class="ti ti-camera text-[#c9a96e]"></i> Shooters Roster
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">Manage your production team and sync data across your workspace.</p>
+      </div>
+      <div id="sync-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-950 text-xs font-medium text-neutral-400">
+        <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Synced
+      </div>
+    </div>
+
+    <!-- Add Shooter Form -->
+    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
+      <h3 class="text-sm font-bold text-white mb-4">Add New Shooter</h3>
+      <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
+        
+        <div class="flex flex-col gap-1.5 md:col-span-5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Name</label>
+          <input type="text" id="shooter-name" placeholder="e.g., Rohan Kumar" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        </div>
+        
+        <div class="flex flex-col gap-1.5 md:col-span-4">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Primary Role</label>
+          <select id="shooter-role" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+            <option value="Lead Photographer">Lead Photographer</option>
+            <option value="Candid Photographer">Candid Photographer</option>
+            <option value="Cinematographer">Cinematographer</option>
+            <option value="Traditional Videographer">Traditional Videographer</option>
+            <option value="Drone Operator">Drone Operator</option>
+            <option value="Lighting Assistant">Lighting Assistant</option>
+          </select>
+        </div>
+        
+        <div class="flex items-end md:col-span-3">
+          <button onclick="addShooter()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-sm px-4 py-2.5 rounded-lg transition flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,169,110,0.15)]">
+            <i class="ti ti-user-plus"></i> Add to Team
+          </button>
+        </div>
+        
+      </div>
+    </div>
+
+    <!-- Active Roster List -->
+    <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
+      <h3 class="text-sm font-bold text-white mb-4">Active Team Members</h3>
+      <div id="shooters-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <!-- Javascript injects roster here -->
+      </div>
+    </div>
+    
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
+
+  <script>
+    // ==========================================
+    // SUPABASE CONFIGURATION (Synced with app.html)
+    // ==========================================
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    
+    const HEADERS = {
+      'Content-Type': 'application/json',
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Prefer': 'return=representation'
+    };
+
+    let currentUser = null;
+    let shooters = [];
+
+    // Initialize Page
+    document.addEventListener('DOMContentLoaded', async () => {
+      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      
+      if (savedUser) {
+        currentUser = JSON.parse(savedUser);
+        await loadShooters();
+        
+        // Hide loader and show content smoothly
+        document.getElementById('loading-overlay').style.opacity = '0';
+        setTimeout(() => {
+          document.getElementById('loading-overlay').classList.add('hidden');
+          document.getElementById('main-content').style.opacity = '1';
+        }, 300);
+      } else {
+        document.body.innerHTML = `
+          <div class="flex flex-col items-center justify-center h-screen bg-[#050505]">
+            <i class="ti ti-shield-lock text-4xl text-red-500 mb-4"></i>
+            <p class="text-sm text-neutral-400 font-medium">Authentication Required.</p>
+            <p class="text-xs text-neutral-500 mt-1">Please sign in from the main Sakkhi app.</p>
+          </div>
+        `;
+      }
+    });
+
+    // Supabase Fetch Wrapper
+    async function sbFetch(path, opts = {}) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+        ...opts,
+        headers: { ...HEADERS, ...(opts.headers || {}) }
+      });
+      if (!res.ok) {
+        throw new Error(await res.text());
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
+    }
+
+    // Load Shooters from Cloud
+    async function loadShooters() {
+      try {
+        const userId = currentUser.id;
+        const key = `${userId}_shooters`; // Syncs strictly to the active user's environment
+        
+        const res = await sbFetch(`settings?key=eq.${key}&select=value`);
+        
+        if (res && res.length > 0) {
+          shooters = res[0].value || [];
+        }
+        
+        renderShooters();
+      } catch (e) {
+        console.error("Error loading shooters from Supabase", e);
+        showToast('Failed to load roster from cloud.', 'error');
+      }
+    }
+
+    // Add Shooter to List
+    async function addShooter() {
+      const nameInput = document.getElementById('shooter-name');
+      const roleInput = document.getElementById('shooter-role');
+      
+      const name = nameInput.value.trim();
+      const role = roleInput.value;
+      
+      if (!name) {
+        showToast('Please provide a name for the shooter.', 'error');
+        nameInput.focus();
+        return;
+      }
+      
+      const newShooter = {
+        id: 'shtr_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        name: name,
+        role: role,
+        addedAt: new Date().toISOString()
+      };
+      
+      shooters.unshift(newShooter); // Add to the top of the array
+      
+      nameInput.value = ''; // Clear input
+      
+      renderShooters();
+      await pushToCloud();
+      showToast(`${name} added to the roster!`, 'success');
+    }
+
+    // Delete Shooter
+    async function deleteShooter(id, name) {
+      if (!confirm(`Are you sure you want to remove ${name} from your team?`)) return;
+      
+      shooters = shooters.filter(s => s.id !== id);
+      
+      renderShooters();
+      await pushToCloud();
+      showToast(`${name} removed from roster.`, 'info');
+    }
+
+    // Push Array to Supabase Settings Table
+    async function pushToCloud() {
+      const userId = currentUser.id;
+      const uniqueKey = `${userId}_shooters`;
+      
+      updateSyncUI('syncing');
+
+      try {
+        const checkExisting = await sbFetch(`settings?key=eq.${uniqueKey}&select=key`);
+        
+        if (checkExisting && checkExisting.length > 0) {
+          await sbFetch(`settings?key=eq.${uniqueKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value: shooters, user_id: userId }) 
+          });
+        } else {
+          await sbFetch('settings', {
+            method: 'POST',
+            body: JSON.stringify({ 
+              key: uniqueKey, 
+              value: shooters, 
+              user_id: userId 
+            })
+          });
+        }
+        updateSyncUI('synced');
+      } catch (e) {
+        console.error("Supabase Save Error: ", e);
+        updateSyncUI('error');
+        showToast('Cloud sync failed.', 'error');
+      }
+    }
+
+    // Render HTML
+    function renderShooters() {
+      const container = document.getElementById('shooters-list');
+      
+      if (shooters.length === 0) {
+        container.classList.remove('grid', 'md:grid-cols-2');
+        container.innerHTML = `
+          <div class="flex flex-col items-center justify-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30">
+            <i class="ti ti-users-group text-3xl text-neutral-700 mb-2"></i>
+            <p class="text-sm font-medium text-neutral-400">No team members added yet.</p>
+            <p class="text-xs text-neutral-600 mt-1">Add shooters to assign them to your upcoming pipelines.</p>
+          </div>
+        `;
+        return;
+      }
+      
+      container.classList.add('grid', 'md:grid-cols-2');
+      container.innerHTML = shooters.map(s => {
+        // Dynamic Badge Styling based on role keyword
+        let roleBadge = 'bg-neutral-900/50 text-neutral-400 border-neutral-800';
+        let icon = 'ti-user';
+        
+        if (s.role.includes('Photographer')) {
+          roleBadge = 'bg-blue-950/30 text-blue-400 border-blue-900/50';
+          icon = 'ti-camera';
+        } else if (s.role.includes('Cinematographer') || s.role.includes('Videographer')) {
+          roleBadge = 'bg-purple-950/30 text-purple-400 border-purple-900/50';
+          icon = 'ti-video';
+        } else if (s.role.includes('Drone')) {
+          roleBadge = 'bg-emerald-950/30 text-emerald-400 border-emerald-900/50';
+          icon = 'ti-drone';
+        }
+
+        const initials = s.name.substring(0, 2).toUpperCase();
+
+        return `
+        <div class="flex items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-neutral-700 hover:bg-[#121212] transition group">
+          <div class="flex items-center gap-4 min-w-0">
+            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-inner">
+              ${initials}
+            </div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">${s.name}</p>
+              <div class="flex items-center gap-1.5 mt-1">
+                <span class="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border font-bold ${roleBadge}">
+                  <i class="ti ${icon} text-[10px]"></i> ${s.role}
+                </span>
+              </div>
+            </div>
+          </div>
+          <button onclick="deleteShooter('${s.id}', '${s.name}')" class="p-2 text-neutral-600 hover:text-red-400 hover:bg-red-950/30 rounded-lg opacity-0 group-hover:opacity-100 transition shrink-0" title="Remove Shooter">
+            <i class="ti ti-trash text-base"></i>
+          </button>
+        </div>
+        `;
+      }).join('');
+    }
+
+    // UI Helpers
+    function updateSyncUI(state) {
+      const syncEl = document.getElementById('sync-status');
+      if (state === 'syncing') {
+        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> Syncing...`;
+      } else if (state === 'synced') {
+        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Synced`;
+      } else {
+        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> Offline`;
+      }
+    }
+
+    function showToast(msg, type = 'success') {
+      const c = document.getElementById('toast-container');
+      const t = document.createElement('div');
+      
+      const colors = type === 'success' 
+        ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' 
+        : type === 'info' 
+          ? 'bg-blue-950/90 border-blue-900 text-blue-300' 
+          : 'bg-red-950/90 border-red-900 text-red-300';
+          
+      const icon = type === 'success' ? 'ti-circle-check' : type === 'info' ? 'ti-info-circle' : 'ti-alert-circle';
+
+      t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-2xl border backdrop-blur-md transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${colors}`;
+      t.innerHTML = `<i class="ti ${icon} text-base"></i><span>${msg}</span>`;
+      
+      c.appendChild(t);
+      
+      // Animate In
+      requestAnimationFrame(() => {
+        t.classList.remove('translate-y-2', 'opacity-0');
+      });
+
+      // Animate Out
+      setTimeout(() => { 
+        t.style.opacity = '0'; 
+        t.style.transform = 'translateY(8px)';
+        setTimeout(() => t.remove(), 300); 
+      }, 3000);
+    }
+  </script>
+</body>
+</html>
