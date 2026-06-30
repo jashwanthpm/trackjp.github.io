@@ -1,0 +1,42 @@
+<!-- Full-Page Notification Manager -->
+<main class="max-w-5xl mx-auto px-6 py-10">
+  <div class="mb-8">
+    <h1 class="text-3xl font-bold text-white tracking-tight">Notification Center</h1>
+    <p class="text-neutral-500 text-sm mt-1">Manage broadcasts, automated reminders, and user engagement.</p>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    <!-- Builder Section -->
+    <div class="lg:col-span-1 bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-6 h-fit">
+      <h2 class="text-lg font-bold text-white mb-4">Create Campaign</h2>
+      <div class="space-y-4">
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500">Target Segment</label>
+          <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1">
+            <option value="all">All Users</option>
+            <option value="active">Active Plan Subscribers</option>
+            <option value="expiring_3">Expiring Soon (<= 3 Days)</option>
+          </select>
+        </div>
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500">Sender Title</label>
+          <input type="text" id="notif-title" placeholder="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1">
+        </div>
+        <div>
+          <label class="text-[10px] uppercase font-bold text-neutral-500">Message</label>
+          <textarea id="notif-msg" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1 h-32"></textarea>
+        </div>
+        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3 bg-[#c9a96e] text-black font-bold rounded-xl hover:bg-[#e6c98a] transition">Execute Campaign</button>
+      </div>
+    </div>
+
+    <!-- Logs Section -->
+    <div class="lg:col-span-2 bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-6">
+      <h2 class="text-lg font-bold text-white mb-4">Recent Broadcasts</h2>
+      <div id="notif-logs" class="space-y-3">
+        <!-- JS will populate this with previous broadcast history -->
+        <p class="text-neutral-600 text-sm">Loading broadcast history...</p>
+      </div>
+    </div>
+  </div>
+</main>
