@@ -1134,12 +1134,17 @@
       <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
     </nav>
 
-    <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
-      <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
-          <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
-          <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
-        </div>
+    <!-- Replace the existing shoot-modal-backdrop and shoot-modal divs with this: -->
+<div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/60 z-50 flex justify-end opacity-0 pointer-events-none transition-opacity duration-300" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
+  <div id="shoot-modal" class="bg-[#0f0f0f] border-l border-neutral-900 w-full sm:w-[450px] h-full overflow-y-auto transform translate-x-full transition-transform duration-300 flex flex-col shadow-2xl">
+    
+    <!-- Keep all the existing interior content exactly as it is, starting from the header: -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
+      <h3 id="shoot-modal-title" class="text-base font-bold text-white tracking-wide">Shoot Information</h3>
+      <button onclick="closeShootModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+    </div>
+    
+    <!-- ... Rest of your existing modal content ... -->
         
         <div class="p-5 space-y-4 flex-1">
           <input type="hidden" id="edit-shoot-id"/>
@@ -4462,17 +4467,36 @@ async function toggleBlockDate(dateStr) {
 
     function closeConfirmModal() { closeModal('confirm-modal-backdrop'); _pendingDropTargetId = null; }
     function openModal(id) {
-      const m = document.getElementById(id); m.classList.add('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = 'hidden';
+  const m = document.getElementById(id); 
+  m.classList.add('opacity-100', 'pointer-events-auto');
+  const inner = m.firstElementChild;
+  if (inner) {
+    if (id === 'shoot-modal-backdrop') {
+      // Slide in from the right for the shoot panel
+      inner.classList.remove('translate-x-full');
+    } else {
+      // Standard bottom-up popup for other modals
+      inner.classList.remove('translate-y-full', 'sm:translate-y-4');
     }
-    function closeModal(id) {
-      const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
-      const inner = m.firstElementChild;
-      if (inner) inner.classList.add('translate-y-full', 'sm:translate-y-4');
-      document.body.style.overflow = '';
+  }
+  document.body.style.overflow = 'hidden';
+}
+
+function closeModal(id) {
+  const m = document.getElementById(id); 
+  m.classList.remove('opacity-100', 'pointer-events-auto');
+  const inner = m.firstElementChild;
+  if (inner) {
+    if (id === 'shoot-modal-backdrop') {
+      // Slide out to the right for the shoot panel
+      inner.classList.add('translate-x-full');
+    } else {
+      // Standard bottom-down exit for other modals
+      inner.classList.add('translate-y-full', 'sm:translate-y-4');
     }
+  }
+  document.body.style.overflow = '';
+}
     function closeShootModal() { closeModal('shoot-modal-backdrop'); }
     function handleBackdropClick(e, id) { if (e.target === document.getElementById(id)) closeModal(id); }
 
