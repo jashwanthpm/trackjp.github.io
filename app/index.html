@@ -1876,12 +1876,40 @@ let _isSubActive = false;
 // ==========================================
 // NOTIFICATION CENTER LOGIC
 // ==========================================
-// 1. Load existing notifications from localStorage on startup (or default to empty array)
 let _notifications = JSON.parse(localStorage.getItem('sakkhi_notifications')) || [];
 
-// Helper function to save current state to localStorage
 function saveNotifications() {
   localStorage.setItem('sakkhi_notifications', JSON.stringify(_notifications));
+}
+
+// Helper function to format the timestamp dynamically
+function formatNotificationTime(isoDateStr) {
+  if (!isoDateStr) return '';
+  const date = new Date(isoDateStr);
+  const now = new Date();
+  
+  const isToday = date.getDate() === now.getDate() && 
+                  date.getMonth() === now.getMonth() && 
+                  date.getFullYear() === now.getFullYear();
+  
+  const yesterday = new Date(now);
+  yesterday.setDate(now.getDate() - 1);
+  const isYesterday = date.getDate() === yesterday.getDate() && 
+                      date.getMonth() === yesterday.getMonth() && 
+                      date.getFullYear() === yesterday.getFullYear();
+
+  // Formats time with AM/PM (e.g., "1:35 PM")
+  const timeStr = date.toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit', hour12: true });
+
+  if (isToday) {
+    return timeStr;
+  } else if (isYesterday) {
+    return `Yesterday, ${timeStr}`;
+  } else {
+    // For older notifications (e.g., "Jul 1, 1:35 PM")
+    const dateStr = date.toLocaleDateString('en-IN', { month: 'short', day: 'numeric' });
+    return `${dateStr}, ${timeStr}`;
+  }
 }
 
 function addNotification(title, message, targetId) {
@@ -1891,30 +1919,34 @@ function addNotification(title, message, targetId) {
     targetId: targetId, 
     title, 
     message, 
-    date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
+    // We now save the raw timestamp instead of a hardcoded text string
+    timestamp: new Date().toISOString() 
   });
   
-  saveNotifications(); // Save to local storage
+  saveNotifications();
   updateNotificationUI();
 }
 
 function removeNotification(id) {
   _notifications = _notifications.filter(n => n.id !== id);
-  
-  saveNotifications(); // Save to local storage
+  saveNotifications();
   updateNotificationUI();
 }
 
 function clearNotifications() {
   _notifications = [];
-  
-  saveNotifications(); // Save to local storage
+  saveNotifications();
   updateNotificationUI();
 }
 
 function toggleNotifications() {
   const dropdown = document.getElementById('notification-dropdown');
   dropdown.classList.toggle('hidden');
+  
+  // Re-render UI when opened so times update (e.g., turning "Today" into "Yesterday" if a day passed)
+  if (!dropdown.classList.contains('hidden')) {
+    updateNotificationUI();
+  }
 }
 
 function handleNotificationClick(targetId) {
@@ -1928,35 +1960,37 @@ function updateNotificationUI() {
   const badge = document.getElementById('notif-badge');
   const list = document.getElementById('notification-list');
   
-  if (!badge || !list) return; // Prevent errors if DOM isn't ready
+  if (!badge || !list) return; 
   
   if (_notifications.length > 0) {
     badge.classList.remove('hidden');
-    list.innerHTML = _notifications.map(n => `
-      <div onclick="handleNotificationClick('${n.targetId}')" class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition cursor-pointer">
+    list.innerHTML = _notifications.map(n => {
+      // Fallback for older notifications that only had 'n.date' string saved
+      const displayTime = n.timestamp ? formatNotificationTime(n.timestamp) : (n.date || '');
+      
+      return `
+      <div onclick="handleNotificationClick('${n.targetId || ''}')" class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition cursor-pointer">
         <div class="pr-6">
             <p class="text-[11px] font-bold text-[#c9a96e] mb-0.5">${n.title}</p>
             <p class="text-xs text-neutral-300 font-medium">${n.message}</p>
-            <p class="text-[9px] text-neutral-600 mt-1.5">${n.date}</p>
+            <p class="text-[9px] text-neutral-600 mt-1.5">${displayTime}</p>
         </div>
         <button onclick="event.stopPropagation(); removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1" title="Dismiss">
           <i class="ti ti-x text-sm"></i>
         </button>
       </div>
-    `).join('');
+      `;
+    }).join('');
   } else {
     badge.classList.add('hidden');
     list.innerHTML = '<div class="p-6 text-center text-xs text-neutral-500 italic">No new notifications</div>';
   }
 }
 
-// 2. Initialize the UI immediately when the page loads to restore saved notifications
 document.addEventListener('DOMContentLoaded', () => {
-  // Add a slight delay to ensure the HTML elements are fully rendered
   setTimeout(updateNotificationUI, 200);
 });
 
-// Close the notification dropdown if the user clicks anywhere outside of it
 document.addEventListener('click', function(event) {
   const wrapper = document.getElementById('notification-wrapper');
   const dropdown = document.getElementById('notification-dropdown');
