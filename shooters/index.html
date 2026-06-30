@@ -161,48 +161,81 @@
       }
     }
 
-    async function addShooter() {
-      const nameInput = document.getElementById('shooter-name');
-      const emailInput = document.getElementById('shooter-email');
-      const roleSelect = document.getElementById('shooter-role');
-      const customInput = document.getElementById('custom-role-input');
-      
-      const name = nameInput.value.trim();
-      const email = emailInput.value.trim().toLowerCase();
-      
-      let role = roleSelect.value;
-      if (role === '__custom__') {
-        role = customInput.value.trim();
-        if (!role) {
-          showToast('Please type a custom role.', 'error');
-          return;
-        }
-      }
-      
-      if (!name || !email) {
-        showToast('Name and Email are required.', 'error');
-        return;
-      }
-      
-      const newShooter = {
-        id: 'shtr_' + Date.now().toString(36),
-        name: name,
-        email: email,
-        role: role,
-        addedAt: new Date().toISOString()
-      };
-      
-      shooters.unshift(newShooter); 
-      
-      nameInput.value = ''; 
-      emailInput.value = '';
-      roleSelect.value = 'Lead Photographer';
-      handleRoleChange(); // reset custom input state
-      
-      renderShooters();
-      await pushToCloud();
-      showToast(`${name} linked via ${email}`, 'success');
+   async function addShooter() {
+  const nameInput = document.getElementById('shooter-name');
+  const emailInput = document.getElementById('shooter-email');
+  const roleSelect = document.getElementById('shooter-role');
+  const customInput = document.getElementById('custom-role-input');
+  
+  const name = nameInput.value.trim();
+  const email = emailInput.value.trim().toLowerCase();
+  
+  let role = roleSelect.value;
+  if (role === '__custom__') {
+    role = customInput.value.trim();
+    if (!role) {
+      showToast('Please type a custom role.', 'error');
+      customInput.focus();
+      return;
     }
+  }
+  
+  if (!name || !email) {
+    showToast('Name and Email are required.', 'error');
+    return;
+  }
+  
+  // --- NEW: VERIFY EMAIL EXISTS IN SAKKHI CLOUD ---
+  const btn = document.querySelector('button[onclick="addShooter()"]');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
+  btn.disabled = true;
+
+  try {
+    const isRegistered = await sbFetch('rpc/check_user_exists', {
+      method: 'POST',
+      body: JSON.stringify({ lookup_email: email })
+    });
+
+    if (!isRegistered) {
+      showToast('This email is not registered in Sakkhi. Ask them to sign up first.', 'error');
+      btn.innerHTML = originalText;
+      btn.disabled = false;
+      return; // Stop the function here
+    }
+  } catch (err) {
+    console.error("Database Verification Error:", err);
+    showToast('Error verifying email. Did you run the SQL script in Supabase?', 'error');
+    btn.innerHTML = originalText;
+    btn.disabled = false;
+    return;
+  }
+  // ------------------------------------------------
+  
+  // If the code reaches here, the user exists. Proceed with adding.
+  const newShooter = {
+    id: 'shtr_' + Date.now().toString(36),
+    name: name,
+    email: email,
+    role: role,
+    addedAt: new Date().toISOString()
+  };
+  
+  shooters.unshift(newShooter); 
+  
+  nameInput.value = ''; 
+  emailInput.value = '';
+  roleSelect.value = 'Lead Photographer';
+  handleRoleChange(); // Reset custom input state
+  
+  // Restore button text
+  btn.innerHTML = originalText;
+  btn.disabled = false;
+  
+  renderShooters();
+  await pushToCloud();
+  showToast(`${name} securely linked via ${email}`, 'success');
+}
 
     async function deleteShooter(id, name) {
       if (!confirm(`Are you sure you want to remove ${name}?`)) return;
