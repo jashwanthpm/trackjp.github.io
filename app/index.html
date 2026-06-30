@@ -1876,11 +1876,15 @@ let _isSubActive = false;
 // ==========================================
 // NOTIFICATION CENTER LOGIC
 // ==========================================
-let _notifications = [];
+// 1. Load existing notifications from localStorage on startup (or default to empty array)
+let _notifications = JSON.parse(localStorage.getItem('sakkhi_notifications')) || [];
 
-// Notice we now accept 'targetId' (which will be the shoot ID)
+// Helper function to save current state to localStorage
+function saveNotifications() {
+  localStorage.setItem('sakkhi_notifications', JSON.stringify(_notifications));
+}
+
 function addNotification(title, message, targetId) {
-  // Generate a unique ID for the notification itself so we can dismiss them individually
   const notifId = 'notif_' + Date.now() + Math.random().toString(36).substr(2, 5);
   _notifications.unshift({ 
     id: notifId, 
@@ -1889,16 +1893,22 @@ function addNotification(title, message, targetId) {
     message, 
     date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) 
   });
+  
+  saveNotifications(); // Save to local storage
   updateNotificationUI();
 }
 
 function removeNotification(id) {
   _notifications = _notifications.filter(n => n.id !== id);
+  
+  saveNotifications(); // Save to local storage
   updateNotificationUI();
 }
 
 function clearNotifications() {
   _notifications = [];
+  
+  saveNotifications(); // Save to local storage
   updateNotificationUI();
 }
 
@@ -1907,13 +1917,9 @@ function toggleNotifications() {
   dropdown.classList.toggle('hidden');
 }
 
-// Function to handle clicking on the notification body
 function handleNotificationClick(targetId) {
   if (targetId) {
-    // Open the shoot using your existing modal function
     openEditShootModal(targetId);
-    
-    // Close the notification dropdown
     document.getElementById('notification-dropdown').classList.add('hidden');
   }
 }
@@ -1921,6 +1927,8 @@ function handleNotificationClick(targetId) {
 function updateNotificationUI() {
   const badge = document.getElementById('notif-badge');
   const list = document.getElementById('notification-list');
+  
+  if (!badge || !list) return; // Prevent errors if DOM isn't ready
   
   if (_notifications.length > 0) {
     badge.classList.remove('hidden');
@@ -1931,7 +1939,6 @@ function updateNotificationUI() {
             <p class="text-xs text-neutral-300 font-medium">${n.message}</p>
             <p class="text-[9px] text-neutral-600 mt-1.5">${n.date}</p>
         </div>
-        <!-- Added event.stopPropagation() so clicking 'X' doesn't open the modal -->
         <button onclick="event.stopPropagation(); removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1" title="Dismiss">
           <i class="ti ti-x text-sm"></i>
         </button>
@@ -1942,6 +1949,12 @@ function updateNotificationUI() {
     list.innerHTML = '<div class="p-6 text-center text-xs text-neutral-500 italic">No new notifications</div>';
   }
 }
+
+// 2. Initialize the UI immediately when the page loads to restore saved notifications
+document.addEventListener('DOMContentLoaded', () => {
+  // Add a slight delay to ensure the HTML elements are fully rendered
+  setTimeout(updateNotificationUI, 200);
+});
 
 // Close the notification dropdown if the user clicks anywhere outside of it
 document.addEventListener('click', function(event) {
