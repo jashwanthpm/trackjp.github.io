@@ -30,67 +30,66 @@
 
   <div class="max-w-5xl mx-auto space-y-6" id="main-content" style="opacity: 0; transition: opacity 0.3s ease;">
     
-    <!-- Header -->
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
           <i class="ti ti-camera text-[#c9a96e]"></i> Shooters Roster
         </h2>
-        <p class="text-xs text-neutral-500 mt-1">Manage your production team and sync data across your workspace.</p>
+        <p class="text-xs text-neutral-500 mt-1">Manage your production team and link them to their Solo accounts.</p>
       </div>
       <div id="sync-status" class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-950 text-xs font-medium text-neutral-400">
         <span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Synced
       </div>
     </div>
 
-    <!-- Add Shooter Form -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
       <h3 class="text-sm font-bold text-white mb-4">Add New Shooter</h3>
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
         
-        <div class="flex flex-col gap-1.5 md:col-span-5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Name</label>
+        <div class="flex flex-col gap-1.5 md:col-span-3">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Name *</label>
           <input type="text" id="shooter-name" placeholder="e.g., Rohan Kumar" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
-        
+
         <div class="flex flex-col gap-1.5 md:col-span-4">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sakkhi Account Email *</label>
+          <input type="email" id="shooter-email" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition"/>
+        </div>
+        
+        <div class="flex flex-col gap-1.5 md:col-span-3">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Primary Role</label>
-          <select id="shooter-role" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+          <select id="shooter-role" onchange="handleRoleChange()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
             <option value="Lead Photographer">Lead Photographer</option>
             <option value="Candid Photographer">Candid Photographer</option>
             <option value="Cinematographer">Cinematographer</option>
             <option value="Traditional Videographer">Traditional Videographer</option>
             <option value="Drone Operator">Drone Operator</option>
             <option value="Lighting Assistant">Lighting Assistant</option>
+            <option value="__custom__">Custom Role...</option>
           </select>
+          <input type="text" id="custom-role-input" placeholder="Type custom role..." class="hidden w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition mt-1"/>
         </div>
         
-        <div class="flex items-end md:col-span-3">
+        <div class="flex items-end md:col-span-2">
           <button onclick="addShooter()" class="w-full bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-bold text-sm px-4 py-2.5 rounded-lg transition flex items-center justify-center gap-2 shadow-[0_0_15px_rgba(201,169,110,0.15)]">
-            <i class="ti ti-user-plus"></i> Add to Team
+            <i class="ti ti-plus"></i> Add
           </button>
         </div>
         
       </div>
     </div>
 
-    <!-- Active Roster List -->
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
       <h3 class="text-sm font-bold text-white mb-4">Active Team Members</h3>
       <div id="shooters-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <!-- Javascript injects roster here -->
-      </div>
+        </div>
     </div>
     
   </div>
 
-  <!-- Toast Notification Container -->
   <div id="toast-container" class="fixed bottom-6 right-6 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    // ==========================================
-    // SUPABASE CONFIGURATION (Synced with app.html)
-    // ==========================================
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
@@ -104,7 +103,6 @@
     let currentUser = null;
     let shooters = [];
 
-    // Initialize Page
     document.addEventListener('DOMContentLoaded', async () => {
       const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
       
@@ -112,7 +110,6 @@
         currentUser = JSON.parse(savedUser);
         await loadShooters();
         
-        // Hide loader and show content smoothly
         document.getElementById('loading-overlay').style.opacity = '0';
         setTimeout(() => {
           document.getElementById('loading-overlay').classList.add('hidden');
@@ -129,89 +126,99 @@
       }
     });
 
-    // Supabase Fetch Wrapper
     async function sbFetch(path, opts = {}) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
         ...opts,
         headers: { ...HEADERS, ...(opts.headers || {}) }
       });
-      if (!res.ok) {
-        throw new Error(await res.text());
-      }
+      if (!res.ok) throw new Error(await res.text());
       const text = await res.text();
       return text ? JSON.parse(text) : [];
     }
 
-    // Load Shooters from Cloud
     async function loadShooters() {
       try {
         const userId = currentUser.id;
-        const key = `${userId}_shooters`; // Syncs strictly to the active user's environment
-        
+        const key = `${userId}_shooters`;
         const res = await sbFetch(`settings?key=eq.${key}&select=value`);
-        
-        if (res && res.length > 0) {
-          shooters = res[0].value || [];
-        }
-        
+        if (res && res.length > 0) shooters = res[0].value || [];
         renderShooters();
       } catch (e) {
-        console.error("Error loading shooters from Supabase", e);
+        console.error(e);
         showToast('Failed to load roster from cloud.', 'error');
       }
     }
 
-    // Add Shooter to List
+    function handleRoleChange() {
+      const roleSelect = document.getElementById('shooter-role');
+      const customInput = document.getElementById('custom-role-input');
+      
+      if (roleSelect.value === '__custom__') {
+        customInput.classList.remove('hidden');
+        customInput.focus();
+      } else {
+        customInput.classList.add('hidden');
+      }
+    }
+
     async function addShooter() {
       const nameInput = document.getElementById('shooter-name');
-      const roleInput = document.getElementById('shooter-role');
+      const emailInput = document.getElementById('shooter-email');
+      const roleSelect = document.getElementById('shooter-role');
+      const customInput = document.getElementById('custom-role-input');
       
       const name = nameInput.value.trim();
-      const role = roleInput.value;
+      const email = emailInput.value.trim().toLowerCase();
       
-      if (!name) {
-        showToast('Please provide a name for the shooter.', 'error');
-        nameInput.focus();
+      let role = roleSelect.value;
+      if (role === '__custom__') {
+        role = customInput.value.trim();
+        if (!role) {
+          showToast('Please type a custom role.', 'error');
+          return;
+        }
+      }
+      
+      if (!name || !email) {
+        showToast('Name and Email are required.', 'error');
         return;
       }
       
       const newShooter = {
-        id: 'shtr_' + Date.now().toString(36) + Math.random().toString(36).substr(2, 5),
+        id: 'shtr_' + Date.now().toString(36),
         name: name,
+        email: email,
         role: role,
         addedAt: new Date().toISOString()
       };
       
-      shooters.unshift(newShooter); // Add to the top of the array
+      shooters.unshift(newShooter); 
       
-      nameInput.value = ''; // Clear input
+      nameInput.value = ''; 
+      emailInput.value = '';
+      roleSelect.value = 'Lead Photographer';
+      handleRoleChange(); // reset custom input state
       
       renderShooters();
       await pushToCloud();
-      showToast(`${name} added to the roster!`, 'success');
+      showToast(`${name} linked via ${email}`, 'success');
     }
 
-    // Delete Shooter
     async function deleteShooter(id, name) {
-      if (!confirm(`Are you sure you want to remove ${name} from your team?`)) return;
-      
+      if (!confirm(`Are you sure you want to remove ${name}?`)) return;
       shooters = shooters.filter(s => s.id !== id);
-      
       renderShooters();
       await pushToCloud();
-      showToast(`${name} removed from roster.`, 'info');
+      showToast(`${name} removed.`, 'info');
     }
 
-    // Push Array to Supabase Settings Table
     async function pushToCloud() {
       const userId = currentUser.id;
       const uniqueKey = `${userId}_shooters`;
-      
       updateSyncUI('syncing');
 
       try {
         const checkExisting = await sbFetch(`settings?key=eq.${uniqueKey}&select=key`);
-        
         if (checkExisting && checkExisting.length > 0) {
           await sbFetch(`settings?key=eq.${uniqueKey}`, {
             method: 'PATCH',
@@ -220,22 +227,16 @@
         } else {
           await sbFetch('settings', {
             method: 'POST',
-            body: JSON.stringify({ 
-              key: uniqueKey, 
-              value: shooters, 
-              user_id: userId 
-            })
+            body: JSON.stringify({ key: uniqueKey, value: shooters, user_id: userId })
           });
         }
         updateSyncUI('synced');
       } catch (e) {
-        console.error("Supabase Save Error: ", e);
         updateSyncUI('error');
         showToast('Cloud sync failed.', 'error');
       }
     }
 
-    // Render HTML
     function renderShooters() {
       const container = document.getElementById('shooters-list');
       
@@ -245,7 +246,7 @@
           <div class="flex flex-col items-center justify-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30">
             <i class="ti ti-users-group text-3xl text-neutral-700 mb-2"></i>
             <p class="text-sm font-medium text-neutral-400">No team members added yet.</p>
-            <p class="text-xs text-neutral-600 mt-1">Add shooters to assign them to your upcoming pipelines.</p>
+            <p class="text-xs text-neutral-600 mt-1">Add their Sakkhi email to link their accounts.</p>
           </div>
         `;
         return;
@@ -253,17 +254,17 @@
       
       container.classList.add('grid', 'md:grid-cols-2');
       container.innerHTML = shooters.map(s => {
-        // Dynamic Badge Styling based on role keyword
         let roleBadge = 'bg-neutral-900/50 text-neutral-400 border-neutral-800';
         let icon = 'ti-user';
         
-        if (s.role.includes('Photographer')) {
+        const roleLower = (s.role || '').toLowerCase();
+        if (roleLower.includes('photographer')) {
           roleBadge = 'bg-blue-950/30 text-blue-400 border-blue-900/50';
           icon = 'ti-camera';
-        } else if (s.role.includes('Cinematographer') || s.role.includes('Videographer')) {
+        } else if (roleLower.includes('cinematographer') || roleLower.includes('video')) {
           roleBadge = 'bg-purple-950/30 text-purple-400 border-purple-900/50';
           icon = 'ti-video';
-        } else if (s.role.includes('Drone')) {
+        } else if (roleLower.includes('drone')) {
           roleBadge = 'bg-emerald-950/30 text-emerald-400 border-emerald-900/50';
           icon = 'ti-drone';
         }
@@ -278,7 +279,8 @@
             </div>
             <div class="min-w-0">
               <p class="text-sm font-bold text-white truncate">${s.name}</p>
-              <div class="flex items-center gap-1.5 mt-1">
+              <p class="text-[10px] text-blue-400 truncate mb-1">${s.email}</p>
+              <div class="flex items-center gap-1.5 mt-0.5">
                 <span class="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border font-bold ${roleBadge}">
                   <i class="ti ${icon} text-[10px]"></i> ${s.role}
                 </span>
@@ -293,46 +295,23 @@
       }).join('');
     }
 
-    // UI Helpers
     function updateSyncUI(state) {
       const syncEl = document.getElementById('sync-status');
-      if (state === 'syncing') {
-        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse shadow-[0_0_8px_rgba(245,158,11,0.5)]"></span> Syncing...`;
-      } else if (state === 'synced') {
-        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span> Synced`;
-      } else {
-        syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]"></span> Offline`;
-      }
+      if (state === 'syncing') syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-amber-500 animate-pulse"></span> Syncing...`;
+      else if (state === 'synced') syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-emerald-500"></span> Synced`;
+      else syncEl.innerHTML = `<span class="w-2 h-2 rounded-full bg-red-500"></span> Offline`;
     }
 
     function showToast(msg, type = 'success') {
       const c = document.getElementById('toast-container');
       const t = document.createElement('div');
-      
-      const colors = type === 'success' 
-        ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' 
-        : type === 'info' 
-          ? 'bg-blue-950/90 border-blue-900 text-blue-300' 
-          : 'bg-red-950/90 border-red-900 text-red-300';
-          
+      const colors = type === 'success' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : type === 'info' ? 'bg-blue-950/90 border-blue-900 text-blue-300' : 'bg-red-950/90 border-red-900 text-red-300';
       const icon = type === 'success' ? 'ti-circle-check' : type === 'info' ? 'ti-info-circle' : 'ti-alert-circle';
-
       t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-2xl border backdrop-blur-md transition-all duration-300 translate-y-2 opacity-0 pointer-events-auto ${colors}`;
       t.innerHTML = `<i class="ti ${icon} text-base"></i><span>${msg}</span>`;
-      
       c.appendChild(t);
-      
-      // Animate In
-      requestAnimationFrame(() => {
-        t.classList.remove('translate-y-2', 'opacity-0');
-      });
-
-      // Animate Out
-      setTimeout(() => { 
-        t.style.opacity = '0'; 
-        t.style.transform = 'translateY(8px)';
-        setTimeout(() => t.remove(), 300); 
-      }, 3000);
+      requestAnimationFrame(() => t.classList.remove('translate-y-2', 'opacity-0'));
+      setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateY(8px)'; setTimeout(() => t.remove(), 300); }, 3000);
     }
   </script>
 </body>
