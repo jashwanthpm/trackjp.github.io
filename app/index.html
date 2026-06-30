@@ -1927,16 +1927,39 @@ function addNotification(title, message, targetId) {
   updateNotificationUI();
 }
 
-function removeNotification(id) {
+// Updated: Removes a single notification locally and from the cloud
+async function removeNotification(id) {
+  // 1. Remove from the local UI immediately for a snappy feel
   _notifications = _notifications.filter(n => n.id !== id);
   saveNotifications();
   updateNotificationUI();
+
+  // 2. Delete from Supabase Database (if it's a remote alert)
+  // Local alerts start with 'notif_', Supabase alerts are standard UUIDs
+  if (!id.toString().startsWith('notif_')) {
+    try {
+      await sbFetch(`notifications?id=eq.${id}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error("Failed to delete notification from cloud:", e);
+    }
+  }
 }
 
-function clearNotifications() {
+// Updated: Clears all notifications locally and wipes them from the cloud
+async function clearNotifications() {
+  // 1. Clear the local UI
   _notifications = [];
   saveNotifications();
   updateNotificationUI();
+
+  // 2. Wipe all remote notifications for this specific user
+  if (currentUser && currentUser.id) {
+    try {
+      await sbFetch(`notifications?user_id=eq.${currentUser.id}`, { method: 'DELETE' });
+    } catch (e) {
+      console.error("Failed to clear cloud notifications:", e);
+    }
+  }
 }
 
 function toggleNotifications() {
