@@ -2184,6 +2184,30 @@ try {
     } catch (e) {
       console.warn("Could not load subscription data.");
     }
+
+    // --- PASTE THE NEW NOTIFICATION LOGIC HERE ---
+    try {
+      const dbNotifs = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc`);
+      if (dbNotifs && dbNotifs.length > 0) {
+        // Map database records to match the existing UI array structure
+        const remoteAlerts = dbNotifs.map(n => ({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          timestamp: n.created_at,
+          targetId: null 
+        }));
+        
+        // Merge with any local notifications, keeping remote ones at the top
+        _notifications = [...remoteAlerts];
+        saveNotifications();
+        updateNotificationUI();
+      }
+    } catch (err) {
+      console.warn("Could not fetch remote notifications.");
+    }
+    // ---------------------------------------------
+
     if(bar) bar.style.width = "100%";
     
     // --- ROBUST MAGIC LINK NOTIFICATION LOGIC ---
