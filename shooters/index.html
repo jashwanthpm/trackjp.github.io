@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sakkhi | Shooters </title>
+  <title>Sakkhi | Shooters Roster</title>
   
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -33,7 +33,7 @@
     <div class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
         <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-          <i class="ti ti-camera text-[#c9a96e]"></i> Shooters
+          <i class="ti ti-camera text-[#c9a96e]"></i> Shooters Roster
         </h2>
         <p class="text-xs text-neutral-500 mt-1">Manage your production team and link them to their Solo accounts.</p>
       </div>
@@ -46,18 +46,21 @@
       <h3 class="text-sm font-bold text-white mb-4">Add New Shooter</h3>
       <div class="grid grid-cols-1 md:grid-cols-12 gap-4">
         
-        <div class="flex flex-col gap-1.5 md:col-span-3">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Full Name *</label>
-          <input type="text" id="shooter-name" placeholder="e.g., Rohan Kumar" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <div class="flex flex-col gap-1.5 md:col-span-4">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">1. Sakkhi Account Email *</label>
+          <input type="email" id="shooter-email" onblur="checkEmailForName()" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
 
-        <div class="flex flex-col gap-1.5 md:col-span-4">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sakkhi Account Email *</label>
-          <input type="email" id="shooter-email" placeholder="rohan@solo.com" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-blue-500 transition"/>
+        <div class="flex flex-col gap-1.5 md:col-span-3">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">2. Full Name</label>
+          <div class="relative">
+             <input type="text" id="shooter-name" readonly placeholder="Auto-fetched on email input..." class="w-full bg-neutral-950/50 border border-neutral-900 border-dashed rounded-lg px-4 py-2.5 text-sm text-neutral-400 outline-none cursor-not-allowed font-semibold transition-colors"/>
+             <i id="name-spinner" class="ti ti-loader animate-spin absolute right-3 top-1/2 -translate-y-1/2 text-[#c9a96e] hidden"></i>
+          </div>
         </div>
         
         <div class="flex flex-col gap-1.5 md:col-span-3">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Primary Role</label>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">3. Primary Role</label>
           <select id="shooter-role" onchange="handleRoleChange()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
             <option value="Lead Photographer">Lead Photographer</option>
             <option value="Candid Photographer">Candid Photographer</option>
@@ -80,9 +83,18 @@
     </div>
 
     <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-5 md:p-6 shadow-lg">
-      <h3 class="text-sm font-bold text-white mb-4">Active Team Members</h3>
-      <div id="shooters-list" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-5 border-b border-neutral-900/50 pb-4">
+        <h3 class="text-sm font-bold text-white">Active Team Members</h3>
+        <div class="relative w-full sm:w-64">
+          <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"></i>
+          <input type="text" id="roster-search" oninput="renderShooters()" placeholder="Search members..." class="w-full bg-neutral-950 border border-neutral-800 rounded-lg pl-9 pr-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
         </div>
+      </div>
+
+      <div id="shooters-list" class="flex flex-col gap-3">
+        </div>
+
     </div>
     
   </div>
@@ -133,7 +145,7 @@
       });
       if (!res.ok) throw new Error(await res.text());
       const text = await res.text();
-      return text ? JSON.parse(text) : [];
+      return text ? JSON.parse(text) : null;
     }
 
     async function loadShooters() {
@@ -149,6 +161,44 @@
       }
     }
 
+    // --- AUTO FETCH USER NAME LOGIC ---
+    async function checkEmailForName() {
+       const email = document.getElementById('shooter-email').value.trim().toLowerCase();
+       const nameInput = document.getElementById('shooter-name');
+       const spinner = document.getElementById('name-spinner');
+       
+       // Clean slate if empty
+       if (!email || !email.includes('@')) {
+          nameInput.value = '';
+          nameInput.classList.remove('text-emerald-400', 'text-red-400');
+          return;
+       }
+       
+       nameInput.value = 'Searching database...';
+       nameInput.classList.remove('text-emerald-400', 'text-red-400');
+       spinner.classList.remove('hidden');
+
+       try {
+         const fetchedName = await sbFetch('rpc/get_sakkhi_user_name', {
+            method: 'POST',
+            body: JSON.stringify({ lookup_email: email })
+         });
+         
+         if (fetchedName) {
+           nameInput.value = fetchedName;
+           nameInput.classList.add('text-emerald-400');
+         } else {
+           nameInput.value = 'User not found in Sakkhi';
+           nameInput.classList.add('text-red-400');
+         }
+       } catch(e) {
+         nameInput.value = 'Error fetching user';
+         nameInput.classList.add('text-red-400');
+       } finally {
+         spinner.classList.add('hidden');
+       }
+    }
+
     function handleRoleChange() {
       const roleSelect = document.getElementById('shooter-role');
       const customInput = document.getElementById('custom-role-input');
@@ -161,97 +211,72 @@
       }
     }
 
-  async function addShooter() {
-  const nameInput = document.getElementById('shooter-name');
-  const emailInput = document.getElementById('shooter-email');
-  const roleSelect = document.getElementById('shooter-role');
-  const customInput = document.getElementById('custom-role-input');
-  
-  const name = nameInput.value.trim();
-  const email = emailInput.value.trim().toLowerCase();
-  
-  let role = roleSelect.value;
-  if (role === '__custom__') {
-    role = customInput.value.trim();
-    if (!role) {
-      showToast('Please type a custom role.', 'error');
-      customInput.focus();
-      return;
+    async function addShooter() {
+      const emailInput = document.getElementById('shooter-email');
+      const nameInput = document.getElementById('shooter-name');
+      const roleSelect = document.getElementById('shooter-role');
+      const customInput = document.getElementById('custom-role-input');
+      
+      const email = emailInput.value.trim().toLowerCase();
+      const name = nameInput.value;
+      
+      // Determine final role
+      let role = roleSelect.value;
+      if (role === '__custom__') {
+        role = customInput.value.trim();
+        if (!role) {
+          showToast('Please type a custom role.', 'error');
+          customInput.focus();
+          return;
+        }
+      }
+      
+      // Validations
+      if (!email) {
+        showToast('Please enter their Sakkhi account email.', 'error');
+        emailInput.focus();
+        return;
+      }
+      
+      if (shooters.find(s => s.email === email)) {
+         showToast('This user is already in your active team members list.', 'error');
+         return;
+      }
+
+      if (!name || name.includes('User not found') || name.includes('Error') || name.includes('Searching')) {
+        showToast('Valid Sakkhi account required. Ensure email is correct.', 'error');
+        return;
+      }
+      
+      // Build Object & Add to array
+      const newShooter = {
+        id: 'shtr_' + Date.now().toString(36),
+        name: name,
+        email: email,
+        role: role,
+        addedAt: new Date().toISOString()
+      };
+      
+      shooters.unshift(newShooter); 
+      
+      // Clear Form
+      emailInput.value = ''; 
+      nameInput.value = '';
+      nameInput.classList.remove('text-emerald-400');
+      roleSelect.value = 'Lead Photographer';
+      handleRoleChange(); 
+      
+      renderShooters();
+      await pushToCloud();
+      showToast(`${name} securely linked to team!`, 'success');
     }
-  }
-  
-  if (!name || !email) {
-    showToast('Name and Email are required.', 'error');
-    return;
-  }
-  
-  // Get button to show loading state safely
-  const btn = document.querySelector('button[onclick="addShooter()"]');
-  const originalText = btn ? btn.innerHTML : 'Add';
-  if (btn) {
-    btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
-    btn.disabled = true;
-  }
-
-  try {
-    console.log("Checking Sakkhi Database for email:", email);
-    
-    // Call the Supabase SQL function
-    const isRegistered = await sbFetch('rpc/check_user_exists', {
-      method: 'POST',
-      body: JSON.stringify({ lookup_email: email })
-    });
-
-    console.log("Supabase Response:", isRegistered);
-
-    // STRICT CHECK: If it is anything OTHER than true, block it immediately.
-    if (isRegistered !== true) {
-      showToast('This email is not registered in Sakkhi. Ask them to sign up first.', 'error');
-      if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
-      return; // 🛑 STRICT STOP: Does not execute code below
-    }
-
-  } catch (err) {
-    console.error("Database Verification Error:", err);
-    showToast('Error verifying email. Did you run the SQL script in Supabase?', 'error');
-    if (btn) { btn.innerHTML = originalText; btn.disabled = false; }
-    return; // 🛑 STRICT STOP
-  }
-  
-  // ✅ If the code reaches this line, the user 100% exists.
-  console.log("User verified! Adding to roster...");
-  
-  const newShooter = {
-    id: 'shtr_' + Date.now().toString(36),
-    name: name,
-    email: email,
-    role: role,
-    addedAt: new Date().toISOString()
-  };
-  
-  shooters.unshift(newShooter); 
-  
-  nameInput.value = ''; 
-  emailInput.value = '';
-  roleSelect.value = 'Lead Photographer';
-  handleRoleChange(); 
-  
-  if (btn) {
-    btn.innerHTML = originalText;
-    btn.disabled = false;
-  }
-  
-  renderShooters();
-  await pushToCloud();
-  showToast(`${name} securely linked via ${email}`, 'success');
-}
 
     async function deleteShooter(id, name) {
-      if (!confirm(`Are you sure you want to remove ${name}?`)) return;
+      if (!confirm(`Are you sure you want to remove ${name} from your team?`)) return;
       shooters = shooters.filter(s => s.id !== id);
       renderShooters();
       await pushToCloud();
-      showToast(`${name} removed.`, 'info');
+      showToast(`${name} removed from roster.`, 'info');
     }
 
     async function pushToCloud() {
@@ -281,21 +306,28 @@
 
     function renderShooters() {
       const container = document.getElementById('shooters-list');
+      const searchQuery = (document.getElementById('roster-search')?.value || '').toLowerCase();
       
-      if (shooters.length === 0) {
-        container.classList.remove('grid', 'md:grid-cols-2');
+      // Filter list based on Search Input
+      const filteredShooters = shooters.filter(s => 
+        (s.name || '').toLowerCase().includes(searchQuery) || 
+        (s.email || '').toLowerCase().includes(searchQuery) || 
+        (s.role || '').toLowerCase().includes(searchQuery)
+      );
+
+      if (filteredShooters.length === 0) {
         container.innerHTML = `
           <div class="flex flex-col items-center justify-center py-10 border border-dashed border-neutral-800 rounded-xl bg-neutral-950/30">
-            <i class="ti ti-users-group text-3xl text-neutral-700 mb-2"></i>
-            <p class="text-sm font-medium text-neutral-400">No team members added yet.</p>
-            <p class="text-xs text-neutral-600 mt-1">Add their Sakkhi email to link their accounts.</p>
+            <i class="ti ti-users text-3xl text-neutral-700 mb-2"></i>
+            <p class="text-sm font-medium text-neutral-400">No team members found.</p>
+            ${searchQuery ? '<p class="text-xs text-neutral-600 mt-1">Try adjusting your search filters.</p>' : '<p class="text-xs text-neutral-600 mt-1">Add their Sakkhi email above to link their accounts.</p>'}
           </div>
         `;
         return;
       }
       
-      container.classList.add('grid', 'md:grid-cols-2');
-      container.innerHTML = shooters.map(s => {
+      // Render One Row per user (Flex column)
+      container.innerHTML = filteredShooters.map(s => {
         let roleBadge = 'bg-neutral-900/50 text-neutral-400 border-neutral-800';
         let icon = 'ti-user';
         
@@ -314,23 +346,23 @@
         const initials = s.name.substring(0, 2).toUpperCase();
 
         return `
-        <div class="flex items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-neutral-700 hover:bg-[#121212] transition group">
+        <div class="flex items-center justify-between p-4 bg-neutral-950/80 border border-neutral-900 rounded-xl hover:border-neutral-700 hover:bg-[#121212] transition group w-full">
           <div class="flex items-center gap-4 min-w-0">
-            <div class="w-10 h-10 rounded-full bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-bold text-xs shrink-0 shadow-inner">
+            <div class="w-12 h-12 rounded-full bg-gradient-to-tr from-neutral-900 to-neutral-800 border border-neutral-700 flex items-center justify-center text-white font-bold text-sm shrink-0 shadow-inner">
               ${initials}
             </div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-white truncate">${s.name}</p>
-              <p class="text-[10px] text-blue-400 truncate mb-1">${s.email}</p>
-              <div class="flex items-center gap-1.5 mt-0.5">
-                <span class="inline-flex items-center gap-1 text-[9px] uppercase tracking-wider px-2 py-0.5 rounded border font-bold ${roleBadge}">
-                  <i class="ti ${icon} text-[10px]"></i> ${s.role}
+              <p class="text-base font-bold text-white truncate leading-tight">${s.name}</p>
+              <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                <span class="inline-flex items-center gap-1 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded border font-bold ${roleBadge}">
+                  <i class="ti ${icon} text-xs"></i> ${s.role}
                 </span>
+                <span class="text-xs text-blue-400 font-medium tracking-wide truncate"><i class="ti ti-mail text-neutral-500 mr-1"></i>${s.email}</span>
               </div>
             </div>
           </div>
-          <button onclick="deleteShooter('${s.id}', '${s.name}')" class="p-2 text-neutral-600 hover:text-red-400 hover:bg-red-950/30 rounded-lg opacity-0 group-hover:opacity-100 transition shrink-0" title="Remove Shooter">
-            <i class="ti ti-trash text-base"></i>
+          <button onclick="deleteShooter('${s.id}', '${s.name}')" class="p-2.5 text-neutral-600 hover:text-red-400 hover:bg-red-950/30 rounded-lg md:opacity-0 md:group-hover:opacity-100 transition shrink-0" title="Remove Shooter">
+            <i class="ti ti-trash text-lg"></i>
           </button>
         </div>
         `;
