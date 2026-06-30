@@ -387,9 +387,22 @@
 </div>
 
       <div class="flex items-center gap-2 md:gap-4">
-        <button onclick="logout()" class="flex items-center justify-center p-2 rounded-lg border border-red-900/30 bg-red-950/20 text-red-400 hover:text-red-300 transition" title="Logout">
-          <i class="ti ti-logout text-lg"></i>
-        </button>
+        <div class="relative" id="notification-wrapper">
+  <button onclick="toggleNotifications()" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-neutral-400 hover:text-white hover:border-neutral-700 transition relative" title="Notifications">
+    <i class="ti ti-bell text-lg"></i>
+    <span id="notif-badge" class="hidden absolute top-1.5 right-1.5 w-2 h-2 bg-red-500 rounded-full shadow-[0_0_5px_rgba(239,68,68,0.8)]"></span>
+  </button>
+  
+  <div id="notification-dropdown" class="hidden absolute top-full mt-2 right-0 w-[300px] bg-[#0f0f0f] border border-neutral-900 rounded-xl shadow-2xl z-50 flex flex-col max-h-[350px]">
+    <div class="p-3 border-b border-neutral-800 flex items-center justify-between sticky top-0 bg-[#0f0f0f] rounded-t-xl z-10">
+      <h3 class="text-sm font-bold text-white"><i class="ti ti-bell-ringing text-[#c9a96e] mr-1"></i> Notifications</h3>
+      <button onclick="clearNotifications()" class="text-[10px] text-neutral-500 hover:text-white transition uppercase font-bold tracking-wider">Clear All</button>
+    </div>
+    <div id="notification-list" class="flex-1 overflow-y-auto p-2 space-y-2 hide-scrollbar">
+      <div class="p-4 text-center text-xs text-neutral-500">No new notifications</div>
+    </div>
+  </div>
+</div>
         <button onclick="togglePrivacyMode()" id="privacy-toggle-btn" class="flex items-center justify-center p-2 rounded-lg border border-neutral-800 bg-neutral-900/50 text-amber-500 hover:text-amber-400 hover:border-amber-500/50 transition" title="Toggle Financial Visibility">
           <i id="privacy-icon" class="ti ti-eye-off text-lg"></i>
         </button>
@@ -1860,6 +1873,64 @@ let _isSubActive = false;
       setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
     }
 
+// ==========================================
+// NOTIFICATION CENTER LOGIC
+// ==========================================
+let _notifications = [];
+
+function addNotification(title, message, id) {
+  _notifications.unshift({ id: id || uid(), title, message, date: new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) });
+  updateNotificationUI();
+}
+
+function removeNotification(id) {
+  _notifications = _notifications.filter(n => n.id !== id);
+  updateNotificationUI();
+}
+
+function clearNotifications() {
+  _notifications = [];
+  updateNotificationUI();
+}
+
+function toggleNotifications() {
+  const dropdown = document.getElementById('notification-dropdown');
+  dropdown.classList.toggle('hidden');
+}
+
+function updateNotificationUI() {
+  const badge = document.getElementById('notif-badge');
+  const list = document.getElementById('notification-list');
+  
+  if (_notifications.length > 0) {
+    badge.classList.remove('hidden');
+    list.innerHTML = _notifications.map(n => `
+      <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 relative group hover:border-[#c9a96e]/30 transition">
+        <div class="pr-6">
+            <p class="text-[11px] font-bold text-[#c9a96e] mb-0.5">${n.title}</p>
+            <p class="text-xs text-neutral-300 font-medium">${n.message}</p>
+            <p class="text-[9px] text-neutral-600 mt-1.5">${n.date}</p>
+        </div>
+        <button onclick="removeNotification('${n.id}')" class="absolute top-2 right-2 text-neutral-600 hover:text-white opacity-0 group-hover:opacity-100 transition p-1">
+          <i class="ti ti-x text-sm"></i>
+        </button>
+      </div>
+    `).join('');
+  } else {
+    badge.classList.add('hidden');
+    list.innerHTML = '<div class="p-6 text-center text-xs text-neutral-500 italic">No new notifications</div>';
+  }
+}
+
+// Close the notification dropdown if the user clicks anywhere outside of it
+document.addEventListener('click', function(event) {
+  const wrapper = document.getElementById('notification-wrapper');
+  const dropdown = document.getElementById('notification-dropdown');
+  if (wrapper && dropdown && !wrapper.contains(event.target)) {
+    dropdown.classList.add('hidden');
+  }
+});
+    
     async function ensureTables() {
       try {
         // We now check if the user_id column exists. If it doesn't, this will throw an error and trigger the migration script.
@@ -2052,16 +2123,16 @@ try {
       initTimeFilters(); // <--- ADD THIS LINE RIGHT HERE
       renderDashboard();
 
-      // Show notification if external bookings came in
-      if (newBookings.length > 0 && !isDemoMode) {
-        setTimeout(() => {
-          if (newBookings.length === 1) {
-            showBookingAlert('New Booking Arrived! 🎉', newBookings[0].name);
-          } else {
-            showBookingAlert(`${newBookings.length} New Bookings! 🎉`, 'Check your shoots list for details.');
-          }
-        }, 800);
-      }
+      // Add external bookings to the notification center
+if (newBookings.length > 0 && !isDemoMode) {
+  setTimeout(() => {
+    newBookings.forEach(booking => {
+      addNotification('New Booking Arrived! 🎉', booking.name || 'A new shoot was added via Magic Link.', booking.id);
+    });
+    // Optional: play a sound or trigger a small toast here if you still want a brief screen alert
+    showToast(`${newBookings.length} new booking(s) received. Check notifications.`, 'success');
+  }, 800);
+}
     }, 400);
 
   } catch (e) {
