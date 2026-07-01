@@ -464,6 +464,9 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
       }
     );
 
+console.log('Status:', response.status);
+    console.log('Response:', await response.clone().text());
+    
     const data = await response.json();
 
     if (!response.ok) {
@@ -473,8 +476,9 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
     allUsers = data;
     renderDashboard();
   } catch (err) {
-    console.error('Admin fetch failed:', err);
-  }
+  console.error('Admin fetch failed:', err);
+  alert(err.message);
+}
 }
 
     // --- RENDER LOGIC ---
