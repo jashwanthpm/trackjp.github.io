@@ -41,8 +41,8 @@
         <p class="text-neutral-500 text-sm mt-1">Deploy targeted campaigns, system alerts, and track delivery logs.</p>
       </div>
       <a href="/admin/" class="flex items-center gap-2 text-xs font-bold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors w-fit shadow-sm">
-  <i class="ti ti-arrow-left"></i> Back to Admin
-</a>
+        <i class="ti ti-arrow-left"></i> Back to Admin
+      </a>
     </div>
 
     <div id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-8">
@@ -64,68 +64,82 @@
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
       
-      <div class="lg:col-span-5 bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 h-fit shadow-2xl relative overflow-hidden">
-        <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+      <!-- COMPOSE PANEL: Fixed Height, Sticky, Scrollable Middle -->
+      <div class="lg:col-span-5 bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl h-[calc(100vh-120px)] sticky top-6 shadow-2xl relative flex flex-col overflow-hidden">
+        <!-- Top Accent -->
+        <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e] z-20"></div>
         
-        <h2 class="text-base font-bold text-white mb-5 flex items-center gap-2">
-          <i class="ti ti-edit text-neutral-400"></i> Create New Campaign
-        </h2>
-
-        <div class="mb-5">
-          <div class="step-head"><span class="step-badge">1</span><span class="step-title">Start from a template</span><span class="step-hint">optional</span></div>
-          <div id="notif-templates" class="grid grid-cols-2 gap-2 mt-1"></div>
+        <!-- Fixed Header -->
+        <div class="p-6 pb-4 border-b border-neutral-900 bg-[#0a0a0a] z-10 flex-shrink-0">
+          <h2 class="text-base font-bold text-white flex items-center gap-2">
+            <i class="ti ti-edit text-neutral-400"></i> Create New Campaign
+          </h2>
         </div>
 
-        <div class="space-y-4">
-          <div class="step-head"><span class="step-badge">2</span><span class="step-title">Who receives this</span></div>
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Audience</label>
-              <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
-                <option value="all">All Ecosystem Accounts</option>
-                <option value="active">Active Subscribers</option>
-                <option value="free">Free Tier Users</option>
-                <option value="expiring_3">Expiring Soon (≤ 3 Days)</option>
-                <option value="expired">Already Expired</option>
-                <option value="new">New Users (last 7 days)</option>
-                <option value="inactive">Inactive (0 shoots logged)</option>
-                <option value="specific">🎯 Specific User(s)</option>
-              </select>
-              <p id="audience-count" class="text-[10px] text-[#c9a96e] font-semibold mt-1.5 flex items-center gap-1"><i class="ti ti-users"></i> —</p>
-            </div>
-            <div>
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notification Type</label>
-              <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
-                <option value="info">System Bulletin (Blue)</option>
-                <option value="alert">Subscription Notice (Amber)</option>
-                <option value="feature">Feature Drop (Emerald)</option>
-                <option value="welcome">Branded Display (Gold)</option>
-              </select>
-            </div>
-          </div>
-
-          <div id="specific-user-picker" class="hidden border border-neutral-800 rounded-lg p-3 bg-[#050505]">
-            <div class="flex items-center justify-between mb-2">
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Search Users</label>
-              <span id="specific-user-count" class="text-[10px] font-bold text-[#c9a96e]">0 selected</span>
-            </div>
-            <input type="text" id="specific-user-search" placeholder="Search by name or email..." class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mb-2 transition">
-            <div id="specific-user-list" class="max-h-48 overflow-y-auto space-y-1"></div>
-          </div>
-
-          <div class="step-head pt-1"><span class="step-badge">3</span><span class="step-title">Write your notification</span></div>
+        <!-- Scrollable Content -->
+        <div class="flex-1 overflow-y-auto p-6 space-y-6 custom-scrollbar">
+          
+          <!-- Step 1 -->
           <div>
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Title</label>
-            <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+            <div class="step-head"><span class="step-badge">1</span><span class="step-title">Start from a template</span><span class="step-hint">optional</span></div>
+            <div id="notif-templates" class="grid grid-cols-2 gap-2 mt-1"></div>
           </div>
 
-          <div>
-            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Content</label>
-            <textarea id="notif-msg" placeholder="Write dynamic copy to inject into user feeds..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 h-28 resize-none transition"></textarea>
+          <!-- Step 2 -->
+          <div class="space-y-4">
+            <div class="step-head"><span class="step-badge">2</span><span class="step-title">Who receives this</span></div>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Audience</label>
+                <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                  <option value="all">All Ecosystem Accounts</option>
+                  <option value="active">Active Subscribers</option>
+                  <option value="free">Free Tier Users</option>
+                  <option value="expiring_3">Expiring Soon (≤ 3 Days)</option>
+                  <option value="expired">Already Expired</option>
+                  <option value="new">New Users (last 7 days)</option>
+                  <option value="inactive">Inactive (0 shoots logged)</option>
+                  <option value="specific">🎯 Specific User(s)</option>
+                </select>
+                <p id="audience-count" class="text-[10px] text-[#c9a96e] font-semibold mt-1.5 flex items-center gap-1"><i class="ti ti-users"></i> —</p>
+              </div>
+              <div>
+                <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notification Type</label>
+                <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                  <option value="info">System Bulletin (Blue)</option>
+                  <option value="alert">Subscription Notice (Amber)</option>
+                  <option value="feature">Feature Drop (Emerald)</option>
+                  <option value="welcome">Branded Display (Gold)</option>
+                </select>
+              </div>
+            </div>
+
+            <div id="specific-user-picker" class="hidden border border-neutral-800 rounded-lg p-3 bg-[#050505]">
+              <div class="flex items-center justify-between mb-2">
+                <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Search Users</label>
+                <span id="specific-user-count" class="text-[10px] font-bold text-[#c9a96e]">0 selected</span>
+              </div>
+              <input type="text" id="specific-user-search" placeholder="Search by name or email..." class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mb-2 transition">
+              <div id="specific-user-list" class="max-h-48 overflow-y-auto space-y-1 custom-scrollbar"></div>
+            </div>
           </div>
 
+          <!-- Step 3 -->
+          <div class="space-y-4 pt-2">
+            <div class="step-head"><span class="step-badge">3</span><span class="step-title">Write your notification</span></div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Title</label>
+              <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Content</label>
+              <textarea id="notif-msg" placeholder="Write dynamic copy to inject into user feeds..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 h-28 resize-none transition"></textarea>
+            </div>
+          </div>
+
+          <!-- Step 4 -->
           <div class="border-t border-neutral-900 pt-4">
             <div class="step-head"><span class="step-badge">4</span><span class="step-title">Add a button</span><span class="step-hint">optional</span></div>
             <div class="grid grid-cols-2 gap-3">
@@ -154,11 +168,8 @@
             <p class="text-[9px] text-neutral-600 mt-2 leading-relaxed"><i class="ti ti-info-circle"></i> Tip: use <span class="text-[#c9a96e] font-mono">{name}</span> inside the Title or Message to auto-insert each recipient's first name.</p>
           </div>
 
-          <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3.5 bg-[#c9a96e] text-black font-bold text-sm tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 mt-2 flex items-center justify-center gap-2">
-            <i class="ti ti-send text-lg"></i> Execute Campaign
-          </button>
-
-          <div class="border-t border-neutral-900 pt-4 mt-2">
+          <!-- Live Preview -->
+          <div class="border-t border-neutral-900 pt-4 pb-2">
             <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5"><i class="ti ti-device-mobile"></i> Live Preview</p>
             <div id="notif-preview" class="bg-[#050505] border border-neutral-800 rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:border-[#c9a96e]/50 transition" onclick="simulatePreviewClick()">
               <div id="preview-icon-wrap" class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border text-blue-400 bg-blue-950/20 border-blue-900/30">
@@ -172,8 +183,16 @@
             </div>
           </div>
         </div>
+
+        <!-- Fixed Footer -->
+        <div class="p-6 pt-4 border-t border-neutral-900 bg-[#0a0a0a] z-10 flex-shrink-0">
+          <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3.5 bg-[#c9a96e] text-black font-bold text-sm tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 flex items-center justify-center gap-2">
+            <i class="ti ti-send text-lg"></i> Execute Campaign
+          </button>
+        </div>
       </div>
 
+      <!-- LOGS PANEL -->
       <div class="lg:col-span-7 space-y-4">
         <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 shadow-lg min-h-[500px]">
           <div class="flex items-center justify-between border-b border-neutral-900/80 pb-4 mb-4">
