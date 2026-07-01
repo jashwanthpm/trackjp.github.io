@@ -6,10 +6,8 @@
   <title>Sakkhi | Executive Command Center</title>
   
   <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
-  <!-- Replace your existing Tailwind script tag with this one -->
-  <!-- Add this to your <head> -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   
@@ -34,46 +32,44 @@
 </head>
 <body class="min-h-screen pb-10 selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <!-- Secure Login Screen -->
-<div id="auth-screen" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
-  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden">
-    <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
-    <div class="flex justify-center mb-6">
-       <img src="../SAKKHIheader.png" alt="Sakkhi Command Center" class="h-10 w-auto object-contain" />
-    </div>
-    
-    <h2 class="text-xl font-bold text-white text-center mb-6">Executive Authentication</h2>
-    
-    <button onclick="signInWithGoogle()" class="w-full py-3 mb-4 text-sm font-bold bg-white text-black hover:bg-gray-200 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
-      <i class="ti ti-brand-google text-lg"></i> Sign in with Google
-    </button>
-
-    <div class="flex items-center gap-3 mb-4">
-      <div class="h-px bg-neutral-800 flex-1"></div>
-      <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Or use email</span>
-      <div class="h-px bg-neutral-800 flex-1"></div>
-    </div>
-    
-    <form id="admin-login-form" class="space-y-4">
-      <div>
-        <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Admin Email</label>
-        <input type="email" id="login-email" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="master@sakkhi.co.in">
-      </div>
-      <div>
-        <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Master Password</label>
-        <input type="password" id="login-password" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="••••••••">
+  <div id="auth-screen" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
+    <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden">
+      <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+      <div class="flex justify-center mb-6">
+         <img src="../SAKKHIheader.png" alt="Sakkhi Command Center" class="h-10 w-auto object-contain" />
       </div>
       
-      <p id="login-error" class="text-red-500 text-xs text-center hidden"></p>
+      <h2 class="text-xl font-bold text-white text-center mb-6">Executive Authentication</h2>
       
-      <button type="submit" id="login-btn" class="w-full py-3 mt-2 text-sm font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-2">
-        <i class="ti ti-lock-open"></i> Authenticate
+      <button onclick="signInWithGoogle()" class="w-full py-3 mb-4 text-sm font-bold bg-white text-black hover:bg-gray-200 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+        <i class="ti ti-brand-google text-lg"></i> Sign in with Google
       </button>
-    </form>
-  </div>
-</div>
 
-  <!-- Plan Editing Modal -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-px bg-neutral-800 flex-1"></div>
+        <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Or use email</span>
+        <div class="h-px bg-neutral-800 flex-1"></div>
+      </div>
+      
+      <form id="admin-login-form" class="space-y-4">
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Admin Email</label>
+          <input type="email" id="login-email" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="master@sakkhi.co.in">
+        </div>
+        <div>
+          <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Master Password</label>
+          <input type="password" id="login-password" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="••••••••">
+        </div>
+        
+        <p id="login-error" class="text-red-500 text-xs text-center hidden"></p>
+        
+        <button type="submit" id="login-btn" class="w-full py-3 mt-2 text-sm font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+          <i class="ti ti-lock-open"></i> Authenticate
+        </button>
+      </form>
+    </div>
+  </div>
+
   <div id="plan-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
     <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 w-full max-w-sm shadow-2xl relative overflow-hidden">
       <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
@@ -104,12 +100,8 @@
     </div>
   </div>
 
-  
-  
-  <!-- User Details Drawer Overlay -->
   <div id="drawer-overlay" onclick="closeUserDrawer()" class="fixed inset-0 bg-black/60 z-[90] hidden backdrop-blur-sm transition-opacity cursor-pointer"></div>
 
-  <!-- User Details Drawer -->
   <div id="user-drawer" class="fixed inset-y-0 right-0 z-[100] w-full max-w-xl bg-[#0a0a0a] border-l border-neutral-800/80 shadow-2xl transform translate-x-full transition-transform duration-300 flex flex-col">
     
     <div class="px-6 py-5 border-b border-neutral-800/80 flex items-center justify-between bg-[#050505] relative overflow-hidden shrink-0">
@@ -234,15 +226,11 @@
     </div>
   </div>
 
-  <!-- Main Admin Dashboard -->
   <div id="admin-dashboard" class="hidden">
     
-    <!-- Premium Header -->
     <header class="sticky top-0 z-40 backdrop-blur-xl bg-[#050505]/80 border-b border-neutral-900/80 px-6 h-16 flex items-center justify-between shadow-sm">
       <div class="flex items-center gap-4">
-        <!-- Replaced text with the Sakkhi image logo -->
         <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-8 md:h-10 w-auto object-contain" />
-        
         <div class="h-4 w-[1px] bg-neutral-800"></div>
         <div class="flex items-center gap-2 px-2.5 py-1 rounded-md bg-[#c9a96e]/10 border border-[#c9a96e]/20">
           <div class="w-1.5 h-1.5 rounded-full bg-[#c9a96e] pulse-dot"></div>
@@ -250,73 +238,64 @@
         </div>
       </div>
       
-      <!-- New Container for Right-Side Buttons -->
       <div class="flex items-center gap-3">
+        <a href="/notifications" class="text-xs font-semibold text-neutral-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
+          <i class="ti ti-history text-sm"></i> Send Notification
+        </a>
+        <button onclick="handleLogout()" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
+          <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
+        </button>
+      </div>
+    </header> 
+
+    <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
       
-      <a href="/notifications" class="text-xs font-semibold text-neutral-300 hover:text-white px-3 py-1.5 rounded-lg transition flex items-center gap-1.5">
-        <i class="ti ti-history text-sm"></i> Send Notification
-      </a>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="admin-stats">
+        
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-50"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-users text-blue-400 text-sm"></i> Total Registered Users
+            </div>
+            <div class="text-3xl font-bold text-white tabular-nums tracking-tight" id="stat-users">0</div>
+          </div>
+        </div>
 
-      <button onclick="window.location.href='/'" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1.5 bg-neutral-900/50 hover:bg-neutral-800 px-3 py-1.5 rounded-lg border border-neutral-800/50">
-        <i class="ti ti-logout text-sm"></i> <span class="hidden sm:inline">Exit Terminal</span>
-      </button>
-    </div>
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-50"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-circle-check text-emerald-400 text-sm"></i> Active Plan Users
+            </div>
+            <div class="text-3xl font-bold text-emerald-400 tabular-nums tracking-tight" id="stat-active-users">0</div>
+          </div>
+        </div>
 
-   </header> <main class="max-w-[1400px] mx-auto px-4 sm:px-8 py-8 space-y-8">
-      
-      <!-- Top Stats Row -->
-<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="admin-stats">
-  
-  <!-- Total Registered Users -->
-  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-50"></div>
-    <div class="relative z-10">
-      <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-users text-blue-400 text-sm"></i> Total Registered Users
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-camera text-purple-400 text-sm"></i> Total Shoots Logged
+            </div>
+            <div class="text-3xl font-bold text-white tabular-nums tracking-tight" id="stat-shoots">0</div>
+          </div>
+        </div>
+
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+          <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c9a96e] to-yellow-600 opacity-50"></div>
+          <div class="relative z-10">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
+              <i class="ti ti-cash text-[#c9a96e] text-sm"></i> Total Processed Value
+            </div>
+            <div class="text-3xl font-bold text-[#c9a96e] tabular-nums tracking-tight" id="stat-revenue">₹0</div>
+          </div>
+        </div>
+
       </div>
-      <div class="text-3xl font-bold text-white tabular-nums tracking-tight" id="stat-users">0</div>
-    </div>
-  </div>
 
-  <!-- Active Plan Users -->
-  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-50"></div>
-    <div class="relative z-10">
-      <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-circle-check text-emerald-400 text-sm"></i> Active Plan Users
-      </div>
-      <div class="text-3xl font-bold text-emerald-400 tabular-nums tracking-tight" id="stat-active-users">0</div>
-    </div>
-  </div>
-
-  <!-- Total Shoots Logged -->
-  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50"></div>
-    <div class="relative z-10">
-      <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-camera text-purple-400 text-sm"></i> Total Shoots Logged
-      </div>
-      <div class="text-3xl font-bold text-white tabular-nums tracking-tight" id="stat-shoots">0</div>
-    </div>
-  </div>
-
-  <!-- Total Processed Amount -->
-  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
-    <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c9a96e] to-yellow-600 opacity-50"></div>
-    <div class="relative z-10">
-      <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
-        <i class="ti ti-cash text-[#c9a96e] text-sm"></i> Total Processed Value
-      </div>
-      <div class="text-3xl font-bold text-[#c9a96e] tabular-nums tracking-tight" id="stat-revenue">₹0</div>
-    </div>
-  </div>
-
-</div>
-
-      <!-- Data Table Section -->
       <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl shadow-xl overflow-hidden flex flex-col">
         
-        <!-- Data Controls Header -->
         <div class="p-5 border-b border-neutral-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0a0a0a]">
           <div>
             <h2 class="text-lg font-bold text-white tracking-wide">Client Database</h2>
@@ -324,7 +303,6 @@
           </div>
           
           <div class="flex flex-col sm:flex-row items-center gap-3">
-            <!-- Plan Filter -->
             <select id="plan-filter" onchange="filterTable()" class="bg-[#050505] border border-neutral-800 rounded-xl px-3 py-2.5 text-sm text-neutral-300 outline-none focus:border-[#c9a96e]/50 transition-colors w-full sm:w-auto cursor-pointer">
               <option value="all">All Plans</option>
               <option value="free">Free Tier</option>
@@ -332,7 +310,6 @@
               <option value="yearly">Yearly</option>
             </select>
 
-            <!-- Search Bar -->
             <div class="flex items-center gap-2 bg-[#050505] border border-neutral-800 focus-within:border-[#c9a96e]/50 transition-colors rounded-xl px-3 py-2 w-full sm:w-64 shadow-inner">
               <i class="ti ti-search text-neutral-500 text-base"></i>
               <input type="text" id="admin-search" placeholder="Search accounts..." class="bg-transparent text-sm font-medium border-none outline-none text-white placeholder-neutral-600 w-full" onkeyup="filterTable()">
@@ -395,12 +372,10 @@
       const { data: { session }, error } = await supabase.auth.getSession();
 
       if (session) {
-        // UNIVERSAL CHECK: Doesn't matter if they used Google or Email, check the email.
         if (session.user.email !== ALLOWED_ADMIN_EMAIL) {
-           await supabase.auth.signOut(); // Boot them out
+           await supabase.auth.signOut(); 
            showAuthScreen("Access Denied: Account lacks master administrative privileges.");
         } else {
-           // It's the master admin! Let them in.
            document.getElementById('auth-screen').style.display = 'none';
            loadDashboard();
         }
@@ -410,7 +385,6 @@
     });
 
     function showAuthScreen(errorMessage = null) {
-      document.getElementById('access-denied').style.display = 'none'; 
       document.getElementById('auth-screen').style.display = 'flex';
       
       if (errorMessage) {
@@ -425,7 +399,6 @@
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
-          // This tells Supabase to bring you right back to this admin page after Google approves
           redirectTo: window.location.origin + window.location.pathname 
         }
       });
@@ -456,9 +429,13 @@
         return; 
       } 
       
-      // Manually trigger a page reload so the DOMContentLoaded gatekeeper handles the rest
       window.location.reload(); 
     });
+
+    async function handleLogout() {
+      await supabase.auth.signOut();
+      window.location.reload(); 
+    }
 
     function loadDashboard() {
       document.getElementById('admin-dashboard').classList.remove('hidden');
@@ -490,184 +467,173 @@
     }
 
     // --- RENDER LOGIC ---
-function renderDashboard() {
-  const today = new Date();
-  today.setHours(0,0,0,0);
-
-  const totalUsers = allUsers.length;
-  let activeUsersCount = 0;
-
-  // Calculate Total Shoots and Total Amount from all users combined
-  const totalShoots = allUsers.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
-  const totalRev = allUsers.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
-
-  allUsers.forEach(u => {
-    const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
-    
-    // Calculate Active Users
-    if (planType !== 'free') {
-      if (u.expires_at) {
-        const expiresDate = new Date(u.expires_at);
-        expiresDate.setHours(0,0,0,0);
-        if (expiresDate >= today) activeUsersCount++;
-      } else {
-        activeUsersCount++;
-      }
-    }
-  });
-  
-  // Update UI Elements
-  document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
-  document.getElementById('stat-active-users').innerText = activeUsersCount.toLocaleString();
-  document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
-  document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
-
-  // Trigger the table render
-  renderTable(allUsers);
-}
-
-function getInitials(name, email) {
-  if (name && name.trim().length > 0) {
-    const parts = name.trim().split(' ');
-    if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
-    return name.substring(0, 2).toUpperCase();
-  }
-  return email ? email.substring(0, 2).toUpperCase() : '??';
-}
-
-function renderTable(data) {
-  const tbody = document.getElementById('user-table-body');
-  
-  if (data.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-neutral-500 font-medium">No records matching your search.</td></tr>`;
-    return;
-  }
-
-  // Generate the user rows (Removed the bottom totals footer)
-  const rowsHTML = data.map(u => {
-    let planBadge = '';
-    let daysText = '';
-    let dateText = '';
-    
-    if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
-      planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
-      daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
-      dateText = `<span class="text-neutral-600 text-[9px] block mt-0.5">No renewal needed</span>`;
-    } else {
-      const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
+    function renderDashboard() {
       const today = new Date();
-      today.setHours(0, 0, 0, 0); 
-      const planName = u.plan_type.toUpperCase();
-      
-      if (expiresDate) {
-        const formattedDate = expiresDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        expiresDate.setHours(0, 0, 0, 0);
-        const diffTime = expiresDate.getTime() - today.getTime();
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+      today.setHours(0,0,0,0);
+
+      const totalUsers = allUsers.length;
+      let activeUsersCount = 0;
+
+      const totalShoots = allUsers.reduce((sum, u) => sum + Number(u.total_shoots_logged || 0), 0);
+      const totalRev = allUsers.reduce((sum, u) => sum + Number(u.total_platform_revenue || 0), 0);
+
+      allUsers.forEach(u => {
+        const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
         
-        if (diffDays > 0) {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
-          daysText = `<span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-clock"></i> ${diffDays} days to renew</span>`;
-          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Renews: ${formattedDate}</span>`;
-        } else if (diffDays === 0) {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-yellow-950/40 text-yellow-500 border-yellow-900/50">${planName} • EXPIRING</span>`;
-          daysText = `<span class="text-yellow-500 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-triangle"></i> Renews Today</span>`;
-          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Date: ${formattedDate}</span>`;
-        } else {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planName} • EXPIRED</span>`;
-          daysText = `<span class="text-red-500/80 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-circle"></i> Overdue by ${Math.abs(diffDays)} days</span>`;
-          dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
+        if (planType !== 'free') {
+          if (u.expires_at) {
+            const expiresDate = new Date(u.expires_at);
+            expiresDate.setHours(0,0,0,0);
+            if (expiresDate >= today) activeUsersCount++;
+          } else {
+            activeUsersCount++;
+          }
         }
-      } else {
-         planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
-         daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
-         dateText = '';
-      }
+      });
+      
+      document.getElementById('stat-users').innerText = totalUsers.toLocaleString();
+      document.getElementById('stat-active-users').innerText = activeUsersCount.toLocaleString();
+      document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
+      document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
+
+      renderTable(allUsers);
     }
 
-    const lastActiveDate = u.last_active_shoot 
-      ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
-      : '<span class="text-neutral-600 italic">Never</span>';
+    function getInitials(name, email) {
+      if (name && name.trim().length > 0) {
+        const parts = name.trim().split(' ');
+        if (parts.length > 1) return (parts[0][0] + parts[1][0]).toUpperCase();
+        return name.substring(0, 2).toUpperCase();
+      }
+      return email ? email.substring(0, 2).toUpperCase() : '??';
+    }
+
+    function renderTable(data) {
+      const tbody = document.getElementById('user-table-body');
       
-    const initials = getInitials(u.full_name, u.email);
-    const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
+      if (data.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="p-12 text-center text-neutral-500 font-medium">No records matching your search.</td></tr>`;
+        return;
+      }
 
-    return `
-      <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
-        <td class="px-6 py-4">
-          <div class="flex items-center gap-3">
-            <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
-              ${initials}
-            </div>
-            <div>
-              <div class="font-bold text-white">${u.full_name || 'Unconfigured Profile'}</div>
-              <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
-                <i class="ti ti-mail text-[10px]"></i> ${u.email}
+      const rowsHTML = data.map(u => {
+        let planBadge = '';
+        let daysText = '';
+        let dateText = '';
+        
+        if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
+          daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
+          dateText = `<span class="text-neutral-600 text-[9px] block mt-0.5">No renewal needed</span>`;
+        } else {
+          const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
+          const today = new Date();
+          today.setHours(0, 0, 0, 0); 
+          const planName = u.plan_type.toUpperCase();
+          
+          if (expiresDate) {
+            const formattedDate = expiresDate.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+            expiresDate.setHours(0, 0, 0, 0);
+            const diffTime = expiresDate.getTime() - today.getTime();
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+            
+            if (diffDays > 0) {
+              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
+              daysText = `<span class="text-emerald-400 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-clock"></i> ${diffDays} days to renew</span>`;
+              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Renews: ${formattedDate}</span>`;
+            } else if (diffDays === 0) {
+              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-yellow-950/40 text-yellow-500 border-yellow-900/50">${planName} • EXPIRING</span>`;
+              daysText = `<span class="text-yellow-500 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-triangle"></i> Renews Today</span>`;
+              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Date: ${formattedDate}</span>`;
+            } else {
+              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planName} • EXPIRED</span>`;
+              daysText = `<span class="text-red-500/80 text-[10px] font-bold flex items-center gap-1 mt-1.5"><i class="ti ti-alert-circle"></i> Overdue by ${Math.abs(diffDays)} days</span>`;
+              dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
+            }
+          } else {
+             planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
+             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
+             dateText = '';
+          }
+        }
+
+        const lastActiveDate = u.last_active_shoot 
+          ? new Date(u.last_active_shoot).toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'}) 
+          : '<span class="text-neutral-600 italic">Never</span>';
+          
+        const initials = getInitials(u.full_name, u.email);
+        const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
+
+        return `
+          <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-full bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xs font-bold text-white group-hover:border-[#c9a96e]/50 transition-colors">
+                  ${initials}
+                </div>
+                <div>
+                  <div class="font-bold text-white">${u.full_name || 'Unconfigured Profile'}</div>
+                  <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                    <i class="ti ti-mail text-[10px]"></i> ${u.email}
+                  </div>
+                </div>
               </div>
-            </div>
-          </div>
-        </td>
-        <td class="px-6 py-4">
-          <div class="font-semibold text-neutral-300 flex items-center gap-1.5">
-             ${u.business_name || '<span class="text-neutral-600 italic">No Studio Name</span>'}
-          </div>
-          <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
-            <i class="ti ti-phone text-[10px]"></i> ${u.phone_number || 'No Phone Added'}
-          </div>
-        </td>
-        <td class="px-6 py-4">
-          <div class="flex flex-col items-start">
-            ${planBadge}
-            ${daysText}
-            ${dateText}
-            <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
-              <i class="ti ti-pencil"></i> Modify Plan
-            </button>
-          </div>
-        </td>
-        <td class="px-6 py-4 text-right font-medium text-neutral-300 tabular-nums">
-          ${Number(u.total_shoots_logged).toLocaleString()}
-        </td>
-        <td class="px-6 py-4 text-right font-bold text-[#c9a96e] tabular-nums">
-          ₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}
-        </td>
-        <td class="px-6 py-4 text-right text-xs text-neutral-500 tabular-nums">
-          ${lastActiveDate}
-        </td>
-      </tr>
-    `;
-  }).join('');
+            </td>
+            <td class="px-6 py-4">
+              <div class="font-semibold text-neutral-300 flex items-center gap-1.5">
+                 ${u.business_name || '<span class="text-neutral-600 italic">No Studio Name</span>'}
+              </div>
+              <div class="text-xs text-neutral-500 mt-0.5 flex items-center gap-1">
+                <i class="ti ti-phone text-[10px]"></i> ${u.phone_number || 'No Phone Added'}
+              </div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex flex-col items-start">
+                ${planBadge}
+                ${daysText}
+                ${dateText}
+                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
+                  <i class="ti ti-pencil"></i> Modify Plan
+                </button>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-right font-medium text-neutral-300 tabular-nums">
+              ${Number(u.total_shoots_logged).toLocaleString()}
+            </td>
+            <td class="px-6 py-4 text-right font-bold text-[#c9a96e] tabular-nums">
+              ₹${Number(u.total_platform_revenue).toLocaleString('en-IN')}
+            </td>
+            <td class="px-6 py-4 text-right text-xs text-neutral-500 tabular-nums">
+              ${lastActiveDate}
+            </td>
+          </tr>
+        `;
+      }).join('');
 
-  // Inject the user rows back without the totals row
-  tbody.innerHTML = rowsHTML;
-}
+      tbody.innerHTML = rowsHTML;
+    }
 
-    // --- USER DRAWER LOGIC ---
     // --- USER DRAWER LOGIC ---
     function openUserDrawer(userId) {
       const user = allUsers.find(u => u.user_id === userId);
       if (!user) return;
 
-      // 1. Header Details
       document.getElementById('drawer-initials').innerText = getInitials(user.full_name, user.email);
       document.getElementById('drawer-name').innerText = user.full_name || 'Unconfigured Profile';
       document.getElementById('drawer-studio').innerText = user.business_name || 'No Studio Name Set';
       
-      // 2. Mini-Dashboard Grid
       document.getElementById('drawer-shoots').innerText = Number(user.total_shoots_logged || 0).toLocaleString();
       document.getElementById('drawer-revenue').innerText = '₹' + Number(user.total_platform_revenue || 0).toLocaleString('en-IN');
       document.getElementById('drawer-pending').innerText = '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN');
       document.getElementById('drawer-received').innerText = '₹' + Number(user.payments_received || 0).toLocaleString('en-IN');
       document.getElementById('drawer-expenses').innerText = '₹' + Number(user.total_expenses || 0).toLocaleString('en-IN');
 
-      // 3. Contact & Network
       document.getElementById('drawer-email').innerText = user.email || 'N/A';
       document.getElementById('drawer-phone').innerText = user.phone_number || 'N/A';
       document.getElementById('drawer-city').innerText = user.city || user.location || 'Unknown Location';
       document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
 
-      // 4. System Status
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
       const joinedDate = user.created_at 
@@ -712,21 +678,17 @@ function renderTable(data) {
       document.getElementById('drawer-plan-badge').innerHTML = badgeHTML;
       document.getElementById('drawer-expiry').innerHTML = expiryText;
       
-// Attach current user data to the delete button
       const safeUserName = (user.full_name || 'this user').replace(/'/g, "\\'");
       document.getElementById('delete-user-btn').setAttribute('onclick', `deleteUser('${user.user_id}', '${safeUserName}')`);
 
-      // Attach current user data to the View App button
       document.getElementById('view-dashboard-btn').setAttribute('onclick', `openUserApp('${user.user_id}')`);
       
-      // 5. Open Animation
       document.getElementById('drawer-overlay').classList.remove('hidden');
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
 
-    // Explicitly defining the close function globally so it fires correctly
     window.closeUserDrawer = function() {
       document.getElementById('user-drawer').classList.add('translate-x-full');
       setTimeout(() => {
@@ -734,7 +696,6 @@ function renderTable(data) {
       }, 300); 
     };
 
-    // Tools
     function copyUserIdToClipboard() {
       const idText = document.getElementById('drawer-user-id').innerText;
       navigator.clipboard.writeText(idText).then(() => {
@@ -749,26 +710,18 @@ function renderTable(data) {
       });
     }
 
-// --- VIEW USER APP LOGIC ---
     function openUserApp(userId) {
-      // You will need to change this URL to match wherever your actual app dashboard lives.
-      // We pass the user_id in the URL so your app knows who to load.
       const targetUrl = `../app/index.html?admin_override=${userId}`;
-      
-      // Opens the user's app in a new tab
       window.open(targetUrl, '_blank');
     }
     
-// --- DELETE USER LOGIC ---
     async function deleteUser(userId, userName) {
-      // 1. Double confirmation to prevent accidental clicks
       const isConfirmed = confirm(`CRITICAL WARNING:\n\nAre you absolutely sure you want to PERMANENTLY delete the account for ${userName}?\n\nThis action cannot be undone.`);
       
       if (!isConfirmed) return;
 
       const btn = document.getElementById('delete-user-btn');
       
-      // 2. Change text and lock the button to prevent double-clicks
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Deleting...';
       btn.disabled = true;
       btn.classList.add('opacity-50', 'cursor-not-allowed');
@@ -778,8 +731,8 @@ function renderTable(data) {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}`
+            'apikey': SUPABASE_ANON_KEY,
+            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
           },
           body: JSON.stringify({ target_user_id: userId })
         });
@@ -789,39 +742,32 @@ function renderTable(data) {
           throw new Error(errorData.message || 'Failed to delete user record.');
         }
 
-        // 3. SUCCESS: Reset the button back to normal BEFORE closing the drawer
         btn.innerHTML = '<i class="ti ti-trash"></i> Delete';
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
 
-        // Close drawer and refresh the dashboard data
         closeUserDrawer();
         await fetchAdminData();
         
-        // Optional success notification
         setTimeout(() => alert(`${userName} has been successfully deleted.`), 300);
 
       } catch (error) {
         console.error(error);
         alert('Error deleting user: ' + error.message);
         
-        // 4. ERROR: Reset the button back to normal so you can try again
         btn.innerHTML = '<i class="ti ti-trash"></i> Delete';
         btn.disabled = false;
         btn.classList.remove('opacity-50', 'cursor-not-allowed');
       }
     }
     
-    // --- SEARCH, FILTER & SORT LOGIC ---
     function sortTable(column) {
-      // If clicking the same column, toggle direction. Otherwise, default to High-to-Low.
       if (currentSortColumn === column) {
         isSortDescending = !isSortDescending;
       } else {
         currentSortColumn = column;
         isSortDescending = true;
       }
-      // Re-run the filter so search text, dropdowns, and sorting all apply together
       filterTable();
     }
 
@@ -829,7 +775,6 @@ function renderTable(data) {
       const query = document.getElementById('admin-search').value.toLowerCase();
       const planFilter = document.getElementById('plan-filter').value.toLowerCase();
 
-      // 1. Apply Search and Plan Filters
       let filtered = allUsers.filter(u => {
         const matchesSearch = (u.email || '').toLowerCase().includes(query) || 
                               (u.full_name || '').toLowerCase().includes(query) ||
@@ -844,7 +789,6 @@ function renderTable(data) {
         return matchesSearch && matchesPlan;
       });
 
-      // 2. Apply Sorting Logic
       if (currentSortColumn) {
         filtered.sort((a, b) => {
           let valA = 0;
@@ -858,7 +802,6 @@ function renderTable(data) {
             valB = Number(b.total_platform_revenue || 0);
           }
 
-          // Return based on direction (High-to-Low vs Low-to-High)
           if (isSortDescending) {
             return valB - valA; 
           } else {
@@ -867,10 +810,9 @@ function renderTable(data) {
         });
       }
 
-      // 3. Render the updated list
       renderTable(filtered);
     }
-    // --- SUBSCRIPTION OVERRIDE LOGIC ---
+
     function openPlanModal(userId, currentPlan, expiryDateStr, userName) {
       document.getElementById('edit-plan-user-id').value = userId;
       document.getElementById('plan-modal-user-name').textContent = `Target: ${userName}`;
@@ -880,10 +822,8 @@ function renderTable(data) {
       
       const expiryInput = document.getElementById('edit-plan-expiry');
       if (expiryDateStr && expiryDateStr !== 'null') {
-        // Format to YYYY-MM-DD for the HTML date picker
         expiryInput.value = expiryDateStr.split('T')[0];
       } else {
-        // Default to exactly 1 Year from today if upgrading from free
         const oneYear = new Date();
         oneYear.setFullYear(oneYear.getFullYear() + 1);
         expiryInput.value = oneYear.toISOString().split('T')[0];
@@ -897,72 +837,6 @@ function renderTable(data) {
       document.getElementById('save-plan-btn').innerHTML = 'Update Plan';
     }
 
-    async function saveUserPlan() {
-      const userId = document.getElementById('edit-plan-user-id').value;
-      const newPlan = document.getElementById('edit-plan-type').value;
-      const newExpiry = document.getElementById('edit-plan-expiry').value;
-      
-      const btn = document.getElementById('save-plan-btn');
-      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
-      
-      // Free plans technically don't have active expiration dates
-      const status = newPlan === 'free' ? 'inactive' : 'active';
-      const expiresAt = (newPlan !== 'free' && newExpiry) ? new Date(newExpiry).toISOString() : null;
-      
-      const payload = {
-        user_id: userId,
-        plan_type: newPlan,
-        status: status,
-        expires_at: expiresAt
-      };
-
-      try {
-        // 1. Check if they already have a record in the subscriptions table
-        const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${userId}`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
-        });
-        const existing = await checkRes.json();
-        
-        // 2. Either PATCH existing or POST new
-        if (existing && existing.length > 0) {
-          await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${userId}`, {
-            method: 'PATCH',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'apikey': SUPABASE_KEY, 
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 
-              'Prefer': 'return=minimal' 
-            },
-            body: JSON.stringify(payload)
-          });
-        } else {
-          await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'apikey': SUPABASE_KEY, 
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 
-              'Prefer': 'return=minimal' 
-            },
-            body: JSON.stringify(payload)
-          });
-        }
-        
-        // 3. Refresh Data
-        closePlanModal();
-        await fetchAdminData();
-        
-      } catch(e) {
-        alert('Error updating user plan: ' + e.message);
-        btn.innerHTML = 'Update Plan';
-      }
-    }
-    function closePlanModal() {
-      document.getElementById('plan-modal').classList.add('hidden');
-      document.getElementById('save-plan-btn').innerHTML = 'Update Plan';
-    }
-
-    // --- NEW: AUTO-CALCULATE DATE ON DROPDOWN CHANGE ---
     document.getElementById('edit-plan-type').addEventListener('change', function(e) {
       const selectedPlan = e.target.value;
       const expiryInput = document.getElementById('edit-plan-expiry');
@@ -975,11 +849,10 @@ function renderTable(data) {
         now.setFullYear(now.getFullYear() + 1);
         expiryInput.value = now.toISOString().split('T')[0];
       } else {
-        expiryInput.value = ''; // Clear for free tier
+        expiryInput.value = ''; 
       }
     });
-    // ---------------------------------------------------
-// --- SAVE PLAN LOGIC ---
+
     async function saveUserPlan() {
       const userId = document.getElementById('edit-plan-user-id').value;
       const newPlan = document.getElementById('edit-plan-type').value;
@@ -1000,7 +873,7 @@ function renderTable(data) {
 
       try {
         const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${userId}`, {
-          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
         });
         const existing = await checkRes.json();
         
@@ -1009,8 +882,8 @@ function renderTable(data) {
             method: 'PATCH',
             headers: { 
               'Content-Type': 'application/json', 
-              'apikey': SUPABASE_KEY, 
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 
+              'apikey': SUPABASE_ANON_KEY, 
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
               'Prefer': 'return=minimal' 
             },
             body: JSON.stringify(payload)
@@ -1020,8 +893,8 @@ function renderTable(data) {
             method: 'POST',
             headers: { 
               'Content-Type': 'application/json', 
-              'apikey': SUPABASE_KEY, 
-              'Authorization': `Bearer ${SUPABASE_KEY}`, 
+              'apikey': SUPABASE_ANON_KEY, 
+              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
               'Prefer': 'return=minimal' 
             },
             body: JSON.stringify(payload)
@@ -1037,7 +910,6 @@ function renderTable(data) {
       }
     }
 
-    // --- CLEANUP ZOMBIE SERVICE WORKERS ---
     if ('serviceWorker' in navigator) {
       navigator.serviceWorker.getRegistrations().then(function(registrations) {
         for(let registration of registrations) {
@@ -1050,4 +922,3 @@ function renderTable(data) {
   </script>
 </body>
 </html>
-    
