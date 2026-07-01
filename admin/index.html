@@ -450,6 +450,8 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
           
         if (error) throw error;
         
+        console.log("Data fetched from Supabase:", data); // ADD THIS LINE
+        
         allUsers = data;
         renderDashboard();
       } catch (error) {
