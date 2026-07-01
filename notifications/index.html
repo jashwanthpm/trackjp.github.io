@@ -143,15 +143,16 @@
               <div class="grid grid-cols-2 gap-3">
                 <input type="text" id="notif-action-label" placeholder="Button Text (e.g. Upgrade Now)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
                 <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-                  <option value="">None (Plain Alert)</option>
-                  <option value="home">Home / Dashboard</option>
-                  <option value="#pricing">Deep link to Pricing</option>
-                  <option value="payments">Ledger Portal</option>
-                  <option value="account">Account Settings</option>
-                  <option value="profile">Profile Page</option>
-                  <option value="notifications">Notifications Tab</option>
-                  <option value="custom">Custom (type below)</option>
-                </select>
+                 <option value="">None (Plain Alert)</option>
+  <!-- Change value="home" to value="dashboard" -->
+  <option value="dashboard">Home / Dashboard</option>
+  <option value="#pricing">Deep link to Pricing</option>
+  <option value="payments">Ledger Portal</option>
+  <option value="account">Account Settings</option>
+  <option value="profile">Profile Page</option>
+  <option value="notifications">Notifications Tab</option>
+  <option value="custom">Custom (type below)</option>
+</select>
               </div>
               <div id="notif-custom-url-wrap" class="hidden mt-2">
                 <input type="text" id="notif-action-url-custom" placeholder="Custom URL (e.g. /live-session/123)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
@@ -227,11 +228,11 @@
       { id:'welcome', label:'Welcome Message', segment:'all', type:'welcome',
         title:'Welcome to Sakkhi, {name}! 🎉',
         message:'We\'re thrilled to have you join us. Explore expert-led sessions, personalized plans, and everything Sakkhi has to offer.',
-        actionLabel:'Get Started', actionUrl:'home' },
+        actionLabel:'Get Started', actionUrl:'dashboard' },
       { id:'feature', label:'New Feature Announcement', segment:'all', type:'feature',
         title:'✨ Something New on Sakkhi',
         message:'We just shipped a new feature! Check it out and see how it can help you get even more out of the app.',
-        actionLabel:'Explore Now', actionUrl:'home' },
+        actionLabel:'Explore Now', actionUrl:'dashboard' },
       { id:'plan_due', label:'Plan Expiring Soon', segment:'expiring_3', type:'alert',
         title:'Your plan is expiring soon',
         message:'Hi {name}, your current plan expires in a few days. Renew now to keep uninterrupted access to all premium features.',
@@ -255,7 +256,7 @@
       { id:'winback', label:'Win-back Campaign', segment:'all', type:'info',
         title:'We miss you, {name}!',
         message:'It\'s been a while since we\'ve seen you. Come back and pick up right where you left off.',
-        actionLabel:'Come Back', actionUrl:'home' },
+        actionLabel:'Come Back', actionUrl:'dashboard' },
       { id:'maintenance', label:'Scheduled Maintenance', segment:'all', type:'info',
         title:'Scheduled Maintenance',
         message:'Sakkhi will undergo scheduled maintenance shortly. Some features may be briefly unavailable. Thank you for your patience.',
