@@ -393,33 +393,49 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 // --- LOGIN HANDLING ---
-document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
-  e.preventDefault();
-  
-  const email = document.getElementById('login-email').value;
-  const password = document.getElementById('login-password').value;
-  const btn = document.getElementById('login-btn');
-  const errorText = document.getElementById('login-error');
-  
-  btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
-  errorText.classList.add('hidden');
+    document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const email = document.getElementById('login-email').value;
+      const password = document.getElementById('login-password').value;
+      const btn = document.getElementById('login-btn');
+      const errorText = document.getElementById('login-error');
+      
+      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
+      errorText.classList.add('hidden');
 
-  // Attempt to sign in with Supabase
-  const { data, error } = await supabase.auth.signInWithPassword({
-    email: email,
-    password: password,
-  });
+      // 1. Attempt to sign in with Supabase Auth
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
 
-  if (error) {
-    errorText.innerText = error.message;
-    errorText.classList.remove('hidden');
-    btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
-  } else {
-    // Success! Load the dashboard
-    document.getElementById('auth-screen').style.display = 'none';
-    loadDashboard();
-  }
-});
+      if (error) {
+        // Handle incorrect password or non-existent user
+        errorText.innerText = error.message;
+        errorText.classList.remove('hidden');
+        btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
+        return; 
+      } 
+      
+      // 2. THE MASTER CHECK: Verify the logged-in user is actually the admin
+      // Replace this email with your actual master admin email
+      const ALLOWED_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
+
+      if (data.user && data.user.email !== ALLOWED_ADMIN_EMAIL) {
+        // They logged in successfully, but they are NOT the master admin. 
+        // We must instantly log them back out and show an error.
+        await supabase.auth.signOut();
+        
+        errorText.innerText = "Access Denied: Account lacks master administrative privileges.";
+        errorText.classList.remove('hidden');
+        btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
+      } else {
+        // Success! They are the admin. Hide login and load the dashboard.
+        document.getElementById('auth-screen').style.display = 'none';
+        loadDashboard();
+      }
+    });
 
 function loadDashboard() {
   document.getElementById('admin-dashboard').classList.remove('hidden');
