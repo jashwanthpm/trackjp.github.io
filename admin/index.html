@@ -356,8 +356,8 @@
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
-    // Initialize the official Supabase client ONCE
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    // 🚨 THE FIX: Renamed to 'supabaseClient' to prevent crashing into the CDN's global variable
+    const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
     // --- GLOBAL STATE ---
     let allUsers = [];
@@ -369,11 +369,11 @@
 
     // --- INITIALIZATION & SECURITY CHECK ---
     document.addEventListener('DOMContentLoaded', async () => {
-      const { data: { session }, error } = await supabase.auth.getSession();
+      const { data: { session }, error } = await supabaseClient.auth.getSession();
 
       if (session) {
         if (session.user.email !== ALLOWED_ADMIN_EMAIL) {
-           await supabase.auth.signOut(); 
+           await supabaseClient.auth.signOut(); 
            showAuthScreen("Access Denied: Account lacks master administrative privileges.");
         } else {
            document.getElementById('auth-screen').style.display = 'none';
@@ -396,7 +396,7 @@
 
     // --- GOOGLE LOGIN HANDLING ---
     async function signInWithGoogle() {
-      const { data, error } = await supabase.auth.signInWithOAuth({
+      const { data, error } = await supabaseClient.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: window.location.origin + window.location.pathname 
@@ -417,7 +417,7 @@
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
       errorText.classList.add('hidden');
 
-      const { data, error } = await supabase.auth.signInWithPassword({
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
         email: email,
         password: password,
       });
@@ -433,7 +433,7 @@
     });
 
     async function handleLogout() {
-      await supabase.auth.signOut();
+      await supabaseClient.auth.signOut();
       window.location.reload(); 
     }
 
@@ -445,7 +445,7 @@
     // --- DATA FETCHING (NEW SECURE VERSION) ---
     async function fetchAdminData() {
       try {
-        const { data, error } = await supabase
+        const { data, error } = await supabaseClient
           .from('admin_user_details')
           .select('*');
           
@@ -715,6 +715,7 @@
       window.open(targetUrl, '_blank');
     }
     
+    // Updated to use the secure supabaseClient SDK!
     async function deleteUser(userId, userName) {
       const isConfirmed = confirm(`CRITICAL WARNING:\n\nAre you absolutely sure you want to PERMANENTLY delete the account for ${userName}?\n\nThis action cannot be undone.`);
       
@@ -727,20 +728,9 @@
       btn.classList.add('opacity-50', 'cursor-not-allowed');
 
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/delete_auth_user`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_ANON_KEY,
-            'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-          },
-          body: JSON.stringify({ target_user_id: userId })
-        });
+        const { error } = await supabaseClient.rpc('delete_auth_user', { target_user_id: userId });
 
-        if (!res.ok) {
-          const errorData = await res.json();
-          throw new Error(errorData.message || 'Failed to delete user record.');
-        }
+        if (error) throw error;
 
         btn.innerHTML = '<i class="ti ti-trash"></i> Delete';
         btn.disabled = false;
@@ -853,6 +843,7 @@
       }
     });
 
+    // Updated to use the secure supabaseClient SDK!
     async function saveUserPlan() {
       const userId = document.getElementById('edit-plan-user-id').value;
       const newPlan = document.getElementById('edit-plan-type').value;
@@ -872,33 +863,24 @@
       };
 
       try {
-        const checkRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${userId}`, {
-          headers: { 'apikey': SUPABASE_ANON_KEY, 'Authorization': `Bearer ${SUPABASE_ANON_KEY}` }
-        });
-        const existing = await checkRes.json();
+        const { data: existing, error: checkError } = await supabaseClient
+          .from('subscriptions')
+          .select('*')
+          .eq('user_id', userId);
+          
+        if (checkError) throw checkError;
         
         if (existing && existing.length > 0) {
-          await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${userId}`, {
-            method: 'PATCH',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'apikey': SUPABASE_ANON_KEY, 
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
-              'Prefer': 'return=minimal' 
-            },
-            body: JSON.stringify(payload)
-          });
+          const { error: updateError } = await supabaseClient
+            .from('subscriptions')
+            .update(payload)
+            .eq('user_id', userId);
+          if (updateError) throw updateError;
         } else {
-          await fetch(`${SUPABASE_URL}/rest/v1/subscriptions`, {
-            method: 'POST',
-            headers: { 
-              'Content-Type': 'application/json', 
-              'apikey': SUPABASE_ANON_KEY, 
-              'Authorization': `Bearer ${SUPABASE_ANON_KEY}`, 
-              'Prefer': 'return=minimal' 
-            },
-            body: JSON.stringify(payload)
-          });
+          const { error: insertError } = await supabaseClient
+            .from('subscriptions')
+            .insert([payload]);
+          if (insertError) throw insertError;
         }
         
         closePlanModal();
@@ -920,5 +902,3 @@
       });
     }
   </script>
-</body>
-</html>
