@@ -39,11 +39,20 @@
   <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden">
     <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
     <div class="flex justify-center mb-6">
-       <!-- Sakkhi Logo -->
        <img src="../SAKKHIheader.png" alt="Sakkhi Command Center" class="h-10 w-auto object-contain" />
     </div>
     
     <h2 class="text-xl font-bold text-white text-center mb-6">Executive Authentication</h2>
+    
+    <button onclick="signInWithGoogle()" class="w-full py-3 mb-4 text-sm font-bold bg-white text-black hover:bg-gray-200 rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+      <i class="ti ti-brand-google text-lg"></i> Sign in with Google
+    </button>
+
+    <div class="flex items-center gap-3 mb-4">
+      <div class="h-px bg-neutral-800 flex-1"></div>
+      <span class="text-[10px] text-neutral-500 uppercase tracking-widest font-bold">Or use email</span>
+      <div class="h-px bg-neutral-800 flex-1"></div>
+    </div>
     
     <form id="admin-login-form" class="space-y-4">
       <div>
@@ -57,7 +66,7 @@
       
       <p id="login-error" class="text-red-500 text-xs text-center hidden"></p>
       
-      <button type="submit" id="login-btn" class="w-full py-3 mt-4 text-sm font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+      <button type="submit" id="login-btn" class="w-full py-3 mt-2 text-sm font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-2">
         <i class="ti ti-lock-open"></i> Authenticate
       </button>
     </form>
@@ -380,19 +389,53 @@
     let currentSortColumn = '';
     let isSortDescending = true;
 
-document.addEventListener('DOMContentLoaded', async () => {
-  // 1. Check if the user already has a valid, active session
-  const { data: { session }, error } = await supabase.auth.getSession();
+    // --- GLOBAL GATEKEEPER SETTING ---
+    // Change this to the exact email you want to have master access
+    const ALLOWED_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
 
-  if (session) {
-    loadDashboard();
-  } else {
-    // Show login screen
-    document.getElementById('auth-screen').style.display = 'flex';
-  }
-});
+    // --- INITIALIZATION & SECURITY CHECK ---
+    document.addEventListener('DOMContentLoaded', async () => {
+      const { data: { session }, error } = await supabase.auth.getSession();
 
-// --- LOGIN HANDLING ---
+      if (session) {
+        // UNIVERSAL CHECK: Doesn't matter if they used Google or Email, check the email.
+        if (session.user.email !== ALLOWED_ADMIN_EMAIL) {
+           await supabase.auth.signOut(); // Boot them out
+           showAuthScreen("Access Denied: Account lacks master administrative privileges.");
+        } else {
+           // It's the master admin! Let them in.
+           document.getElementById('auth-screen').style.display = 'none';
+           loadDashboard();
+        }
+      } else {
+        showAuthScreen();
+      }
+    });
+
+    function showAuthScreen(errorMessage = null) {
+      document.getElementById('access-denied').style.display = 'none'; 
+      document.getElementById('auth-screen').style.display = 'flex';
+      
+      if (errorMessage) {
+        const errEl = document.getElementById('login-error');
+        errEl.innerText = errorMessage;
+        errEl.classList.remove('hidden');
+      }
+    }
+
+    // --- GOOGLE LOGIN HANDLING ---
+    async function signInWithGoogle() {
+      const { data, error } = await supabase.auth.signInWithOAuth({
+        provider: 'google',
+        options: {
+          // This tells Supabase to bring you right back to this admin page after Google approves
+          redirectTo: window.location.origin + window.location.pathname 
+        }
+      });
+      if (error) console.error("Google Auth Error:", error.message);
+    }
+
+    // --- EMAIL LOGIN HANDLING ---
     document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
       e.preventDefault();
       
@@ -404,50 +447,50 @@ document.addEventListener('DOMContentLoaded', async () => {
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
       errorText.classList.add('hidden');
 
-      // 1. Attempt to sign in with Supabase Auth
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
       });
 
       if (error) {
-        // Handle incorrect password or non-existent user
         errorText.innerText = error.message;
         errorText.classList.remove('hidden');
         btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
         return; 
       } 
       
-      // 2. THE MASTER CHECK: Verify the logged-in user is actually the admin
-      // Replace this email with your actual master admin email
-      const ALLOWED_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
-
-      if (data.user && data.user.email !== ALLOWED_ADMIN_EMAIL) {
-        // They logged in successfully, but they are NOT the master admin. 
-        // We must instantly log them back out and show an error.
-        await supabase.auth.signOut();
-        
-        errorText.innerText = "Access Denied: Account lacks master administrative privileges.";
-        errorText.classList.remove('hidden');
-        btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
-      } else {
-        // Success! They are the admin. Hide login and load the dashboard.
-        document.getElementById('auth-screen').style.display = 'none';
-        loadDashboard();
-      }
+      // Manually trigger a page reload so the DOMContentLoaded gatekeeper handles the rest
+      window.location.reload(); 
     });
 
-function loadDashboard() {
-  document.getElementById('admin-dashboard').classList.remove('hidden');
-  fetchAdminData();
-}
+    function loadDashboard() {
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      fetchAdminData();
+    }
 
-// --- LOGOUT LOGIC ---
-async function handleLogout() {
-  await supabase.auth.signOut();
-  window.location.reload(); 
-}
-// Attach handleLogout() to your "Exit Terminal" button in the HTML
+    // --- DATA FETCHING (NEW SECURE VERSION) ---
+    async function fetchAdminData() {
+      try {
+        const { data, error } = await supabase
+          .from('admin_user_details')
+          .select('*');
+          
+        if (error) throw error;
+        
+        allUsers = data;
+        renderDashboard();
+      } catch (error) {
+        console.error("Supabase Fetch Error:", error);
+        document.getElementById('user-table-body').innerHTML = `
+          <tr>
+            <td colspan="6" class="p-12 text-center text-red-400">
+              <i class="ti ti-alert-triangle text-3xl mb-2"></i>
+              <p class="font-bold">Database Connection Failed</p>
+              <p class="text-xs text-red-500/70 mt-1">${error.message}</p>
+            </td>
+          </tr>`;
+      }
+    }
 
 // --- RENDER LOGIC ---
 function renderDashboard() {
