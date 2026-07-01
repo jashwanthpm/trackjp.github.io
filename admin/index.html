@@ -447,30 +447,35 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
     // --- DATA FETCHING (NEW SECURE VERSION) ---
     async function fetchAdminData() {
   try {
-    const { data, error } = await supabaseClient
-      .from('admin_user_details') // <--- Check this name!
-      .select('*');
-      
-    // ...
-          
-        if (error) throw error;
-        
-        console.log("Data fetched from Supabase:", data); // ADD THIS LINE
-        
-        allUsers = data;
-        renderDashboard();
-      } catch (error) {
-        console.error("Supabase Fetch Error:", error);
-        document.getElementById('user-table-body').innerHTML = `
-          <tr>
-            <td colspan="6" class="p-12 text-center text-red-400">
-              <i class="ti ti-alert-triangle text-3xl mb-2"></i>
-              <p class="font-bold">Database Connection Failed</p>
-              <p class="text-xs text-red-500/70 mt-1">${error.message}</p>
-            </td>
-          </tr>`;
-      }
+    const {
+      data: { session }
+    } = await supabaseClient.auth.getSession();
+
+    if (!session) {
+      throw new Error('No active session');
     }
+
+    const response = await fetch(
+      'https://smyupcjfusgduaoxqfvu.functions.supabase.co/admin-users',
+      {
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || 'Failed to load admin data');
+    }
+
+    allUsers = data;
+    renderDashboard();
+  } catch (err) {
+    console.error('Admin fetch failed:', err);
+  }
+}
 
     // --- RENDER LOGIC ---
     function renderDashboard() {
