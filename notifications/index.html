@@ -482,16 +482,21 @@
     // --- FETCH USERS ---
     async function fetchAdminData() {
       try {
+        // Grab the live session token
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) throw new Error('No active session');
 
-        const res = await fetch(`${SUPABASE_URL}/functions/v1/admin-users`, {
+        // Use the exact Edge Function URL from admin.html
+        const res = await fetch('https://smyupcjfusgduaoxqfvu.functions.supabase.co/admin-users', {
           headers: {
             'Authorization': `Bearer ${session.access_token}` 
           }
         });
         
-        if (!res.ok) throw new Error('Failed to fetch user data');
+        if (!res.ok) {
+            const errData = await res.text();
+            throw new Error(`Failed to fetch user data: ${res.status} ${errData}`);
+        }
         
         allUsers = await res.json();
         updateStatsBar();
