@@ -1,42 +1,329 @@
-<!-- Full-Page Notification Manager -->
-<main class="max-w-5xl mx-auto px-6 py-10">
-  <div class="mb-8">
-    <h1 class="text-3xl font-bold text-white tracking-tight">Notification Center</h1>
-    <p class="text-neutral-500 text-sm mt-1">Manage broadcasts, automated reminders, and user engagement.</p>
-  </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Sakkhi | Broadcast Center</title>
+  
+  <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #030303; color: #e8e8e8; }
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #333; }
+  </style>
+</head>
+<body class="min-h-screen pb-10 selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-    <!-- Builder Section -->
-    <div class="lg:col-span-1 bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-6 h-fit">
-      <h2 class="text-lg font-bold text-white mb-4">Create Campaign</h2>
-      <div class="space-y-4">
-        <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500">Target Segment</label>
-          <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1">
-            <option value="all">All Users</option>
-            <option value="active">Active Plan Subscribers</option>
-            <option value="expiring_3">Expiring Soon (<= 3 Days)</option>
-          </select>
-        </div>
-        <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500">Sender Title</label>
-          <input type="text" id="notif-title" placeholder="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1">
-        </div>
-        <div>
-          <label class="text-[10px] uppercase font-bold text-neutral-500">Message</label>
-          <textarea id="notif-msg" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white mt-1 h-32"></textarea>
-        </div>
-        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3 bg-[#c9a96e] text-black font-bold rounded-xl hover:bg-[#e6c98a] transition">Execute Campaign</button>
+  <main class="max-w-7xl mx-auto px-6 py-10">
+    
+    <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+          <i class="ti ti-broadcast text-[#c9a96e]"></i> Broadcast Center
+        </h1>
+        <p class="text-neutral-500 text-sm mt-1">Deploy targeted campaigns, system alerts, and track delivery logs.</p>
       </div>
+      <a href="index.html" class="flex items-center gap-2 text-xs font-bold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors w-fit shadow-sm">
+        <i class="ti ti-arrow-left"></i> Back to Dashboard
+      </a>
     </div>
 
-    <!-- Logs Section -->
-    <div class="lg:col-span-2 bg-[#0a0a0a] border border-neutral-800 rounded-2xl p-6">
-      <h2 class="text-lg font-bold text-white mb-4">Recent Broadcasts</h2>
-      <div id="notif-logs" class="space-y-3">
-        <!-- JS will populate this with previous broadcast history -->
-        <p class="text-neutral-600 text-sm">Loading broadcast history...</p>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      
+      <div class="lg:col-span-5 bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 h-fit shadow-2xl relative overflow-hidden">
+        <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+        
+        <h2 class="text-base font-bold text-white mb-5 flex items-center gap-2">
+          <i class="ti ti-edit text-neutral-400"></i> Create New Campaign
+        </h2>
+        
+        <div class="space-y-4">
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Target Segment</label>
+              <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                <option value="all">All Ecosystem Accounts</option>
+                <option value="active">Active Subscribers</option>
+                <option value="expiring_3">Expiring Soon (<= 3 Days)</option>
+                <option value="free">Free Tier Users</option>
+              </select>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Campaign Style</label>
+              <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                <option value="info">System Bulletin (Blue)</option>
+                <option value="alert">Subscription Notice (Amber)</option>
+                <option value="feature">Feature Drop (Emerald)</option>
+                <option value="welcome">Branded Display (Gold)</option>
+              </select>
+            </div>
+          </div>
+
+          <div>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sender Title</label>
+            <input type="text" id="notif-title" value="Sakkhi Team" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+          </div>
+
+          <div>
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Message Content</label>
+            <textarea id="notif-msg" placeholder="Write dynamic copy to inject into user feeds..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 h-28 resize-none transition"></textarea>
+          </div>
+
+          <div class="border-t border-neutral-900 pt-3">
+            <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5"><i class="ti ti-link"></i> Interactive Call-To-Action</p>
+            <div class="grid grid-cols-2 gap-3">
+              <div>
+                <label class="text-[9px] uppercase font-semibold text-neutral-500">Button Text</label>
+                <input type="text" id="notif-action-label" placeholder="e.g. Upgrade Now" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+              </div>
+              <div>
+                <label class="text-[9px] uppercase font-semibold text-neutral-500">Target Link</label>
+                <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                  <option value="">None (Plain Alert)</option>
+                  <option value="#pricing">Deep link to Pricing</option>
+                  <option value="payments">Ledger Portal</option>
+                  <option value="account">Account Settings</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3.5 bg-[#c9a96e] text-black font-bold text-sm tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 mt-2 flex items-center justify-center gap-2">
+            <i class="ti ti-send text-lg"></i> Execute Campaign
+          </button>
+        </div>
       </div>
+
+      <div class="lg:col-span-7 space-y-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 shadow-lg min-h-[500px]">
+          <div class="flex items-center justify-between border-b border-neutral-900/80 pb-4 mb-4">
+            <h2 class="text-base font-bold text-white flex items-center gap-2">
+              <i class="ti ti-history text-neutral-400"></i> Recent Broadcast Logs
+            </h2>
+            <button onclick="fetchNotificationLogs()" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-800">
+              <i class="ti ti-refresh"></i> Refresh
+            </button>
+          </div>
+          
+          <div id="notif-logs" class="space-y-3">
+            <div class="flex flex-col items-center justify-center py-12 text-neutral-500">
+              <i class="ti ti-loader animate-spin text-3xl mb-3 text-[#c9a96e]"></i>
+              <p class="text-sm tracking-wide">Syncing campaign history...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
     </div>
-  </div>
-</main>
+  </main>
+
+  <script>
+    // --- SYSTEM CONFIGURATION ---
+    const MASTER_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    
+    let allUsers = [];
+
+    // --- INITIALIZATION ---
+    document.addEventListener('DOMContentLoaded', () => {
+      let isMasterAdmin = false;
+      const targetEmail = MASTER_ADMIN_EMAIL.toLowerCase();
+
+      // Basic Auth Check
+      for (let i = 0; i < localStorage.length; i++) {
+        const val = localStorage.getItem(localStorage.key(i));
+        if (val && val.toLowerCase().includes(targetEmail)) { isMasterAdmin = true; break; }
+      }
+      if (!isMasterAdmin) {
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const val = sessionStorage.getItem(sessionStorage.key(i));
+          if (val && val.toLowerCase().includes(targetEmail)) { isMasterAdmin = true; break; }
+        }
+      }
+
+      if (!isMasterAdmin) {
+        alert("Access Denied: Master Admin authentication required.");
+        window.location.href = '/';
+        return;
+      }
+
+      // If authorized, load the data
+      fetchAdminData();
+      fetchNotificationLogs();
+    });
+
+    // --- FETCH USERS ---
+    async function fetchAdminData() {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_details?select=*`, {
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': `Bearer ${SUPABASE_KEY}` 
+          }
+        });
+        if (!res.ok) throw new Error('Failed to fetch user data');
+        allUsers = await res.json();
+      } catch (error) {
+        console.error("Could not load users for broadcasting:", error);
+      }
+    }
+
+    // --- SEND BULK NOTIFICATION ---
+    async function sendBulkNotification() {
+      const target = document.getElementById('notif-target').value;
+      const type = document.getElementById('notif-type').value;
+      const title = document.getElementById('notif-title').value.trim();
+      const msg = document.getElementById('notif-msg').value.trim();
+      const actionLabel = document.getElementById('notif-action-label').value.trim();
+      const actionUrl = document.getElementById('notif-action-url').value;
+      const btn = document.getElementById('send-notif-btn');
+
+      if (!msg || !title) { alert("Title and Message are required."); return; }
+      if (allUsers.length === 0) { alert("User database is still loading, please wait a moment."); return; }
+
+      btn.innerHTML = '<i class="ti ti-loader animate-spin text-lg"></i> Processing...';
+      btn.disabled = true;
+
+      // Filter Users
+      let targetedUsers = [];
+      const today = new Date(); today.setHours(0,0,0,0);
+
+      allUsers.forEach(u => {
+        const planType = u.plan_type ? String(u.plan_type).toLowerCase() : 'free';
+        let diffDays = 9999;
+        if (u.expires_at) {
+          const expiresDate = new Date(u.expires_at); expiresDate.setHours(0,0,0,0);
+          diffDays = Math.ceil((expiresDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+        }
+
+        if (target === 'all') targetedUsers.push(u);
+        else if (target === 'free' && planType === 'free') targetedUsers.push(u);
+        else if (target === 'active' && planType !== 'free' && diffDays >= 0) targetedUsers.push(u);
+        else if (target === 'expiring_3' && planType !== 'free' && diffDays >= 0 && diffDays <= 3) targetedUsers.push(u);
+      });
+
+      if (targetedUsers.length === 0) {
+        alert("0 users match this segment criteria.");
+        btn.innerHTML = '<i class="ti ti-send text-lg"></i> Execute Campaign'; 
+        btn.disabled = false; 
+        return;
+      }
+
+      // Build Database Payload
+      const payload = targetedUsers.map(u => ({
+        user_id: u.user_id,
+        title: title,
+        message: msg,
+        type: type,
+        action_label: actionLabel || null,
+        action_url: actionUrl || null
+      }));
+
+      // Send to Database
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` },
+          body: JSON.stringify(payload)
+        });
+
+        if(!res.ok) throw new Error("Failed to insert records");
+
+        document.getElementById('notif-msg').value = '';
+        alert(`Successfully deployed campaign to ${targetedUsers.length} targets!`);
+        fetchNotificationLogs(); // Refresh the logs instantly
+      } catch(e) { 
+        alert('Broadcast failed: ' + e.message); 
+      } finally { 
+        btn.innerHTML = '<i class="ti ti-send text-lg"></i> Execute Campaign'; 
+        btn.disabled = false; 
+      }
+    }
+
+    // --- FETCH & GROUP CAMPAIGN LOGS ---
+    async function fetchNotificationLogs() {
+      const logsContainer = document.getElementById('notif-logs');
+      logsContainer.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="ti ti-loader animate-spin text-3xl mb-3 text-[#c9a96e]"></i><p class="text-sm tracking-wide">Syncing campaign history...</p></div>';
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications?select=*&order=created_at.desc`, {
+          headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+        });
+        const data = await res.json();
+
+        if (data.length === 0) {
+          logsContainer.innerHTML = '<div class="text-center py-12 border border-neutral-900 border-dashed rounded-xl"><div class="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center text-neutral-500 mx-auto mb-3 text-xl"><i class="ti ti-history"></i></div><p class="text-sm font-medium text-white">No broadcast history</p><p class="text-xs text-neutral-500 mt-1">Your past campaigns will appear here.</p></div>';
+          return;
+        }
+
+        // Group rows that have the exact same title & message to show as 1 campaign
+        const campaigns = [];
+        const seen = new Set();
+
+        data.forEach(n => {
+          // Group by title, message, and the specific hour it was sent
+          const key = `${n.title}|${n.message}|${n.created_at.substring(0,13)}`; 
+          if (!seen.has(key)) {
+            seen.add(key);
+            campaigns.push({ ...n, sentCount: 1 });
+          } else {
+            const existing = campaigns.find(c => `${c.title}|${c.message}|${c.created_at.substring(0,13)}` === key);
+            if (existing) existing.sentCount++;
+          }
+        });
+
+        // Render HTML
+        logsContainer.innerHTML = campaigns.map(c => {
+          const date = new Date(c.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', hour: 'numeric', minute: '2-digit' });
+          
+          const typeStyle = {
+            alert: { icon: 'ti-alert-triangle', color: 'text-amber-400 bg-amber-950/20 border-amber-900/30' },
+            feature: { icon: 'ti-sparkles', color: 'text-emerald-400 bg-emerald-950/20 border-emerald-900/30' },
+            welcome: { icon: 'ti-crown', color: 'text-[#c9a96e] bg-[#c9a96e]/10 border-[#c9a96e]/20' },
+            info: { icon: 'ti-info-circle', color: 'text-blue-400 bg-blue-950/20 border-blue-900/30' }
+          }[c.type || 'info'];
+
+          return `
+            <div class="bg-[#050505] border border-neutral-900 rounded-xl p-5 hover:border-neutral-700 transition relative group">
+              <div class="flex items-start gap-4">
+                <div class="w-10 h-10 rounded-xl ${typeStyle.color} flex items-center justify-center flex-shrink-0 mt-0.5 border">
+                  <i class="ti ${typeStyle.icon} text-xl"></i>
+                </div>
+                <div class="flex-1 min-w-0 pr-4">
+                  <div class="flex justify-between items-start mb-1">
+                    <p class="text-base font-bold text-white">${c.title}</p>
+                    <span class="text-[10px] text-neutral-500 font-medium whitespace-nowrap bg-neutral-900 px-2 py-1 rounded">${date}</span>
+                  </div>
+                  <p class="text-sm text-neutral-400 mt-1.5 leading-relaxed">${c.message}</p>
+                  
+                  <div class="flex items-center gap-3 mt-4 pt-4 border-t border-neutral-900">
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-neutral-900 text-neutral-300 border border-neutral-800 flex items-center gap-1.5">
+                      <i class="ti ti-users text-[#c9a96e]"></i> ${c.sentCount} Recipients
+                    </span>
+                    ${c.action_label ? `
+                      <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1.5 bg-blue-950/30 border border-blue-900/50 px-2.5 py-1 rounded-md">
+                        <i class="ti ti-link"></i> Button: ${c.action_label}
+                      </span>
+                    ` : ''}
+                  </div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+      } catch (e) {
+        logsContainer.innerHTML = `<div class="text-center py-8 bg-red-950/20 border border-red-900/30 rounded-xl"><p class="text-sm text-red-400 font-bold">Error loading logs</p><p class="text-xs text-red-500/70 mt-1">${e.message}</p></div>`;
+      }
+    }
+  </script>
+</body>
+</html>
