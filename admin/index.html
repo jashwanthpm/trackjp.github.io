@@ -443,10 +443,12 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
 
     // --- DATA FETCHING (NEW SECURE VERSION) ---
     async function fetchAdminData() {
-      try {
-        const { data, error } = await supabaseClient
-          .from('admin_user_details')
-          .select('*');
+  try {
+    const { data, error } = await supabaseClient
+      .from('admin_user_details') // <--- Check this name!
+      .select('*');
+      
+    // ...
           
         if (error) throw error;
         
