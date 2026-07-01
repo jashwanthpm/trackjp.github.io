@@ -20,7 +20,14 @@
 </head>
 <body class="min-h-screen pb-10 selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <main class="max-w-7xl mx-auto px-6 py-10">
+<div id="access-denied" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
+    <div class="w-20 h-20 bg-red-950/20 border border-red-900/30 rounded-2xl flex items-center justify-center text-red-500 text-4xl mb-6 shadow-[0_0_30px_rgba(220,38,38,0.1)]"><i class="ti ti-shield-lock"></i></div>
+    <h1 class="text-2xl font-bold text-white mb-2 tracking-tight">Restricted Area</h1>
+    <p class="text-sm text-neutral-500 text-center max-w-sm mb-8 leading-relaxed">This terminal requires master administrator privileges. Please log in to the main app with your admin account first.</p>
+    <button onclick="window.location.href='/'" class="px-8 py-3 bg-neutral-900 border border-neutral-800 text-white rounded-xl text-sm font-bold hover:bg-neutral-800 transition-all shadow-lg">Return to Login</button>
+  </div>
+  
+  <main id="admin-dashboard" class="hidden max-w-7xl mx-auto px-6 py-10">
     
     <div class="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
       <div>
@@ -29,9 +36,9 @@
         </h1>
         <p class="text-neutral-500 text-sm mt-1">Deploy targeted campaigns, system alerts, and track delivery logs.</p>
       </div>
-      <a href="index.html" class="flex items-center gap-2 text-xs font-bold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors w-fit shadow-sm">
-        <i class="ti ti-arrow-left"></i> Back to Dashboard
-      </a>
+      <a href="/admin/" class="flex items-center gap-2 text-xs font-bold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white px-4 py-2.5 rounded-lg transition-colors w-fit shadow-sm">
+  <i class="ti ti-arrow-left"></i> Back to Admin
+</a>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
@@ -149,12 +156,15 @@
       }
 
       if (!isMasterAdmin) {
-        alert("Access Denied: Master Admin authentication required.");
-        window.location.href = '/';
+        // If NOT admin, leave the Access Denied screen visible and stop loading
+        console.warn("Access Denied: No matching master session found.");
         return;
       }
 
-      // If authorized, load the data
+      // If authorized, hide the error screen, show the dashboard, and load the data
+      document.getElementById('access-denied').style.display = 'none';
+      document.getElementById('admin-dashboard').classList.remove('hidden');
+      
       fetchAdminData();
       fetchNotificationLogs();
     });
