@@ -7,6 +7,8 @@
   
   <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
   <!-- Replace your existing Tailwind script tag with this one -->
+  <!-- Add this to your <head> -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="https://cdn.tailwindcss.com"></script>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
@@ -32,13 +34,35 @@
 </head>
 <body class="min-h-screen pb-10 selection:bg-[#c9a96e]/30 selection:text-white">
 
-  <!-- Access Denied Screen -->
-  <div id="access-denied" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
-    <div class="w-20 h-20 bg-red-950/20 border border-red-900/30 rounded-2xl flex items-center justify-center text-red-500 text-4xl mb-6 shadow-[0_0_30px_rgba(220,38,38,0.1)]"><i class="ti ti-shield-lock"></i></div>
-    <h1 class="text-2xl font-bold text-white mb-2 tracking-tight">Restricted Area</h1>
-    <p class="text-sm text-neutral-500 text-center max-w-sm mb-8 leading-relaxed">This terminal requires master administrator privileges. Please authenticate with a verified executive account.</p>
-    <button onclick="window.location.href='/'" class="px-8 py-3 bg-neutral-900 border border-neutral-800 text-white rounded-xl text-sm font-bold hover:bg-neutral-800 hover:border-neutral-700 transition-all shadow-lg">Return to Ledger</button>
+  <!-- Secure Login Screen -->
+<div id="auth-screen" class="fixed inset-0 z-50 bg-[#030303] flex flex-col items-center justify-center p-4">
+  <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 w-full max-w-md shadow-2xl relative overflow-hidden">
+    <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+    <div class="flex justify-center mb-6">
+       <!-- Sakkhi Logo -->
+       <img src="../SAKKHIheader.png" alt="Sakkhi Command Center" class="h-10 w-auto object-contain" />
+    </div>
+    
+    <h2 class="text-xl font-bold text-white text-center mb-6">Executive Authentication</h2>
+    
+    <form id="admin-login-form" class="space-y-4">
+      <div>
+        <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Admin Email</label>
+        <input type="email" id="login-email" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="master@sakkhi.co.in">
+      </div>
+      <div>
+        <label class="block text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-1">Master Password</label>
+        <input type="password" id="login-password" required class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition" placeholder="••••••••">
+      </div>
+      
+      <p id="login-error" class="text-red-500 text-xs text-center hidden"></p>
+      
+      <button type="submit" id="login-btn" class="w-full py-3 mt-4 text-sm font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg flex items-center justify-center gap-2">
+        <i class="ti ti-lock-open"></i> Authenticate
+      </button>
+    </form>
   </div>
+</div>
 
   <!-- Plan Editing Modal -->
   <div id="plan-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
@@ -342,78 +366,72 @@
   </div>
 
   <script>
-    // --- SECURITY CONFIGURATION ---
-    const MASTER_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
+    // --- SECURE CONFIGURATION ---
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
-    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
+    // This is the key that was previously on line 372
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'; 
+    
+    // Initialize the official Supabase client
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    
+    // --- GLOBAL STATE ---
     let allUsers = [];
-    
-    // --- SORTING STATE ---
     let currentSortColumn = '';
     let isSortDescending = true;
 
-    // --- INITIALIZATION & SECURITY CHECK ---
-    document.addEventListener('DOMContentLoaded', () => {
-      let isMasterAdmin = false;
-      const targetEmail = MASTER_ADMIN_EMAIL.toLowerCase();
+document.addEventListener('DOMContentLoaded', async () => {
+  // 1. Check if the user already has a valid, active session
+  const { data: { session }, error } = await supabase.auth.getSession();
 
-      // 1. Smart Scan: Check Local Storage (Case-Insensitive)
-      for (let i = 0; i < localStorage.length; i++) {
-        const val = localStorage.getItem(localStorage.key(i));
-        if (val && val.toLowerCase().includes(targetEmail)) {
-          isMasterAdmin = true;
-          break;
-        }
-      }
+  if (session) {
+    loadDashboard();
+  } else {
+    // Show login screen
+    document.getElementById('auth-screen').style.display = 'flex';
+  }
+});
 
-      // 2. Backup Scan: Check Session Storage
-      if (!isMasterAdmin) {
-        for (let i = 0; i < sessionStorage.length; i++) {
-          const val = sessionStorage.getItem(sessionStorage.key(i));
-          if (val && val.toLowerCase().includes(targetEmail)) {
-            isMasterAdmin = true;
-            break;
-          }
-        }
-      }
+// --- LOGIN HANDLING ---
+document.getElementById('admin-login-form').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  const btn = document.getElementById('login-btn');
+  const errorText = document.getElementById('login-error');
+  
+  btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Verifying...';
+  errorText.classList.add('hidden');
 
-      if (isMasterAdmin) {
-        document.getElementById('access-denied').style.display = 'none';
-        document.getElementById('admin-dashboard').classList.remove('hidden');
-        fetchAdminData();
-      } else {
-        console.warn("Access Denied: No matching master session found.");
-      }
-    });
+  // Attempt to sign in with Supabase
+  const { data, error } = await supabase.auth.signInWithPassword({
+    email: email,
+    password: password,
+  });
 
-    // --- DATA FETCHING ---
-    async function fetchAdminData() {
-      try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/admin_user_details?select=*`, {
-          headers: {
-            'Content-Type': 'application/json',
-            'apikey': SUPABASE_KEY,
-            'Authorization': `Bearer ${SUPABASE_KEY}` 
-          }
-        });
-        
-        if (!res.ok) throw new Error('Failed to fetch user data');
-        
-        allUsers = await res.json();
-        renderDashboard();
-      } catch (error) {
-        console.error(error);
-        document.getElementById('user-table-body').innerHTML = `
-          <tr>
-            <td colspan="6" class="p-12 text-center text-red-400">
-              <i class="ti ti-alert-triangle text-3xl mb-2"></i>
-              <p class="font-bold">Database Connection Failed</p>
-              <p class="text-xs text-red-500/70 mt-1">Please ensure your SQL View and Permissions are configured correctly.</p>
-            </td>
-          </tr>`;
-      }
-    }
+  if (error) {
+    errorText.innerText = error.message;
+    errorText.classList.remove('hidden');
+    btn.innerHTML = '<i class="ti ti-lock-open"></i> Authenticate';
+  } else {
+    // Success! Load the dashboard
+    document.getElementById('auth-screen').style.display = 'none';
+    loadDashboard();
+  }
+});
+
+function loadDashboard() {
+  document.getElementById('admin-dashboard').classList.remove('hidden');
+  fetchAdminData();
+}
+
+// --- LOGOUT LOGIC ---
+async function handleLogout() {
+  await supabase.auth.signOut();
+  window.location.reload(); 
+}
+// Attach handleLogout() to your "Exit Terminal" button in the HTML
 
 // --- RENDER LOGIC ---
 function renderDashboard() {
