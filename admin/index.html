@@ -367,7 +367,17 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
     let isSortDescending = true;
 
     // --- GLOBAL GATEKEEPER SETTING ---
-    const ALLOWED_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
+    const { data: admin } = await supabaseClient
+  .from('admins')
+  .select('*')
+  .eq('user_id', user.id)
+  .single();
+
+if (!admin) {
+  alert('Access denied');
+  window.location.href = '/';
+  return;
+}
 
     // --- INITIALIZATION & SECURITY CHECK ---
     document.addEventListener('DOMContentLoaded', async () => {
