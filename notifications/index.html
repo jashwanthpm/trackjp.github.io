@@ -49,7 +49,12 @@
         <h2 class="text-base font-bold text-white mb-5 flex items-center gap-2">
           <i class="ti ti-edit text-neutral-400"></i> Create New Campaign
         </h2>
-        
+
+        <div class="mb-5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-2 flex items-center gap-1.5"><i class="ti ti-template"></i> Quick Templates</label>
+          <div id="notif-templates" class="grid grid-cols-2 gap-2 mt-1"></div>
+        </div>
+
         <div class="space-y-4">
           <div class="grid grid-cols-2 gap-3">
             <div>
@@ -93,17 +98,40 @@
                 <label class="text-[9px] uppercase font-semibold text-neutral-500">Target Link</label>
                 <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
                   <option value="">None (Plain Alert)</option>
+                  <option value="home">Home / Dashboard</option>
                   <option value="#pricing">Deep link to Pricing</option>
                   <option value="payments">Ledger Portal</option>
                   <option value="account">Account Settings</option>
+                  <option value="profile">Profile Page</option>
+                  <option value="notifications">Notifications Tab</option>
+                  <option value="custom">Custom (type below)</option>
                 </select>
               </div>
             </div>
+            <div id="notif-custom-url-wrap" class="hidden mt-2">
+              <label class="text-[9px] uppercase font-semibold text-neutral-500">Custom Path / URL</label>
+              <input type="text" id="notif-action-url-custom" placeholder="e.g. /live-session/123 or https://..." class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition">
+            </div>
+            <p class="text-[9px] text-neutral-600 mt-2 leading-relaxed"><i class="ti ti-info-circle"></i> Tip: use <span class="text-[#c9a96e] font-mono">{name}</span> inside the Title or Message to auto-insert each recipient's first name.</p>
           </div>
 
           <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3.5 bg-[#c9a96e] text-black font-bold text-sm tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 mt-2 flex items-center justify-center gap-2">
             <i class="ti ti-send text-lg"></i> Execute Campaign
           </button>
+
+          <div class="border-t border-neutral-900 pt-4 mt-2">
+            <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5"><i class="ti ti-device-mobile"></i> Live Preview</p>
+            <div id="notif-preview" class="bg-[#050505] border border-neutral-800 rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:border-[#c9a96e]/50 transition" onclick="simulatePreviewClick()">
+              <div id="preview-icon-wrap" class="w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border text-blue-400 bg-blue-950/20 border-blue-900/30">
+                <i id="preview-icon" class="ti ti-info-circle text-lg"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <p id="preview-title" class="text-sm font-bold text-white truncate">Sakkhi Team</p>
+                <p id="preview-msg" class="text-xs text-neutral-400 mt-1 leading-relaxed">Your message preview will appear here...</p>
+                <span id="preview-action" class="hidden text-[10px] text-[#c9a96e] font-bold uppercase tracking-widest mt-2 inline-flex items-center gap-1"><i class="ti ti-arrow-up-right"></i></span>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -138,6 +166,125 @@
     
     let allUsers = [];
 
+    // --- QUICK TEMPLATES ---
+    const NOTIF_TEMPLATES = [
+      { id:'welcome', icon:'ti-mood-smile', label:'Welcome', segment:'all', type:'welcome',
+        title:'Welcome to Sakkhi, {name}! 🎉',
+        message:'We\'re thrilled to have you join us. Explore expert-led sessions, personalized plans, and everything Sakkhi has to offer.',
+        actionLabel:'Get Started', actionUrl:'home' },
+      { id:'feature', icon:'ti-bulb', label:'New Feature', segment:'all', type:'feature',
+        title:'✨ Something New on Sakkhi',
+        message:'We just shipped a new feature! Check it out and see how it can help you get even more out of the app.',
+        actionLabel:'Explore Now', actionUrl:'home' },
+      { id:'plan_due', icon:'ti-clock-hour-4', label:'Plan Expiring', segment:'expiring_3', type:'alert',
+        title:'Your plan is expiring soon',
+        message:'Hi {name}, your current plan expires in a few days. Renew now to keep uninterrupted access to all premium features.',
+        actionLabel:'Renew Now', actionUrl:'#pricing' },
+      { id:'renewal', icon:'ti-refresh', label:'Renewal Due', segment:'expiring_3', type:'alert',
+        title:'Time to Renew Your Plan',
+        message:'Your subscription is due for renewal. Don\'t lose access — renew today and continue your journey with Sakkhi.',
+        actionLabel:'Renew Plan', actionUrl:'#pricing' },
+      { id:'purchase_success', icon:'ti-circle-check', label:'Purchase Success', segment:'active', type:'welcome',
+        title:'Payment Successful! 🎉',
+        message:'Thank you {name}! Your payment was successful and your plan is now active. Enjoy full access to all premium features.',
+        actionLabel:'View My Plan', actionUrl:'account' },
+      { id:'payment_failed', icon:'ti-alert-triangle', label:'Payment Failed', segment:'all', type:'alert',
+        title:'Payment Failed',
+        message:'We couldn\'t process your recent payment. Please update your payment details to avoid any interruption in service.',
+        actionLabel:'Retry Payment', actionUrl:'#pricing' },
+      { id:'offer', icon:'ti-gift', label:'Special Offer', segment:'free', type:'feature',
+        title:'🎁 A Special Offer For You',
+        message:'For a limited time, upgrade to a premium plan and unlock exclusive features at a special price.',
+        actionLabel:'Claim Offer', actionUrl:'#pricing' },
+      { id:'winback', icon:'ti-heart', label:'We Miss You', segment:'all', type:'info',
+        title:'We miss you, {name}!',
+        message:'It\'s been a while since we\'ve seen you. Come back and pick up right where you left off.',
+        actionLabel:'Come Back', actionUrl:'home' },
+      { id:'maintenance', icon:'ti-tool', label:'Maintenance', segment:'all', type:'info',
+        title:'Scheduled Maintenance',
+        message:'Sakkhi will undergo scheduled maintenance shortly. Some features may be briefly unavailable. Thank you for your patience.',
+        actionLabel:'', actionUrl:'' },
+      { id:'milestone', icon:'ti-trophy', label:'Milestone', segment:'active', type:'feature',
+        title:'Congratulations, {name}! 🏆',
+        message:'You\'ve hit a milestone with Sakkhi. Keep up the great progress — we\'re proud of you!',
+        actionLabel:'View Progress', actionUrl:'account' }
+    ];
+
+    function renderTemplates() {
+      const wrap = document.getElementById('notif-templates');
+      wrap.innerHTML = NOTIF_TEMPLATES.map(t => `
+        <button type="button" onclick="applyTemplate('${t.id}')" class="flex items-center gap-2 text-left bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 hover:border-[#c9a96e]/60 hover:bg-[#c9a96e]/5 transition group">
+          <i class="ti ${t.icon} text-[#c9a96e] text-base flex-shrink-0"></i>
+          <span class="text-[11px] font-semibold text-neutral-300 group-hover:text-white truncate">${t.label}</span>
+        </button>
+      `).join('');
+    }
+
+    function applyTemplate(id) {
+      const t = NOTIF_TEMPLATES.find(x => x.id === id);
+      if (!t) return;
+      document.getElementById('notif-target').value = t.segment;
+      document.getElementById('notif-type').value = t.type;
+      document.getElementById('notif-title').value = t.title;
+      document.getElementById('notif-msg').value = t.message;
+      document.getElementById('notif-action-label').value = t.actionLabel;
+
+      const urlSelect = document.getElementById('notif-action-url');
+      const knownValues = Array.from(urlSelect.options).map(o => o.value);
+      if (t.actionUrl && !knownValues.includes(t.actionUrl)) {
+        urlSelect.value = 'custom';
+        document.getElementById('notif-action-url-custom').value = t.actionUrl;
+        document.getElementById('notif-custom-url-wrap').classList.remove('hidden');
+      } else {
+        urlSelect.value = t.actionUrl || '';
+        document.getElementById('notif-custom-url-wrap').classList.add('hidden');
+        document.getElementById('notif-action-url-custom').value = '';
+      }
+      updatePreview();
+    }
+
+    // --- LIVE PREVIEW ---
+    function getResolvedActionUrl() {
+      const sel = document.getElementById('notif-action-url').value;
+      const custom = document.getElementById('notif-action-url-custom').value.trim();
+      return sel === 'custom' ? custom : sel;
+    }
+
+    function updatePreview() {
+      const type = document.getElementById('notif-type').value;
+      const title = document.getElementById('notif-title').value.trim() || 'Sakkhi Team';
+      const msg = document.getElementById('notif-msg').value.trim() || 'Your message preview will appear here...';
+      const actionLabel = document.getElementById('notif-action-label').value.trim();
+
+      const typeStyle = {
+        alert: { icon: 'ti-alert-triangle', color: 'text-amber-400 bg-amber-950/20 border-amber-900/30' },
+        feature: { icon: 'ti-sparkles', color: 'text-emerald-400 bg-emerald-950/20 border-emerald-900/30' },
+        welcome: { icon: 'ti-crown', color: 'text-[#c9a96e] bg-[#c9a96e]/10 border-[#c9a96e]/20' },
+        info: { icon: 'ti-info-circle', color: 'text-blue-400 bg-blue-950/20 border-blue-900/30' }
+      }[type] || { icon: 'ti-info-circle', color: 'text-blue-400 bg-blue-950/20 border-blue-900/30' };
+
+      const iconWrap = document.getElementById('preview-icon-wrap');
+      iconWrap.className = `w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 border ${typeStyle.color}`;
+      document.getElementById('preview-icon').className = `ti ${typeStyle.icon} text-lg`;
+      document.getElementById('preview-title').textContent = title.replace(/{name}/gi, 'Priya');
+      document.getElementById('preview-msg').textContent = msg.replace(/{name}/gi, 'Priya');
+
+      const actionEl = document.getElementById('preview-action');
+      if (actionLabel) {
+        actionEl.textContent = '';
+        actionEl.innerHTML = `<i class="ti ti-arrow-up-right"></i> ${actionLabel}`;
+        actionEl.classList.remove('hidden');
+      } else {
+        actionEl.classList.add('hidden');
+      }
+    }
+
+    function simulatePreviewClick() {
+      const url = getResolvedActionUrl();
+      if (!url) { alert('This notification has no button — tapping it in the app just dismisses it.'); return; }
+      alert(`Tapping this notification in the app will open: "${url}"`);
+    }
+
     // --- INITIALIZATION ---
     document.addEventListener('DOMContentLoaded', () => {
       let isMasterAdmin = false;
@@ -169,6 +316,22 @@
       fetchNotificationLogs();
     });
 
+    // Render templates + wire up live preview listeners (runs regardless of auth state on load)
+    document.addEventListener('DOMContentLoaded', () => {
+      renderTemplates();
+      updatePreview();
+
+      ['notif-type', 'notif-title', 'notif-msg', 'notif-action-label'].forEach(id => {
+        document.getElementById(id).addEventListener('input', updatePreview);
+      });
+
+      const urlSelect = document.getElementById('notif-action-url');
+      const customWrap = document.getElementById('notif-custom-url-wrap');
+      urlSelect.addEventListener('change', () => {
+        customWrap.classList.toggle('hidden', urlSelect.value !== 'custom');
+      });
+    });
+
     // --- FETCH USERS ---
     async function fetchAdminData() {
       try {
@@ -193,7 +356,7 @@
       const title = document.getElementById('notif-title').value.trim();
       const msg = document.getElementById('notif-msg').value.trim();
       const actionLabel = document.getElementById('notif-action-label').value.trim();
-      const actionUrl = document.getElementById('notif-action-url').value;
+      const actionUrl = getResolvedActionUrl();
       const btn = document.getElementById('send-notif-btn');
 
       if (!msg || !title) { alert("Title and Message are required."); return; }
@@ -227,15 +390,23 @@
         return;
       }
 
-      // Build Database Payload
-      const payload = targetedUsers.map(u => ({
-        user_id: u.user_id,
-        title: title,
-        message: msg,
-        type: type,
-        action_label: actionLabel || null,
-        action_url: actionUrl || null
-      }));
+      // Build Database Payload (personalize {name} per recipient if used)
+      const getFirstName = (u) => {
+        const raw = u.full_name || u.name || (u.email ? u.email.split('@')[0] : 'there');
+        return String(raw).trim().split(' ')[0];
+      };
+
+      const payload = targetedUsers.map(u => {
+        const name = getFirstName(u);
+        return {
+          user_id: u.user_id,
+          title: title.replace(/{name}/gi, name),
+          message: msg.replace(/{name}/gi, name),
+          type: type,
+          action_label: actionLabel || null,
+          action_url: actionUrl || null
+        };
+      });
 
       // Send to Database
       try {
@@ -248,6 +419,8 @@
         if(!res.ok) throw new Error("Failed to insert records");
 
         document.getElementById('notif-msg').value = '';
+        document.getElementById('notif-action-url-custom').value = '';
+        updatePreview();
         alert(`Successfully deployed campaign to ${targetedUsers.length} targets!`);
         fetchNotificationLogs(); // Refresh the logs instantly
       } catch(e) { 
