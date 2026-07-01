@@ -377,20 +377,17 @@
   <script>
     // --- SECURE CONFIGURATION ---
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
-    // This is the key that was previously on line 372
-    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'; 
-    
-    // Initialize the official Supabase client
+    // Initialize the official Supabase client ONCE
     const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-    
+
     // --- GLOBAL STATE ---
     let allUsers = [];
     let currentSortColumn = '';
     let isSortDescending = true;
 
     // --- GLOBAL GATEKEEPER SETTING ---
-    // Change this to the exact email you want to have master access
     const ALLOWED_ADMIN_EMAIL = 'jashwanthjp18@gmail.com'; 
 
     // --- INITIALIZATION & SECURITY CHECK ---
@@ -492,7 +489,7 @@
       }
     }
 
-// --- RENDER LOGIC ---
+    // --- RENDER LOGIC ---
 function renderDashboard() {
   const today = new Date();
   today.setHours(0,0,0,0);
