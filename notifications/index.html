@@ -45,157 +45,168 @@
       </a>
     </div>
 
-    <div id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
-      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-4 py-3">
+    <div id="stats-bar" class="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-5 py-4">
         <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Total Users</p>
-        <p id="stat-total" class="text-xl font-bold text-white mt-1">—</p>
+        <p id="stat-total" class="text-2xl font-bold text-white mt-1">—</p>
       </div>
-      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-4 py-3">
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-5 py-4">
         <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Active Subscribers</p>
-        <p id="stat-active" class="text-xl font-bold text-emerald-400 mt-1">—</p>
+        <p id="stat-active" class="text-2xl font-bold text-emerald-400 mt-1">—</p>
       </div>
-      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-4 py-3">
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-5 py-4">
         <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Expiring ≤ 3 Days</p>
-        <p id="stat-expiring" class="text-xl font-bold text-amber-400 mt-1">—</p>
+        <p id="stat-expiring" class="text-2xl font-bold text-amber-400 mt-1">—</p>
       </div>
-      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-4 py-3">
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-xl px-5 py-4">
         <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Free Tier</p>
-        <p id="stat-free" class="text-xl font-bold text-neutral-300 mt-1">—</p>
+        <p id="stat-free" class="text-2xl font-bold text-neutral-300 mt-1">—</p>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+    <!-- MAIN STACKED LAYOUT -->
+    <div class="flex flex-col gap-8">
       
-      <!-- COMPACT COMPOSE PANEL -->
-      <div class="lg:col-span-5 bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 shadow-2xl relative sticky top-6 h-max">
-        <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+      <!-- WIDE COMPOSE PANEL -->
+      <div class="w-full bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 md:p-8 shadow-2xl relative">
+        <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e] rounded-t-2xl"></div>
         
-        <h2 class="text-base font-bold text-white mb-4 flex items-center gap-2">
+        <h2 class="text-lg font-bold text-white mb-6 flex items-center gap-2">
           <i class="ti ti-edit text-neutral-400"></i> Create New Campaign
         </h2>
 
-        <!-- Step 1: Template Dropdown instead of Grid -->
-        <div class="mb-4">
-          <div class="step-head mb-1.5"><span class="step-badge">1</span><span class="step-title">Start from a template</span><span class="step-hint">optional</span></div>
-          <select id="notif-template-select" onchange="if(this.value) applyTemplate(this.value)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-            <option value="">-- Choose a pre-built template --</option>
-          </select>
-        </div>
-
-        <div class="space-y-3">
-          <!-- Step 2: Target -->
-          <div>
-            <div class="step-head mb-1.5"><span class="step-badge">2</span><span class="step-title">Who receives this</span></div>
-            <div class="grid grid-cols-2 gap-3">
-              <div>
-                <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-                  <option value="all">All Ecosystem Accounts</option>
-                  <option value="active">Active Subscribers</option>
-                  <option value="free">Free Tier Users</option>
-                  <option value="expiring_3">Expiring Soon (≤ 3 Days)</option>
-                  <option value="expired">Already Expired</option>
-                  <option value="new">New Users (last 7 days)</option>
-                  <option value="inactive">Inactive (0 shoots)</option>
-                  <option value="specific">🎯 Specific User(s)</option>
-                </select>
-                <p id="audience-count" class="text-[9px] text-[#c9a96e] font-semibold mt-1 flex items-center gap-1"><i class="ti ti-users"></i> —</p>
-              </div>
-              <div>
-                <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-                  <option value="info">System Bulletin (Blue)</option>
-                  <option value="alert">Subscription Notice (Amber)</option>
-                  <option value="feature">Feature Drop (Emerald)</option>
-                  <option value="welcome">Branded Display (Gold)</option>
-                </select>
-              </div>
-            </div>
-
-            <div id="specific-user-picker" class="hidden border border-neutral-800 rounded-lg p-2.5 bg-[#050505] mt-2">
-              <div class="flex items-center justify-between mb-1.5">
-                <label class="text-[9px] uppercase font-bold text-neutral-500 tracking-wider">Search Users</label>
-                <span id="specific-user-count" class="text-[9px] font-bold text-[#c9a96e]">0 selected</span>
-              </div>
-              <input type="text" id="specific-user-search" placeholder="Search by name or email..." class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-1.5 text-xs text-white outline-none focus:border-[#c9a96e] mb-1.5 transition">
-              <div id="specific-user-list" class="max-h-32 overflow-y-auto space-y-1"></div>
-            </div>
-          </div>
-
-          <!-- Step 3: Message -->
-          <div class="pt-1">
-            <div class="step-head mb-1.5"><span class="step-badge">3</span><span class="step-title">Write your notification</span></div>
-            <input type="text" id="notif-title" value="Sakkhi Team" placeholder="Sender Title" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mb-2 transition">
-            <textarea id="notif-msg" placeholder="Write dynamic copy... (Tip: use {name})" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] h-20 resize-none transition"></textarea>
-          </div>
-
-          <!-- Step 4: Actions -->
-          <div class="border-t border-neutral-900 pt-3">
-            <div class="step-head mb-1.5"><span class="step-badge">4</span><span class="step-title">Add a button</span><span class="step-hint">optional</span></div>
-            <div class="grid grid-cols-2 gap-3">
-              <input type="text" id="notif-action-label" placeholder="Button Text (e.g. Upgrade)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition">
-              <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-                <option value="">None (Plain Alert)</option>
-                <option value="home">Home / Dashboard</option>
-                <option value="#pricing">Deep link to Pricing</option>
-                <option value="payments">Ledger Portal</option>
-                <option value="account">Account Settings</option>
-                <option value="profile">Profile Page</option>
-                <option value="notifications">Notifications Tab</option>
-                <option value="custom">Custom (type below)</option>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-x-12 gap-y-8 mb-8">
+          
+          <!-- LEFT COLUMN -->
+          <div class="space-y-6">
+            <!-- Step 1 -->
+            <div>
+              <div class="step-head mb-2"><span class="step-badge">1</span><span class="step-title">Start from a template</span><span class="step-hint">optional</span></div>
+              <select id="notif-template-select" onchange="if(this.value) applyTemplate(this.value)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
+                <option value="">-- Choose a pre-built template --</option>
               </select>
             </div>
-            <div id="notif-custom-url-wrap" class="hidden mt-2">
-              <input type="text" id="notif-action-url-custom" placeholder="Custom URL (e.g. /live-session/123)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition">
+
+            <!-- Step 2 -->
+            <div>
+              <div class="step-head mb-2"><span class="step-badge">2</span><span class="step-title">Who receives this</span></div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Audience Segment</label>
+                  <select id="notif-target" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                    <option value="all">All Ecosystem Accounts</option>
+                    <option value="active">Active Subscribers</option>
+                    <option value="free">Free Tier Users</option>
+                    <option value="expiring_3">Expiring Soon (≤ 3 Days)</option>
+                    <option value="expired">Already Expired</option>
+                    <option value="new">New Users (last 7 days)</option>
+                    <option value="inactive">Inactive (0 shoots)</option>
+                    <option value="specific">🎯 Specific User(s)</option>
+                  </select>
+                  <p id="audience-count" class="text-[10px] text-[#c9a96e] font-semibold mt-1.5 flex items-center gap-1"><i class="ti ti-users"></i> —</p>
+                </div>
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Visual Type</label>
+                  <select id="notif-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition cursor-pointer">
+                    <option value="info">System Bulletin (Blue)</option>
+                    <option value="alert">Subscription Notice (Amber)</option>
+                    <option value="feature">Feature Drop (Emerald)</option>
+                    <option value="welcome">Branded Display (Gold)</option>
+                  </select>
+                </div>
+              </div>
+
+              <!-- Specific User Picker (Hidden by default) -->
+              <div id="specific-user-picker" class="hidden border border-neutral-800 rounded-lg p-4 bg-[#050505] mt-3">
+                <div class="flex items-center justify-between mb-2">
+                  <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Search Users</label>
+                  <span id="specific-user-count" class="text-[10px] font-bold text-[#c9a96e]">0 selected</span>
+                </div>
+                <input type="text" id="specific-user-search" placeholder="Search by name or email..." class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mb-2 transition">
+                <div id="specific-user-list" class="max-h-40 overflow-y-auto space-y-1 custom-scrollbar"></div>
+              </div>
             </div>
           </div>
 
-          <!-- Condensed Live Preview -->
-          <div class="border-t border-neutral-900 pt-3">
-            <div id="notif-preview" class="bg-[#050505] border border-neutral-800 rounded-xl p-3 flex items-start gap-3 cursor-pointer hover:border-[#c9a96e]/50 transition" onclick="simulatePreviewClick()">
-              <div id="preview-icon-wrap" class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border text-blue-400 bg-blue-950/20 border-blue-900/30">
-                <i id="preview-icon" class="ti ti-info-circle text-base"></i>
+          <!-- RIGHT COLUMN -->
+          <div class="space-y-6">
+            <!-- Step 3 -->
+            <div>
+              <div class="step-head mb-2"><span class="step-badge">3</span><span class="step-title">Write your notification</span></div>
+              <input type="text" id="notif-title" value="Sakkhi Team" placeholder="Sender Title" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mb-3 transition">
+              <textarea id="notif-msg" placeholder="Write dynamic copy... (Tip: use {name} to auto-insert their name)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-4 py-3 text-sm text-white outline-none focus:border-[#c9a96e] h-28 resize-none transition"></textarea>
+            </div>
+
+            <!-- Step 4 -->
+            <div>
+              <div class="step-head mb-2"><span class="step-badge">4</span><span class="step-title">Add a button</span><span class="step-hint">optional</span></div>
+              <div class="grid grid-cols-2 gap-3">
+                <input type="text" id="notif-action-label" placeholder="Button Text (e.g. Upgrade Now)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+                <select id="notif-action-url" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
+                  <option value="">None (Plain Alert)</option>
+                  <option value="home">Home / Dashboard</option>
+                  <option value="#pricing">Deep link to Pricing</option>
+                  <option value="payments">Ledger Portal</option>
+                  <option value="account">Account Settings</option>
+                  <option value="profile">Profile Page</option>
+                  <option value="notifications">Notifications Tab</option>
+                  <option value="custom">Custom (type below)</option>
+                </select>
               </div>
-              <div class="flex-1 min-w-0">
-                <p id="preview-title" class="text-sm font-bold text-white truncate">Sakkhi Team</p>
-                <p id="preview-msg" class="text-[11px] text-neutral-400 mt-0.5 leading-relaxed truncate">Your message preview will appear here...</p>
-                <span id="preview-action" class="hidden text-[9px] text-[#c9a96e] font-bold uppercase tracking-widest mt-1.5 inline-flex items-center gap-1"><i class="ti ti-arrow-up-right"></i></span>
+              <div id="notif-custom-url-wrap" class="hidden mt-2">
+                <input type="text" id="notif-action-url-custom" placeholder="Custom URL (e.g. /live-session/123)" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
               </div>
             </div>
+
+            <!-- Live Preview Area -->
+            <div class="pt-2">
+              <p class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider mb-2 flex items-center gap-1.5"><i class="ti ti-device-mobile"></i> Live Preview</p>
+              <div id="notif-preview" class="bg-[#050505] border border-neutral-800 rounded-xl p-4 flex items-start gap-3 cursor-pointer hover:border-[#c9a96e]/50 transition" onclick="simulatePreviewClick()">
+                <div id="preview-icon-wrap" class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 border text-blue-400 bg-blue-950/20 border-blue-900/30">
+                  <i id="preview-icon" class="ti ti-info-circle text-lg"></i>
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p id="preview-title" class="text-sm font-bold text-white truncate">Sakkhi Team</p>
+                  <p id="preview-msg" class="text-xs text-neutral-400 mt-1 leading-relaxed">Your message preview will appear here...</p>
+                  <span id="preview-action" class="hidden text-[10px] text-[#c9a96e] font-bold uppercase tracking-widest mt-2 inline-flex items-center gap-1"><i class="ti ti-arrow-up-right"></i></span>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
         
-        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-3.5 bg-[#c9a96e] text-black font-bold text-sm tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 mt-4 flex items-center justify-center gap-2">
-          <i class="ti ti-send text-lg"></i> Execute Campaign
+        <button onclick="sendBulkNotification()" id="send-notif-btn" class="w-full py-4 bg-[#c9a96e] text-black font-bold text-base tracking-wide rounded-xl hover:bg-[#e6c98a] hover:shadow-[0_0_20px_rgba(201,169,110,0.3)] transition-all duration-300 flex items-center justify-center gap-2">
+          <i class="ti ti-send text-xl"></i> Execute Campaign
         </button>
       </div>
 
-      <!-- LOGS PANEL -->
-      <div class="lg:col-span-7 space-y-4">
-        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 shadow-lg min-h-[500px]">
-          <div class="flex items-center justify-between border-b border-neutral-900/80 pb-4 mb-4">
-            <h2 class="text-base font-bold text-white flex items-center gap-2">
-              <i class="ti ti-history text-neutral-400"></i> Recent Broadcast Logs
-            </h2>
-            <button onclick="fetchNotificationLogs()" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1 bg-neutral-900 px-3 py-1.5 rounded-lg border border-neutral-800">
-              <i class="ti ti-refresh"></i> Refresh
-            </button>
-          </div>
+      <!-- WIDE LOGS PANEL -->
+      <div class="w-full bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 md:p-8 shadow-lg min-h-[500px]">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between border-b border-neutral-900/80 pb-5 mb-5 gap-4">
+          <h2 class="text-lg font-bold text-white flex items-center gap-2">
+            <i class="ti ti-history text-neutral-400"></i> Recent Broadcast Logs
+          </h2>
+          <button onclick="fetchNotificationLogs()" class="text-xs font-semibold text-neutral-400 hover:text-white transition flex items-center gap-1 bg-neutral-900 px-4 py-2 rounded-lg border border-neutral-800 w-fit">
+            <i class="ti ti-refresh"></i> Refresh
+          </button>
+        </div>
 
-          <div class="flex flex-col sm:flex-row gap-2 mb-4">
-            <input type="text" id="log-search" placeholder="Search past campaigns..." class="flex-1 bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition">
-            <select id="log-type-filter" class="bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
-              <option value="">All Types</option>
-              <option value="info">System Bulletin</option>
-              <option value="alert">Subscription Notice</option>
-              <option value="feature">Feature Drop</option>
-              <option value="welcome">Branded Display</option>
-            </select>
-          </div>
-          
-          <div id="notif-logs" class="space-y-3">
-            <div class="flex flex-col items-center justify-center py-12 text-neutral-500">
-              <i class="ti ti-loader animate-spin text-3xl mb-3 text-[#c9a96e]"></i>
-              <p class="text-sm tracking-wide">Syncing campaign history...</p>
-            </div>
+        <div class="flex flex-col sm:flex-row gap-3 mb-6">
+          <input type="text" id="log-search" placeholder="Search past campaigns..." class="flex-1 bg-[#050505] border border-neutral-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+          <select id="log-type-filter" class="bg-[#050505] border border-neutral-800 rounded-lg px-4 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition cursor-pointer">
+            <option value="">All Types</option>
+            <option value="info">System Bulletin</option>
+            <option value="alert">Subscription Notice</option>
+            <option value="feature">Feature Drop</option>
+            <option value="welcome">Branded Display</option>
+          </select>
+        </div>
+        
+        <div id="notif-logs" class="space-y-4">
+          <div class="flex flex-col items-center justify-center py-16 text-neutral-500">
+            <i class="ti ti-loader animate-spin text-4xl mb-4 text-[#c9a96e]"></i>
+            <p class="text-sm tracking-wide">Syncing campaign history...</p>
           </div>
         </div>
       </div>
@@ -213,43 +224,43 @@
 
     // --- QUICK TEMPLATES ---
     const NOTIF_TEMPLATES = [
-      { id:'welcome', icon:'ti-mood-smile', label:'Welcome Message', segment:'all', type:'welcome',
+      { id:'welcome', label:'Welcome Message', segment:'all', type:'welcome',
         title:'Welcome to Sakkhi, {name}! 🎉',
         message:'We\'re thrilled to have you join us. Explore expert-led sessions, personalized plans, and everything Sakkhi has to offer.',
         actionLabel:'Get Started', actionUrl:'home' },
-      { id:'feature', icon:'ti-bulb', label:'New Feature Announcement', segment:'all', type:'feature',
+      { id:'feature', label:'New Feature Announcement', segment:'all', type:'feature',
         title:'✨ Something New on Sakkhi',
         message:'We just shipped a new feature! Check it out and see how it can help you get even more out of the app.',
         actionLabel:'Explore Now', actionUrl:'home' },
-      { id:'plan_due', icon:'ti-clock-hour-4', label:'Plan Expiring Soon', segment:'expiring_3', type:'alert',
+      { id:'plan_due', label:'Plan Expiring Soon', segment:'expiring_3', type:'alert',
         title:'Your plan is expiring soon',
         message:'Hi {name}, your current plan expires in a few days. Renew now to keep uninterrupted access to all premium features.',
         actionLabel:'Renew Now', actionUrl:'#pricing' },
-      { id:'renewal', icon:'ti-refresh', label:'Renewal Due Today', segment:'expiring_3', type:'alert',
+      { id:'renewal', label:'Renewal Due Today', segment:'expiring_3', type:'alert',
         title:'Time to Renew Your Plan',
         message:'Your subscription is due for renewal. Don\'t lose access — renew today and continue your journey with Sakkhi.',
         actionLabel:'Renew Plan', actionUrl:'#pricing' },
-      { id:'purchase_success', icon:'ti-circle-check', label:'Purchase Successful', segment:'active', type:'welcome',
+      { id:'purchase_success', label:'Purchase Successful', segment:'active', type:'welcome',
         title:'Payment Successful! 🎉',
         message:'Thank you {name}! Your payment was successful and your plan is now active. Enjoy full access to all premium features.',
         actionLabel:'View My Plan', actionUrl:'account' },
-      { id:'payment_failed', icon:'ti-alert-triangle', label:'Payment Failed Alert', segment:'all', type:'alert',
+      { id:'payment_failed', label:'Payment Failed Alert', segment:'all', type:'alert',
         title:'Payment Failed',
         message:'We couldn\'t process your recent payment. Please update your payment details to avoid any interruption in service.',
         actionLabel:'Retry Payment', actionUrl:'#pricing' },
-      { id:'offer', icon:'ti-gift', label:'Special Offer Promo', segment:'free', type:'feature',
+      { id:'offer', label:'Special Offer Promo', segment:'free', type:'feature',
         title:'🎁 A Special Offer For You',
         message:'For a limited time, upgrade to a premium plan and unlock exclusive features at a special price.',
         actionLabel:'Claim Offer', actionUrl:'#pricing' },
-      { id:'winback', icon:'ti-heart', label:'Win-back Campaign', segment:'all', type:'info',
+      { id:'winback', label:'Win-back Campaign', segment:'all', type:'info',
         title:'We miss you, {name}!',
         message:'It\'s been a while since we\'ve seen you. Come back and pick up right where you left off.',
         actionLabel:'Come Back', actionUrl:'home' },
-      { id:'maintenance', icon:'ti-tool', label:'Scheduled Maintenance', segment:'all', type:'info',
+      { id:'maintenance', label:'Scheduled Maintenance', segment:'all', type:'info',
         title:'Scheduled Maintenance',
         message:'Sakkhi will undergo scheduled maintenance shortly. Some features may be briefly unavailable. Thank you for your patience.',
         actionLabel:'', actionUrl:'' },
-      { id:'milestone', icon:'ti-trophy', label:'Milestone Celebration', segment:'active', type:'feature',
+      { id:'milestone', label:'Milestone Celebration', segment:'active', type:'feature',
         title:'Congratulations, {name}! 🏆',
         message:'You\'ve hit a milestone with Sakkhi. Keep up the great progress — we\'re proud of you!',
         actionLabel:'View Progress', actionUrl:'account' }
@@ -309,8 +320,8 @@
       }[type] || { icon: 'ti-info-circle', color: 'text-blue-400 bg-blue-950/20 border-blue-900/30' };
 
       const iconWrap = document.getElementById('preview-icon-wrap');
-      iconWrap.className = `w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0 border ${typeStyle.color}`;
-      document.getElementById('preview-icon').className = `ti ${typeStyle.icon} text-base`;
+      iconWrap.className = `w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 border ${typeStyle.color}`;
+      document.getElementById('preview-icon').className = `ti ${typeStyle.icon} text-lg`;
       document.getElementById('preview-title').textContent = title.replace(/{name}/gi, 'Priya');
       document.getElementById('preview-msg').textContent = msg.replace(/{name}/gi, 'Priya');
 
@@ -380,7 +391,6 @@
       let isMasterAdmin = false;
       const targetEmail = MASTER_ADMIN_EMAIL.toLowerCase();
 
-      // Basic Auth Check
       for (let i = 0; i < localStorage.length; i++) {
         const val = localStorage.getItem(localStorage.key(i));
         if (val && val.toLowerCase().includes(targetEmail)) { isMasterAdmin = true; break; }
@@ -393,12 +403,10 @@
       }
 
       if (!isMasterAdmin) {
-        // If NOT admin, leave the Access Denied screen visible and stop loading
         console.warn("Access Denied: No matching master session found.");
         return;
       }
 
-      // If authorized, hide the error screen, show the dashboard, and load the data
       document.getElementById('access-denied').style.display = 'none';
       document.getElementById('admin-dashboard').classList.remove('hidden');
       
@@ -406,7 +414,6 @@
       fetchNotificationLogs();
     });
 
-    // Render templates + wire up live preview listeners (runs regardless of auth state on load)
     document.addEventListener('DOMContentLoaded', () => {
       renderTemplates();
       updatePreview();
@@ -440,7 +447,7 @@
       const q = document.getElementById('specific-user-search').value.trim().toLowerCase();
 
       if (allUsers.length === 0) {
-        listEl.innerHTML = '<p class="text-[11px] text-neutral-500 py-2">Loading users...</p>';
+        listEl.innerHTML = '<p class="text-xs text-neutral-500 py-2">Loading users...</p>';
         return;
       }
 
@@ -449,7 +456,7 @@
         : allUsers;
 
       if (matches.length === 0) {
-        listEl.innerHTML = '<p class="text-[11px] text-neutral-500 py-2">No users match your search.</p>';
+        listEl.innerHTML = '<p class="text-xs text-neutral-500 py-2">No users match your search.</p>';
         return;
       }
 
@@ -458,10 +465,10 @@
         const name = u.full_name || 'Unnamed User';
         const email = u.email || '';
         return `
-          <label class="flex items-center gap-2 px-2 py-1.5 rounded-md hover:bg-neutral-900 cursor-pointer">
-            <input type="checkbox" ${checked} onchange="toggleUserSelection('${u.user_id}')" class="accent-[#c9a96e] w-3.5 h-3.5">
-            <span class="text-xs text-neutral-200 truncate">${name}</span>
-            <span class="text-[10px] text-neutral-500 truncate ml-auto">${email}</span>
+          <label class="flex items-center gap-3 px-3 py-2 rounded-md hover:bg-neutral-900 cursor-pointer">
+            <input type="checkbox" ${checked} onchange="toggleUserSelection('${u.user_id}')" class="accent-[#c9a96e] w-4 h-4">
+            <span class="text-sm text-neutral-200 truncate">${name}</span>
+            <span class="text-[11px] text-neutral-500 truncate ml-auto">${email}</span>
           </label>
         `;
       }).join('');
@@ -520,10 +527,9 @@
       );
       if (!confirmed) return;
 
-      btn.innerHTML = '<i class="ti ti-loader animate-spin text-lg"></i> Processing...';
+      btn.innerHTML = '<i class="ti ti-loader animate-spin text-xl"></i> Processing...';
       btn.disabled = true;
 
-      // Build Database Payload (personalize {name} per recipient if used)
       const getFirstName = (u) => {
         const raw = u.full_name || u.name || (u.email ? u.email.split('@')[0] : 'there');
         return String(raw).trim().split(' ')[0];
@@ -541,7 +547,6 @@
         };
       });
 
-      // Send to Database
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
           method: 'POST',
@@ -558,22 +563,22 @@
         updatePreview();
         updateStatsBar();
         updateAudienceCount();
-        alert(`Successfully deployed campaign to ${targetedUsers.length} targets!`);
-        fetchNotificationLogs(); // Refresh the logs instantly
+        fetchNotificationLogs(); 
       } catch(e) { 
         alert('Broadcast failed: ' + e.message); 
       } finally { 
-        btn.innerHTML = '<i class="ti ti-send text-lg"></i> Execute Campaign'; 
+        btn.innerHTML = '<i class="ti ti-send text-xl"></i> Execute Campaign'; 
         btn.disabled = false; 
       }
     }
 
     // --- FETCH & GROUP CAMPAIGN LOGS ---
     let allCampaigns = [];
+    let campaignGroupCounter = 0;
 
     async function fetchNotificationLogs() {
       const logsContainer = document.getElementById('notif-logs');
-      logsContainer.innerHTML = '<div class="text-center py-12 text-neutral-500"><i class="ti ti-loader animate-spin text-3xl mb-3 text-[#c9a96e]"></i><p class="text-sm tracking-wide">Syncing campaign history...</p></div>';
+      logsContainer.innerHTML = '<div class="text-center py-16 text-neutral-500"><i class="ti ti-loader animate-spin text-4xl mb-4 text-[#c9a96e]"></i><p class="text-sm tracking-wide">Syncing campaign history...</p></div>';
 
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications?select=*&order=created_at.desc`, {
@@ -583,23 +588,25 @@
 
         if (data.length === 0) {
           allCampaigns = [];
-          logsContainer.innerHTML = '<div class="text-center py-12 border border-neutral-900 border-dashed rounded-xl"><div class="w-12 h-12 bg-neutral-900 rounded-full flex items-center justify-center text-neutral-500 mx-auto mb-3 text-xl"><i class="ti ti-history"></i></div><p class="text-sm font-medium text-white">No broadcast history</p><p class="text-xs text-neutral-500 mt-1">Your past campaigns will appear here.</p></div>';
+          logsContainer.innerHTML = '<div class="text-center py-16 border border-neutral-900 border-dashed rounded-xl"><div class="w-16 h-16 bg-neutral-900 rounded-full flex items-center justify-center text-neutral-500 mx-auto mb-4 text-2xl"><i class="ti ti-history"></i></div><p class="text-base font-medium text-white">No broadcast history</p><p class="text-sm text-neutral-500 mt-2">Your past campaigns will appear here.</p></div>';
           return;
         }
 
-        // Group rows that have the exact same title & message to show as 1 campaign
         const campaigns = [];
         const seen = new Set();
+        campaignGroupCounter = 0;
 
         data.forEach(n => {
-          // Group by title, message, and the specific hour it was sent
           const key = `${n.title}|${n.message}|${n.created_at.substring(0,13)}`; 
           if (!seen.has(key)) {
             seen.add(key);
-            campaigns.push({ ...n, sentCount: 1 });
+            campaigns.push({ ...n, sentCount: 1, ids: [n.id], groupId: campaignGroupCounter++ });
           } else {
             const existing = campaigns.find(c => `${c.title}|${c.message}|${c.created_at.substring(0,13)}` === key);
-            if (existing) existing.sentCount++;
+            if (existing) {
+                existing.sentCount++;
+                existing.ids.push(n.id);
+            }
           }
         });
 
@@ -607,7 +614,39 @@
         renderLogs();
 
       } catch (e) {
-        logsContainer.innerHTML = `<div class="text-center py-8 bg-red-950/20 border border-red-900/30 rounded-xl"><p class="text-sm text-red-400 font-bold">Error loading logs</p><p class="text-xs text-red-500/70 mt-1">${e.message}</p></div>`;
+        logsContainer.innerHTML = `<div class="text-center py-12 bg-red-950/20 border border-red-900/30 rounded-xl"><p class="text-base text-red-400 font-bold">Error loading logs</p><p class="text-sm text-red-500/70 mt-2">${e.message}</p></div>`;
+      }
+    }
+
+    // --- DELETE CAMPAIGN ---
+    async function deleteCampaign(groupId) {
+      const campaign = allCampaigns.find(c => c.groupId === groupId);
+      if (!campaign) return;
+      
+      const confirmed = confirm(`Are you sure you want to completely delete "${campaign.title}"?\n\nThis will permanently remove the notification from the inbox of all ${campaign.sentCount} user(s) who received it. This action cannot be undone.`);
+      if (!confirmed) return;
+
+      const logsContainer = document.getElementById('notif-logs');
+      logsContainer.innerHTML = '<div class="text-center py-16 text-neutral-500"><i class="ti ti-loader animate-spin text-4xl mb-4 text-red-500"></i><p class="text-sm tracking-wide">Deleting campaign records...</p></div>';
+
+      try {
+        const ids = campaign.ids;
+        const batchSize = 100; // Delete in chunks to avoid Supabase URL length limits
+        
+        for (let i = 0; i < ids.length; i += batchSize) {
+          const batch = ids.slice(i, i + batchSize);
+          const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications?id=in.(${batch.join(',')})`, {
+            method: 'DELETE',
+            headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${SUPABASE_KEY}` }
+          });
+          if (!res.ok) throw new Error("Failed to delete records from the database");
+        }
+        
+        // Refresh immediately after deleting
+        fetchNotificationLogs(); 
+      } catch (e) {
+        alert('Error deleting campaign: ' + e.message);
+        fetchNotificationLogs(); // Restore view on failure
       }
     }
 
@@ -621,7 +660,7 @@
       if (q) campaigns = campaigns.filter(c => c.title.toLowerCase().includes(q) || c.message.toLowerCase().includes(q));
 
       if (campaigns.length === 0) {
-        logsContainer.innerHTML = '<div class="text-center py-12 border border-neutral-900 border-dashed rounded-xl"><p class="text-sm font-medium text-white">No campaigns match your filters</p></div>';
+        logsContainer.innerHTML = '<div class="text-center py-16 border border-neutral-900 border-dashed rounded-xl"><p class="text-base font-medium text-white">No campaigns match your filters</p></div>';
         return;
       }
 
@@ -636,24 +675,29 @@
           }[c.type || 'info'];
 
           return `
-            <div class="bg-[#050505] border border-neutral-900 rounded-xl p-5 hover:border-neutral-700 transition relative group">
-              <div class="flex items-start gap-4">
-                <div class="w-10 h-10 rounded-xl ${typeStyle.color} flex items-center justify-center flex-shrink-0 mt-0.5 border">
-                  <i class="ti ${typeStyle.icon} text-xl"></i>
+            <div class="bg-[#050505] border border-neutral-900 rounded-xl p-6 hover:border-neutral-700 transition relative group w-full">
+              <div class="flex items-start gap-5 w-full">
+                <div class="w-12 h-12 rounded-xl ${typeStyle.color} flex items-center justify-center flex-shrink-0 mt-0.5 border">
+                  <i class="ti ${typeStyle.icon} text-2xl"></i>
                 </div>
-                <div class="flex-1 min-w-0 pr-4">
-                  <div class="flex justify-between items-start mb-1">
-                    <p class="text-base font-bold text-white">${c.title}</p>
-                    <span class="text-[10px] text-neutral-500 font-medium whitespace-nowrap bg-neutral-900 px-2 py-1 rounded">${date}</span>
+                <div class="flex-1 min-w-0 pr-2">
+                  <div class="flex flex-col sm:flex-row sm:justify-between sm:items-start mb-2 gap-2">
+                    <p class="text-lg font-bold text-white leading-tight">${c.title}</p>
+                    <div class="flex items-center gap-3">
+                      <span class="text-xs text-neutral-500 font-medium whitespace-nowrap bg-neutral-900 px-3 py-1.5 rounded-md">${date}</span>
+                      <button onclick="deleteCampaign(${c.groupId})" class="text-neutral-500 hover:text-red-500 transition bg-neutral-900/50 hover:bg-red-950/30 p-2 rounded-md border border-transparent hover:border-red-900/50" title="Delete Campaign for all users">
+                        <i class="ti ti-trash text-base"></i>
+                      </button>
+                    </div>
                   </div>
-                  <p class="text-sm text-neutral-400 mt-1.5 leading-relaxed">${c.message}</p>
+                  <p class="text-sm text-neutral-400 mt-1 leading-relaxed">${c.message}</p>
                   
-                  <div class="flex items-center gap-3 mt-4 pt-4 border-t border-neutral-900">
-                    <span class="px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-widest bg-neutral-900 text-neutral-300 border border-neutral-800 flex items-center gap-1.5">
+                  <div class="flex flex-wrap items-center gap-3 mt-5 pt-5 border-t border-neutral-900/80">
+                    <span class="px-3 py-1.5 rounded-md text-[10px] font-bold uppercase tracking-widest bg-neutral-900 text-neutral-300 border border-neutral-800 flex items-center gap-1.5">
                       <i class="ti ti-users text-[#c9a96e]"></i> ${c.sentCount} Recipients
                     </span>
                     ${c.action_label ? `
-                      <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1.5 bg-blue-950/30 border border-blue-900/50 px-2.5 py-1 rounded-md">
+                      <span class="text-[10px] text-blue-400 font-bold uppercase tracking-widest flex items-center gap-1.5 bg-blue-950/30 border border-blue-900/50 px-3 py-1.5 rounded-md">
                         <i class="ti ti-link"></i> Button: ${c.action_label}
                       </span>
                     ` : ''}
