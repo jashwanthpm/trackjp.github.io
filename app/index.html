@@ -798,6 +798,17 @@
                   </div>
                 </div>
 
+                <div id="biometric-settings-block" class="hidden bg-neutral-950/50 border border-neutral-900 rounded-lg p-4 flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <i class="ti ti-fingerprint text-2xl text-[#c9a96e]"></i>
+                    <div>
+                      <p class="text-sm font-semibold text-white">Face ID / Fingerprint Unlock</p>
+                      <p id="biometric-status-lbl" class="text-[11px] text-neutral-500">Skip typing your PIN on this device</p>
+                    </div>
+                  </div>
+                  <button id="biometric-toggle-btn" onclick="toggleBiometricUnlock()" class="flex-shrink-0 text-xs font-bold px-3 py-2 rounded-lg transition bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700">Enable</button>
+                </div>
+
               <div class="border-t border-neutral-800 pt-5 mt-5 space-y-5">
                   <div class="border-b border-neutral-800 pb-4">
                     <h3 class="text-lg font-bold text-white flex items-center gap-2">
@@ -1304,6 +1315,9 @@
           <button onclick="closePrivacyPrompt()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Abort</button>
           <button onclick="verifyPrivacyPassword()" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Unlock</button>
         </div>
+        <button id="privacy-biometric-btn" onclick="tryBiometricFill('privacy-pass-input', verifyPrivacyPassword)" class="hidden w-full py-2 text-xs font-semibold text-[#c9a96e] hover:text-[#e6c98a] transition flex items-center justify-center gap-1.5">
+          <i class="ti ti-fingerprint text-base"></i> Use Face ID / Fingerprint
+        </button>
       </div>
     </div>
     
@@ -1324,6 +1338,9 @@
           <button onclick="closeDeleteAllModal()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
           <button onclick="executeDeleteAll()" class="w-1/2 py-2.5 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition">Confirm Delete</button>
         </div>
+        <button id="delete-all-biometric-btn" onclick="tryBiometricFill('delete-all-pin-input', executeDeleteAll)" class="hidden w-full py-2 text-xs font-semibold text-[#c9a96e] hover:text-[#e6c98a] transition flex items-center justify-center gap-1.5">
+          <i class="ti ti-fingerprint text-base"></i> Use Face ID / Fingerprint
+        </button>
   
 <div id="password-pin-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
       <div class="bg-[#0f0f0f] border border-emerald-900/50 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
@@ -1340,6 +1357,9 @@
           <button onclick="closeModal('password-pin-modal-backdrop')" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Cancel</button>
           <button onclick="executeSetNewPassword()" id="execute-pwd-btn" class="w-1/2 py-2.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg transition">Verify & Save</button>
         </div>
+        <button id="password-pin-biometric-btn" onclick="tryBiometricFill('password-pin-input', executeSetNewPassword)" class="hidden w-full py-2 text-xs font-semibold text-[#c9a96e] hover:text-[#e6c98a] transition flex items-center justify-center gap-1.5">
+          <i class="ti ti-fingerprint text-base"></i> Use Face ID / Fingerprint
+        </button>
       </div>
     </div>
       
@@ -2423,11 +2443,6 @@ if (newBookings.length > 0 && !isDemoMode) {
     }
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
-    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
-
-    // Escapes user-entered text before it's inserted into innerHTML, so a client
-    // name / notification / booking title containing <, >, &, " or ' is shown as
-    // plain text instead of being parsed as HTML (prevents layout breakage and XSS).
     function escapeHtml(str) {
       if (str === null || str === undefined) return '';
       return String(str)
@@ -2437,6 +2452,110 @@ if (newBookings.length > 0 && !isDemoMode) {
         .replace(/"/g, '&quot;')
         .replace(/'/g, '&#39;');
     }
+
+    // ==========================================
+    // BIOMETRIC (FACE ID / FINGERPRINT) UNLOCK
+    // ==========================================
+    // Uses the device's own platform authenticator (WebAuthn) purely as a local
+    // "prove it's really you" gate on THIS device/browser. It doesn't replace
+    // your PIN or talk to a server — once the OS confirms your face/fingerprint,
+    // we auto-fill the same PIN you already set, so you don't have to type it.
+    // NOTE: This only works over HTTPS, on supported devices/browsers, and the
+    // registration is device-specific (enabling it on your phone won't enable
+    // it on your laptop — each device needs its own one-time setup).
+
+    function biometricStorageKey() {
+      return currentUser ? ('biometric_enabled_' + currentUser.id) : null;
+    }
+
+    function isBiometricEnabled() {
+      const key = biometricStorageKey();
+      return !!(key && localStorage.getItem(key) === 'true');
+    }
+
+    async function isBiometricSupported() {
+      if (!window.PublicKeyCredential || !navigator.credentials) return false;
+      try {
+        return await PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable();
+      } catch (e) {
+        return false;
+      }
+    }
+
+    async function refreshBiometricUI() {
+      const settingsBlock = document.getElementById('biometric-settings-block');
+      const toggleBtn = document.getElementById('biometric-toggle-btn');
+      const statusLbl = document.getElementById('biometric-status-lbl');
+      const allUnlockBtns = document.querySelectorAll('#privacy-biometric-btn, #delete-all-biometric-btn, #password-pin-biometric-btn');
+
+      const supported = await isBiometricSupported();
+      if (settingsBlock) settingsBlock.classList.toggle('hidden', !supported);
+      if (!supported) return;
+
+      const enabled = isBiometricEnabled();
+      if (toggleBtn) {
+        toggleBtn.textContent = enabled ? 'Disable' : 'Enable';
+        toggleBtn.className = enabled
+          ? 'flex-shrink-0 text-xs font-bold px-3 py-2 rounded-lg transition bg-red-950/40 hover:bg-red-950/60 text-red-400 border border-red-900/50'
+          : 'flex-shrink-0 text-xs font-bold px-3 py-2 rounded-lg transition bg-neutral-800 hover:bg-neutral-700 text-white border border-neutral-700';
+      }
+      if (statusLbl) statusLbl.textContent = enabled ? 'Enabled on this device' : 'Skip typing your PIN on this device';
+      allUnlockBtns.forEach(btn => btn.classList.toggle('hidden', !enabled));
+    }
+
+    async function toggleBiometricUnlock() {
+      if (isBiometricEnabled()) {
+        localStorage.removeItem(biometricStorageKey());
+        showToast('Face ID / Fingerprint unlock disabled on this device.');
+        refreshBiometricUI();
+        return;
+      }
+
+      try {
+        const challenge = crypto.getRandomValues(new Uint8Array(32));
+        const userId = crypto.getRandomValues(new Uint8Array(16));
+        const cred = await navigator.credentials.create({
+          publicKey: {
+            challenge,
+            rp: { name: 'Sakkhi', id: location.hostname },
+            user: { id: userId, name: (currentUser && currentUser.email) || 'user', displayName: (currentUser && currentUser.email) || 'Sakkhi User' },
+            pubKeyCredParams: [{ type: 'public-key', alg: -7 }, { type: 'public-key', alg: -257 }],
+            authenticatorSelection: { authenticatorAttachment: 'platform', userVerification: 'required', residentKey: 'required' },
+            timeout: 60000,
+            attestation: 'none'
+          }
+        });
+        if (cred) {
+          localStorage.setItem(biometricStorageKey(), 'true');
+          showToast('Face ID / Fingerprint unlock enabled on this device.', 'success');
+        }
+      } catch (err) {
+        console.error('Biometric enroll failed:', err);
+        showToast('Could not enable Face ID / Fingerprint on this device.', 'error');
+      }
+      refreshBiometricUI();
+    }
+
+    // Called by the "Use Face ID / Fingerprint" button on a PIN modal.
+    // On success, fills the PIN field with the saved PIN and runs the same
+    // verify function that a manually-typed correct PIN would trigger.
+    async function tryBiometricFill(inputId, onVerifiedCallback) {
+      if (!isBiometricEnabled()) return;
+      try {
+        const challenge = crypto.getRandomValues(new Uint8Array(32));
+        await navigator.credentials.get({
+          publicKey: { challenge, userVerification: 'required', timeout: 60000 }
+        });
+        const input = document.getElementById(inputId);
+        if (input) input.value = _appPin;
+        onVerifiedCallback();
+      } catch (err) {
+        // Cancelled, failed, or no matching biometric — silently let the user type the PIN instead.
+        console.warn('Biometric verification cancelled or failed:', err);
+      }
+    }
+
+    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
     // --- DEVICE TRACKING UTILITY ---
@@ -4761,6 +4880,7 @@ async function toggleBlockDate(dateStr) {
       const inner = m.firstElementChild;
       if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
       document.body.style.overflow = 'hidden';
+      refreshBiometricUI();
     }
     function closeModal(id) {
       const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
@@ -5164,6 +5284,10 @@ function updateAccountDisplay() {
       
       if (tab === 'devices') {
         renderDevicesList();
+      }
+
+      if (tab === 'security') {
+        refreshBiometricUI();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
