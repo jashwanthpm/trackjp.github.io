@@ -2020,14 +2020,14 @@ function updateNotificationUI() {
           </div>
           <div class="flex-1 min-w-0 pr-5">
             <div class="flex items-center gap-2">
-              <p class="text-xs font-bold text-white truncate">${n.title}</p>
+              <p class="text-xs font-bold text-white truncate">${escapeHtml(n.title)}</p>
               ${!n.isRead ? `<span class="w-1.5 h-1.5 bg-[#c9a96e] rounded-full flex-shrink-0 animate-pulse"></span>` : ''}
             </div>
-            <p class="text-xs text-neutral-400 font-medium leading-relaxed mt-0.5">${n.message}</p>
+            <p class="text-xs text-neutral-400 font-medium leading-relaxed mt-0.5">${escapeHtml(n.message)}</p>
             
             ${n.actionLabel && n.actionUrl ? `
               <button onclick="executeNotificationAction('${n.id}', '${n.actionUrl}')" class="mt-2.5 px-3 py-1 bg-[#c9a96e] hover:bg-[#e6c98a] text-black text-[10px] font-bold rounded-md transition flex items-center gap-1 shadow-sm">
-                <span>${n.actionLabel}</span><i class="ti ti-arrow-up-right text-[11px]"></i>
+                <span>${escapeHtml(n.actionLabel)}</span><i class="ti ti-arrow-up-right text-[11px]"></i>
               </button>
             ` : ''}
             
@@ -2424,6 +2424,19 @@ if (newBookings.length > 0 && !isDemoMode) {
 
     function today() { const d = new Date(); return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0'); }
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
+
+    // Escapes user-entered text before it's inserted into innerHTML, so a client
+    // name / notification / booking title containing <, >, &, " or ' is shown as
+    // plain text instead of being parsed as HTML (prevents layout breakage and XSS).
+    function escapeHtml(str) {
+      if (str === null || str === undefined) return '';
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+    }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
     // --- DEVICE TRACKING UTILITY ---
@@ -2734,8 +2747,8 @@ function getCurrentDeviceDetails() {
                 <span class="text-[8px] uppercase text-neutral-500">${mmm}</span>
               </div>
               <div class="flex-1 min-w-0">
-                <p class="text-sm font-semibold text-white truncate">${s.name}</p>
-                <p class="text-xs text-neutral-500">${s.event} • ${s.location || 'N/A'}</p>
+                <p class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</p>
+                <p class="text-xs text-neutral-500">${escapeHtml(s.event)} • ${escapeHtml(s.location) || 'N/A'}</p>
               </div>
             </div>
           `;
@@ -2815,7 +2828,7 @@ function getCurrentDeviceDetails() {
         <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer">
           <div class="flex items-start justify-between mb-2">
             <div class="flex-1">
-              <p class="text-sm font-semibold text-white">${i + 1}. ${c.name}</p>
+              <p class="text-sm font-semibold text-white">${i + 1}. ${escapeHtml(c.name)}</p>
               <p class="text-xs text-neutral-500">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
             </div>
             <div class="text-right">
@@ -2859,7 +2872,7 @@ function getCurrentDeviceDetails() {
                 <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition">
                   <div class="flex items-start justify-between mb-2">
                     <div class="flex-1">
-                      <p class="text-sm font-bold text-white">${i + 1}. ${c.name}</p>
+                      <p class="text-sm font-bold text-white">${i + 1}. ${escapeHtml(c.name)}</p>
                       <p class="text-xs text-neutral-500 mt-1">${c.shoots} shoot${c.shoots !== 1 ? 's' : ''}</p>
                     </div>
                     <div class="text-right">
@@ -2902,11 +2915,11 @@ function getCurrentDeviceDetails() {
             </div>
             
             <div class="min-w-0 flex-1">
-              <div class="text-sm font-semibold text-white">${s.name}</div>
+              <div class="text-sm font-semibold text-white">${escapeHtml(s.name)}</div>
               <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${s.event}</span>
-                <span class="text-xs text-neutral-500">${s.location || 'N/A'}</span>
-                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${s.company}</span>` : ''}
+                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${escapeHtml(s.event)}</span>
+                <span class="text-xs text-neutral-500">${escapeHtml(s.location) || 'N/A'}</span>
+                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${escapeHtml(s.company)}</span>` : ''}
               </div>
             </div>
           </div>
@@ -3313,10 +3326,10 @@ async function toggleBlockDate(dateStr) {
                       </div>
                       
                       <div class="min-w-0 flex-1">
-                        <div class="text-sm font-semibold text-white">${s.name}</div>
+                        <div class="text-sm font-semibold text-white">${escapeHtml(s.name)}</div>
                         <div class="flex flex-wrap items-center gap-2 mt-1">
-                          <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${s.event}</span>
-                          ${s.company ? `<span class="text-xs text-neutral-500">${s.company}</span>` : ''}
+                          <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-[#c9a96e] border border-amber-900">${escapeHtml(s.event)}</span>
+                          ${s.company ? `<span class="text-xs text-neutral-500">${escapeHtml(s.company)}</span>` : ''}
                         </div>
                       </div>
                     </div>
