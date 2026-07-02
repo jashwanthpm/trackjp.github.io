@@ -2687,7 +2687,14 @@ function getCurrentDeviceDetails() {
       const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
       const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const trueOutstanding = totalGross - realizedReceived;
+      // "Due" is a running balance, not a per-period figure — a shoot from an
+      // earlier financial year that's still unpaid is still money owed today.
+      // So this is calculated from ALL shoots, not just the FY-filtered set.
+      const trueOutstanding = _shoots.reduce((a, s) => {
+        const gross = Number(s.amount || 0);
+        const received = s.payStatus === 'done' ? gross : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0;
+        return a + (gross - received);
+      }, 0);
 
       document.getElementById('dash-stats').innerHTML = `
         <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
@@ -2808,7 +2815,13 @@ function getCurrentDeviceDetails() {
         }
         companyStats[comp].shoots++;
         companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
+      });
+
+  // "Due" per company is a running balance, not a per-period figure — so it's
+  // calculated from ALL shoots for that company, not just the FY-filtered set.
+  _shoots.forEach(s => {
+        const comp = s.company || 'Direct';
+        if (s.payStatus !== 'done' && companyStats[comp]) {
           companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
         }
       });
@@ -3282,7 +3295,19 @@ async function toggleBlockDate(dateStr) {
       if (!rootList) return;
       
       if (!filtered.length) {
-        rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found.</div>';
+        const fySelect = document.getElementById('pay-filter-fy');
+        const fyValue = fySelect?.value || 'all';
+        const fyLabel = fySelect ? (fySelect.options[fySelect.selectedIndex]?.text || 'All Time') : 'All Time';
+
+        if (fyValue !== 'all') {
+          rootList.innerHTML = `
+            <div class="text-center py-8 text-xs text-neutral-500 space-y-2">
+              <p>No payments found. You're currently viewing <span class="text-white font-semibold">${escapeHtml(fyLabel)}</span> — the data may be from a different period.</p>
+              <button onclick="document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="text-[11px] font-bold text-[#c9a96e] hover:text-[#e6c98a] underline underline-offset-2">Switch to All Time</button>
+            </div>`;
+        } else {
+          rootList.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No payments found matching these filters.</div>';
+        }
         return;
       }
 
