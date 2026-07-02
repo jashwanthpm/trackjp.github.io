@@ -3188,13 +3188,20 @@ async function toggleBlockDate(dateStr) {
     }
 
     function renderPaymentsList() {
-      // ---> NEW FILTER APPLY <---
-      let baseShoots = applyTimeFilter(_shoots.filter(s => s.amount), 'pay');
-
       const q = (document.getElementById('pay-search')?.value || '').toLowerCase();
       const fs = document.getElementById('pay-filter-status')?.value || '';
       const fc = document.getElementById('pay-filter-company')?.value || '';
       const fe = document.getElementById('pay-filter-expenses')?.value || '';
+
+      // ---> NEW FILTER APPLY <---
+      // Pending dues don't expire when a financial year ends. If the user is
+      // specifically looking for pending payments or pending expenses, show
+      // them regardless of which FY / custom date range is selected — a
+      // shoot from 2 years ago that's still unpaid is still relevant today.
+      const showingPendingOnly = fs === 'pending' || fs === 'part' || fe === 'pending';
+      let baseShoots = showingPendingOnly
+        ? _shoots.filter(s => s.amount)
+        : applyTimeFilter(_shoots.filter(s => s.amount), 'pay');
 
       // ONLY DECLARE THIS ONCE
       let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
