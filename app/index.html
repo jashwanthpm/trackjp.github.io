@@ -2555,6 +2555,26 @@ if (newBookings.length > 0 && !isDemoMode) {
       }
     }
 
+    // Maps each PIN modal to the input it should fill + the function that
+    // verifies it, so the same auto-trigger logic works for all three.
+    const PIN_MODAL_CONFIG = {
+      'privacy-prompt-backdrop': { inputId: 'privacy-pass-input', callback: () => verifyPrivacyPassword() },
+      'delete-all-modal-backdrop': { inputId: 'delete-all-pin-input', callback: () => executeDeleteAll() },
+      'password-pin-modal-backdrop': { inputId: 'password-pin-input', callback: () => executeSetNewPassword() }
+    };
+
+    // Fires automatically the moment a PIN modal opens — if Face ID/Fingerprint
+    // is enabled, the OS prompt pops up right away with no extra tap needed.
+    // If it's not enabled (or the person cancels/fails it), the PIN input is
+    // just sitting there ready to type into, same as before.
+    function maybeAutoTriggerBiometric(modalId) {
+      const cfg = PIN_MODAL_CONFIG[modalId];
+      if (!cfg || !isBiometricEnabled()) return;
+      // Small delay lets the modal's open transition finish before the OS
+      // biometric sheet appears, so it doesn't feel like it's fighting the UI.
+      setTimeout(() => tryBiometricFill(cfg.inputId, cfg.callback), 200);
+    }
+
     function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
     function ddMmm(d) { const dt = new Date(d + 'T00:00:00'); return { dd: dt.getDate(), mmm: MONTHS[dt.getMonth()].slice(0, 3).toUpperCase() }; }
 
@@ -4881,19 +4901,7 @@ async function toggleBlockDate(dateStr) {
       if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
       document.body.style.overflow = 'hidden';
       refreshBiometricUI();
-
-      // Auto-prompt Face ID / Fingerprint the moment a PIN modal opens, so
-      // there's no extra tap needed. If it's cancelled/unsupported, typing
-      // the PIN manually still works exactly as before.
-      const pinModalMap = {
-        'privacy-prompt-backdrop': ['privacy-pass-input', verifyPrivacyPassword],
-        'delete-all-modal-backdrop': ['delete-all-pin-input', executeDeleteAll],
-        'password-pin-modal-backdrop': ['password-pin-input', executeSetNewPassword]
-      };
-      if (pinModalMap[id] && isBiometricEnabled()) {
-        const [inputId, callback] = pinModalMap[id];
-        setTimeout(() => tryBiometricFill(inputId, callback), 300);
-      }
+      maybeAutoTriggerBiometric(id);
     }
     function closeModal(id) {
       const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
