@@ -4881,6 +4881,19 @@ async function toggleBlockDate(dateStr) {
       if (inner) inner.classList.remove('translate-y-full', 'sm:translate-y-4');
       document.body.style.overflow = 'hidden';
       refreshBiometricUI();
+
+      // Auto-prompt Face ID / Fingerprint the moment a PIN modal opens, so
+      // there's no extra tap needed. If it's cancelled/unsupported, typing
+      // the PIN manually still works exactly as before.
+      const pinModalMap = {
+        'privacy-prompt-backdrop': ['privacy-pass-input', verifyPrivacyPassword],
+        'delete-all-modal-backdrop': ['delete-all-pin-input', executeDeleteAll],
+        'password-pin-modal-backdrop': ['password-pin-input', executeSetNewPassword]
+      };
+      if (pinModalMap[id] && isBiometricEnabled()) {
+        const [inputId, callback] = pinModalMap[id];
+        setTimeout(() => tryBiometricFill(inputId, callback), 300);
+      }
     }
     function closeModal(id) {
       const m = document.getElementById(id); m.classList.remove('opacity-100', 'pointer-events-auto');
