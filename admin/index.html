@@ -886,8 +886,16 @@ console.log('Status:', response.status);
     // ==========================================
     let _drawerUser = null; // the user currently open in the side drawer
 
+    // Some users have "N/A" literally saved as their business_name (bad data),
+    // which isn't a real name — treat it the same as empty/missing.
+    function displayBusinessName(user) {
+      const raw = (user && user.business_name || '').trim();
+      if (!raw || /^n\/?a$/i.test(raw)) return (user && user.email) || 'there';
+      return raw;
+    }
+
     function waTemplateText(key, user) {
-      const name = (user && (user.business_name || user.email)) || 'there';
+      const name = displayBusinessName(user);
       const plan = user && user.plan_type ? user.plan_type.charAt(0).toUpperCase() + user.plan_type.slice(1) : 'Free';
       const expiry = user && user.expires_at ? new Date(user.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
       const pending = user ? '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN') : '₹0';
@@ -979,7 +987,7 @@ console.log('Status:', response.status);
         const targetUser = allUsers.find(u => u.id === userId || u.user_id === userId);
         if (targetUser && targetUser.phone_number) {
           const planLabel = newPlan.charAt(0).toUpperCase() + newPlan.slice(1);
-          let msg = `Hi ${targetUser.business_name || targetUser.email || 'there'}, your Sakkhi plan has been updated to *${planLabel}*.`;
+          let msg = `Hi ${displayBusinessName(targetUser)}, your Sakkhi plan has been updated to *${planLabel}*.`;
           if (expiresAt) msg += ` It's valid until ${new Date(expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
           msg += ` Thank you for using Sakkhi!`;
 
