@@ -229,6 +229,14 @@
     }
     body[data-theme="minimal"] .account-sidebar-item:hover { color: #111827 !important; background-color: rgba(243, 244, 246, 0.7) !important; }
     body[data-theme="minimal"] .account-sidebar-item.active { background-color: #f9fafb !important; color: #111827 !important; border-color: #e5e7eb !important; }
+
+    @keyframes pulse-ring {
+  0% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.7); }
+  70% { transform: scale(1); box-shadow: 0 0 0 10px rgba(201, 169, 110, 0); }
+  100% { transform: scale(0.8); box-shadow: 0 0 0 0 rgba(201, 169, 110, 0); }
+}
+.mic-active { animation: pulse-ring 2s infinite; }
+  
   </style>
 </head>
 <body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
@@ -327,6 +335,10 @@
           <span class="w-2 h-2 rounded-full bg-neutral-600 transition-colors duration-300" id="sync-dot"></span>
           <span id="sync-label" class="hidden sm:inline">Connecting</span>
         </div>
+
+        <button onclick="startVoiceAgent()" class="flex items-center justify-center p-2 rounded-lg border border-[#c9a96e]/30 bg-[#c9a96e]/10 text-[#c9a96e] hover:bg-[#c9a96e]/20 hover:border-[#c9a96e]/50 transition mr-1 sm:mr-2" title="Voice Assistant">
+  <i class="ti ti-microphone text-lg"></i>
+</button>
 
         <button onclick="openAddShootModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
           <i class="ti ti-plus text-base"></i> <span class="hidden sm:inline">New Shoot</span>
@@ -1237,6 +1249,7 @@
         </button>
       </div>
     </div>
+
     
 <!-- PASTE THE DELETE ALL MODAL HERE (Line 1055) -->
     <div id="delete-all-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
@@ -1281,6 +1294,22 @@
     </div>
       
     </div>
+
+      <div id="voice-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-5 shadow-2xl text-center relative overflow-hidden flex flex-col items-center">
+     <button onclick="closeVoiceModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-xl"></i></button>
+     
+     <div id="voice-mic-icon" class="w-16 h-16 bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-full flex items-center justify-center text-[#c9a96e] text-3xl mb-2 transition-all">
+       <i class="ti ti-microphone"></i>
+     </div>
+     
+     <h3 id="voice-status-title" class="text-white font-bold text-lg tracking-wide">Listening...</h3>
+     <p id="voice-transcript" class="text-sm text-[#c9a96e] min-h-[40px] italic font-medium">Speak now...</p>
+     
+     <div id="voice-confirm-card" class="hidden w-full bg-neutral-950 border border-neutral-800 rounded-xl p-4 text-left mt-2">
+        </div>
+  </div>
+</div>
     
     </div> <div id="toast-container" class="fixed bottom-20 md:bottom-6 right-4 left-4 md:left-auto z-[9999] flex flex-col gap-2 pointer-events-none"></div>
     
@@ -5645,6 +5674,221 @@ async function executeDeleteAll() {
       renderDevicesList();
       showToast('All other sessions have been terminated securely.');
     }
+
+    // ==========================================
+    // VOICE AGENT ENGINE (FREE WEB SPEECH API)
+    // ==========================================
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    let recognition = null;
+
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN'; // Optimized for Indian English accents
+    }
+
+    function startVoiceAgent() {
+        if (!recognition) {
+            showToast('Voice recognition is not supported in this browser.', 'error');
+            return;
+        }
+        
+        const statusTitle = document.getElementById('voice-status-title');
+        const transcriptEl = document.getElementById('voice-transcript');
+        const micIcon = document.getElementById('voice-mic-icon');
+        const confirmCard = document.getElementById('voice-confirm-card');
+        
+        statusTitle.textContent = 'Listening...';
+        transcriptEl.textContent = 'Say something like "Book tomorrow" or "Payment from Studio X"';
+        confirmCard.classList.add('hidden');
+        micIcon.classList.add('mic-active', 'bg-[#c9a96e]/30', 'border-[#c9a96e]');
+        
+        openModal('voice-modal-backdrop');
+        
+        recognition.onresult = (event) => {
+            const transcript = Array.from(event.results)
+                .map(result => result[0].transcript)
+                .join('');
+            
+            transcriptEl.textContent = '"' + transcript + '"';
+            
+            if (event.results[0].isFinal) {
+                micIcon.classList.remove('mic-active', 'bg-[#c9a96e]/30', 'border-[#c9a96e]');
+                statusTitle.textContent = 'Processing...';
+                // Small delay so the user can read what it heard
+                setTimeout(() => processVoiceCommand(transcript.toLowerCase()), 600);
+            }
+        };
+        
+        recognition.onerror = (event) => {
+            micIcon.classList.remove('mic-active');
+            if(event.error === 'no-speech') {
+                statusTitle.textContent = 'No speech detected';
+            } else {
+                statusTitle.textContent = 'Microphone error';
+            }
+            setTimeout(closeVoiceModal, 2000);
+        };
+        
+        recognition.start();
+    }
+
+    function closeVoiceModal() {
+        if (recognition) recognition.stop();
+        closeModal('voice-modal-backdrop');
+        document.getElementById('voice-mic-icon').classList.remove('mic-active');
+    }
+
+    function processVoiceCommand(text) {
+        const confirmCard = document.getElementById('voice-confirm-card');
+        const statusTitle = document.getElementById('voice-status-title');
+        
+        // --- INTENT 1: EXPENSES ---
+        if (text.includes('expense') || text.includes('spend') || text.includes('cost')) {
+            const td = today();
+            const currentMonthPrefix = td.substring(0, 7);
+            const thisMonthShoots = _shoots.filter(s => s.date.startsWith(currentMonthPrefix));
+            const totalExp = thisMonthShoots.reduce((sum, s) => sum + Number(s.expense || 0), 0);
+            
+            statusTitle.textContent = 'Expenses Report';
+            confirmCard.innerHTML = `
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 bg-orange-950/40 border border-orange-900/50 rounded-full flex items-center justify-center text-orange-500"><i class="ti ti-receipt"></i></div>
+                    <div>
+                        <p class="text-[10px] uppercase font-bold text-neutral-500">This Month's Total Expenses</p>
+                        <p class="text-xl font-bold text-orange-500">${fmtAmt(totalExp)}</p>
+                    </div>
+                </div>
+                <button onclick="closeVoiceModal()" class="w-full mt-4 py-2 bg-neutral-800 text-white rounded-lg text-xs font-bold hover:bg-neutral-700 transition">Got it</button>
+            `;
+            confirmCard.classList.remove('hidden');
+            return;
+        }
+        
+        // --- INTENT 2: PAYMENT RECEIVED ---
+        if (text.includes('pay') || text.includes('paid') || text.includes('received')) {
+            let matchedCompany = null;
+            
+            // Find longest matching company name from the user's saved list
+            const sortedCompanies = [..._companies].sort((a, b) => b.length - a.length);
+            for (const c of sortedCompanies) {
+                if (text.includes(c.toLowerCase())) {
+                    matchedCompany = c;
+                    break;
+                }
+            }
+            
+            if (matchedCompany) {
+                const pendingShoots = _shoots.filter(s => s.company === matchedCompany && s.payStatus !== 'done');
+                
+                if (pendingShoots.length > 0) {
+                    const amountDue = pendingShoots.reduce((sum, s) => sum + (Number(s.amount || 0) - Number(s.partPaid || 0)), 0);
+                    
+                    statusTitle.textContent = 'Log Payment?';
+                    confirmCard.innerHTML = `
+                        <p class="text-xs text-neutral-400 mb-2">Found ${pendingShoots.length} pending shoot(s) for <strong class="text-white">${matchedCompany}</strong>.</p>
+                        <div class="bg-emerald-950/20 border border-emerald-900/30 rounded-lg p-3 mb-4">
+                            <p class="text-[10px] uppercase font-bold text-emerald-500/70 tracking-wider">Total Due Cleared</p>
+                            <p class="text-lg text-emerald-400 font-bold">${fmtAmt(amountDue)}</p>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="closeVoiceModal()" class="flex-1 py-2 border border-neutral-800 text-neutral-400 rounded-lg text-xs font-bold hover:text-white transition">Cancel</button>
+                            <button onclick="executeVoicePayment('${matchedCompany}')" class="flex-1 py-2 bg-emerald-600 text-white rounded-lg text-xs font-bold hover:bg-emerald-500 transition">Confirm Paid</button>
+                        </div>
+                    `;
+                } else {
+                    statusTitle.textContent = 'No Pending Dues';
+                    confirmCard.innerHTML = `<p class="text-xs text-neutral-400 mb-4">All shoots for <strong>${matchedCompany}</strong> are already fully settled.</p>
+                    <button onclick="closeVoiceModal()" class="w-full py-2 bg-neutral-800 text-white rounded-lg text-xs font-bold hover:bg-neutral-700 transition">Close</button>`;
+                }
+            } else {
+                statusTitle.textContent = 'Company Not Found';
+                confirmCard.innerHTML = `<p class="text-xs text-neutral-400 mb-4">I couldn't detect a saved company name in your command.</p>
+                <button onclick="closeVoiceModal()" class="w-full py-2 bg-neutral-800 text-white rounded-lg text-xs font-bold hover:bg-neutral-700 transition">Close</button>`;
+            }
+            confirmCard.classList.remove('hidden');
+            return;
+        }
+        
+        // --- INTENT 3: BOOKING & AVAILABILITY ---
+        if (text.includes('book') || text.includes('schedule') || text.includes('available') || text.includes('free')) {
+            let targetDate = today();
+            let displayLabel = "Today";
+            
+            // Very simple NLP Date parsing
+            const d = new Date();
+            if (text.includes('tomorrow')) {
+                d.setDate(d.getDate() + 1);
+                targetDate = d.toISOString().split('T')[0];
+                displayLabel = "Tomorrow";
+            } else if (text.includes('next week')) {
+                d.setDate(d.getDate() + 7);
+                targetDate = d.toISOString().split('T')[0];
+                displayLabel = "Next Week";
+            }
+            
+            const existing = _shoots.filter(s => s.date === targetDate);
+            const isBlocked = _blockedDates.includes(targetDate);
+            
+            statusTitle.textContent = 'Check Availability';
+            
+            let availabilityHtml = '';
+            if (isBlocked) {
+                availabilityHtml = `<div class="text-red-400 flex items-center gap-2"><i class="ti ti-lock"></i> You have blocked this date.</div>`;
+            } else if (existing.length > 0) {
+                availabilityHtml = `<div class="text-amber-400 flex items-center gap-2"><i class="ti ti-alert-circle"></i> You have ${existing.length} shoot(s) scheduled.</div>`;
+            } else {
+                availabilityHtml = `<div class="text-emerald-400 flex items-center gap-2"><i class="ti ti-check"></i> You are completely free!</div>`;
+            }
+            
+            confirmCard.innerHTML = `
+                <div class="bg-neutral-950 border border-neutral-800 rounded-lg p-3 mb-4">
+                    <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">${displayLabel}</p>
+                    <p class="text-sm text-white font-bold">${targetDate}</p>
+                    <div class="mt-2 text-xs font-medium">${availabilityHtml}</div>
+                </div>
+                <div class="flex gap-2">
+                    <button onclick="closeVoiceModal()" class="flex-1 py-2 border border-neutral-800 text-neutral-400 rounded-lg text-xs font-bold hover:text-white transition">Cancel</button>
+                    <button onclick="closeVoiceModal(); setTimeout(() => openAddShootModal('${targetDate}'), 300)" class="flex-1 py-2 bg-[#c9a96e] text-black rounded-lg text-xs font-bold hover:bg-[#e6c98a] transition">Draft Shoot</button>
+                </div>
+            `;
+            confirmCard.classList.remove('hidden');
+            return;
+        }
+        
+        // --- FALLBACK ---
+        statusTitle.textContent = 'Command not recognized';
+        confirmCard.innerHTML = `
+            <p class="text-xs text-neutral-400 mb-4">Try saying:<br><br>• "Payment received from [Company]"<br>• "Check availability for tomorrow"<br>• "What are my expenses this month?"</p>
+            <button onclick="closeVoiceModal()" class="w-full py-2 bg-neutral-800 text-white rounded-lg text-xs font-bold hover:bg-neutral-700 transition">Close</button>
+        `;
+        confirmCard.classList.remove('hidden');
+    }
+
+    // Helper to execute the confirmed payment
+    async function executeVoicePayment(companyName) {
+        closeVoiceModal();
+        const pendingShoots = _shoots.filter(s => s.company === companyName && s.payStatus !== 'done');
+        
+        setSyncStatus('syncing', 'Processing Payment...');
+        
+        try {
+            let updatedCount = 0;
+            for (let s of pendingShoots) {
+                s.payStatus = 'done';
+                s.partPaid = s.amount; // Ensure partial pay balances match full amount
+                await saveShootToDB(s);
+                updatedCount++;
+            }
+            
+            showToast(`Successfully marked ${updatedCount} shoot(s) for ${companyName} as Paid!`, 'success');
+            refreshCurrentView();
+        } catch (e) {
+            showToast('Error processing voice payment: ' + e.message, 'error');
+        }
+    }
+    
     // Auto-load exactly 1 second after app loads so _shoots data has time to sync from Supabase
     document.addEventListener('DOMContentLoaded', () => {
       setTimeout(() => {
