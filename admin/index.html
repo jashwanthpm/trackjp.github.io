@@ -947,7 +947,8 @@ console.log('Status:', response.status);
       const btn = document.getElementById('save-plan-btn');
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
       
-      const status = newPlan === 'free' ? 'inactive' : 'active';
+      // Always set status to active when YOU explicitly grant a plan
+      const status = 'active'; 
       const expiresAt = (newPlan !== 'free' && newExpiry) ? new Date(newExpiry).toISOString() : null;
       
       const payload = {
