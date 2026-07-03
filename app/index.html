@@ -2179,11 +2179,13 @@ try {
         if (_subscription.expiresAt && new Date(_subscription.expiresAt) < new Date()) {
           _subscription.status = 'expired';
         }
-        _isSubActive = _subscription.status === 'active';
       }
     } catch (e) {
       console.warn("Could not load subscription data.");
     }
+
+    // Authorized if explicitly marked active OR running on the free plan tier
+    _isSubActive = _subscription.status === 'active' || _subscription.plan === 'free';
 
    // --- PASTE THE NEW NOTIFICATION LOGIC HERE ---
     try {
