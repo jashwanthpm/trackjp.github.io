@@ -355,7 +355,7 @@
         document.getElementById('ui-biz-name').textContent = `Ledger • ${profile.bizName || 'Sakkhi Studio'}`;
         
         document.getElementById('ui-total').textContent = formatAmt(totalBilled);
-        document.getElementById('ui-expenses').textContent = formatAmt(totalExpenses);
+        document.getElementById('ui-expenses').textContent = formatAmt(totalPendingExpenses);
         document.getElementById('ui-paid').textContent = formatAmt(totalPaid);
         document.getElementById('ui-due').textContent = formatAmt(due);
 
