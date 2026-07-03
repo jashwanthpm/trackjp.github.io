@@ -82,7 +82,8 @@
         <div>
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Plan Tier</label>
           <select id="edit-plan-type" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition">
-            <option value="free">Free</option>
+            <option value="none">Locked / No Access</option>
+            <option value="free">Free Plan (Active)</option>
             <option value="monthly">Monthly</option>
             <option value="yearly">Yearly</option>
           </select>
@@ -552,10 +553,16 @@ console.log('Status:', response.status);
         let daysText = '';
         let dateText = '';
         
-        if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-neutral-900/50 text-neutral-400 border-neutral-800">FREE TIER</span>`;
-          daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
-          dateText = `<span class="text-neutral-600 text-[9px] block mt-0.5">No renewal needed</span>`;
+        const isLocked = !u.status || u.status === 'inactive';
+        
+        if (isLocked) {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/20 text-red-500 border-red-900/50"><i class="ti ti-lock mr-1"></i> ACCESS LOCKED</span>`;
+          daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1">Pending Admin Approval</span>`;
+          dateText = '';
+        } else if (!u.plan_type || u.plan_type.toLowerCase() === 'free') {
+          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-emerald-950/20 text-emerald-400 border-emerald-900/50">FREE TIER • ACTIVE</span>`;
+          daysText = `<span class="text-neutral-400 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
+          dateText = '';
         } else {
           const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
           const today = new Date();
@@ -594,6 +601,7 @@ console.log('Status:', response.status);
           
         const initials = getInitials(u.full_name, u.email);
         const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
+        const safeStatus = u.status || 'inactive';
 
         return `
           <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
@@ -623,7 +631,7 @@ console.log('Status:', response.status);
                 ${planBadge}
                 ${daysText}
                 ${dateText}
-                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
+                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}', '${safeStatus}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
                   <i class="ti ti-pencil"></i> Modify Plan
                 </button>
               </div>
@@ -840,12 +848,16 @@ console.log('Status:', response.status);
       renderTable(filtered);
     }
 
-    function openPlanModal(userId, currentPlan, expiryDateStr, userName) {
+    function openPlanModal(userId, currentPlan, expiryDateStr, userName, currentStatus) {
       document.getElementById('edit-plan-user-id').value = userId;
       document.getElementById('plan-modal-user-name').textContent = `Target: ${userName}`;
       
       const selectType = document.getElementById('edit-plan-type');
-      selectType.value = currentPlan && currentPlan !== 'null' ? currentPlan : 'free';
+      if (currentStatus === 'inactive' || !currentStatus || currentStatus === 'null') {
+        selectType.value = 'none';
+      } else {
+        selectType.value = currentPlan && currentPlan !== 'null' ? currentPlan : 'free';
+      }
       
       const expiryInput = document.getElementById('edit-plan-expiry');
       if (expiryDateStr && expiryDateStr !== 'null') {
@@ -947,13 +959,14 @@ console.log('Status:', response.status);
       const btn = document.getElementById('save-plan-btn');
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
       
-      // Always set status to active when YOU explicitly grant a plan
-      const status = 'active'; 
-      const expiresAt = (newPlan !== 'free' && newExpiry) ? new Date(newExpiry).toISOString() : null;
+      // Determine status based on dropdown choice
+      const status = newPlan === 'none' ? 'inactive' : 'active';
+      const dbPlanType = newPlan === 'none' ? 'free' : newPlan; 
+      const expiresAt = (newPlan !== 'free' && newPlan !== 'none' && newExpiry) ? new Date(newExpiry).toISOString() : null;
       
       const payload = {
         user_id: userId,
-        plan_type: newPlan,
+        plan_type: dbPlanType,
         status: status,
         expires_at: expiresAt
       };
@@ -980,8 +993,6 @@ console.log('Status:', response.status);
         }
         
         closePlanModal();
-        
-        // Refresh the admin dashboard with the newly saved plan
         await fetchAdminData();
         
       } catch(e) {
