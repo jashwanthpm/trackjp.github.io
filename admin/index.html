@@ -553,18 +553,14 @@ console.log('Status:', response.status);
         let daysText = '';
         let dateText = '';
         
-        // FIX: We now check the plan_type since the Edge function guarantees it
         const isLocked = !u.plan_type || u.plan_type.toLowerCase() === 'none';
         
         if (isLocked) {
           planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-red-950/20 text-red-500 border-red-900/50"><i class="ti ti-lock mr-1"></i> ACCESS LOCKED</span>`;
           daysText = `<span class="text-neutral-500 text-[10px] font-medium mt-1.5 flex items-center gap-1">Pending Admin Approval</span>`;
           dateText = '';
-        } else if (u.plan_type.toLowerCase() === 'free') {
-          planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-emerald-950/20 text-emerald-400 border-emerald-900/50">FREE TIER • ACTIVE</span>`;
-          daysText = `<span class="text-neutral-400 text-[10px] font-medium mt-1.5 flex items-center gap-1"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
-          dateText = '';
         } else {
+          // FIX: Treat the Free plan like all other plans so it respects the timer!
           const expiresDate = u.expires_at ? new Date(u.expires_at) : null;
           const today = new Date();
           today.setHours(0, 0, 0, 0); 
@@ -590,8 +586,9 @@ console.log('Status:', response.status);
               dateText = `<span class="text-neutral-500 text-[9px] block mt-0.5">Expired on: ${formattedDate}</span>`;
             }
           } else {
+             // If you leave the date blank in the modal, it becomes a true Lifetime plan
              planBadge = `<span class="px-2.5 py-1 rounded-md text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planName} • ACTIVE</span>`;
-             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5">Expiration unknown</span>`;
+             daysText = `<span class="text-neutral-500 text-[10px] font-medium italic mt-1.5"><i class="ti ti-infinity"></i> Lifetime Access</span>`;
              dateText = '';
           }
         }
@@ -602,6 +599,7 @@ console.log('Status:', response.status);
           
         const initials = getInitials(u.full_name, u.email);
         const safeName = (u.full_name || u.email).replace(/'/g, "\\'");
+        const safeStatus = u.status || 'inactive';
 
         return `
           <tr onclick="openUserDrawer('${u.user_id}')" class="hover:bg-[#121212] transition-colors duration-200 group cursor-pointer">
@@ -631,7 +629,7 @@ console.log('Status:', response.status);
                 ${planBadge}
                 ${daysText}
                 ${dateText}
-                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
+                <button onclick="event.stopPropagation(); openPlanModal('${u.user_id}', '${u.plan_type}', '${u.expires_at || ''}', '${safeName}', '${safeStatus}')" class="text-[10px] font-bold text-blue-400 hover:text-blue-300 mt-2 flex items-center gap-1 transition relative z-10">
                   <i class="ti ti-pencil"></i> Modify Plan
                 </button>
               </div>
@@ -673,8 +671,6 @@ console.log('Status:', response.status);
       document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
 
-      // Remember who the drawer is currently open for, so template picks
-      // and the Send button can reuse their details.
       _drawerUser = user;
       document.getElementById('wa-template-select').value = 'welcome';
       applyWaTemplate();
@@ -691,16 +687,15 @@ console.log('Status:', response.status);
           : '<span class="text-neutral-600 italic">Never synced</span>';
       document.getElementById('drawer-last-sync').innerHTML = lastActiveDate;
 
-      const planType = (user.plan_type || 'free').toLowerCase();
+      const planType = (user.plan_type || 'none').toLowerCase();
       let badgeHTML = '';
       let expiryText = '';
 
-      if (planType === 'free') {
-          badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-neutral-900 text-neutral-400 border-neutral-800">FREE TIER</span>`;
-          expiryText = '<span class="text-neutral-500 italic">Lifetime</span>';
+      // FIX: Drawer UI now mirrors the main table UI
+      if (planType === 'none') {
+          badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">LOCKED</span>`;
+          expiryText = '<span class="text-neutral-500 italic">No Access</span>';
       } else {
-          badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType.toUpperCase()}</span>`;
-          
           if (user.expires_at) {
               const expDate = new Date(user.expires_at);
               const today = new Date();
@@ -710,13 +705,15 @@ console.log('Status:', response.status);
               const formattedExp = expDate.toLocaleDateString('en-IN', {day: '2-digit', month: 'short', year: 'numeric'});
               
               if (expDate >= today) {
+                  badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType.toUpperCase()}</span>`;
                   expiryText = `<span class="text-emerald-400">${formattedExp}</span>`;
               } else {
-                  expiryText = `<span class="text-red-400">${formattedExp} (Expired)</span>`;
                   badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-red-950/40 text-red-400 border-red-900">${planType.toUpperCase()}</span>`;
+                  expiryText = `<span class="text-red-400">${formattedExp} (Expired)</span>`;
               }
           } else {
-              expiryText = '<span class="text-neutral-500 italic">Unknown</span>';
+              badgeHTML = `<span class="px-2 py-1 rounded text-[9px] font-bold border uppercase tracking-widest bg-[#c9a96e]/10 text-[#c9a96e] border-[#c9a96e]/30">${planType.toUpperCase()}</span>`;
+              expiryText = '<span class="text-neutral-500 italic"><i class="ti ti-infinity"></i> Lifetime Access</span>';
           }
       }
       
@@ -733,13 +730,6 @@ console.log('Status:', response.status);
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
     }
-
-    window.closeUserDrawer = function() {
-      document.getElementById('user-drawer').classList.add('translate-x-full');
-      setTimeout(() => {
-        document.getElementById('drawer-overlay').classList.add('hidden');
-      }, 300); 
-    };
 
     function copyUserIdToClipboard() {
       const idText = document.getElementById('drawer-user-id').innerText;
@@ -959,10 +949,11 @@ console.log('Status:', response.status);
       const btn = document.getElementById('save-plan-btn');
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
       
-      // Explicitly save the plan type as 'none' so the Edge Function returns it
       const status = newPlan === 'none' ? 'inactive' : 'active';
       const dbPlanType = newPlan; 
-      const expiresAt = (newPlan !== 'free' && newPlan !== 'none' && newExpiry) ? new Date(newExpiry).toISOString() : null;
+      
+      // FIX: We now allow the 'free' plan to save an expiration date (for free trials)
+      const expiresAt = (newPlan !== 'none' && newExpiry) ? new Date(newExpiry).toISOString() : null;
       
       const payload = {
         user_id: userId,
