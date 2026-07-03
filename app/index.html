@@ -2181,13 +2181,16 @@ try {
         if (_subscription.expiresAt && new Date(_subscription.expiresAt) < new Date()) {
           _subscription.status = 'expired';
         }
+        // ONLY grant access if the admin has explicitly marked it active
+        _isSubActive = _subscription.status === 'active';
+      } else {
+        // No plan assigned by admin yet = Locked Out
+        _isSubActive = false; 
       }
     } catch (e) {
       console.warn("Could not load subscription data.");
+      _isSubActive = false;
     }
-
-    // Authorized if explicitly marked active OR running on the free plan tier
-    _isSubActive = _subscription.status === 'active' || _subscription.plan === 'free';
 
    // --- PASTE THE NEW NOTIFICATION LOGIC HERE ---
     try {
@@ -4970,7 +4973,16 @@ function updateAccountDisplay() {
     const userId = currentUser.id || 'No ID Found';
     
     const subBadgeColor = _isSubActive ? 'bg-emerald-950/40 text-emerald-400 border-emerald-900' : 'bg-red-950/40 text-red-400 border-red-900';
-    const subText = _isSubActive ? `${_subscription.plan.toUpperCase()} PLAN (Valid till ${new Date(_subscription.expiresAt).toLocaleDateString()})` : `EXPIRED / INACTIVE`;
+    
+    // Smart text formatting that handles plans with no expiration date
+    let subText = `ACCESS PENDING / INACTIVE`;
+    if (_isSubActive) {
+      if (_subscription.expiresAt) {
+        subText = `${_subscription.plan.toUpperCase()} PLAN (Valid till ${new Date(_subscription.expiresAt).toLocaleDateString('en-IN')})`;
+      } else {
+        subText = `${_subscription.plan.toUpperCase()} PLAN (Active)`;
+      }
+    }
 
     emailDisplay.innerHTML = `
       <div class="flex flex-col gap-1.5">
