@@ -215,11 +215,15 @@
           <i class="ti ti-mail-forward"></i> Email
         </a>
 
+        <a id="drawer-whatsapp" href="#" target="_blank" class="py-2.5 bg-green-950/20 hover:bg-green-900/40 border border-green-900/30 text-green-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-brand-whatsapp"></i> WhatsApp
+        </a>
+
         <button id="view-dashboard-btn" class="py-2.5 bg-blue-950/20 hover:bg-blue-900/40 border border-blue-900/30 text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-external-link"></i> View App
         </button>
         
-        <button id="delete-user-btn" class="py-2.5 bg-red-950/20 hover:bg-red-900/40 border border-red-900/30 text-red-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+        <button id="delete-user-btn" class="col-span-2 py-2.5 bg-red-950/20 hover:bg-red-900/40 border border-red-900/30 text-red-500 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-trash"></i> Delete
         </button>
       </div>
@@ -648,6 +652,18 @@ console.log('Status:', response.status);
       document.getElementById('drawer-city').innerText = user.city || user.location || 'Unknown Location';
       document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
+
+      const waBtn = document.getElementById('drawer-whatsapp');
+      if (user.phone_number) {
+        let cleanPhone = String(user.phone_number).replace(/[^0-9]/g, '');
+        if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // default to India country code if missing
+        const waMsg = `Hi ${user.name || 'there'}, this is Sakkhi Support reaching out.`;
+        waBtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`;
+        waBtn.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        waBtn.href = '#';
+        waBtn.classList.add('opacity-40', 'pointer-events-none');
+      }
 
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
