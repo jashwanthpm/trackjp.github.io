@@ -205,6 +205,22 @@
           </div>
         </div>
       </div>
+
+      <div class="pt-2 pb-2 space-y-2">
+        <p class="text-[10px] font-bold text-neutral-500 uppercase tracking-wider flex items-center gap-1.5"><i class="ti ti-brand-whatsapp text-green-400"></i> WhatsApp Message</p>
+        <select id="wa-template-select" onchange="applyWaTemplate()" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-300 outline-none focus:border-green-700 transition cursor-pointer">
+          <option value="welcome">Welcome Message</option>
+          <option value="plan_updated">Plan Updated</option>
+          <option value="plan_expiring">Plan Expiring Soon</option>
+          <option value="payment_reminder">Pending Payment Reminder</option>
+          <option value="checkin">General Check-in</option>
+          <option value="custom">Custom Message</option>
+        </select>
+        <textarea id="wa-message-box" rows="4" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-200 outline-none focus:border-green-700 transition resize-none" placeholder="Message..."></textarea>
+        <a id="drawer-whatsapp" href="#" target="_blank" class="w-full py-2.5 bg-green-950/20 hover:bg-green-900/40 border border-green-900/30 text-green-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
+          <i class="ti ti-send"></i> Send on WhatsApp
+        </a>
+      </div>
       
       <div class="pt-2 grid grid-cols-2 gap-3 pb-6">
         <button onclick="copyUserIdToClipboard()" id="copy-id-btn" class="py-2.5 bg-neutral-900 hover:bg-neutral-800 border border-neutral-800 rounded-lg text-xs font-bold text-neutral-300 transition-colors flex items-center justify-center gap-1.5 shadow-sm">
@@ -213,10 +229,6 @@
         
         <a id="drawer-mailto" href="#" class="py-2.5 bg-[#c9a96e]/10 hover:bg-[#c9a96e]/20 border border-[#c9a96e]/30 text-[#c9a96e] rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
           <i class="ti ti-mail-forward"></i> Email
-        </a>
-
-        <a id="drawer-whatsapp" href="#" target="_blank" class="py-2.5 bg-green-950/20 hover:bg-green-900/40 border border-green-900/30 text-green-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
-          <i class="ti ti-brand-whatsapp"></i> WhatsApp
         </a>
 
         <button id="view-dashboard-btn" class="py-2.5 bg-blue-950/20 hover:bg-blue-900/40 border border-blue-900/30 text-blue-400 rounded-lg text-xs font-bold transition-colors flex items-center justify-center gap-1.5 shadow-sm">
@@ -653,17 +665,11 @@ console.log('Status:', response.status);
       document.getElementById('drawer-companies').innerText = user.companies_worked_for || 'No client data synced';
       document.getElementById('drawer-mailto').href = `mailto:${user.email}?subject=Message from Sakkhi Support`;
 
-      const waBtn = document.getElementById('drawer-whatsapp');
-      if (user.phone_number) {
-        let cleanPhone = String(user.phone_number).replace(/[^0-9]/g, '');
-        if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // default to India country code if missing
-        const waMsg = `Hi ${user.name || 'there'}, this is Sakkhi Support reaching out.`;
-        waBtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(waMsg)}`;
-        waBtn.classList.remove('opacity-40', 'pointer-events-none');
-      } else {
-        waBtn.href = '#';
-        waBtn.classList.add('opacity-40', 'pointer-events-none');
-      }
+      // Remember who the drawer is currently open for, so template picks
+      // and the Send button can reuse their details.
+      _drawerUser = user;
+      document.getElementById('wa-template-select').value = 'welcome';
+      applyWaTemplate();
 
       document.getElementById('drawer-user-id').innerText = user.user_id;
       
@@ -875,6 +881,56 @@ console.log('Status:', response.status);
     });
 
     // Updated to use the secure supabaseClient SDK!
+    // ==========================================
+    // WHATSAPP MESSAGE TEMPLATES (User Drawer)
+    // ==========================================
+    let _drawerUser = null; // the user currently open in the side drawer
+
+    function waTemplateText(key, user) {
+      const name = (user && (user.name || user.email)) || 'there';
+      const plan = user && user.plan_type ? user.plan_type.charAt(0).toUpperCase() + user.plan_type.slice(1) : 'Free';
+      const expiry = user && user.expires_at ? new Date(user.expires_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' }) : 'N/A';
+      const pending = user ? '₹' + Number(user.pending_payments || 0).toLocaleString('en-IN') : '₹0';
+
+      switch (key) {
+        case 'welcome':
+          return `Hi ${name}, welcome to Sakkhi! We're glad to have you onboard. Let us know if you need any help getting started.`;
+        case 'plan_updated':
+          return `Hi ${name}, your Sakkhi plan has been updated to *${plan}*, valid until ${expiry}. Thank you for using Sakkhi!`;
+        case 'plan_expiring':
+          return `Hi ${name}, just a heads-up — your Sakkhi *${plan}* plan expires on ${expiry}. Renew anytime to keep things running smoothly.`;
+        case 'payment_reminder':
+          return `Hi ${name}, this is a gentle reminder that you have ${pending} pending on your Sakkhi account. Let us know if you have any questions.`;
+        case 'checkin':
+          return `Hi ${name}, just checking in — how's everything going with Sakkhi? Happy to help with anything you need.`;
+        case 'custom':
+        default:
+          return '';
+      }
+    }
+
+    function applyWaTemplate() {
+      const key = document.getElementById('wa-template-select').value;
+      document.getElementById('wa-message-box').value = waTemplateText(key, _drawerUser);
+      updateWaSendLink();
+    }
+
+    function updateWaSendLink() {
+      const waBtn = document.getElementById('drawer-whatsapp');
+      const msg = document.getElementById('wa-message-box').value;
+      if (_drawerUser && _drawerUser.phone_number && msg.trim()) {
+        let cleanPhone = String(_drawerUser.phone_number).replace(/[^0-9]/g, '');
+        if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // default to India country code if missing
+        waBtn.href = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`;
+        waBtn.classList.remove('opacity-40', 'pointer-events-none');
+      } else {
+        waBtn.href = '#';
+        waBtn.classList.add('opacity-40', 'pointer-events-none');
+      }
+    }
+
+    document.getElementById('wa-message-box').addEventListener('input', updateWaSendLink);
+
     async function saveUserPlan() {
       const userId = document.getElementById('edit-plan-user-id').value;
       const newPlan = document.getElementById('edit-plan-type').value;
