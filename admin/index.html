@@ -979,25 +979,8 @@ console.log('Status:', response.status);
         }
         
         closePlanModal();
-
-        // Notify the user on WhatsApp about their plan change, instead of
-        // having to message them separately. Uses a wa.me link since we
-        // don't have the official WhatsApp Business API set up yet — this
-        // opens WhatsApp with the message ready; you just hit Send.
-        const targetUser = allUsers.find(u => u.id === userId || u.user_id === userId);
-        if (targetUser && targetUser.phone_number) {
-          const planLabel = newPlan.charAt(0).toUpperCase() + newPlan.slice(1);
-          let msg = `Hi ${displayBusinessName(targetUser)}, your Sakkhi plan has been updated to *${planLabel}*.`;
-          if (expiresAt) msg += ` It's valid until ${new Date(expiresAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' })}.`;
-          msg += ` Thank you for using Sakkhi!`;
-
-          let cleanPhone = String(targetUser.phone_number).replace(/[^0-9]/g, '');
-          if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone; // default to India country code if missing
-          window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(msg)}`, '_blank');
-        } else if (targetUser) {
-          console.warn('No phone number on file for this user — skipped WhatsApp notify.');
-        }
-
+        
+        // Refresh the admin dashboard with the newly saved plan
         await fetchAdminData();
         
       } catch(e) {
