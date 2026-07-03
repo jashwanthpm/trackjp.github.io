@@ -402,7 +402,7 @@
             const payStatusColor = s.pay_status === 'done' ? 'text-emerald-400' : (s.pay_status === 'part' ? 'text-amber-400' : 'text-red-400');
             const payStatusLabel = s.pay_status === 'done' ? 'Settled' : (s.pay_status === 'part' ? 'Partial' : 'Pending');
             // If partial, show the paid amount, otherwise just the status label
-            const payStatusDisplay = s.pay_status === 'part' ? `Partial (${formatAmt(partPaid)})` : payStatusLabel;
+            const payStatusDisplay = s.pay_status === 'part' ? `Partially Paid (${formatAmt(partPaid)})` : payStatusLabel;
             
             const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
