@@ -853,9 +853,10 @@ console.log('Status:', response.status);
       if (expiryDateStr && expiryDateStr !== 'null') {
         expiryInput.value = expiryDateStr.split('T')[0];
       } else {
-        const oneYear = new Date();
-        oneYear.setFullYear(oneYear.getFullYear() + 1);
-        expiryInput.value = oneYear.toISOString().split('T')[0];
+        // Default to a 7-day trial if no date exists
+        const trialDate = new Date();
+        trialDate.setDate(trialDate.getDate() + 7);
+        expiryInput.value = trialDate.toISOString().split('T')[0];
       }
       
       document.getElementById('plan-modal').classList.remove('hidden');
@@ -877,7 +878,12 @@ console.log('Status:', response.status);
       } else if (selectedPlan === 'yearly') {
         now.setFullYear(now.getFullYear() + 1);
         expiryInput.value = now.toISOString().split('T')[0];
+      } else if (selectedPlan === 'free') {
+        // Automatically set to 7 days when "Free" is selected
+        now.setDate(now.getDate() + 7);
+        expiryInput.value = now.toISOString().split('T')[0];
       } else {
+        // Clear the date if "Locked / No Access" is selected
         expiryInput.value = ''; 
       }
     });
