@@ -5786,21 +5786,22 @@ async function executeDeleteAll() {
         if (e.error === 'no-speech' || e.error === 'aborted') return;
 
         if (e.error === 'network') {
-          // Many browsers (Brave in particular, with Shields on) block the
-          // remote speech-recognition service used by webkitSpeechRecognition.
-          // The mic itself is fine — it's the browser refusing the request.
+          // Brave (and some other Chromium browsers) permanently disable the
+          // remote speech-recognition backend that webkitSpeechRecognition
+          // depends on — this is a deliberate policy, not a Shields setting,
+          // so toggling Shields will not fix it.
           showVoiceMicError(
-            "Voice recognition can't reach the speech service right now. " +
-            "Brave often blocks this — try turning Shields off for this site, " +
-            "or open this page in Chrome. You can still type your command below."
+            "Voice recognition isn't available in this browser — Brave (and some others) disable the speech service entirely. " +
+            "Open this page in Google Chrome or Microsoft Edge to use your voice, or just type your command below.",
+            false
           );
           return;
         }
         if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          showVoiceMicError("Microphone access was blocked. Please allow microphone permission for this site, then try again — or type your command below.");
+          showVoiceMicError("Microphone access was blocked. Please allow microphone permission for this site, then try again — or type your command below.", true);
           return;
         }
-        showVoiceMicError("Didn't catch that (" + (e.error || 'unknown error') + "). Try again, or type your command below.");
+        showVoiceMicError("Didn't catch that (" + (e.error || 'unknown error') + "). Try again, or type your command below.", true);
       };
 
       _voiceRecognition.onend = () => {
@@ -5810,12 +5811,14 @@ async function executeDeleteAll() {
       };
     }
 
-    function showVoiceMicError(message) {
+    function showVoiceMicError(message, canRetry) {
       showVoiceState('unsupported');
       const el = document.getElementById('voice-state-unsupported');
       if (el) {
         const msgP = el.querySelector('p');
         if (msgP) msgP.textContent = message;
+        const retryBtn = el.querySelector('button');
+        if (retryBtn) retryBtn.classList.toggle('hidden', canRetry === false);
       }
       speakVoiceAnswer(message);
     }
