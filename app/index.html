@@ -1,3 +1,4 @@
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -1089,10 +1090,11 @@
 
         <div class="p-6 flex-1 flex flex-col items-center justify-center gap-5 min-h-[260px]">
 
-          <!-- Unsupported browser state -->
+          <!-- Unsupported / error browser state -->
           <div id="voice-state-unsupported" class="hidden flex-col items-center text-center gap-3">
             <i class="ti ti-microphone-off text-3xl text-neutral-600"></i>
             <p class="text-xs text-neutral-400 leading-relaxed">Voice recognition isn't supported in this browser. Try Chrome, or type your command below instead.</p>
+            <button onclick="startVoiceCapture()" class="text-[11px] uppercase tracking-wider font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-lg px-4 py-2 hover:bg-[#c9a96e]/10 transition">Try Voice Again</button>
           </div>
 
           <!-- Listening state -->
@@ -5782,7 +5784,23 @@ async function executeDeleteAll() {
 
       _voiceRecognition.onerror = (e) => {
         if (e.error === 'no-speech' || e.error === 'aborted') return;
-        showToast('Voice error: ' + (e.error || 'could not hear you'), 'error');
+
+        if (e.error === 'network') {
+          // Many browsers (Brave in particular, with Shields on) block the
+          // remote speech-recognition service used by webkitSpeechRecognition.
+          // The mic itself is fine — it's the browser refusing the request.
+          showVoiceMicError(
+            "Voice recognition can't reach the speech service right now. " +
+            "Brave often blocks this — try turning Shields off for this site, " +
+            "or open this page in Chrome. You can still type your command below."
+          );
+          return;
+        }
+        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
+          showVoiceMicError("Microphone access was blocked. Please allow microphone permission for this site, then try again — or type your command below.");
+          return;
+        }
+        showVoiceMicError("Didn't catch that (" + (e.error || 'unknown error') + "). Try again, or type your command below.");
       };
 
       _voiceRecognition.onend = () => {
@@ -5790,6 +5808,16 @@ async function executeDeleteAll() {
           processVoiceCommand(_voiceFinalTranscript);
         }
       };
+    }
+
+    function showVoiceMicError(message) {
+      showVoiceState('unsupported');
+      const el = document.getElementById('voice-state-unsupported');
+      if (el) {
+        const msgP = el.querySelector('p');
+        if (msgP) msgP.textContent = message;
+      }
+      speakVoiceAnswer(message);
     }
 
     function openVoiceAgent() {
@@ -5877,6 +5905,14 @@ async function executeDeleteAll() {
       } catch (e) {}
     }
 
+    // Sets the confirm-card text AND reads it back aloud, so the user gets a
+    // spoken reply to every voice (or typed) command, not just query answers.
+    function setVoiceSummary(html) {
+      const el = document.getElementById('voice-result-summary');
+      if (el) el.innerHTML = html;
+      speakVoiceAnswer(html.replace(/<[^>]+>/g, ''));
+    }
+
     function parseVoiceCommand(rawText) {
       const text = rawText.toLowerCase().trim();
 
@@ -5899,6 +5935,36 @@ async function executeDeleteAll() {
         if (best) return best;
         const m = t.match(/(?:from|for|by)\s+([a-z0-9&.\-' ]+?)(?=\s+(?:this month|this week|today|tomorrow|next|on|amount|rupees|rs\.?|₹|if|$)|$)/i);
         return m ? m[1].trim() : null;
+      }
+
+      function extractClientName(t) {
+        // 1) Highest confidence: explicit "name is X" / "client is X" / "named X"
+        let m = t.match(/(?:client'?s?\s+name\s+is|client\s+name\s+is|the\s+client\s+is|client\s+is|name\s+is|named)\s+([a-z][a-z\s.'-]*?)(?:[.,]|\s+(?:on|for|if|this|next|tomorrow|today)\b|$)/i);
+        if (m && m[1].trim()) return titleCaseVoice(m[1].trim());
+
+        // 2) "book <Name> for/on ..." — capture right after the book/schedule verb
+        m = t.match(/\b(?:book(?:ing)?|schedule)\s+(?:a\s+shoot\s+for\s+|a\s+booking\s+for\s+)?([a-z][a-z\s.'-]*?)(?:\s+(?:for|on|if|next|this|tomorrow|today)\b|[.,]|$)/i);
+        if (m && m[1].trim() && !/^(a|the|shoot|booking|date)$/i.test(m[1].trim())) {
+          return titleCaseVoice(m[1].trim());
+        }
+
+        // 3) Fallback: strip every known filler/date/trigger phrase, keep what's left
+        const fillers = [
+          /\bbook(ing)?\b/g, /\bschedule\b/g,
+          /\bif i'?m free\b/g, /\bif free\b/g, /\bif available\b/g,
+          /\bclient'?s?\s+name\s+is\b/g, /\bclient\s+is\b/g, /\bname\s+is\b/g, /\bnamed\b/g,
+          /\ba\s+date\b/g, /\bthe\s+date\b/g,
+          /\bday after tomorrow\b/g, /\btoday\b/g, /\btomorrow\b/g,
+          /\bnext\s+\w+\b/g, /\bthis\s+\w+\b/g,
+          /\b\d{1,2}(st|nd|rd|th)?\b/g,
+          /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/g,
+          /\b(jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b/g,
+          /\bfor\b/g, /\bon\b/g, /\bthe\b/g, /\ba\b/g, /\bis\b/g
+        ];
+        let cleaned = t;
+        fillers.forEach(re => { cleaned = cleaned.replace(re, ' '); });
+        cleaned = cleaned.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
+        return cleaned ? titleCaseVoice(cleaned) : '';
       }
 
       function extractDate(t) {
@@ -5964,15 +6030,7 @@ async function executeDeleteAll() {
 
       if (isBooking) {
         const date = extractDate(text);
-        let namePart = text
-          .replace(/\bbook(ing)?\b/g, '')
-          .replace(/\bif i'?m free\b|\bif free\b|\bif available\b/g, '')
-          .replace(/\bfor\b/g, ' ')
-          .replace(/\b(on|next|this)\b[\s\S]*$/, '')
-          .replace(/\d{1,2}(st|nd|rd|th)?/g, '')
-          .replace(/\s+/g, ' ')
-          .trim();
-        return { intent: 'booking', date, name: namePart ? titleCaseVoice(namePart) : '' };
+        return { intent: 'booking', date, name: extractClientName(text) };
       }
 
       if (isPayment) {
@@ -6007,8 +6065,7 @@ async function executeDeleteAll() {
 
       showVoiceState('result');
       document.getElementById('voice-result-icon').className = 'ti ti-help-circle text-xl text-amber-500 mt-0.5';
-      document.getElementById('voice-result-summary').textContent =
-        "I couldn't tell if that was a booking, a payment, or an expense. Try including a word like \"book\", \"payment received\", or \"expense\".";
+      setVoiceSummary("I couldn't tell if that was a booking, a payment, or an expense. Try including a word like \"book\", \"payment received\", or \"expense\".");
       document.getElementById('voice-result-actions').innerHTML =
         `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
     }
@@ -6018,8 +6075,7 @@ async function executeDeleteAll() {
       document.getElementById('voice-result-icon').className = 'ti ti-calendar-event text-xl text-[#c9a96e] mt-0.5';
 
       if (!parsed.date) {
-        document.getElementById('voice-result-summary').textContent =
-          "I heard a booking request but couldn't figure out the date. Try again mentioning a clear date, like \"next Friday\" or \"15th August\".";
+        setVoiceSummary("I heard a booking request but couldn't figure out the date. Try again mentioning a clear date, like \"next Friday\" or \"15th August\".");
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
         return;
@@ -6031,16 +6087,14 @@ async function executeDeleteAll() {
       if (conflicts.length > 0) {
         const c = conflicts[0];
         _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
-        document.getElementById('voice-result-summary').innerHTML =
-          `You're already booked on <strong>${dateLabel}</strong> — <strong>${c.name}</strong> (${c.event}). I haven't booked this to avoid a double-booking.`;
+        setVoiceSummary(`You're already booked on <strong>${dateLabel}</strong> — <strong>${c.name}</strong> (${c.event}). I haven't booked this to avoid a double-booking.`);
         document.getElementById('voice-result-actions').innerHTML = `
           <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>
           <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-amber-600/20 border border-amber-600/40 text-amber-400 hover:bg-amber-600/30 rounded-lg transition">Book Anyway</button>
         `;
       } else {
         _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
-        document.getElementById('voice-result-summary').innerHTML =
-          `You're free on <strong>${dateLabel}</strong>. I'll open a new shoot pre-filled with this date${parsed.name ? ' and name "' + parsed.name + '"' : ''} — review and hit Save to confirm.`;
+        setVoiceSummary(`You're free on <strong>${dateLabel}</strong>. I'll open a new shoot pre-filled with this date${parsed.name ? ' and name "' + parsed.name + '"' : ''} — review and hit Save to confirm.`);
         document.getElementById('voice-result-actions').innerHTML = `
           <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
           <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
@@ -6065,8 +6119,7 @@ async function executeDeleteAll() {
       document.getElementById('voice-result-icon').className = 'ti ti-cash text-xl text-emerald-400 mt-0.5';
 
       if (!parsed.company) {
-        document.getElementById('voice-result-summary').textContent =
-          "I heard a payment mention but couldn't identify the company. Please repeat and name the company clearly.";
+        setVoiceSummary("I heard a payment mention but couldn't identify the company. Please repeat and name the company clearly.");
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
         return;
@@ -6083,8 +6136,7 @@ async function executeDeleteAll() {
 
       const pending = monthShoots.filter(s => s.payStatus !== 'done').sort((a, b) => a.date.localeCompare(b.date));
       if (pending.length === 0) {
-        document.getElementById('voice-result-summary').textContent =
-          `No pending shoots found for ${parsed.company} this month — looks like everything's already settled.`;
+        setVoiceSummary(`No pending shoots found for ${parsed.company} this month — looks like everything's already settled.`);
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
         return;
@@ -6093,8 +6145,7 @@ async function executeDeleteAll() {
       const target = pending[0];
       _voicePending = { type: 'payment', shootId: target.id, amount: parsed.amount };
       const extraNote = pending.length > 1 ? ` (1 of ${pending.length} pending shoots — adjust the rest manually)` : '';
-      document.getElementById('voice-result-summary').innerHTML =
-        `Mark <strong>${formatINR(parsed.amount)}</strong> received from <strong>${parsed.company}</strong> for the shoot on ${target.date}?${extraNote} I'll open that record pre-filled — review and hit Save to confirm.`;
+      setVoiceSummary(`Mark <strong>${formatINR(parsed.amount)}</strong> received from <strong>${parsed.company}</strong> for the shoot on ${target.date}?${extraNote} I'll open that record pre-filled — review and hit Save to confirm.`);
       document.getElementById('voice-result-actions').innerHTML = `
         <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
         <button onclick="confirmVoicePayment()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
@@ -6137,8 +6188,7 @@ async function executeDeleteAll() {
       }
 
       if (!parsed.company || scoped.length === 0) {
-        document.getElementById('voice-result-summary').textContent =
-          "I heard an expense amount but couldn't match it to a specific shoot this month. Please add it manually, or mention the company/client name clearly.";
+        setVoiceSummary("I heard an expense amount but couldn't match it to a specific shoot this month. Please add it manually, or mention the company/client name clearly.");
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
         return;
@@ -6148,8 +6198,7 @@ async function executeDeleteAll() {
       const target = sorted[0];
       _voicePending = { type: 'expense', shootId: target.id, amount: parsed.amount };
 
-      document.getElementById('voice-result-summary').innerHTML =
-        `Add expense of <strong>${formatINR(parsed.amount)}</strong> to the ${parsed.company} shoot on ${target.date}? I'll open that record pre-filled — review and hit Save to confirm.`;
+      setVoiceSummary(`Add expense of <strong>${formatINR(parsed.amount)}</strong> to the ${parsed.company} shoot on ${target.date}? I'll open that record pre-filled — review and hit Save to confirm.`);
       document.getElementById('voice-result-actions').innerHTML = `
         <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
         <button onclick="confirmVoiceExpense()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
