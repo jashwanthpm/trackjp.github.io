@@ -1075,6 +1075,79 @@
       <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
     </nav>
 
+    <!-- Voice Agent FAB -->
+    <button id="voice-fab" onclick="openVoiceAgent()" title="Voice Assistant" class="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] shadow-[0_0_25px_rgba(201,169,110,0.35)] flex items-center justify-center text-black text-2xl transition-transform hover:scale-105 active:scale-95">
+      <i class="ti ti-microphone"></i>
+    </button>
+
+    <!-- Voice Agent Modal -->
+    <div id="voice-modal-backdrop" class="fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'voice-modal-backdrop')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
+        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
+          <h3 class="text-base font-bold text-white tracking-wide flex items-center gap-2"><i class="ti ti-microphone text-[#c9a96e]"></i> Voice Assistant</h3>
+          <button onclick="closeVoiceAgent()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+        </div>
+
+        <div class="p-6 flex-1 flex flex-col items-center justify-center gap-5 min-h-[260px]">
+
+          <!-- Unsupported browser state -->
+          <div id="voice-state-unsupported" class="hidden flex-col items-center text-center gap-3">
+            <i class="ti ti-microphone-off text-3xl text-neutral-600"></i>
+            <p class="text-xs text-neutral-400 leading-relaxed">Voice recognition isn't supported in this browser. Try Chrome, or type your command below instead.</p>
+          </div>
+
+          <!-- Listening state -->
+          <div id="voice-state-listening" class="hidden flex-col items-center gap-4 text-center">
+            <div class="relative w-20 h-20 flex items-center justify-center">
+              <div class="absolute inset-0 rounded-full bg-[#c9a96e]/20 animate-ping"></div>
+              <div class="relative w-16 h-16 rounded-full bg-[#c9a96e] flex items-center justify-center text-black text-2xl shadow-[0_0_20px_rgba(201,169,110,0.4)]">
+                <i class="ti ti-microphone"></i>
+              </div>
+            </div>
+            <p class="text-xs text-neutral-500 uppercase tracking-widest font-bold">Listening...</p>
+            <p id="voice-live-transcript" class="text-sm text-neutral-300 italic min-h-[20px]">Try: "Book Mehta family for next Friday if I'm free"</p>
+            <button onclick="stopVoiceCapture()" class="text-[11px] uppercase tracking-wider font-bold text-neutral-500 hover:text-white border border-neutral-800 rounded-lg px-4 py-2 transition">Stop</button>
+          </div>
+
+          <!-- Processing state -->
+          <div id="voice-state-processing" class="hidden flex-col items-center gap-3">
+            <div class="spinner-voice w-10 h-10 border-2 border-neutral-800 border-t-[#c9a96e] rounded-full animate-spin"></div>
+            <p class="text-xs text-neutral-500">Understanding...</p>
+          </div>
+
+          <!-- Result / Confirm state -->
+          <div id="voice-state-result" class="hidden flex-col items-stretch gap-4 w-full text-left">
+            <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-4 flex items-start gap-3">
+              <i id="voice-result-icon" class="ti ti-info-circle text-xl text-[#c9a96e] mt-0.5"></i>
+              <div class="flex-1 min-w-0">
+                <p id="voice-result-heard" class="text-[10px] uppercase tracking-widest font-bold text-neutral-600 mb-1">You said</p>
+                <p id="voice-result-transcript" class="text-xs text-neutral-400 italic mb-2"></p>
+                <p id="voice-result-summary" class="text-sm text-white font-medium leading-relaxed"></p>
+              </div>
+            </div>
+            <div id="voice-result-actions" class="flex gap-2"></div>
+          </div>
+
+          <!-- Query answer state (read-only report) -->
+          <div id="voice-state-answer" class="hidden flex-col items-stretch gap-4 w-full text-left">
+            <div class="bg-[#0a0a0a] border border-[#c9a96e]/20 rounded-xl p-5 text-center">
+              <p id="voice-answer-label" class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-2"></p>
+              <p id="voice-answer-value" class="text-2xl font-bold text-[#c9a96e]"></p>
+              <p id="voice-answer-detail" class="text-xs text-neutral-500 mt-2"></p>
+            </div>
+            <button onclick="resetVoiceModal()" class="w-full py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Ask Another</button>
+          </div>
+
+          <!-- Manual fallback text input -->
+          <div class="w-full flex items-center gap-2 border-t border-neutral-900 pt-4 mt-1">
+            <input id="voice-manual-input" type="text" placeholder="Or type a command..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition" onkeydown="if(event.key==='Enter'){submitManualVoiceCommand();}"/>
+            <button onclick="submitManualVoiceCommand()" class="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-[#c9a96e]/50 text-[#c9a96e] transition"><i class="ti ti-send text-sm"></i></button>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
     <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
       <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
         <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
@@ -5662,7 +5735,8 @@ async function executeDeleteAll() {
           'confirm-modal-backdrop', 
           'privacy-prompt-backdrop', 
           'delete-all-modal-backdrop', 
-          'password-pin-modal-backdrop'
+          'password-pin-modal-backdrop',
+          'voice-modal-backdrop'
         ];
         
         activeModals.forEach(id => {
@@ -5674,7 +5748,427 @@ async function executeDeleteAll() {
         });
       }
     });
-    
+
+    /* ============================================================
+       VOICE ASSISTANT
+       Free, on-device speech-to-text (Web Speech API) + simple
+       keyword/regex intent parsing. No external API, no server,
+       no cost. Every action opens the existing Shoot modal
+       pre-filled — nothing is ever saved without you reviewing
+       and tapping Save yourself.
+       ============================================================ */
+
+    let _voiceRecognition = null;
+    let _voiceFinalTranscript = '';
+    let _voicePending = {};
+
+    function initVoiceAgent() {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) return;
+      _voiceRecognition = new SR();
+      _voiceRecognition.lang = 'en-IN';
+      _voiceRecognition.continuous = false;
+      _voiceRecognition.interimResults = true;
+
+      _voiceRecognition.onresult = (e) => {
+        let interim = '', final = '';
+        for (let i = e.resultIndex; i < e.results.length; i++) {
+          const t = e.results[i][0].transcript;
+          if (e.results[i].isFinal) final += t; else interim += t;
+        }
+        const liveEl = document.getElementById('voice-live-transcript');
+        if (liveEl) liveEl.textContent = (final + interim) || 'Listening...';
+        if (final) _voiceFinalTranscript = final.trim();
+      };
+
+      _voiceRecognition.onerror = (e) => {
+        if (e.error === 'no-speech' || e.error === 'aborted') return;
+        showToast('Voice error: ' + (e.error || 'could not hear you'), 'error');
+      };
+
+      _voiceRecognition.onend = () => {
+        if (_voiceFinalTranscript) {
+          processVoiceCommand(_voiceFinalTranscript);
+        }
+      };
+    }
+
+    function openVoiceAgent() {
+      resetVoiceModal();
+      openModal('voice-modal-backdrop');
+    }
+
+    function closeVoiceAgent() {
+      stopVoiceCapture();
+      if (window.speechSynthesis) window.speechSynthesis.cancel();
+      closeModal('voice-modal-backdrop');
+    }
+
+    function resetVoiceModal() {
+      _voiceFinalTranscript = '';
+      _voicePending = {};
+      const manualInput = document.getElementById('voice-manual-input');
+      if (manualInput) manualInput.value = '';
+
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+      if (!SR) { showVoiceState('unsupported'); return; }
+      startVoiceCapture();
+    }
+
+    function showVoiceState(state) {
+      ['unsupported', 'listening', 'processing', 'result', 'answer'].forEach(s => {
+        const el = document.getElementById('voice-state-' + s);
+        if (!el) return;
+        el.classList.toggle('hidden', s !== state);
+        el.classList.toggle('flex', s === state);
+      });
+    }
+
+    function startVoiceCapture() {
+      if (!_voiceRecognition) return;
+      _voiceFinalTranscript = '';
+      const liveEl = document.getElementById('voice-live-transcript');
+      if (liveEl) liveEl.textContent = 'Listening...';
+      showVoiceState('listening');
+      try { _voiceRecognition.start(); } catch (e) { /* already running */ }
+    }
+
+    function stopVoiceCapture() {
+      if (_voiceRecognition) { try { _voiceRecognition.stop(); } catch (e) {} }
+    }
+
+    function submitManualVoiceCommand() {
+      const input = document.getElementById('voice-manual-input');
+      const val = input.value.trim();
+      if (!val) return;
+      stopVoiceCapture();
+      processVoiceCommand(val);
+    }
+
+    function processVoiceCommand(text) {
+      stopVoiceCapture();
+      showVoiceState('processing');
+      setTimeout(() => {
+        const parsed = parseVoiceCommand(text);
+        renderVoiceResult(text, parsed);
+      }, 300);
+    }
+
+    function titleCaseVoice(s) {
+      return s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
+    }
+
+    function isInCurrentMonth(dateStr) {
+      if (!dateStr) return false;
+      const d = new Date(dateStr + 'T00:00:00');
+      const now = new Date();
+      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
+    }
+
+    function formatINR(n) {
+      return '₹' + Number(n || 0).toLocaleString('en-IN');
+    }
+
+    function speakVoiceAnswer(text) {
+      if (!window.speechSynthesis) return;
+      try {
+        window.speechSynthesis.cancel();
+        const u = new SpeechSynthesisUtterance(text);
+        window.speechSynthesis.speak(u);
+      } catch (e) {}
+    }
+
+    function parseVoiceCommand(rawText) {
+      const text = rawText.toLowerCase().trim();
+
+      function extractAmount(t) {
+        const m = t.match(/(?:₹|rs\.?|rupees?)?\s*(\d[\d,]*(?:\.\d+)?)\s*(k\b)?/i);
+        if (!m) return null;
+        let num = parseFloat(m[1].replace(/,/g, ''));
+        if (isNaN(num)) return null;
+        if (m[2]) num *= 1000;
+        return num;
+      }
+
+      function extractEntityName(t, list) {
+        let best = null;
+        (list || []).forEach(c => {
+          if (c && t.includes(c.toLowerCase())) {
+            if (!best || c.length > best.length) best = c;
+          }
+        });
+        if (best) return best;
+        const m = t.match(/(?:from|for|by)\s+([a-z0-9&.\-' ]+?)(?=\s+(?:this month|this week|today|tomorrow|next|on|amount|rupees|rs\.?|₹|if|$)|$)/i);
+        return m ? m[1].trim() : null;
+      }
+
+      function extractDate(t) {
+        const today = new Date();
+        const pad = n => String(n).padStart(2, '0');
+        const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+
+        if (/\btoday\b/.test(t)) return toISO(today);
+        if (/day after tomorrow/.test(t)) { const d = new Date(today); d.setDate(d.getDate() + 2); return toISO(d); }
+        if (/\btomorrow\b/.test(t)) { const d = new Date(today); d.setDate(d.getDate() + 1); return toISO(d); }
+
+        const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+        const wdMatch = t.match(/\b(next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
+        if (wdMatch) {
+          const targetIdx = weekdays.indexOf(wdMatch[2]);
+          const d = new Date(today);
+          let diff = (targetIdx - d.getDay() + 7) % 7;
+          if (diff === 0) diff = 7;
+          if (wdMatch[1]) diff += 7;
+          d.setDate(d.getDate() + diff);
+          return toISO(d);
+        }
+
+        const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+        const monthsShort = monthsFull.map(m => m.slice(0, 3));
+        const monthPattern = 'january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec';
+
+        let day, monIdx;
+        let m = t.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(' + monthPattern + ')\\b', 'i'));
+        if (m) {
+          day = parseInt(m[1]);
+          monIdx = monthsFull.indexOf(m[2].toLowerCase());
+          if (monIdx < 0) monIdx = monthsShort.findIndex(ms => m[2].toLowerCase().startsWith(ms));
+        } else {
+          m = t.match(new RegExp('\\b(' + monthPattern + ')\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b', 'i'));
+          if (m) {
+            day = parseInt(m[2]);
+            monIdx = monthsFull.indexOf(m[1].toLowerCase());
+            if (monIdx < 0) monIdx = monthsShort.findIndex(ms => m[1].toLowerCase().startsWith(ms));
+          }
+        }
+        if (day && monIdx >= 0) {
+          let d = new Date(today.getFullYear(), monIdx, day);
+          if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setFullYear(today.getFullYear() + 1);
+          return toISO(d);
+        }
+
+        m = t.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
+        if (m) {
+          let dd = parseInt(m[1]), mm = parseInt(m[2]) - 1;
+          let yyyy = m[3] ? (m[3].length === 2 ? 2000 + parseInt(m[3]) : parseInt(m[3])) : today.getFullYear();
+          let d = new Date(yyyy, mm, dd);
+          if (!m[3] && d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setFullYear(yyyy + 1);
+          return toISO(d);
+        }
+
+        return null;
+      }
+
+      const isBooking = /\bbook(ing)?\b|\bschedule\b/.test(text);
+      const isPayment = !isBooking && /\bpayment(s)?\b|\breceived\b|\bpaid\b/.test(text);
+      const isExpense = !isBooking && /\bexpense(s)?\b|\bspent\b/.test(text);
+
+      if (isBooking) {
+        const date = extractDate(text);
+        let namePart = text
+          .replace(/\bbook(ing)?\b/g, '')
+          .replace(/\bif i'?m free\b|\bif free\b|\bif available\b/g, '')
+          .replace(/\bfor\b/g, ' ')
+          .replace(/\b(on|next|this)\b[\s\S]*$/, '')
+          .replace(/\d{1,2}(st|nd|rd|th)?/g, '')
+          .replace(/\s+/g, ' ')
+          .trim();
+        return { intent: 'booking', date, name: namePart ? titleCaseVoice(namePart) : '' };
+      }
+
+      if (isPayment) {
+        const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
+        const amount = /\d/.test(text) ? extractAmount(text) : null;
+        return { intent: 'payment', company, amount };
+      }
+
+      if (isExpense) {
+        const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
+        const amount = /\d/.test(text) ? extractAmount(text) : null;
+        return { intent: 'expense', company, amount };
+      }
+
+      return { intent: 'unknown' };
+    }
+
+    function showVoiceAnswer(label, value, detail) {
+      showVoiceState('answer');
+      document.getElementById('voice-answer-label').textContent = label;
+      document.getElementById('voice-answer-value').textContent = value;
+      document.getElementById('voice-answer-detail').textContent = detail || '';
+    }
+
+    function renderVoiceResult(rawText, parsed) {
+      const transcriptEl = document.getElementById('voice-result-transcript');
+      if (transcriptEl) transcriptEl.textContent = '"' + rawText + '"';
+
+      if (parsed.intent === 'booking') return handleVoiceBookingIntent(parsed);
+      if (parsed.intent === 'payment') return handleVoicePaymentIntent(parsed);
+      if (parsed.intent === 'expense') return handleVoiceExpenseIntent(parsed);
+
+      showVoiceState('result');
+      document.getElementById('voice-result-icon').className = 'ti ti-help-circle text-xl text-amber-500 mt-0.5';
+      document.getElementById('voice-result-summary').textContent =
+        "I couldn't tell if that was a booking, a payment, or an expense. Try including a word like \"book\", \"payment received\", or \"expense\".";
+      document.getElementById('voice-result-actions').innerHTML =
+        `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
+    }
+
+    function handleVoiceBookingIntent(parsed) {
+      showVoiceState('result');
+      document.getElementById('voice-result-icon').className = 'ti ti-calendar-event text-xl text-[#c9a96e] mt-0.5';
+
+      if (!parsed.date) {
+        document.getElementById('voice-result-summary').textContent =
+          "I heard a booking request but couldn't figure out the date. Try again mentioning a clear date, like \"next Friday\" or \"15th August\".";
+        document.getElementById('voice-result-actions').innerHTML =
+          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
+        return;
+      }
+
+      const conflicts = (typeof _shoots !== 'undefined' ? _shoots : []).filter(s => s.date === parsed.date);
+      const dateLabel = new Date(parsed.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+
+      if (conflicts.length > 0) {
+        const c = conflicts[0];
+        _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
+        document.getElementById('voice-result-summary').innerHTML =
+          `You're already booked on <strong>${dateLabel}</strong> — <strong>${c.name}</strong> (${c.event}). I haven't booked this to avoid a double-booking.`;
+        document.getElementById('voice-result-actions').innerHTML = `
+          <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>
+          <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-amber-600/20 border border-amber-600/40 text-amber-400 hover:bg-amber-600/30 rounded-lg transition">Book Anyway</button>
+        `;
+      } else {
+        _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
+        document.getElementById('voice-result-summary').innerHTML =
+          `You're free on <strong>${dateLabel}</strong>. I'll open a new shoot pre-filled with this date${parsed.name ? ' and name "' + parsed.name + '"' : ''} — review and hit Save to confirm.`;
+        document.getElementById('voice-result-actions').innerHTML = `
+          <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
+          <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
+        `;
+      }
+    }
+
+    function confirmVoiceBooking() {
+      const { date, name } = _voicePending;
+      closeVoiceAgent();
+      openAddShootModal(date);
+      if (name) {
+        setTimeout(() => {
+          const nameField = document.getElementById('f-shoot-name');
+          if (nameField) nameField.value = name;
+        }, 60);
+      }
+    }
+
+    function handleVoicePaymentIntent(parsed) {
+      showVoiceState('result');
+      document.getElementById('voice-result-icon').className = 'ti ti-cash text-xl text-emerald-400 mt-0.5';
+
+      if (!parsed.company) {
+        document.getElementById('voice-result-summary').textContent =
+          "I heard a payment mention but couldn't identify the company. Please repeat and name the company clearly.";
+        document.getElementById('voice-result-actions').innerHTML =
+          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
+        return;
+      }
+
+      const monthShoots = (typeof _shoots !== 'undefined' ? _shoots : []).filter(s => s.company === parsed.company && isInCurrentMonth(s.date));
+
+      if (!parsed.amount) {
+        const received = monthShoots.reduce((a, s) => a + (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0), 0);
+        showVoiceAnswer('Payments Received This Month', formatINR(received), `From ${parsed.company} · ${monthShoots.length} shoot(s) this month`);
+        speakVoiceAnswer(`You've received ${received} rupees from ${parsed.company} this month.`);
+        return;
+      }
+
+      const pending = monthShoots.filter(s => s.payStatus !== 'done').sort((a, b) => a.date.localeCompare(b.date));
+      if (pending.length === 0) {
+        document.getElementById('voice-result-summary').textContent =
+          `No pending shoots found for ${parsed.company} this month — looks like everything's already settled.`;
+        document.getElementById('voice-result-actions').innerHTML =
+          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
+        return;
+      }
+
+      const target = pending[0];
+      _voicePending = { type: 'payment', shootId: target.id, amount: parsed.amount };
+      const extraNote = pending.length > 1 ? ` (1 of ${pending.length} pending shoots — adjust the rest manually)` : '';
+      document.getElementById('voice-result-summary').innerHTML =
+        `Mark <strong>${formatINR(parsed.amount)}</strong> received from <strong>${parsed.company}</strong> for the shoot on ${target.date}?${extraNote} I'll open that record pre-filled — review and hit Save to confirm.`;
+      document.getElementById('voice-result-actions').innerHTML = `
+        <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
+        <button onclick="confirmVoicePayment()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
+      `;
+    }
+
+    function confirmVoicePayment() {
+      const { shootId, amount } = _voicePending;
+      closeVoiceAgent();
+      openEditShootModal(shootId);
+      setTimeout(() => {
+        const s = (typeof _shoots !== 'undefined' ? _shoots : []).find(x => x.id === shootId);
+        const total = Number(s?.amount || 0);
+        const payStatusEl = document.getElementById('f-shoot-pay-status');
+        if (!payStatusEl) return;
+        if (amount >= total) {
+          payStatusEl.value = 'done';
+        } else {
+          payStatusEl.value = 'part';
+          document.getElementById('f-shoot-part-paid').value = amount;
+        }
+        handlePayStatusChange();
+      }, 80);
+    }
+
+    function handleVoiceExpenseIntent(parsed) {
+      showVoiceState('result');
+      document.getElementById('voice-result-icon').className = 'ti ti-receipt-2 text-xl text-amber-500 mt-0.5';
+
+      const allShoots = (typeof _shoots !== 'undefined' ? _shoots : []);
+      const scoped = parsed.company
+        ? allShoots.filter(s => s.company === parsed.company && isInCurrentMonth(s.date))
+        : allShoots.filter(s => isInCurrentMonth(s.date));
+
+      if (!parsed.amount) {
+        const total = scoped.reduce((a, s) => a + Number(s.expense || 0), 0);
+        showVoiceAnswer('Expenses This Month', formatINR(total), parsed.company ? `For ${parsed.company} · ${scoped.length} shoot(s)` : `Across ${scoped.length} shoot(s)`);
+        speakVoiceAnswer(`Your expenses this month${parsed.company ? ' for ' + parsed.company : ''} are ${total} rupees.`);
+        return;
+      }
+
+      if (!parsed.company || scoped.length === 0) {
+        document.getElementById('voice-result-summary').textContent =
+          "I heard an expense amount but couldn't match it to a specific shoot this month. Please add it manually, or mention the company/client name clearly.";
+        document.getElementById('voice-result-actions').innerHTML =
+          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
+        return;
+      }
+
+      const sorted = [...scoped].sort((a, b) => a.date.localeCompare(b.date));
+      const target = sorted[0];
+      _voicePending = { type: 'expense', shootId: target.id, amount: parsed.amount };
+
+      document.getElementById('voice-result-summary').innerHTML =
+        `Add expense of <strong>${formatINR(parsed.amount)}</strong> to the ${parsed.company} shoot on ${target.date}? I'll open that record pre-filled — review and hit Save to confirm.`;
+      document.getElementById('voice-result-actions').innerHTML = `
+        <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
+        <button onclick="confirmVoiceExpense()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
+      `;
+    }
+
+    function confirmVoiceExpense() {
+      const { shootId, amount } = _voicePending;
+      closeVoiceAgent();
+      openEditShootModal(shootId);
+      setTimeout(() => {
+        const expEl = document.getElementById('f-shoot-expense');
+        if (expEl) expEl.value = amount;
+      }, 80);
+    }
+
+    initVoiceAgent();
+
   </script>
     <script>
   if ('serviceWorker' in navigator) {
