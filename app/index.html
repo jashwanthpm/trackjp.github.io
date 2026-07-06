@@ -1096,7 +1096,7 @@
             <i class="ti ti-scan text-4xl text-neutral-600"></i>
             <p class="text-xs text-neutral-400 leading-relaxed max-w-xs">Upload a screenshot of the payment (UPI, bank transfer, etc). It's read on your device only — the image itself is never stored or uploaded.</p>
             <label class="cursor-pointer w-full">
-              <input id="proof-file-input" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleProofFileSelect(event)"/>
+              <input id="proof-file-input" type="file" accept="image/*" class="hidden" onchange="handleProofFileSelect(event)"/>
               <span class="block w-full py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition text-center">Choose Screenshot</span>
             </label>
           </div>
@@ -5803,10 +5803,23 @@ async function executeDeleteAll() {
     }
 
     function extractProofAmount(t) {
-      let m = t.match(/(?:₹|rs\.?|inr)\s*([\d,]+(?:\.\d{1,2})?)/i);
+      // 1) Explicit currency symbol/word wins
+      let m = t.match(/₹\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/);
       if (m) return parseFloat(m[1].replace(/,/g, ''));
-      const nums = [...t.matchAll(/\b(\d[\d,]{2,})(?:\.\d{1,2})?\b/g)].map(x => parseFloat(x[1].replace(/,/g, '')));
-      return nums.length ? Math.max(...nums) : null;
+      m = t.match(/(?:rs\.?|inr)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/i);
+      if (m) return parseFloat(m[1].replace(/,/g, ''));
+
+      // 2) Comma-grouped numbers (2,300) look like currency, not IDs/phone numbers
+      const grouped = [...t.matchAll(/\b\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?\b/g)].map(x => parseFloat(x[0].replace(/,/g, '')));
+      if (grouped.length) return Math.max(...grouped);
+
+      // 3) Fallback: bare numbers up to 7 digits only — excludes 10-12 digit
+      //    phone numbers and long transaction/UTR IDs entirely.
+      const candidates = [];
+      const re = /(?<![\d+])(\d{1,7})(?:\.\d{1,2})?(?!\d)/g;
+      let mm;
+      while ((mm = re.exec(t))) candidates.push(parseFloat(mm[1]));
+      return candidates.length ? Math.max(...candidates) : null;
     }
 
     function extractProofCompany(t) {
