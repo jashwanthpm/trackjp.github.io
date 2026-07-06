@@ -29,6 +29,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
     body {
@@ -1075,74 +1076,62 @@
       <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
     </nav>
 
-    <!-- Voice Agent FAB -->
-    <button id="voice-fab" onclick="openVoiceAgent()" title="Voice Assistant" class="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] shadow-[0_0_25px_rgba(201,169,110,0.35)] flex items-center justify-center text-black text-2xl transition-transform hover:scale-105 active:scale-95">
-      <i class="ti ti-microphone"></i>
+    <!-- Payment Proof FAB -->
+    <button id="proof-fab" onclick="openProofModal()" title="Upload Payment Proof" class="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] shadow-[0_0_25px_rgba(201,169,110,0.35)] flex items-center justify-center text-black text-2xl transition-transform hover:scale-105 active:scale-95">
+      <i class="ti ti-receipt"></i>
     </button>
 
-    <!-- Voice Agent Modal -->
-    <div id="voice-modal-backdrop" class="fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'voice-modal-backdrop')">
+    <!-- Payment Proof Modal -->
+    <div id="proof-modal-backdrop" class="fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'proof-modal-backdrop')">
       <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
         <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
-          <h3 class="text-base font-bold text-white tracking-wide flex items-center gap-2"><i class="ti ti-microphone text-[#c9a96e]"></i> Voice Assistant</h3>
-          <button onclick="closeVoiceAgent()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+          <h3 class="text-base font-bold text-white tracking-wide flex items-center gap-2"><i class="ti ti-receipt text-[#c9a96e]"></i> Payment Proof</h3>
+          <button onclick="closeProofModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
         </div>
 
-        <div class="p-6 flex-1 flex flex-col items-center justify-center gap-5 min-h-[260px]">
+        <div class="p-6 flex-1 flex flex-col items-center justify-center gap-4 min-h-[260px]">
 
-          <!-- Unsupported / error browser state -->
-          <div id="voice-state-unsupported" class="hidden flex-col items-center text-center gap-3">
-            <i class="ti ti-microphone-off text-3xl text-neutral-600"></i>
-            <p class="text-xs text-neutral-400 leading-relaxed">Voice recognition isn't supported in this browser. Try Chrome, or type your command below instead.</p>
-            <button onclick="startVoiceCapture()" class="text-[11px] uppercase tracking-wider font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-lg px-4 py-2 hover:bg-[#c9a96e]/10 transition">Try Voice Again</button>
+          <!-- Idle: pick a screenshot -->
+          <div id="proof-state-idle" class="flex flex-col items-center gap-4 text-center w-full">
+            <i class="ti ti-scan text-4xl text-neutral-600"></i>
+            <p class="text-xs text-neutral-400 leading-relaxed max-w-xs">Upload a screenshot of the payment (UPI, bank transfer, etc). It's read on your device only — the image itself is never stored or uploaded.</p>
+            <label class="cursor-pointer w-full">
+              <input id="proof-file-input" type="file" accept="image/*" capture="environment" class="hidden" onchange="handleProofFileSelect(event)"/>
+              <span class="block w-full py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition text-center">Choose Screenshot</span>
+            </label>
           </div>
 
-          <!-- Listening state -->
-          <div id="voice-state-listening" class="hidden flex-col items-center gap-4 text-center">
-            <div class="relative w-20 h-20 flex items-center justify-center">
-              <div class="absolute inset-0 rounded-full bg-[#c9a96e]/20 animate-ping"></div>
-              <div class="relative w-16 h-16 rounded-full bg-[#c9a96e] flex items-center justify-center text-black text-2xl shadow-[0_0_20px_rgba(201,169,110,0.4)]">
-                <i class="ti ti-microphone"></i>
-              </div>
-            </div>
-            <p class="text-xs text-neutral-500 uppercase tracking-widest font-bold">Listening...</p>
-            <p id="voice-live-transcript" class="text-sm text-neutral-300 italic min-h-[20px]">Try: "Book Mehta family for next Friday if I'm free"</p>
-            <button onclick="stopVoiceCapture()" class="text-[11px] uppercase tracking-wider font-bold text-neutral-500 hover:text-white border border-neutral-800 rounded-lg px-4 py-2 transition">Stop</button>
-          </div>
-
-          <!-- Processing state -->
-          <div id="voice-state-processing" class="hidden flex-col items-center gap-3">
-            <div class="spinner-voice w-10 h-10 border-2 border-neutral-800 border-t-[#c9a96e] rounded-full animate-spin"></div>
-            <p class="text-xs text-neutral-500">Understanding...</p>
+          <!-- Reading (OCR) state -->
+          <div id="proof-state-reading" class="hidden flex-col items-center gap-3">
+            <img id="proof-thumb" class="max-h-32 rounded-lg border border-neutral-800" />
+            <div class="w-8 h-8 border-2 border-neutral-800 border-t-[#c9a96e] rounded-full animate-spin"></div>
+            <p class="text-xs text-neutral-500">Reading receipt on your device...</p>
           </div>
 
           <!-- Result / Confirm state -->
-          <div id="voice-state-result" class="hidden flex-col items-stretch gap-4 w-full text-left">
-            <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-4 flex items-start gap-3">
-              <i id="voice-result-icon" class="ti ti-info-circle text-xl text-[#c9a96e] mt-0.5"></i>
-              <div class="flex-1 min-w-0">
-                <p id="voice-result-heard" class="text-[10px] uppercase tracking-widest font-bold text-neutral-600 mb-1">You said</p>
-                <p id="voice-result-transcript" class="text-xs text-neutral-400 italic mb-2"></p>
-                <p id="voice-result-summary" class="text-sm text-white font-medium leading-relaxed"></p>
+          <div id="proof-state-result" class="hidden flex-col items-stretch gap-4 w-full text-left">
+            <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-4">
+              <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-600 mb-2">Detected</p>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] text-neutral-500">Amount (₹)</label>
+                  <input id="proof-amount" type="number" oninput="updateProofMatch()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]"/>
+                </div>
+                <div>
+                  <label class="text-[10px] text-neutral-500">Company</label>
+                  <select id="proof-company" onchange="updateProofMatch()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]"></select>
+                </div>
               </div>
+              <p id="proof-match-note" class="text-xs text-neutral-400 mt-3 leading-relaxed"></p>
             </div>
-            <div id="voice-result-actions" class="flex gap-2"></div>
+            <div id="proof-result-actions" class="flex gap-2"></div>
           </div>
 
-          <!-- Query answer state (read-only report) -->
-          <div id="voice-state-answer" class="hidden flex-col items-stretch gap-4 w-full text-left">
-            <div class="bg-[#0a0a0a] border border-[#c9a96e]/20 rounded-xl p-5 text-center">
-              <p id="voice-answer-label" class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-2"></p>
-              <p id="voice-answer-value" class="text-2xl font-bold text-[#c9a96e]"></p>
-              <p id="voice-answer-detail" class="text-xs text-neutral-500 mt-2"></p>
-            </div>
-            <button onclick="resetVoiceModal()" class="w-full py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Ask Another</button>
-          </div>
-
-          <!-- Manual fallback text input -->
-          <div class="w-full flex items-center gap-2 border-t border-neutral-900 pt-4 mt-1">
-            <input id="voice-manual-input" type="text" placeholder="Or type a command..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition" onkeydown="if(event.key==='Enter'){submitManualVoiceCommand();}"/>
-            <button onclick="submitManualVoiceCommand()" class="p-2.5 rounded-lg bg-neutral-900 border border-neutral-800 hover:border-[#c9a96e]/50 text-[#c9a96e] transition"><i class="ti ti-send text-sm"></i></button>
+          <!-- No text detected -->
+          <div id="proof-state-empty" class="hidden flex-col items-center text-center gap-3">
+            <i class="ti ti-alert-triangle text-3xl text-amber-500"></i>
+            <p class="text-xs text-neutral-400 leading-relaxed">Couldn't read any text from that image clearly. Try a clearer screenshot, or enter the payment manually.</p>
+            <button onclick="resetProofModal()" class="text-[11px] uppercase tracking-wider font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-lg px-4 py-2 hover:bg-[#c9a96e]/10 transition">Try Another Image</button>
           </div>
 
         </div>
@@ -5736,8 +5725,7 @@ async function executeDeleteAll() {
           'confirm-modal-backdrop', 
           'privacy-prompt-backdrop', 
           'delete-all-modal-backdrop', 
-          'password-pin-modal-backdrop',
-          'voice-modal-backdrop'
+          'password-pin-modal-backdrop'
         ];
         
         activeModals.forEach(id => {
@@ -5751,596 +5739,156 @@ async function executeDeleteAll() {
     });
 
     /* ============================================================
-       VOICE ASSISTANT
-       Free, on-device speech-to-text (Web Speech API) + simple
-       keyword/regex intent parsing. No external API, no server,
-       no cost. Every action opens the existing Shoot modal
-       pre-filled — nothing is ever saved without you reviewing
-       and tapping Save yourself.
+       PAYMENT PROOF — on-device OCR (Tesseract.js), free, no server.
+       The uploaded screenshot is read entirely in this browser tab
+       and is NEVER uploaded to Supabase or any server — only the
+       extracted amount/company text is used, and it's discarded
+       (object URL revoked) as soon as the modal closes.
        ============================================================ */
 
-    let _voiceRecognition = null;
-    let _voiceFinalTranscript = '';
-    let _voicePending = {};
+    let _proofObjectUrl = null;
+    let _proofMatch = null;
 
-    function initVoiceAgent() {
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) return;
-      _voiceRecognition = new SR();
-      _voiceRecognition.lang = 'en-IN';
-      _voiceRecognition.continuous = false;
-      _voiceRecognition.interimResults = true;
-
-      _voiceRecognition.onresult = (e) => {
-        let interim = '', final = '';
-        for (let i = e.resultIndex; i < e.results.length; i++) {
-          const t = e.results[i][0].transcript;
-          if (e.results[i].isFinal) final += t; else interim += t;
-        }
-        const liveEl = document.getElementById('voice-live-transcript');
-        if (liveEl) liveEl.textContent = (final + interim) || 'Listening...';
-        if (final) _voiceFinalTranscript = final.trim();
-      };
-
-      _voiceRecognition.onerror = (e) => {
-        if (e.error === 'no-speech' || e.error === 'aborted') return;
-
-        if (e.error === 'network') {
-          // Brave (and some other Chromium browsers) permanently disable the
-          // remote speech-recognition backend that webkitSpeechRecognition
-          // depends on — this is a deliberate policy, not a Shields setting,
-          // so toggling Shields will not fix it.
-          showVoiceMicError(
-            "Voice recognition isn't available in this browser — Brave (and some others) disable the speech service entirely. " +
-            "Open this page in Google Chrome or Microsoft Edge to use your voice, or just type your command below.",
-            false
-          );
-          return;
-        }
-        if (e.error === 'not-allowed' || e.error === 'service-not-allowed') {
-          showVoiceMicError("Microphone access was blocked. Please allow microphone permission for this site, then try again — or type your command below.", true);
-          return;
-        }
-        showVoiceMicError("Didn't catch that (" + (e.error || 'unknown error') + "). Try again, or type your command below.", true);
-      };
-
-      _voiceRecognition.onend = () => {
-        if (_voiceFinalTranscript) {
-          processVoiceCommand(_voiceFinalTranscript);
-        }
-      };
+    function openProofModal() {
+      resetProofModal();
+      openModal('proof-modal-backdrop');
     }
 
-    function showVoiceMicError(message, canRetry) {
-      showVoiceState('unsupported');
-      const el = document.getElementById('voice-state-unsupported');
-      if (el) {
-        const msgP = el.querySelector('p');
-        if (msgP) msgP.textContent = message;
-        const retryBtn = el.querySelector('button');
-        if (retryBtn) retryBtn.classList.toggle('hidden', canRetry === false);
-      }
-      speakVoiceAnswer(message);
+    function closeProofModal() {
+      if (_proofObjectUrl) { URL.revokeObjectURL(_proofObjectUrl); _proofObjectUrl = null; }
+      closeModal('proof-modal-backdrop');
     }
 
-    function openVoiceAgent() {
-      resetVoiceModal();
-      openModal('voice-modal-backdrop');
+    function resetProofModal() {
+      if (_proofObjectUrl) { URL.revokeObjectURL(_proofObjectUrl); _proofObjectUrl = null; }
+      _proofMatch = null;
+      const input = document.getElementById('proof-file-input');
+      if (input) input.value = '';
+      showProofState('idle');
     }
 
-    function closeVoiceAgent() {
-      stopVoiceCapture();
-      if (window.speechSynthesis) window.speechSynthesis.cancel();
-      closeModal('voice-modal-backdrop');
-    }
-
-    function resetVoiceModal() {
-      _voiceFinalTranscript = '';
-      _voicePending = {};
-      const manualInput = document.getElementById('voice-manual-input');
-      if (manualInput) manualInput.value = '';
-
-      const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
-      if (!SR) { showVoiceState('unsupported'); return; }
-      startVoiceCapture();
-    }
-
-    function showVoiceState(state) {
-      ['unsupported', 'listening', 'processing', 'result', 'answer'].forEach(s => {
-        const el = document.getElementById('voice-state-' + s);
+    function showProofState(state) {
+      ['idle', 'reading', 'result', 'empty'].forEach(s => {
+        const el = document.getElementById('proof-state-' + s);
         if (!el) return;
         el.classList.toggle('hidden', s !== state);
         el.classList.toggle('flex', s === state);
       });
     }
 
-    function startVoiceCapture() {
-      if (!_voiceRecognition) return;
-      _voiceFinalTranscript = '';
-      const liveEl = document.getElementById('voice-live-transcript');
-      if (liveEl) liveEl.textContent = 'Listening...';
-      showVoiceState('listening');
-      try { _voiceRecognition.start(); } catch (e) { /* already running */ }
-    }
+    async function handleProofFileSelect(event) {
+      const file = event.target.files[0];
+      if (!file) return;
 
-    function stopVoiceCapture() {
-      if (_voiceRecognition) { try { _voiceRecognition.stop(); } catch (e) {} }
-    }
+      if (_proofObjectUrl) URL.revokeObjectURL(_proofObjectUrl);
+      _proofObjectUrl = URL.createObjectURL(file);
+      const thumb = document.getElementById('proof-thumb');
+      if (thumb) thumb.src = _proofObjectUrl;
 
-    function submitManualVoiceCommand() {
-      const input = document.getElementById('voice-manual-input');
-      const val = input.value.trim();
-      if (!val) return;
-      stopVoiceCapture();
-      processVoiceCommand(val);
-    }
+      showProofState('reading');
 
-    function processVoiceCommand(text) {
-      stopVoiceCapture();
-      showVoiceState('processing');
-      setTimeout(() => {
-        const parsed = parseVoiceCommand(text);
-        renderVoiceResult(text, parsed);
-      }, 300);
-    }
-
-    function titleCaseVoice(s) {
-      return s.replace(/\w\S*/g, w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase());
-    }
-
-    function isInCurrentMonth(dateStr) {
-      if (!dateStr) return false;
-      const d = new Date(dateStr + 'T00:00:00');
-      const now = new Date();
-      return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
-    }
-
-    function isInMonth(dateStr, year, monthIdx) {
-      if (!dateStr) return false;
-      const d = new Date(dateStr + 'T00:00:00');
-      return d.getFullYear() === year && d.getMonth() === monthIdx;
-    }
-
-    function resolveMonthRange(t) {
-      const today = new Date();
-      let year = today.getFullYear();
-      let monthIdx = today.getMonth();
-      let label = 'This Month';
-
-      if (/\blast month\b|\bprevious month\b/.test(t)) {
-        monthIdx -= 1; label = 'Last Month';
-      } else if (/\bnext month\b/.test(t)) {
-        monthIdx += 1; label = 'Next Month';
-      } else {
-        const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-        const monthsShort = monthsFull.map(m => m.slice(0, 3));
-        const monthPattern = 'january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec';
-        const m = t.match(new RegExp('\\b(' + monthPattern + ')\\b(?:\\s+(\\d{4}))?', 'i'));
-        if (m) {
-          let idx = monthsFull.indexOf(m[1].toLowerCase());
-          if (idx < 0) idx = monthsShort.findIndex(ms => m[1].toLowerCase().startsWith(ms));
-          monthIdx = idx;
-          if (m[2]) year = parseInt(m[2]);
-          else if (idx > today.getMonth()) year = today.getFullYear() - 1;
-          label = monthsFull[idx].charAt(0).toUpperCase() + monthsFull[idx].slice(1) + ' ' + year;
-        }
-      }
-      if (monthIdx < 0) { monthIdx = 11; year -= 1; }
-      if (monthIdx > 11) { monthIdx = 0; year += 1; }
-      return { year, monthIdx, label };
-    }
-
-    // Resolves phrases like "this month", "last month", "next month", or a
-    // named month ("June", "in August") into a concrete {year, month, label}.
-    // Defaults to the current month when nothing is said.
-    function resolveMonthRange(t) {
-      const today = new Date();
-      const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-      const monthsShort = monthsFull.map(m => m.slice(0, 3));
-      const monthPattern = monthsFull.join('|') + '|' + monthsShort.join('|');
-
-      let year = today.getFullYear(), month = today.getMonth(), label = 'this month';
-
-      if (/\blast month\b|\bprevious month\b/.test(t)) {
-        month = today.getMonth() - 1;
-        if (month < 0) { month = 11; year -= 1; }
-        label = 'last month';
-      } else if (/\bnext month\b/.test(t)) {
-        month = today.getMonth() + 1;
-        if (month > 11) { month = 0; year += 1; }
-        label = 'next month';
-      } else {
-        const mM = t.match(new RegExp('\\b(' + monthPattern + ')\\b', 'i'));
-        if (mM) {
-          let idx = monthsFull.indexOf(mM[1].toLowerCase());
-          if (idx < 0) idx = monthsShort.findIndex(ms => mM[1].toLowerCase().startsWith(ms));
-          if (idx >= 0) {
-            month = idx;
-            label = monthsFull[idx].charAt(0).toUpperCase() + monthsFull[idx].slice(1);
-            // If a bare month name is behind us in the year, assume they mean the most recent occurrence (this year).
-          }
-        }
-      }
-      return { year, month, label };
-    }
-
-    function isInMonthRange(dateStr, range) {
-      if (!dateStr || !range) return false;
-      const d = new Date(dateStr + 'T00:00:00');
-      return d.getFullYear() === range.year && d.getMonth() === range.month;
-    }
-
-    function formatINR(n) {
-      return '₹' + Number(n || 0).toLocaleString('en-IN');
-    }
-
-    function speakVoiceAnswer(text) {
-      if (!window.speechSynthesis) return;
       try {
-        window.speechSynthesis.cancel();
-        const u = new SpeechSynthesisUtterance(text);
-        window.speechSynthesis.speak(u);
-      } catch (e) {}
+        if (typeof Tesseract === 'undefined') {
+          showToast('OCR library failed to load — check your connection.', 'error');
+          showProofState('idle');
+          return;
+        }
+        const { data: { text } } = await Tesseract.recognize(file, 'eng');
+        if (!text || !text.trim()) { showProofState('empty'); return; }
+        renderProofResult(text);
+      } catch (err) {
+        showToast('Could not read that image: ' + (err.message || err), 'error');
+        showProofState('idle');
+      }
     }
 
-    // Sets the confirm-card text AND reads it back aloud, so the user gets a
-    // spoken reply to every voice (or typed) command, not just query answers.
-    function setVoiceSummary(html) {
-      const el = document.getElementById('voice-result-summary');
-      if (el) el.innerHTML = html;
-      speakVoiceAnswer(html.replace(/<[^>]+>/g, ''));
+    function extractProofAmount(t) {
+      let m = t.match(/(?:₹|rs\.?|inr)\s*([\d,]+(?:\.\d{1,2})?)/i);
+      if (m) return parseFloat(m[1].replace(/,/g, ''));
+      const nums = [...t.matchAll(/\b(\d[\d,]{2,})(?:\.\d{1,2})?\b/g)].map(x => parseFloat(x[1].replace(/,/g, '')));
+      return nums.length ? Math.max(...nums) : null;
     }
 
-    function parseVoiceCommand(rawText) {
-      const text = rawText.toLowerCase().trim();
-
-      function extractAmount(t) {
-        const m = t.match(/(?:₹|rs\.?|rupees?)?\s*(\d[\d,]*(?:\.\d+)?)\s*(k\b)?/i);
-        if (!m) return null;
-        let num = parseFloat(m[1].replace(/,/g, ''));
-        if (isNaN(num)) return null;
-        if (m[2]) num *= 1000;
-        return num;
-      }
-
-      function extractEntityName(t, list) {
-        let best = null;
-        (list || []).forEach(c => {
-          if (c && t.includes(c.toLowerCase())) {
-            if (!best || c.length > best.length) best = c;
-          }
-        });
-        if (best) return best;
-        const m = t.match(/(?:from|for|by)\s+([a-z0-9&.\-' ]+?)(?=\s+(?:this month|this week|today|tomorrow|next|on|amount|rupees|rs\.?|₹|if|$)|$)/i);
-        return m ? m[1].trim() : null;
-      }
-
-      function extractClientName(t) {
-        // 1) Highest confidence: explicit "name is X" / "client is X" / "named X"
-        let m = t.match(/(?:client'?s?\s+name\s+is|client\s+name\s+is|the\s+client\s+is|client\s+is|name\s+is|named)\s+([a-z][a-z\s.'-]*?)(?:[.,]|\s+(?:on|for|if|this|next|tomorrow|today)\b|$)/i);
-        if (m && m[1].trim()) return titleCaseVoice(m[1].trim());
-
-        // 2) "book <Name> for/on ..." — capture right after the book/schedule verb
-        m = t.match(/\b(?:book(?:ing)?|schedule)\s+(?:a\s+shoot\s+for\s+|a\s+booking\s+for\s+)?([a-z][a-z\s.'-]*?)(?:\s+(?:for|on|if|next|this|tomorrow|today)\b|[.,]|$)/i);
-        if (m && m[1].trim() && !/^(a|the|shoot|booking|date)$/i.test(m[1].trim())) {
-          return titleCaseVoice(m[1].trim());
+    function extractProofCompany(t) {
+      const low = t.toLowerCase();
+      let best = null;
+      (typeof _companies !== 'undefined' ? _companies : []).forEach(c => {
+        if (c && low.includes(c.toLowerCase())) {
+          if (!best || c.length > best.length) best = c;
         }
-
-        // 3) Fallback: strip every known filler/date/trigger phrase, keep what's left
-        const fillers = [
-          /\bbook(ing)?\b/g, /\bschedule\b/g,
-          /\bif i'?m free\b/g, /\bif free\b/g, /\bif available\b/g,
-          /\bclient'?s?\s+name\s+is\b/g, /\bclient\s+is\b/g, /\bname\s+is\b/g, /\bnamed\b/g,
-          /\ba\s+date\b/g, /\bthe\s+date\b/g,
-          /\bday after tomorrow\b/g, /\btoday\b/g, /\btomorrow\b/g,
-          /\bnext\s+\w+\b/g, /\bthis\s+\w+\b/g,
-          /\b\d{1,2}(st|nd|rd|th)?\b/g,
-          /\b(january|february|march|april|may|june|july|august|september|october|november|december)\b/g,
-          /\b(jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec)\b/g,
-          /\bfor\b/g, /\bon\b/g, /\bthe\b/g, /\ba\b/g, /\bis\b/g
-        ];
-        let cleaned = t;
-        fillers.forEach(re => { cleaned = cleaned.replace(re, ' '); });
-        cleaned = cleaned.replace(/[.,]/g, ' ').replace(/\s+/g, ' ').trim();
-        return cleaned ? titleCaseVoice(cleaned) : '';
-      }
-
-      function extractDate(t) {
-        const today = new Date();
-        const pad = n => String(n).padStart(2, '0');
-        const toISO = d => `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-
-        if (/\btoday\b/.test(t)) return toISO(today);
-        if (/day after tomorrow/.test(t)) { const d = new Date(today); d.setDate(d.getDate() + 2); return toISO(d); }
-        if (/\btomorrow\b/.test(t)) { const d = new Date(today); d.setDate(d.getDate() + 1); return toISO(d); }
-
-        const weekdays = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-        const wdMatch = t.match(/\b(next\s+)?(sunday|monday|tuesday|wednesday|thursday|friday|saturday)\b/);
-        if (wdMatch) {
-          const targetIdx = weekdays.indexOf(wdMatch[2]);
-          const d = new Date(today);
-          let diff = (targetIdx - d.getDay() + 7) % 7;
-          if (diff === 0) diff = 7;
-          if (wdMatch[1]) diff += 7;
-          d.setDate(d.getDate() + diff);
-          return toISO(d);
-        }
-
-        // "10th next month" / "next month the 10th" / "5th this month"
-        let rm = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(next|this)\s+month\b/);
-        if (!rm) rm = t.match(/\b(next|this)\s+month\b[\s\S]*?(\d{1,2})(?:st|nd|rd|th)?\b/);
-        if (rm) {
-          const day = parseInt(rm[1].match(/\d/) ? rm[1] : rm[2]);
-          const isNext = /next/.test(rm[0]);
-          const d = new Date(today.getFullYear(), today.getMonth() + (isNext ? 1 : 0), day);
-          return toISO(d);
-        }
-
-        const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-        const monthsShort = monthsFull.map(m => m.slice(0, 3));
-        const monthPattern = 'january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec';
-
-        let day, monIdx;
-        let m = t.match(new RegExp('\\b(\\d{1,2})(?:st|nd|rd|th)?\\s+(' + monthPattern + ')\\b', 'i'));
-        if (m) {
-          day = parseInt(m[1]);
-          monIdx = monthsFull.indexOf(m[2].toLowerCase());
-          if (monIdx < 0) monIdx = monthsShort.findIndex(ms => m[2].toLowerCase().startsWith(ms));
-        } else {
-          m = t.match(new RegExp('\\b(' + monthPattern + ')\\s+(\\d{1,2})(?:st|nd|rd|th)?\\b', 'i'));
-          if (m) {
-            day = parseInt(m[2]);
-            monIdx = monthsFull.indexOf(m[1].toLowerCase());
-            if (monIdx < 0) monIdx = monthsShort.findIndex(ms => m[1].toLowerCase().startsWith(ms));
-          }
-        }
-        if (day && monIdx >= 0) {
-          let d = new Date(today.getFullYear(), monIdx, day);
-          if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setFullYear(today.getFullYear() + 1);
-          return toISO(d);
-        }
-
-        m = t.match(/\b(\d{1,2})[\/\-](\d{1,2})(?:[\/\-](\d{2,4}))?\b/);
-        if (m) {
-          let dd = parseInt(m[1]), mm = parseInt(m[2]) - 1;
-          let yyyy = m[3] ? (m[3].length === 2 ? 2000 + parseInt(m[3]) : parseInt(m[3])) : today.getFullYear();
-          let d = new Date(yyyy, mm, dd);
-          if (!m[3] && d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setFullYear(yyyy + 1);
-          return toISO(d);
-        }
-
-        m = t.match(/\bon\s+the\s+(\d{1,2})(?:st|nd|rd|th)?\b|\bon\s+(\d{1,2})(?:st|nd|rd|th)?\b(?!\s*(?:am|pm|\/|-))/);
-        if (m) {
-          const day = parseInt(m[1] || m[2]);
-          let d = new Date(today.getFullYear(), today.getMonth(), day);
-          if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setMonth(d.getMonth() + 1);
-          return toISO(d);
-        }
-
-        return null;
-      }
-
-      const isUpcoming = /\bupcoming\b|\bnext\s+shoot\b|\bwhen\s+is\s+my\s+next\b|\bany\s+shoots?\b|\bmy\s+schedule\b|\bwhat.?s\s+(my\s+)?next\b/.test(text);
-      const isBooking = !isUpcoming && /\bbook(ing)?\b|\bschedule\s+a\b|\badd\s+a?\s*shoot\b/.test(text);
-      const isPayment = !isUpcoming && !isBooking && /\bpayment(s)?\b|\breceived\b|\bpaid\b/.test(text);
-      const isExpense = !isUpcoming && !isBooking && !isPayment && /\bexpense(s)?\b|\bspent\b/.test(text);
-
-      if (isUpcoming) {
-        return { intent: 'upcoming' };
-      }
-
-      if (isBooking) {
-        const date = extractDate(text);
-        return { intent: 'booking', date, name: extractClientName(text) };
-      }
-
-      if (isPayment) {
-        const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
-        const amount = /\d/.test(text) ? extractAmount(text) : null;
-        return { intent: 'payment', company, amount, month: resolveMonthRange(text) };
-      }
-
-      if (isExpense) {
-        const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
-        const amount = /\d/.test(text) ? extractAmount(text) : null;
-        return { intent: 'expense', company, amount, month: resolveMonthRange(text) };
-      }
-
-      return { intent: 'unknown' };
+      });
+      return best;
     }
 
-    function showVoiceAnswer(label, value, detail) {
-      showVoiceState('answer');
-      document.getElementById('voice-answer-label').textContent = label;
-      document.getElementById('voice-answer-value').textContent = value;
-      document.getElementById('voice-answer-detail').textContent = detail || '';
+    function renderProofResult(rawText) {
+      showProofState('result');
+      const amount = extractProofAmount(rawText);
+      const company = extractProofCompany(rawText);
+
+      document.getElementById('proof-amount').value = amount || '';
+
+      const sel = document.getElementById('proof-company');
+      const companies = typeof _companies !== 'undefined' ? _companies : [];
+      sel.innerHTML = '<option value="">— Select company —</option>' +
+        companies.map(c => `<option value="${c}">${c}</option>`).join('');
+      sel.value = company || '';
+
+      updateProofMatch();
     }
 
-    function renderVoiceResult(rawText, parsed) {
-      const transcriptEl = document.getElementById('voice-result-transcript');
-      if (transcriptEl) transcriptEl.textContent = '"' + rawText + '"';
+    function updateProofMatch() {
+      const company = document.getElementById('proof-company').value;
+      const amount = parseFloat(document.getElementById('proof-amount').value) || 0;
+      const noteEl = document.getElementById('proof-match-note');
+      const actionsEl = document.getElementById('proof-result-actions');
 
-      if (parsed.intent === 'upcoming') return handleVoiceUpcomingIntent(parsed);
-      if (parsed.intent === 'booking') return handleVoiceBookingIntent(parsed);
-      if (parsed.intent === 'payment') return handleVoicePaymentIntent(parsed);
-      if (parsed.intent === 'expense') return handleVoiceExpenseIntent(parsed);
+      if (!company) {
+        noteEl.textContent = 'Select the company this payment is from to find the matching shoot.';
+        actionsEl.innerHTML = `<button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>`;
+        _proofMatch = null;
+        return;
+      }
 
-      showVoiceState('result');
-      document.getElementById('voice-result-icon').className = 'ti ti-help-circle text-xl text-amber-500 mt-0.5';
-      setVoiceSummary("I couldn't tell if that was a booking, a payment, or an expense. Try including a word like \"book\", \"payment received\", or \"expense\".");
-      document.getElementById('voice-result-actions').innerHTML =
-        `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
-    }
-
-    function handleVoiceUpcomingIntent() {
-      const todayISO = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
-      const upcoming = (typeof _shoots !== 'undefined' ? _shoots : [])
-        .filter(s => s.date >= todayISO)
+      const pending = (typeof _shoots !== 'undefined' ? _shoots : [])
+        .filter(s => s.company === company && s.payStatus !== 'done')
         .sort((a, b) => a.date.localeCompare(b.date));
 
-      if (upcoming.length === 0) {
-        showVoiceAnswer('Upcoming Shoots', 'None scheduled', "You don't have any upcoming shoots booked yet.");
-        speakVoiceAnswer("You don't have any upcoming shoots booked yet.");
-        return;
-      }
-
-      const next = upcoming[0];
-      const dateLabel = new Date(next.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
-      const restList = upcoming.slice(1, 4).map(s => `${s.name} (${new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`);
-      const restText = restList.join(', ');
-
-      showVoiceAnswer('Next Shoot', `${next.name} — ${dateLabel}`, restText ? `Then: ${restText}` : `${next.event || ''}${next.location ? ' · ' + next.location : ''}`);
-      speakVoiceAnswer(`Your next shoot is ${next.name} on ${dateLabel}.` + (restText ? ` After that: ${restText}.` : ''));
-    }
-
-    function handleVoiceBookingIntent(parsed) {
-      showVoiceState('result');
-      document.getElementById('voice-result-icon').className = 'ti ti-calendar-event text-xl text-[#c9a96e] mt-0.5';
-
-      if (!parsed.date) {
-        setVoiceSummary("I heard a booking request but couldn't figure out the date. Try again mentioning a clear date, like \"next Friday\" or \"15th August\".");
-        document.getElementById('voice-result-actions').innerHTML =
-          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
-        return;
-      }
-
-      const conflicts = (typeof _shoots !== 'undefined' ? _shoots : []).filter(s => s.date === parsed.date);
-      const dateLabel = new Date(parsed.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
-
-      if (conflicts.length > 0) {
-        const c = conflicts[0];
-        _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
-        setVoiceSummary(`You're already booked on <strong>${dateLabel}</strong> — <strong>${c.name}</strong> (${c.event}). I haven't booked this to avoid a double-booking.`);
-        document.getElementById('voice-result-actions').innerHTML = `
-          <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>
-          <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-amber-600/20 border border-amber-600/40 text-amber-400 hover:bg-amber-600/30 rounded-lg transition">Book Anyway</button>
-        `;
-      } else {
-        _voicePending = { type: 'booking', date: parsed.date, name: parsed.name };
-        setVoiceSummary(`You're free on <strong>${dateLabel}</strong>. I'll open a new shoot pre-filled with this date${parsed.name ? ' and name "' + parsed.name + '"' : ''} — review and hit Save to confirm.`);
-        document.getElementById('voice-result-actions').innerHTML = `
-          <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
-          <button onclick="confirmVoiceBooking()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
-        `;
-      }
-    }
-
-    function confirmVoiceBooking() {
-      const { date, name } = _voicePending;
-      closeVoiceAgent();
-      openAddShootModal(date);
-      if (name) {
-        setTimeout(() => {
-          const nameField = document.getElementById('f-shoot-name');
-          if (nameField) nameField.value = name;
-        }, 60);
-      }
-    }
-
-    function handleVoicePaymentIntent(parsed) {
-      showVoiceState('result');
-      document.getElementById('voice-result-icon').className = 'ti ti-cash text-xl text-emerald-400 mt-0.5';
-
-      const allShoots = (typeof _shoots !== 'undefined' ? _shoots : []);
-      const { year, monthIdx, label } = parsed.month;
-      const monthShoots = allShoots.filter(s => (!parsed.company || s.company === parsed.company) && isInMonth(s.date, year, monthIdx));
-
-      if (!parsed.amount) {
-        const received = monthShoots.reduce((a, s) => a + (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0), 0);
-        const scopeText = parsed.company ? `From ${parsed.company} · ${monthShoots.length} shoot(s) in ${label}` : `Across ${monthShoots.length} shoot(s) in ${label}`;
-        showVoiceAnswer(`Payments Received — ${label}`, formatINR(received), scopeText);
-        speakVoiceAnswer(`You've received ${received} rupees${parsed.company ? ' from ' + parsed.company : ''} in ${label}.`);
-        return;
-      }
-
-      if (!parsed.company) {
-        setVoiceSummary("I heard a payment amount but couldn't identify which company it's for. Please repeat and name the company clearly.");
-        document.getElementById('voice-result-actions').innerHTML =
-          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
-        return;
-      }
-
-      const pending = monthShoots.filter(s => s.payStatus !== 'done').sort((a, b) => a.date.localeCompare(b.date));
       if (pending.length === 0) {
-        setVoiceSummary(`No pending shoots found for ${parsed.company} in ${label} — looks like everything's already settled.`);
-        document.getElementById('voice-result-actions').innerHTML =
-          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
+        noteEl.textContent = `No pending shoots found for ${company}. Everything may already be settled — check the company or shoot manually.`;
+        actionsEl.innerHTML = `<button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
+        _proofMatch = null;
         return;
       }
 
       const target = pending[0];
-      _voicePending = { type: 'payment', shootId: target.id, amount: parsed.amount };
-      const extraNote = pending.length > 1 ? ` (1 of ${pending.length} pending shoots — adjust the rest manually)` : '';
-      setVoiceSummary(`Mark <strong>${formatINR(parsed.amount)}</strong> received from <strong>${parsed.company}</strong> for the shoot on ${target.date}?${extraNote} I'll open that record pre-filled — review and hit Save to confirm.`);
-      document.getElementById('voice-result-actions').innerHTML = `
-        <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
-        <button onclick="confirmVoicePayment()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
+      _proofMatch = { shootId: target.id, amount };
+      const extra = pending.length > 1 ? ` (1 of ${pending.length} pending — adjust the rest manually)` : '';
+      noteEl.innerHTML = `Matched to the shoot on <strong>${target.date}</strong>${extra}. Review and confirm below.`;
+      actionsEl.innerHTML = `
+        <button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
+        <button onclick="confirmProofPayment()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
       `;
     }
 
-    function confirmVoicePayment() {
-      const { shootId, amount } = _voicePending;
-      closeVoiceAgent();
+    function confirmProofPayment() {
+      if (!_proofMatch) return;
+      const { shootId, amount } = _proofMatch;
+      closeProofModal();
       openEditShootModal(shootId);
       setTimeout(() => {
         const s = (typeof _shoots !== 'undefined' ? _shoots : []).find(x => x.id === shootId);
         const total = Number(s?.amount || 0);
         const payStatusEl = document.getElementById('f-shoot-pay-status');
         if (!payStatusEl) return;
-        if (amount >= total) {
+        if (amount >= total && amount > 0) {
           payStatusEl.value = 'done';
-        } else {
+        } else if (amount > 0) {
           payStatusEl.value = 'part';
           document.getElementById('f-shoot-part-paid').value = amount;
         }
         handlePayStatusChange();
       }, 80);
     }
-
-    function handleVoiceExpenseIntent(parsed) {
-      showVoiceState('result');
-      document.getElementById('voice-result-icon').className = 'ti ti-receipt-2 text-xl text-amber-500 mt-0.5';
-
-      const allShoots = (typeof _shoots !== 'undefined' ? _shoots : []);
-      const { year, monthIdx, label } = parsed.month;
-      const scoped = allShoots.filter(s => (!parsed.company || s.company === parsed.company) && isInMonth(s.date, year, monthIdx));
-
-      if (!parsed.amount) {
-        const total = scoped.reduce((a, s) => a + Number(s.expense || 0), 0);
-        showVoiceAnswer(`Expenses — ${label}`, formatINR(total), parsed.company ? `For ${parsed.company} · ${scoped.length} shoot(s)` : `Across ${scoped.length} shoot(s)`);
-        speakVoiceAnswer(`Your expenses${parsed.company ? ' for ' + parsed.company : ''} in ${label} are ${total} rupees.`);
-        return;
-      }
-
-      if (!parsed.company || scoped.length === 0) {
-        setVoiceSummary(`I heard an expense amount but couldn't match it to a specific shoot in ${label}. Please add it manually, or mention the company/client name clearly.`);
-        document.getElementById('voice-result-actions').innerHTML =
-          `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
-        return;
-      }
-
-      const sorted = [...scoped].sort((a, b) => a.date.localeCompare(b.date));
-      const target = sorted[0];
-      _voicePending = { type: 'expense', shootId: target.id, amount: parsed.amount };
-
-      setVoiceSummary(`Add expense of <strong>${formatINR(parsed.amount)}</strong> to the ${parsed.company} shoot on ${target.date}? I'll open that record pre-filled — review and hit Save to confirm.`);
-      document.getElementById('voice-result-actions').innerHTML = `
-        <button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
-        <button onclick="confirmVoiceExpense()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
-      `;
-    }
-
-    function confirmVoiceExpense() {
-      const { shootId, amount } = _voicePending;
-      closeVoiceAgent();
-      openEditShootModal(shootId);
-      setTimeout(() => {
-        const expEl = document.getElementById('f-shoot-expense');
-        if (expEl) expEl.value = amount;
-      }, 80);
-    }
-
-    initVoiceAgent();
 
   </script>
     <script>
