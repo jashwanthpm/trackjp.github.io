@@ -1,4 +1,4 @@
-
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8"/>
@@ -5895,6 +5895,81 @@ async function executeDeleteAll() {
       return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth();
     }
 
+    function isInMonth(dateStr, year, monthIdx) {
+      if (!dateStr) return false;
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.getFullYear() === year && d.getMonth() === monthIdx;
+    }
+
+    function resolveMonthRange(t) {
+      const today = new Date();
+      let year = today.getFullYear();
+      let monthIdx = today.getMonth();
+      let label = 'This Month';
+
+      if (/\blast month\b|\bprevious month\b/.test(t)) {
+        monthIdx -= 1; label = 'Last Month';
+      } else if (/\bnext month\b/.test(t)) {
+        monthIdx += 1; label = 'Next Month';
+      } else {
+        const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+        const monthsShort = monthsFull.map(m => m.slice(0, 3));
+        const monthPattern = 'january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec';
+        const m = t.match(new RegExp('\\b(' + monthPattern + ')\\b(?:\\s+(\\d{4}))?', 'i'));
+        if (m) {
+          let idx = monthsFull.indexOf(m[1].toLowerCase());
+          if (idx < 0) idx = monthsShort.findIndex(ms => m[1].toLowerCase().startsWith(ms));
+          monthIdx = idx;
+          if (m[2]) year = parseInt(m[2]);
+          else if (idx > today.getMonth()) year = today.getFullYear() - 1;
+          label = monthsFull[idx].charAt(0).toUpperCase() + monthsFull[idx].slice(1) + ' ' + year;
+        }
+      }
+      if (monthIdx < 0) { monthIdx = 11; year -= 1; }
+      if (monthIdx > 11) { monthIdx = 0; year += 1; }
+      return { year, monthIdx, label };
+    }
+
+    // Resolves phrases like "this month", "last month", "next month", or a
+    // named month ("June", "in August") into a concrete {year, month, label}.
+    // Defaults to the current month when nothing is said.
+    function resolveMonthRange(t) {
+      const today = new Date();
+      const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+      const monthsShort = monthsFull.map(m => m.slice(0, 3));
+      const monthPattern = monthsFull.join('|') + '|' + monthsShort.join('|');
+
+      let year = today.getFullYear(), month = today.getMonth(), label = 'this month';
+
+      if (/\blast month\b|\bprevious month\b/.test(t)) {
+        month = today.getMonth() - 1;
+        if (month < 0) { month = 11; year -= 1; }
+        label = 'last month';
+      } else if (/\bnext month\b/.test(t)) {
+        month = today.getMonth() + 1;
+        if (month > 11) { month = 0; year += 1; }
+        label = 'next month';
+      } else {
+        const mM = t.match(new RegExp('\\b(' + monthPattern + ')\\b', 'i'));
+        if (mM) {
+          let idx = monthsFull.indexOf(mM[1].toLowerCase());
+          if (idx < 0) idx = monthsShort.findIndex(ms => mM[1].toLowerCase().startsWith(ms));
+          if (idx >= 0) {
+            month = idx;
+            label = monthsFull[idx].charAt(0).toUpperCase() + monthsFull[idx].slice(1);
+            // If a bare month name is behind us in the year, assume they mean the most recent occurrence (this year).
+          }
+        }
+      }
+      return { year, month, label };
+    }
+
+    function isInMonthRange(dateStr, range) {
+      if (!dateStr || !range) return false;
+      const d = new Date(dateStr + 'T00:00:00');
+      return d.getFullYear() === range.year && d.getMonth() === range.month;
+    }
+
     function formatINR(n) {
       return '₹' + Number(n || 0).toLocaleString('en-IN');
     }
@@ -5991,6 +6066,16 @@ async function executeDeleteAll() {
           return toISO(d);
         }
 
+        // "10th next month" / "next month the 10th" / "5th this month"
+        let rm = t.match(/\b(\d{1,2})(?:st|nd|rd|th)?\s+(next|this)\s+month\b/);
+        if (!rm) rm = t.match(/\b(next|this)\s+month\b[\s\S]*?(\d{1,2})(?:st|nd|rd|th)?\b/);
+        if (rm) {
+          const day = parseInt(rm[1].match(/\d/) ? rm[1] : rm[2]);
+          const isNext = /next/.test(rm[0]);
+          const d = new Date(today.getFullYear(), today.getMonth() + (isNext ? 1 : 0), day);
+          return toISO(d);
+        }
+
         const monthsFull = ['january','february','march','april','may','june','july','august','september','october','november','december'];
         const monthsShort = monthsFull.map(m => m.slice(0, 3));
         const monthPattern = 'january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|sept|oct|nov|dec';
@@ -6024,12 +6109,25 @@ async function executeDeleteAll() {
           return toISO(d);
         }
 
+        m = t.match(/\bon\s+the\s+(\d{1,2})(?:st|nd|rd|th)?\b|\bon\s+(\d{1,2})(?:st|nd|rd|th)?\b(?!\s*(?:am|pm|\/|-))/);
+        if (m) {
+          const day = parseInt(m[1] || m[2]);
+          let d = new Date(today.getFullYear(), today.getMonth(), day);
+          if (d < new Date(today.getFullYear(), today.getMonth(), today.getDate())) d.setMonth(d.getMonth() + 1);
+          return toISO(d);
+        }
+
         return null;
       }
 
-      const isBooking = /\bbook(ing)?\b|\bschedule\b/.test(text);
-      const isPayment = !isBooking && /\bpayment(s)?\b|\breceived\b|\bpaid\b/.test(text);
-      const isExpense = !isBooking && /\bexpense(s)?\b|\bspent\b/.test(text);
+      const isUpcoming = /\bupcoming\b|\bnext\s+shoot\b|\bwhen\s+is\s+my\s+next\b|\bany\s+shoots?\b|\bmy\s+schedule\b|\bwhat.?s\s+(my\s+)?next\b/.test(text);
+      const isBooking = !isUpcoming && /\bbook(ing)?\b|\bschedule\s+a\b|\badd\s+a?\s*shoot\b/.test(text);
+      const isPayment = !isUpcoming && !isBooking && /\bpayment(s)?\b|\breceived\b|\bpaid\b/.test(text);
+      const isExpense = !isUpcoming && !isBooking && !isPayment && /\bexpense(s)?\b|\bspent\b/.test(text);
+
+      if (isUpcoming) {
+        return { intent: 'upcoming' };
+      }
 
       if (isBooking) {
         const date = extractDate(text);
@@ -6039,13 +6137,13 @@ async function executeDeleteAll() {
       if (isPayment) {
         const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
         const amount = /\d/.test(text) ? extractAmount(text) : null;
-        return { intent: 'payment', company, amount };
+        return { intent: 'payment', company, amount, month: resolveMonthRange(text) };
       }
 
       if (isExpense) {
         const company = extractEntityName(text, typeof _companies !== 'undefined' ? _companies : []);
         const amount = /\d/.test(text) ? extractAmount(text) : null;
-        return { intent: 'expense', company, amount };
+        return { intent: 'expense', company, amount, month: resolveMonthRange(text) };
       }
 
       return { intent: 'unknown' };
@@ -6062,6 +6160,7 @@ async function executeDeleteAll() {
       const transcriptEl = document.getElementById('voice-result-transcript');
       if (transcriptEl) transcriptEl.textContent = '"' + rawText + '"';
 
+      if (parsed.intent === 'upcoming') return handleVoiceUpcomingIntent(parsed);
       if (parsed.intent === 'booking') return handleVoiceBookingIntent(parsed);
       if (parsed.intent === 'payment') return handleVoicePaymentIntent(parsed);
       if (parsed.intent === 'expense') return handleVoiceExpenseIntent(parsed);
@@ -6071,6 +6170,27 @@ async function executeDeleteAll() {
       setVoiceSummary("I couldn't tell if that was a booking, a payment, or an expense. Try including a word like \"book\", \"payment received\", or \"expense\".");
       document.getElementById('voice-result-actions').innerHTML =
         `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
+    }
+
+    function handleVoiceUpcomingIntent() {
+      const todayISO = (() => { const d = new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; })();
+      const upcoming = (typeof _shoots !== 'undefined' ? _shoots : [])
+        .filter(s => s.date >= todayISO)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (upcoming.length === 0) {
+        showVoiceAnswer('Upcoming Shoots', 'None scheduled', "You don't have any upcoming shoots booked yet.");
+        speakVoiceAnswer("You don't have any upcoming shoots booked yet.");
+        return;
+      }
+
+      const next = upcoming[0];
+      const dateLabel = new Date(next.date + 'T00:00:00').toLocaleDateString('en-IN', { weekday: 'long', day: 'numeric', month: 'long' });
+      const restList = upcoming.slice(1, 4).map(s => `${s.name} (${new Date(s.date + 'T00:00:00').toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })})`);
+      const restText = restList.join(', ');
+
+      showVoiceAnswer('Next Shoot', `${next.name} — ${dateLabel}`, restText ? `Then: ${restText}` : `${next.event || ''}${next.location ? ' · ' + next.location : ''}`);
+      speakVoiceAnswer(`Your next shoot is ${next.name} on ${dateLabel}.` + (restText ? ` After that: ${restText}.` : ''));
     }
 
     function handleVoiceBookingIntent(parsed) {
@@ -6121,25 +6241,28 @@ async function executeDeleteAll() {
       showVoiceState('result');
       document.getElementById('voice-result-icon').className = 'ti ti-cash text-xl text-emerald-400 mt-0.5';
 
+      const allShoots = (typeof _shoots !== 'undefined' ? _shoots : []);
+      const { year, monthIdx, label } = parsed.month;
+      const monthShoots = allShoots.filter(s => (!parsed.company || s.company === parsed.company) && isInMonth(s.date, year, monthIdx));
+
+      if (!parsed.amount) {
+        const received = monthShoots.reduce((a, s) => a + (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0), 0);
+        const scopeText = parsed.company ? `From ${parsed.company} · ${monthShoots.length} shoot(s) in ${label}` : `Across ${monthShoots.length} shoot(s) in ${label}`;
+        showVoiceAnswer(`Payments Received — ${label}`, formatINR(received), scopeText);
+        speakVoiceAnswer(`You've received ${received} rupees${parsed.company ? ' from ' + parsed.company : ''} in ${label}.`);
+        return;
+      }
+
       if (!parsed.company) {
-        setVoiceSummary("I heard a payment mention but couldn't identify the company. Please repeat and name the company clearly.");
+        setVoiceSummary("I heard a payment amount but couldn't identify which company it's for. Please repeat and name the company clearly.");
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Try Again</button>`;
         return;
       }
 
-      const monthShoots = (typeof _shoots !== 'undefined' ? _shoots : []).filter(s => s.company === parsed.company && isInCurrentMonth(s.date));
-
-      if (!parsed.amount) {
-        const received = monthShoots.reduce((a, s) => a + (s.payStatus === 'done' ? Number(s.amount || 0) : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0), 0);
-        showVoiceAnswer('Payments Received This Month', formatINR(received), `From ${parsed.company} · ${monthShoots.length} shoot(s) this month`);
-        speakVoiceAnswer(`You've received ${received} rupees from ${parsed.company} this month.`);
-        return;
-      }
-
       const pending = monthShoots.filter(s => s.payStatus !== 'done').sort((a, b) => a.date.localeCompare(b.date));
       if (pending.length === 0) {
-        setVoiceSummary(`No pending shoots found for ${parsed.company} this month — looks like everything's already settled.`);
+        setVoiceSummary(`No pending shoots found for ${parsed.company} in ${label} — looks like everything's already settled.`);
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
         return;
@@ -6179,19 +6302,18 @@ async function executeDeleteAll() {
       document.getElementById('voice-result-icon').className = 'ti ti-receipt-2 text-xl text-amber-500 mt-0.5';
 
       const allShoots = (typeof _shoots !== 'undefined' ? _shoots : []);
-      const scoped = parsed.company
-        ? allShoots.filter(s => s.company === parsed.company && isInCurrentMonth(s.date))
-        : allShoots.filter(s => isInCurrentMonth(s.date));
+      const { year, monthIdx, label } = parsed.month;
+      const scoped = allShoots.filter(s => (!parsed.company || s.company === parsed.company) && isInMonth(s.date, year, monthIdx));
 
       if (!parsed.amount) {
         const total = scoped.reduce((a, s) => a + Number(s.expense || 0), 0);
-        showVoiceAnswer('Expenses This Month', formatINR(total), parsed.company ? `For ${parsed.company} · ${scoped.length} shoot(s)` : `Across ${scoped.length} shoot(s)`);
-        speakVoiceAnswer(`Your expenses this month${parsed.company ? ' for ' + parsed.company : ''} are ${total} rupees.`);
+        showVoiceAnswer(`Expenses — ${label}`, formatINR(total), parsed.company ? `For ${parsed.company} · ${scoped.length} shoot(s)` : `Across ${scoped.length} shoot(s)`);
+        speakVoiceAnswer(`Your expenses${parsed.company ? ' for ' + parsed.company : ''} in ${label} are ${total} rupees.`);
         return;
       }
 
       if (!parsed.company || scoped.length === 0) {
-        setVoiceSummary("I heard an expense amount but couldn't match it to a specific shoot this month. Please add it manually, or mention the company/client name clearly.");
+        setVoiceSummary(`I heard an expense amount but couldn't match it to a specific shoot in ${label}. Please add it manually, or mention the company/client name clearly.`);
         document.getElementById('voice-result-actions').innerHTML =
           `<button onclick="resetVoiceModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
         return;
