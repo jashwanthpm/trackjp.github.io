@@ -589,7 +589,7 @@
                 </div>
 
                 <div class="flex items-center gap-4 -mt-1">
-                  <div id="acc-avatar-initial" class="w-16 h-16 flex-shrink-0 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_25px_rgba(201,169,110,0.3)]">S</div>
+                  <div id="acc-avatar-initial" class="w-16 h-16 flex-shrink-0 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_25px_rgba(201,169,110,0.3)] overflow-hidden">S</div>
                   <div class="min-w-0">
                     <p id="acc-hero-name" class="text-lg font-bold text-white truncate">Your Studio</p>
                     <p id="acc-hero-email" class="text-xs text-neutral-500 truncate">Loading...</p>
@@ -1480,7 +1480,8 @@ setTimeout(() => {
           email: data.user.email,
           name: data.user.user_metadata?.name || decoded.name,
           token: data.access_token, 
-          user_metadata: data.user.user_metadata || {}
+          user_metadata: data.user.user_metadata || {},
+          avatarUrl: decoded.picture || data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || null
         };
 
         localStorage.setItem('currentUser', JSON.stringify(currentUser));
@@ -2242,6 +2243,7 @@ try {
     
     // --- ROBUST MAGIC LINK NOTIFICATION LOGIC ---
     const lastSeenStr = localStorage.getItem('sakkhi_last_seen');
+    const ownShootIds = new Set(JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]'));
     let newBookings = [];
 
     if (lastSeenStr) {
@@ -2250,6 +2252,7 @@ try {
       
       newBookings = _shoots.filter(s => {
         if (!s.created) return false;
+        if (ownShootIds.has(s.id)) return false; // created by me, from this dashboard — never a Magic Link alert
         const shootTime = new Date(s.created).getTime();
         return shootTime > lastSeenTime;
       });
@@ -2320,6 +2323,15 @@ if (newBookings.length > 0 && !isDemoMode) {
         setSyncStatus('synced', 'Saved Successfully');
         showToast('Shoot record saved successfully');
         
+        // Mark this shoot as created by ME, on this device, via the dashboard —
+        // so it can never be mistaken for an external Magic Link booking,
+        // regardless of any timestamp/clock-skew edge cases.
+        if (!existing) {
+          const seenIds = JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]');
+          seenIds.push(shoot.id);
+          localStorage.setItem('sakkhi_own_shoot_ids', JSON.stringify(seenIds.slice(-300)));
+        }
+
         // Update "last seen" so your own shoots don't trigger the alert on refresh
         localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
       } catch (e) {
@@ -3556,9 +3568,20 @@ async function toggleBlockDate(dateStr) {
       }
       const heroName = _profile.bizName || 'Your Studio';
       const heroNameEl = document.getElementById('acc-hero-name');
-      const heroAvatarEl = document.getElementById('acc-avatar-initial');
       if (heroNameEl) heroNameEl.textContent = heroName;
-      if (heroAvatarEl) heroAvatarEl.textContent = heroName.trim().charAt(0).toUpperCase() || 'S';
+      renderAccountAvatar();
+    }
+
+    function renderAccountAvatar() {
+      const el = document.getElementById('acc-avatar-initial');
+      if (!el) return;
+      const name = (_profile.bizName || currentUser?.name || 'Your Studio').trim();
+      const initial = name.charAt(0).toUpperCase() || 'S';
+      if (currentUser && currentUser.avatarUrl) {
+        el.innerHTML = `<img src="${currentUser.avatarUrl}" alt="Profile" class="w-full h-full object-cover" referrerpolicy="no-referrer" onerror="this.parentElement.textContent='${initial}'">`;
+      } else {
+        el.textContent = initial;
+      }
     }
 
     async function saveProfileSettings() {
@@ -5034,6 +5057,7 @@ function updateAccountDisplay() {
     `;
     const heroEmailEl = document.getElementById('acc-hero-email');
     if (heroEmailEl) heroEmailEl.textContent = email;
+    renderAccountAvatar();
   } else {
     emailDisplay.textContent = 'Not signed in';
   }
