@@ -269,8 +269,9 @@
       
       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5" id="admin-stats">
         
-        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg hover:-translate-y-0.5 hover:border-neutral-700 transition-all duration-200">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-500 to-indigo-500 opacity-50"></div>
+          <i class="ti ti-users absolute -right-2 -bottom-3 text-7xl text-blue-500/10"></i>
           <div class="relative z-10">
             <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
               <i class="ti ti-users text-blue-400 text-sm"></i> Total Registered Users
@@ -279,8 +280,9 @@
           </div>
         </div>
 
-        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg hover:-translate-y-0.5 hover:border-neutral-700 transition-all duration-200">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-emerald-500 to-teal-500 opacity-50"></div>
+          <i class="ti ti-circle-check absolute -right-2 -bottom-3 text-7xl text-emerald-500/10"></i>
           <div class="relative z-10">
             <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
               <i class="ti ti-circle-check text-emerald-400 text-sm"></i> Active Plan Users
@@ -289,8 +291,9 @@
           </div>
         </div>
 
-        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg hover:-translate-y-0.5 hover:border-neutral-700 transition-all duration-200">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-purple-500 to-pink-500 opacity-50"></div>
+          <i class="ti ti-camera absolute -right-2 -bottom-3 text-7xl text-purple-500/10"></i>
           <div class="relative z-10">
             <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
               <i class="ti ti-camera text-purple-400 text-sm"></i> Total Shoots Logged
@@ -299,8 +302,9 @@
           </div>
         </div>
 
-        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden group shadow-lg hover:-translate-y-0.5 hover:border-neutral-700 transition-all duration-200">
           <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-[#c9a96e] to-yellow-600 opacity-50"></div>
+          <i class="ti ti-cash absolute -right-2 -bottom-3 text-7xl text-[#c9a96e]/10"></i>
           <div class="relative z-10">
             <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-2">
               <i class="ti ti-cash text-[#c9a96e] text-sm"></i> Total Processed Value
@@ -481,9 +485,6 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
       }
     );
 
-console.log('Status:', response.status);
-    console.log('Response:', await response.clone().text());
-    
     const data = await response.json();
 
     if (!response.ok) {
@@ -729,6 +730,12 @@ console.log('Status:', response.status);
       setTimeout(() => {
         document.getElementById('user-drawer').classList.remove('translate-x-full');
       }, 10);
+    }
+
+    function closeUserDrawer() {
+      document.getElementById('user-drawer').classList.add('translate-x-full');
+      document.getElementById('drawer-overlay').classList.add('hidden');
+      _drawerUser = null;
     }
 
     function copyUserIdToClipboard() {
