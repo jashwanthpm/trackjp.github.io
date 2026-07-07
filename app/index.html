@@ -29,7 +29,6 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-   <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
   <style>
     body {
@@ -73,10 +72,27 @@
     }
 
     .account-sidebar-item.active {
-      background-color: #0a0a0a;
-      border-color: #262626;
+      background: linear-gradient(90deg, rgba(201,169,110,0.14), rgba(201,169,110,0.02));
+      border-color: rgba(201,169,110,0.3);
       color: #c9a96e;
       font-weight: 600;
+      box-shadow: inset 2px 0 0 #c9a96e;
+    }
+
+    /* Premium icon badges for every Account section header — one CSS rule,
+       no per-section HTML edits, keeps each icon's own semantic color. */
+    .account-content-section h3 > i:first-child,
+    #account-settings summary h3 > i:first-child {
+      width: 2.25rem;
+      height: 2.25rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 9999px;
+      background: rgba(201, 169, 110, 0.10);
+      border: 1px solid rgba(201, 169, 110, 0.22);
+      font-size: 1.05rem;
+      flex-shrink: 0;
     }
 
     .account-content-section {
@@ -570,6 +586,14 @@
                     <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
                   </h3>
                   <p class="text-xs text-neutral-500 mt-1">Manage your professional information</p>
+                </div>
+
+                <div class="flex items-center gap-4 -mt-1">
+                  <div id="acc-avatar-initial" class="w-16 h-16 flex-shrink-0 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] flex items-center justify-center text-black text-2xl font-bold shadow-[0_0_25px_rgba(201,169,110,0.3)]">S</div>
+                  <div class="min-w-0">
+                    <p id="acc-hero-name" class="text-lg font-bold text-white truncate">Your Studio</p>
+                    <p id="acc-hero-email" class="text-xs text-neutral-500 truncate">Loading...</p>
+                  </div>
                 </div>
 
                 <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
@@ -1075,69 +1099,6 @@
       <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
       <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
     </nav>
-
-    <!-- Payment Proof FAB -->
-    <button id="proof-fab" onclick="openProofModal()" title="Upload Payment Proof" class="fixed right-4 bottom-20 md:bottom-6 z-40 w-14 h-14 rounded-full bg-gradient-to-b from-[#c9a96e] to-[#b6935a] shadow-[0_0_25px_rgba(201,169,110,0.35)] flex items-center justify-center text-black text-2xl transition-transform hover:scale-105 active:scale-95">
-      <i class="ti ti-receipt"></i>
-    </button>
-
-    <!-- Payment Proof Modal -->
-    <div id="proof-modal-backdrop" class="fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'proof-modal-backdrop')">
-      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-md max-h-[85vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
-        <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 bg-[#0f0f0f] z-10">
-          <h3 class="text-base font-bold text-white tracking-wide flex items-center gap-2"><i class="ti ti-receipt text-[#c9a96e]"></i> Payment Proof</h3>
-          <button onclick="closeProofModal()" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
-        </div>
-
-        <div class="p-6 flex-1 flex flex-col items-center justify-center gap-4 min-h-[260px]">
-
-          <!-- Idle: pick a screenshot -->
-          <div id="proof-state-idle" class="flex flex-col items-center gap-4 text-center w-full">
-            <i class="ti ti-scan text-4xl text-neutral-600"></i>
-            <p class="text-xs text-neutral-400 leading-relaxed max-w-xs">Upload a screenshot of the payment (UPI, bank transfer, etc). It's read on your device only — the image itself is never stored or uploaded.</p>
-            <label class="cursor-pointer w-full">
-              <input id="proof-file-input" type="file" accept="image/*" class="hidden" onchange="handleProofFileSelect(event)"/>
-              <span class="block w-full py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition text-center">Choose Screenshot</span>
-            </label>
-          </div>
-
-          <!-- Reading (OCR) state -->
-          <div id="proof-state-reading" class="hidden flex-col items-center gap-3">
-            <img id="proof-thumb" class="max-h-32 rounded-lg border border-neutral-800" />
-            <div class="w-8 h-8 border-2 border-neutral-800 border-t-[#c9a96e] rounded-full animate-spin"></div>
-            <p class="text-xs text-neutral-500">Reading receipt on your device...</p>
-          </div>
-
-          <!-- Result / Confirm state -->
-          <div id="proof-state-result" class="hidden flex-col items-stretch gap-4 w-full text-left">
-            <div class="bg-[#0a0a0a] border border-neutral-900 rounded-xl p-4">
-              <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-600 mb-2">Detected</p>
-              <div class="grid grid-cols-2 gap-3">
-                <div>
-                  <label class="text-[10px] text-neutral-500">Amount (₹)</label>
-                  <input id="proof-amount" type="number" oninput="updateProofMatch()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]"/>
-                </div>
-                <div>
-                  <label class="text-[10px] text-neutral-500">Company</label>
-                  <select id="proof-company" onchange="updateProofMatch()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]"></select>
-                </div>
-              </div>
-              <p id="proof-match-note" class="text-xs text-neutral-400 mt-3 leading-relaxed"></p>
-            </div>
-            <div id="proof-result-actions" class="flex gap-2"></div>
-          </div>
-
-          <!-- No text detected -->
-          <div id="proof-state-empty" class="hidden flex-col items-center text-center gap-3">
-            <i class="ti ti-alert-triangle text-3xl text-amber-500"></i>
-            <p class="text-xs text-neutral-400 leading-relaxed">Couldn't read any text from that image clearly. Try a clearer screenshot, or enter the payment manually.</p>
-            <button onclick="resetProofModal()" class="text-[11px] uppercase tracking-wider font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-lg px-4 py-2 hover:bg-[#c9a96e]/10 transition">Try Another Image</button>
-          </div>
-
-        </div>
-      </div>
-    </div>
-
     <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
       <div id="shoot-modal" class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full sm:max-w-xl max-h-[85vh] sm:max-h-[90vh] overflow-y-auto transform translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col">
         <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900 sticky top-0 z-10">
@@ -3593,6 +3554,11 @@ async function toggleBlockDate(dateStr) {
       if (document.getElementById('acc-wa-template-payment')) {
         document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
       }
+      const heroName = _profile.bizName || 'Your Studio';
+      const heroNameEl = document.getElementById('acc-hero-name');
+      const heroAvatarEl = document.getElementById('acc-avatar-initial');
+      if (heroNameEl) heroNameEl.textContent = heroName;
+      if (heroAvatarEl) heroAvatarEl.textContent = heroName.trim().charAt(0).toUpperCase() || 'S';
     }
 
     async function saveProfileSettings() {
@@ -5066,6 +5032,8 @@ function updateAccountDisplay() {
         </div>
       </div>
     `;
+    const heroEmailEl = document.getElementById('acc-hero-email');
+    if (heroEmailEl) heroEmailEl.textContent = email;
   } else {
     emailDisplay.textContent = 'Not signed in';
   }
@@ -5738,205 +5706,6 @@ async function executeDeleteAll() {
       }
     });
 
-    /* ============================================================
-       PAYMENT PROOF — on-device OCR (Tesseract.js), free, no server.
-       The uploaded screenshot is read entirely in this browser tab
-       and is NEVER uploaded to Supabase or any server — only the
-       extracted amount/company text is used, and it's discarded
-       (object URL revoked) as soon as the modal closes.
-       ============================================================ */
-
-    let _proofObjectUrl = null;
-    let _proofMatch = null;
-
-    function openProofModal() {
-      resetProofModal();
-      openModal('proof-modal-backdrop');
-    }
-
-    function closeProofModal() {
-      if (_proofObjectUrl) { URL.revokeObjectURL(_proofObjectUrl); _proofObjectUrl = null; }
-      closeModal('proof-modal-backdrop');
-    }
-
-    function resetProofModal() {
-      if (_proofObjectUrl) { URL.revokeObjectURL(_proofObjectUrl); _proofObjectUrl = null; }
-      _proofMatch = null;
-      const input = document.getElementById('proof-file-input');
-      if (input) input.value = '';
-      showProofState('idle');
-    }
-
-    function showProofState(state) {
-      ['idle', 'reading', 'result', 'empty'].forEach(s => {
-        const el = document.getElementById('proof-state-' + s);
-        if (!el) return;
-        el.classList.toggle('hidden', s !== state);
-        el.classList.toggle('flex', s === state);
-      });
-    }
-
-    async function preprocessImageForOCR(file) {
-      const img = await createImageBitmap(file);
-      const scale = img.width < 900 ? 2 : 1;
-      const canvas = document.createElement('canvas');
-      canvas.width = img.width * scale;
-      canvas.height = img.height * scale;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-      const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const d = imgData.data;
-      for (let i = 0; i < d.length; i += 4) {
-        const gray = 0.299 * d[i] + 0.587 * d[i + 1] + 0.114 * d[i + 2];
-        const boosted = Math.max(0, Math.min(255, (gray - 128) * 1.6 + 128));
-        d[i] = d[i + 1] = d[i + 2] = boosted;
-      }
-      ctx.putImageData(imgData, 0, 0);
-      return canvas;
-    }
-
-    async function handleProofFileSelect(event) {
-      const file = event.target.files[0];
-      if (!file) return;
-
-      if (_proofObjectUrl) URL.revokeObjectURL(_proofObjectUrl);
-      _proofObjectUrl = URL.createObjectURL(file);
-      const thumb = document.getElementById('proof-thumb');
-      if (thumb) thumb.src = _proofObjectUrl;
-
-      showProofState('reading');
-
-      try {
-        if (typeof Tesseract === 'undefined') {
-          showToast('OCR library failed to load — check your connection.', 'error');
-          showProofState('idle');
-          return;
-        }
-        const source = await preprocessImageForOCR(file).catch(() => file);
-        const { data } = await Tesseract.recognize(source, 'eng');
-        if (!data.text || !data.text.trim()) { showProofState('empty'); return; }
-        renderProofResult(data);
-      } catch (err) {
-        showToast('Could not read that image: ' + (err.message || err), 'error');
-        showProofState('idle');
-      }
-    }
-
-    function pickAmountFromWords(data) {
-      const words = (data.words || []).filter(w => w.text && /\d/.test(w.text) && w.bbox);
-      const parsed = words.map(w => {
-        const digitsOnly = w.text.replace(/[^\d]/g, '');
-        return { num: parseFloat(digitsOnly), digits: digitsOnly.length, height: w.bbox.y1 - w.bbox.y0 };
-      }).filter(w => w.num && w.digits >= 3 && w.digits <= 7);
-
-      if (!parsed.length) return extractProofAmount(data.text);
-
-      // The payment amount is always shown in the largest/boldest font on a
-      // receipt — phone numbers, transaction IDs and UTR numbers are always
-      // smaller print. Picking by font height (not digit value) sidesteps
-      // both "wrong number entirely" and "extra digit from a misread ₹" bugs.
-      const maxHeight = Math.max(...parsed.map(w => w.height));
-      const tall = parsed.filter(w => w.height >= maxHeight * 0.85);
-      return Math.min(...tall.map(w => w.num));
-    }
-
-    function extractProofAmount(t) {
-      const candidates = [];
-      for (const m of t.matchAll(/(?:₹|rs\.?|inr)\s*(\d{1,3}(?:,\d{2,3})*(?:\.\d{1,2})?)/gi)) {
-        candidates.push(parseFloat(m[1].replace(/,/g, '')));
-      }
-      for (const m of t.matchAll(/\b\d{1,3}(?:,\d{2,3})+(?:\.\d{1,2})?\b/g)) {
-        candidates.push(parseFloat(m[0].replace(/,/g, '')));
-      }
-      if (candidates.length) return Math.min(...candidates);
-
-      const bare = [];
-      const re = /(?<![\d+])(\d{1,7})(?:\.\d{1,2})?(?!\d)/g;
-      let mm;
-      while ((mm = re.exec(t))) bare.push(parseFloat(mm[1]));
-      return bare.length ? Math.max(...bare) : null;
-    }
-
-    function extractProofCompany(t) {
-      const low = t.toLowerCase();
-      let best = null;
-      (typeof _companies !== 'undefined' ? _companies : []).forEach(c => {
-        if (c && low.includes(c.toLowerCase())) {
-          if (!best || c.length > best.length) best = c;
-        }
-      });
-      return best;
-    }
-
-    function renderProofResult(data) {
-      showProofState('result');
-      const amount = pickAmountFromWords(data);
-      const company = extractProofCompany(data.text);
-
-      document.getElementById('proof-amount').value = amount || '';
-
-      const sel = document.getElementById('proof-company');
-      const companies = typeof _companies !== 'undefined' ? _companies : [];
-      sel.innerHTML = '<option value="">— Select company —</option>' +
-        companies.map(c => `<option value="${c}">${c}</option>`).join('');
-      sel.value = company || '';
-
-      updateProofMatch();
-    }
-
-    function updateProofMatch() {
-      const company = document.getElementById('proof-company').value;
-      const amount = parseFloat(document.getElementById('proof-amount').value) || 0;
-      const noteEl = document.getElementById('proof-match-note');
-      const actionsEl = document.getElementById('proof-result-actions');
-
-      if (!company) {
-        noteEl.textContent = 'Select the company this payment is from to find the matching shoot.';
-        actionsEl.innerHTML = `<button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>`;
-        _proofMatch = null;
-        return;
-      }
-
-      const pending = (typeof _shoots !== 'undefined' ? _shoots : [])
-        .filter(s => s.company === company && s.payStatus !== 'done')
-        .sort((a, b) => a.date.localeCompare(b.date));
-
-      if (pending.length === 0) {
-        noteEl.textContent = `No pending shoots found for ${company}. Everything may already be settled — check the company or shoot manually.`;
-        actionsEl.innerHTML = `<button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">OK</button>`;
-        _proofMatch = null;
-        return;
-      }
-
-      const target = pending[0];
-      _proofMatch = { shootId: target.id, amount };
-      const extra = pending.length > 1 ? ` (1 of ${pending.length} pending — adjust the rest manually)` : '';
-      noteEl.innerHTML = `Matched to the shoot on <strong>${target.date}</strong>${extra}. Review and confirm below.`;
-      actionsEl.innerHTML = `
-        <button onclick="resetProofModal()" class="flex-1 py-2.5 text-xs font-bold bg-neutral-900 hover:bg-neutral-800 text-white rounded-lg transition">Cancel</button>
-        <button onclick="confirmProofPayment()" class="flex-1 py-2.5 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Open & Fill</button>
-      `;
-    }
-
-    function confirmProofPayment() {
-      if (!_proofMatch) return;
-      const { shootId, amount } = _proofMatch;
-      closeProofModal();
-      openEditShootModal(shootId);
-      setTimeout(() => {
-        const s = (typeof _shoots !== 'undefined' ? _shoots : []).find(x => x.id === shootId);
-        const total = Number(s?.amount || 0);
-        const payStatusEl = document.getElementById('f-shoot-pay-status');
-        if (!payStatusEl) return;
-        if (amount >= total && amount > 0) {
-          payStatusEl.value = 'done';
-        } else if (amount > 0) {
-          payStatusEl.value = 'part';
-          document.getElementById('f-shoot-part-paid').value = amount;
-        }
-        handlePayStatusChange();
-      }, 80);
-    }
 
   </script>
     <script>
