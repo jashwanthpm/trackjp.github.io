@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ProTrade Options Terminal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom scrollbar and animations */
+        body { font-family: 'Inter', sans-serif; }
+        .glow-text { text-shadow: 0 0 10px rgba(59, 130, 246, 0.5); }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-950 text-white p-4 md:p-8 min-h-screen">
+
+    <div class="max-w-5xl mx-auto">
+        <header class="mb-8 border-b border-gray-800 pb-4">
+            <h1 class="text-3xl md:text-4xl font-bold text-blue-500 glow-text">ProTrade Options Terminal</h1>
+            <p class="text-gray-400 mt-2">Real-time Breakout & Risk Matrix for Indian Indices</p>
+        </header>
+
+        <div class="flex flex-wrap gap-4 mb-8" id="tabs">
+            <button onclick="switchTab('NIFTY 50')" id="tab-NIFTY 50" class="px-6 py-2 rounded-lg font-semibold bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] transition-all">NIFTY 50</button>
+            <button onclick="switchTab('FINNIFTY')" id="tab-FINNIFTY" class="px-6 py-2 rounded-lg font-semibold bg-gray-800 text-gray-400 hover:bg-gray-700 transition-all">FINNIFTY</button>
+            <button onclick="switchTab('MIDCPNIFTY')" id="tab-MIDCPNIFTY" class="px-6 py-2 rounded-lg font-semibold bg-gray-800 text-gray-400 hover:bg-gray-700 transition-all">MIDCPNIFTY</button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 fade-in">
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
+                <h2 class="text-xl font-bold mb-6 text-gray-300">Live Asset State</h2>
+                
+                <div class="flex justify-between items-center mb-6">
+                    <span class="text-gray-400">Current Market Price</span>
+                    <span class="text-4xl font-mono font-bold text-white" id="cmp-display">₹--</span>
+                </div>
+                
+                <div class="flex justify-between items-center bg-gray-800 p-4 rounded-lg mb-4">
+                    <span class="text-gray-400">Volume Status</span>
+                    <span class="font-mono text-blue-400" id="volume-display">--</span>
+                </div>
+                
+                <div class="flex items-center justify-between p-4 rounded-lg border" id="trend-box">
+                    <span class="text-gray-400">Trend Signal</span>
+                    <div class="flex items-center font-bold" id="trend-display">
+                        Analyzing...
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-gray-900 border border-gray-800 rounded-xl p-6 shadow-xl">
+                <div class="flex justify-between items-center mb-6">
+                    <h2 class="text-xl font-bold text-gray-300">Execution Blueprint</h2>
+                    <span class="bg-yellow-900/50 text-yellow-500 px-3 py-1 rounded text-sm font-mono" id="strike-display">-- CE/PE</span>
+                </div>
+
+                <div class="mb-6 bg-gray-800 p-4 rounded-lg border border-gray-700">
+                    <label class="text-gray-400 text-xs uppercase tracking-wider block mb-2">Base Premium (₹) - Editable</label>
+                    <input type="number" id="base-premium-input" value="100" class="w-full bg-gray-900 text-2xl font-mono text-white p-2 rounded border border-gray-600 focus:outline-none focus:border-blue-500" oninput="calculateRisk()">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="bg-red-950/30 border border-red-900/50 p-4 rounded-lg">
+                        <p class="text-red-400 text-xs uppercase tracking-wider mb-1">Stop Loss (-20%)</p>
+                        <p class="text-2xl font-mono text-red-500" id="sl-display">₹80.00</p>
+                    </div>
+                    <div class="bg-blue-900/20 border border-blue-900/50 p-4 rounded-lg">
+                        <p class="text-blue-400 text-xs uppercase tracking-wider mb-1">Target 1 (+15%)</p>
+                        <p class="text-2xl font-mono text-blue-400" id="t1-display">₹115.00</p>
+                    </div>
+                    <div class="col-span-2 bg-emerald-900/20 border border-emerald-900/50 p-4 rounded-lg text-center">
+                        <p class="text-emerald-400 text-xs uppercase tracking-wider mb-1">Target 2 (+30%)</p>
+                        <p class="text-3xl font-mono text-emerald-400 font-bold" id="t2-display">₹130.00</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // --- 1. STATE & CONFIGURATION ---
+        let activeTab = 'NIFTY 50';
+        
+        // Mock API Data (Replace this with real API polling later)
+        const marketData = {
+            'NIFTY 50': { cmp: 24310.50, volume: 850000, step: 50 },
+            'FINNIFTY': { cmp: 21855.20, volume: 420000, step: 50 },
+            'MIDCPNIFTY': { cmp: 12423.80, volume: 610000, step: 100 }
+        };
+
+        // --- 2. CORE LOGIC ---
+        function switchTab(indexName) {
+            activeTab = indexName;
+            
+            // Update UI Tab Styling
+            document.querySelectorAll('[id^="tab-"]').forEach(btn => {
+                btn.className = "px-6 py-2 rounded-lg font-semibold bg-gray-800 text-gray-400 hover:bg-gray-700 transition-all";
+            });
+            document.getElementById(`tab-${indexName}`).className = "px-6 py-2 rounded-lg font-semibold bg-blue-600 text-white shadow-[0_0_15px_rgba(37,99,235,0.5)] transition-all";
+            
+            updateDashboard();
+        }
+
+        function updateDashboard() {
+            const data = marketData[activeTab];
+            
+            // Calculate ATM Strike
+            const atmStrike = Math.round(data.cmp / data.step) * data.step;
+            
+            // Determine Trend based on Volume (Mock logic)
+            const isBullish = data.volume > 500000;
+            const trendText = isBullish ? 'BULLISH BREAKOUT' : 'CONSOLIDATING';
+            const optionType = isBullish ? 'CE' : 'PE';
+
+            // Update DOM Elements
+            document.getElementById('cmp-display').innerText = `₹${data.cmp.toLocaleString('en-IN')}`;
+            document.getElementById('volume-display').innerText = data.volume.toLocaleString('en-IN');
+            document.getElementById('strike-display').innerText = `${atmStrike} ${optionType}`;
+            
+            const trendBox = document.getElementById('trend-box');
+            const trendDisplay = document.getElementById('trend-display');
+            
+            if (isBullish) {
+                trendBox.className = "flex items-center justify-between p-4 rounded-lg border bg-emerald-900/20 border-emerald-800";
+                trendDisplay.className = "flex items-center font-bold text-emerald-400";
+                trendDisplay.innerText = "↗ " + trendText;
+            } else {
+                trendBox.className = "flex items-center justify-between p-4 rounded-lg border bg-gray-800 border-gray-700";
+                trendDisplay.className = "flex items-center font-bold text-gray-400";
+                trendDisplay.innerText = "→ " + trendText;
+            }
+
+            // Mock an initial base premium when switching tabs
+            document.getElementById('base-premium-input').value = Math.floor(data.cmp * 0.005);
+            calculateRisk();
+        }
+
+        // --- 3. RISK CALCULATOR ---
+        function calculateRisk() {
+            const baseStr = document.getElementById('base-premium-input').value;
+            const basePremium = parseFloat(baseStr);
+
+            if (isNaN(basePremium) || basePremium <= 0) {
+                document.getElementById('sl-display').innerText = "₹0.00";
+                document.getElementById('t1-display').innerText = "₹0.00";
+                document.getElementById('t2-display').innerText = "₹0.00";
+                return;
+            }
+
+            // The Math: SL (-20%), T1 (+15%), T2 (+30%)
+            const stopLoss = basePremium * 0.80;
+            const target1 = basePremium * 1.15;
+            const target2 = basePremium * 1.30;
+
+            document.getElementById('sl-display').innerText = `₹${stopLoss.toFixed(2)}`;
+            document.getElementById('t1-display').innerText = `₹${target1.toFixed(2)}`;
+            document.getElementById('t2-display').innerText = `₹${target2.toFixed(2)}`;
+        }
+
+        // --- 4. SIMULATE LIVE MARKET TICKS ---
+        setInterval(() => {
+            // Randomly fluctuate the mock CMP slightly to simulate live market
+            const data = marketData[activeTab];
+            const fluctuation = (Math.random() - 0.5) * 10; 
+            data.cmp = parseFloat((data.cmp + fluctuation).toFixed(2));
+            updateDashboard();
+        }, 3000); // Updates every 3 seconds
+
+        // Initialize App on load
+        window.onload = () => switchTab('NIFTY 50');
+    </script>
+</body>
+</html>
