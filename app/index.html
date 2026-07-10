@@ -832,10 +832,10 @@
                     </div>
                     
                     <!-- Disclaimer for the User -->
-                    <div class="flex items-start gap-1.5 text-[11px] text-neutral-500 bg-white/5 p-2.5 rounded-lg border border-white/10">
-                      <i class="ti ti-info-circle mt-0.5 text-blue-400"></i>
-                      <p><strong>Note:</strong> Ledger links automatically hide fully settled shoots older than 6 months to prevent invoice bloat. Unpaid shoots will always remain visible.</p>
-                    </div>
+<div class="flex items-start gap-1.5 text-[11px] text-neutral-500 bg-white/5 p-2.5 rounded-lg border border-white/10">
+  <i class="ti ti-info-circle mt-0.5 text-blue-400"></i>
+  <p><strong>Note:</strong> Ledger links automatically hide fully settled shoots older than 6 months to prevent invoice bloat. Unpaid shoots will always remain visible. Magic Booking links will automatically hide dates you are already booked to prevent double-bookings.</p>
+</div>
                     
                   </div>
                 </details>
@@ -1020,6 +1020,17 @@
             Send this link to the studio! They will see a custom calendar that automatically hides the days you are already booked or have manually blocked, preventing double-bookings.
           </div>
         </details>
+
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
+  <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
+    <div class="flex items-center gap-3"><i class="ti ti-wallet text-indigo-400 text-lg"></i> How do I share Client Ledger Links?</div>
+    <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
+  </summary>
+  <div class="p-4 pt-0 text-xs text-neutral-400 leading-relaxed border-t border-neutral-800/50 mt-2 pt-3">
+    Go to <strong>Account > Management</strong>. Under "Studio Companies", click the <strong>Ledger</strong> button next to any partner studio. <br><br>
+    Send this secure link to the studio! They will see a custom, branded web portal summarizing all their outstanding dues, settled invoices, and your bank/UPI details in real-time.
+  </div>
+</details>
 
         <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
@@ -3356,30 +3367,30 @@ async function toggleBlockDate(dateStr) {
       const payStatsContainer = document.getElementById('pay-stats');
       if (payStatsContainer) {
         payStatsContainer.innerHTML = `
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
+          <div onclick="document.getElementById('pay-filter-status').value=''; document.getElementById('pay-filter-expenses').value=''; renderPaymentsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-neutral-900 transition flex flex-col cursor-pointer" title="View All">
             <div class="text-[10px] font-bold text-neutral-400 uppercase tracking-wider">Total Amount</div>
             <div class="text-lg font-bold tracking-tight text-white mt-1 privacy-target">${fmtAmt(gross)}</div>
             <div class="text-[10px] text-neutral-600 mt-auto pt-2">Filtered shoots</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
+          <div onclick="document.getElementById('pay-filter-status').value='done'; document.getElementById('pay-filter-expenses').value=''; renderPaymentsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-emerald-950/20 transition flex flex-col cursor-pointer" title="Filter by Settled">
             <div class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider">Amount Received</div>
             <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-1 privacy-target">${fmtAmt(captured)}</div>
             <div class="text-[10px] text-emerald-600/60 mt-auto pt-2">Settled payments</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
+          <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; renderPaymentsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Filter by Pending">
             <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
             <div class="text-2xl font-bold tracking-tight text-red-400 mt-1 privacy-target">${fmtAmt(outstanding)}</div>
             <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues</div>
           </div>
-          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col">
+          <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col cursor-pointer" onclick="document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" title="View All Expenses">
             <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
             <div class="text-lg font-bold tracking-tight text-amber-500 mt-1 privacy-target">${fmtAmt(expenses)}</div>
             <div class="flex items-center justify-between mt-auto pt-2 border-t border-neutral-800/60">
-              <div>
+              <div onclick="event.stopPropagation(); document.getElementById('pay-filter-expenses').value='settled'; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" class="hover:bg-neutral-800 px-1 -ml-1 rounded transition" title="Filter by Settled Expenses">
                  <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Settled:</span>
                  <span class="text-[10px] font-bold text-emerald-400 ml-0.5 privacy-target">${fmtAmt(expensesSettled)}</span>
               </div>
-              <div>
+              <div onclick="event.stopPropagation(); document.getElementById('pay-filter-expenses').value='pending'; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" class="hover:bg-neutral-800 px-1 -mr-1 rounded transition" title="Filter by Pending Expenses">
                  <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Pending:</span>
                  <span class="text-[10px] font-bold text-orange-400 ml-0.5 privacy-target">${fmtAmt(expensesPending)}</span>
               </div>
