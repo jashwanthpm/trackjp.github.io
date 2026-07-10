@@ -939,7 +939,7 @@
               <div class="space-y-5">
 
                 <!-- Editor Workspace Toggle -->
-<div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 mb-5">
+<div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 mb-5 space-y-4">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -948,9 +948,32 @@
       <p class="text-xs text-neutral-500 mt-1">Enable a dedicated tab to track off-season editing and album design jobs.</p>
     </div>
     <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
-      <input type="checkbox" id="toggle-editor-workspace" class="sr-only peer" onchange="saveEditorToggle(this.checked)">
+      <input type="checkbox" id="toggle-editor-workspace" class="sr-only peer" onchange="saveEditorToggle()">
       <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
     </label>
+  </div>
+
+  <div id="editor-integrations" class="hidden pt-4 border-t border-neutral-800 space-y-4">
+    <div class="flex items-center justify-between">
+      <div>
+        <h4 class="text-sm font-bold text-neutral-300">Include in Dashboard Totals</h4>
+        <p class="text-[10px] text-neutral-500">Combine editing revenue into main Dashboard stats.</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="toggle-dash-edits" class="sr-only peer" onchange="saveEditorToggle()">
+        <div class="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-emerald-500"></div>
+      </label>
+    </div>
+    <div class="flex items-center justify-between">
+      <div>
+        <h4 class="text-sm font-bold text-neutral-300">Link with Client Ledger</h4>
+        <p class="text-[10px] text-neutral-500">Show editing dues in the external client ledger links.</p>
+      </div>
+      <label class="relative inline-flex items-center cursor-pointer">
+        <input type="checkbox" id="toggle-ledger-edits" class="sr-only peer" onchange="saveEditorToggle()">
+        <div class="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
+      </label>
+    </div>
   </div>
 </div>
                 
@@ -2797,20 +2820,33 @@ function handleEditEventOther() {
 }
 
 // Handle the toggle change
-async function saveEditorToggle(isChecked) {
-  _profile.isEditor = isChecked;
+async function saveEditorToggle() {
+  const isEditorOn = document.getElementById('toggle-editor-workspace').checked;
+  
+  _profile.isEditor = isEditorOn;
+  _profile.dashEdits = document.getElementById('toggle-dash-edits').checked;
+  _profile.ledgerEdits = document.getElementById('toggle-ledger-edits').checked;
+  
   await saveSettingToDB('profile', _profile);
   
   const navTab = document.getElementById('tab-editing');
-  if (isChecked) {
+  const integrations = document.getElementById('editor-integrations');
+  
+  if (isEditorOn) {
     navTab.classList.remove('hidden');
-    showToast('Editor Workspace enabled!', 'success');
+    integrations.classList.remove('hidden');
+    showToast('Editor Settings Saved!', 'success');
   } else {
     navTab.classList.add('hidden');
-    // If they hide it while on the tab, kick them back to dashboard
+    integrations.classList.add('hidden');
     if (document.getElementById('section-editing').classList.contains('hidden') === false) {
       switchTab('dashboard');
     }
+  }
+  
+  // Refresh the dashboard if the user flipped the dashboard toggle
+  if (_currentAccountTab === 'settings') {
+     renderDashboard();
   }
 }
 
@@ -3265,17 +3301,31 @@ async function deleteEditJob() {
       document.getElementById('dash-date').textContent = now.toLocaleDateString('en-IN', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
       // ... rest of the function stays exactly the same
 
-      const totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-      const totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
-      const realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      // "Due" is a running balance, not a per-period figure — a shoot from an
-      // earlier financial year that's still unpaid is still money owed today.
-      // So this is calculated from ALL shoots, not just the FY-filtered set.
-      const trueOutstanding = _shoots.reduce((a, s) => {
+      let totalGross = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
+      let totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
+      let realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
+      
+      let trueOutstanding = _shoots.reduce((a, s) => {
         const gross = Number(s.amount || 0);
         const received = s.payStatus === 'done' ? gross : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0;
         return a + (gross - received);
       }, 0);
+
+      // Dynamically add Editing Totals if the toggle is active
+      if (_profile.dashEdits && typeof _edits !== 'undefined') {
+         // Apply the same Financial Year / Date filters to the editing jobs
+         const filteredEdits = applyTimeFilter([..._edits], 'dash');
+         
+         totalGross += filteredEdits.reduce((a, e) => a + Number(e.amount || 0), 0);
+         realizedReceived += filteredEdits.reduce((a, e) => e.pay_status === 'done' ? a + Number(e.amount || 0) : a, 0);
+         
+         // Outstanding is calculated against all active history, so we don't use the filtered array here
+         trueOutstanding += _edits.reduce((a, e) => {
+           const gross = Number(e.amount || 0);
+           const received = e.pay_status === 'done' ? gross : 0;
+           return a + (gross - received);
+         }, 0);
+      }
 
       document.getElementById('dash-stats').innerHTML = `
         <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
@@ -4057,13 +4107,30 @@ async function toggleBlockDate(dateStr) {
       if (document.getElementById('acc-wa-template-payment')) {
         document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
       }
+      
       const heroName = _profile.bizName || 'Your Studio';
       const heroNameEl = document.getElementById('acc-hero-name');
       if (heroNameEl) heroNameEl.textContent = heroName;
+      
       renderAccountAvatar();
-    // ADD THESE NEW LINES:
+      
+      // Editor & Integration Toggles
       document.getElementById('toggle-editor-workspace').checked = _profile.isEditor || false;
-      if (_profile.isEditor) document.getElementById('tab-editing').classList.remove('hidden');
+      
+      const dashToggle = document.getElementById('toggle-dash-edits');
+      if (dashToggle) dashToggle.checked = _profile.dashEdits || false;
+      
+      const ledgerToggle = document.getElementById('toggle-ledger-edits');
+      if (ledgerToggle) ledgerToggle.checked = _profile.ledgerEdits || false;
+      
+      const integrations = document.getElementById('editor-integrations');
+      
+      if (_profile.isEditor) {
+         document.getElementById('tab-editing').classList.remove('hidden');
+         if (integrations) integrations.classList.remove('hidden');
+      } else {
+         if (integrations) integrations.classList.add('hidden');
+      }
     }
 
     function renderAccountAvatar() {
