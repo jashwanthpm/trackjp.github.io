@@ -250,6 +250,13 @@
 </head>
 <body data-theme="midnight" class="min-h-screen pb-24 md:pb-6 transition-colors duration-300">
 
+  <div id="ptr-indicator" class="fixed top-0 left-0 w-full flex justify-center pointer-events-none z-[9999] transition-transform duration-200" style="transform: translateY(-100%);">
+    <div class="bg-[#0f0f0f]/90 backdrop-blur-md border border-neutral-800 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 mt-4">
+      <i class="ti ti-arrow-down text-[#c9a96e] transition-transform duration-200" id="ptr-icon"></i>
+      <span id="ptr-text" class="text-[10px] font-bold text-white tracking-widest uppercase">Pull to refresh</span>
+    </div>
+  </div>
+  
  <div id="login-modal" class="login-modal">
     <div class="login-modal-content relative bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-8 sm:p-10 w-full max-w-[400px] shadow-[0_8px_32px_rgba(0,0,0,0.8)] backdrop-blur-xl">
       
@@ -6310,6 +6317,75 @@ async function executeDeleteAll() {
 
 
   </script>
+
+    <script>
+    // --- PULL TO REFRESH LOGIC ---
+    let ptrStartY = 0;
+    let ptrCurrentY = 0;
+    let ptrIsPulling = false;
+    const ptrIndicator = document.getElementById('ptr-indicator');
+    const ptrIcon = document.getElementById('ptr-icon');
+    const ptrText = document.getElementById('ptr-text');
+
+    document.addEventListener('touchstart', (e) => {
+      // Only allow pulling if we are at the absolute top of the page
+      if (window.scrollY <= 0) {
+        ptrStartY = e.touches[0].clientY;
+        ptrIsPulling = true;
+        ptrIndicator.style.transition = 'none'; // Remove CSS transition so it sticks to the finger
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!ptrIsPulling) return;
+      
+      ptrCurrentY = e.touches[0].clientY;
+      const pullDistance = ptrCurrentY - ptrStartY;
+      
+      if (pullDistance > 0 && window.scrollY <= 0) {
+        // Apply friction/resistance so it feels heavy like a native app
+        const yPos = Math.min(pullDistance * 0.4, 80); 
+        ptrIndicator.style.transform = `translateY(${yPos - 60}px)`; // -60px is the hidden resting state
+        
+        // Swap icon/text when they pass the refresh threshold
+        if (pullDistance > 120) {
+          ptrText.textContent = "Release to refresh";
+          ptrIcon.className = "ti ti-arrow-up text-[#c9a96e] transition-transform duration-200";
+        } else {
+          ptrText.textContent = "Pull to refresh";
+          ptrIcon.className = "ti ti-arrow-down text-[#c9a96e] transition-transform duration-200";
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      if (!ptrIsPulling) return;
+      ptrIsPulling = false;
+      
+      const pullDistance = ptrCurrentY - ptrStartY;
+      // Add a bouncy release transition
+      ptrIndicator.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      
+      if (pullDistance > 120 && window.scrollY <= 0) {
+        // Threshold met: Trigger the refresh animation and reload
+        ptrIndicator.style.transform = `translateY(20px)`;
+        ptrText.textContent = "Refreshing...";
+        ptrIcon.className = "ti ti-loader animate-spin text-[#c9a96e]";
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // Threshold not met: Snap back to the top
+        ptrIndicator.style.transform = `translateY(-100%)`;
+      }
+      
+      // Reset variables
+      ptrStartY = 0;
+      ptrCurrentY = 0;
+    });
+  </script>
+    
     <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
