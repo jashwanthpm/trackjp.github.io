@@ -557,10 +557,15 @@
     <div class="p-5 space-y-4">
       <input type="hidden" id="f-edit-id"/>
       
+      <div class="flex flex-col gap-1.5 mb-1">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
+        <input type="text" id="f-edit-client" placeholder="e.g., John Doe" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
-          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
-          <input type="text" id="f-edit-client" placeholder="e.g., John Doe" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Date *</label>
+          <input type="date" id="f-edit-date" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition [color-scheme:dark]"/>
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Job Type *</label>
@@ -2786,22 +2791,22 @@ async function saveEditorToggle(isChecked) {
   }
 }
 
-// Render the Editing View
+// Render the Editing View (Now grouped by Month)
 function renderEditingList() {
   const totalAmount = _edits.reduce((a, b) => a + Number(b.amount || 0), 0);
   const pendingAmount = _edits.filter(e => e.pay_status === 'pending').reduce((a, b) => a + Number(b.amount || 0), 0);
   const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
 
   document.getElementById('editing-stats').innerHTML = `
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
       <div class="text-xs text-blue-400 uppercase tracking-wider font-semibold">Active Jobs</div>
       <div class="text-2xl font-bold text-white mt-2">${activeJobs}</div>
     </div>
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
       <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Revenue</div>
       <div class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalAmount)}</div>
     </div>
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
       <div class="text-xs text-red-400 uppercase tracking-wider font-semibold">Pending Pay</div>
       <div class="text-2xl font-bold text-red-400 mt-2 privacy-target">${fmtAmt(pendingAmount)}</div>
     </div>
@@ -2809,37 +2814,78 @@ function renderEditingList() {
 
   const listEl = document.getElementById('editing-list');
   if (_edits.length === 0) {
-    listEl.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No editing jobs found.</div>';
+    listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No editing jobs found.</div>';
     return;
   }
 
-  listEl.innerHTML = _edits.sort((a,b) => new Date(b.created) - new Date(a.created)).map(e => {
-    const workStyles = {
-      'pending': 'bg-neutral-900 text-neutral-400',
-      'editing': 'bg-blue-950/50 text-blue-400 border border-blue-900/50',
-      'review': 'bg-amber-950/50 text-amber-400 border border-amber-900/50',
-      'completed': 'bg-emerald-950/50 text-emerald-400 border border-emerald-900/50'
-    }[e.work_status] || 'bg-neutral-900 text-neutral-400';
+  // Sort by date descending
+  const sorted = [..._edits].sort((a,b) => (b.date || b.created).localeCompare(a.date || a.created));
 
-    return `
-      <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition cursor-pointer flex justify-between items-center gap-3">
-        <div>
-          <h4 class="text-sm font-bold text-white">${escapeHtml(e.client_name)}</h4>
-          <div class="flex items-center gap-2 mt-1">
-            <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider">${escapeHtml(e.job_type || 'Edit')}</span>
-            <p class="text-xs text-neutral-500">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
-          </div>
-          <div class="mt-2.5 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
-            ${e.work_status.replace('-', ' ')}
-          </div>
+  // Group by Month
+  const grouped = {};
+  sorted.forEach(e => {
+    const monthKey = (e.date || e.created || '').slice(0, 7);
+    if (!grouped[monthKey]) grouped[monthKey] = [];
+    grouped[monthKey].push(e);
+  });
+
+  let html = '';
+  Object.keys(grouped).sort().reverse().forEach(monthKey => {
+    const jobs = grouped[monthKey];
+    const [year, month] = monthKey.split('-');
+    const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
+    
+    html += `
+      <div class="mb-6">
+        <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
+          <i class="ti ti-calendar text-[#c9a96e]"></i>
+          <h3 class="text-sm font-bold text-white tracking-wide">${monthName} ${year}</h3>
+          <span class="text-xs text-neutral-500 ml-auto">${jobs.length} jobs</span>
         </div>
-        <div class="text-right">
-          <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
-          <p class="text-[10px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+        <div class="space-y-2">
+          ${jobs.map(e => {
+            const workStyles = {
+              'pending': 'bg-neutral-900 text-neutral-400',
+              'editing': 'bg-blue-950/50 text-blue-400 border border-blue-900/50',
+              'review': 'bg-amber-950/50 text-amber-400 border border-amber-900/50',
+              'completed': 'bg-emerald-950/50 text-emerald-400 border border-emerald-900/50'
+            }[e.work_status] || 'bg-neutral-900 text-neutral-400';
+
+            const dateObj = new Date((e.date || e.created) + 'T00:00:00');
+            const dd = !isNaN(dateObj) ? dateObj.getDate().toString().padStart(2, '0') : '--';
+            const mmm = !isNaN(dateObj) ? MONTHS[dateObj.getMonth()].slice(0,3).toUpperCase() : '---';
+
+            return `
+              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                    <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
+                    <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <h4 class="text-sm font-bold text-white truncate">${escapeHtml(e.client_name)}</h4>
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                      <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider">${escapeHtml(e.job_type || 'Edit')}</span>
+                      <p class="text-xs text-neutral-500 truncate">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
+                    </div>
+                    <div class="mt-2.5 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
+                      ${e.work_status.replace('-', ' ')}
+                    </div>
+                  </div>
+                </div>
+                <div class="text-right flex-shrink-0">
+                  <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
+                  <p class="text-[10px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+                </div>
+              </div>
+            `;
+          }).join('')}
         </div>
       </div>
     `;
-  }).join('');
+  });
+  
+  listEl.innerHTML = html;
   applyPrivacyUIVisibility();
 }
 
@@ -2847,15 +2893,12 @@ function openEditJobModal(id = null) {
   const modalBtn = document.getElementById('modal-delete-edit-btn');
   const title = document.getElementById('edit-job-title');
   
-  // Sync Companies Dropdown
   const cSel = document.getElementById('f-edit-company');
   cSel.innerHTML = '<option value="">Direct Client / None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
 
-  // Sync Events Dropdown
   const eSel = document.getElementById('f-edit-event');
   eSel.innerHTML = '<option value="">Select Event</option>' + _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Add Custom Event</option>';
 
-  // Sync Job Types Dropdown
   const jtSel = document.getElementById('f-edit-job-type');
   jtSel.innerHTML = _jobTypes.map(j => `<option value="${j}">${j}</option>`).join('') + '<option value="Other">Add Custom Job Type</option>';
 
@@ -2868,31 +2911,26 @@ function openEditJobModal(id = null) {
     
     document.getElementById('f-edit-id').value = job.id;
     document.getElementById('f-edit-client').value = job.client_name;
+    document.getElementById('f-edit-date').value = job.date || job.created.split('T')[0];
     if (job.company_name) cSel.value = job.company_name;
 
-    // Handle Event Selection
     if (job.event_name) {
-      if (_events.includes(job.event_name)) {
-        eSel.value = job.event_name;
-      } else {
+      if (_events.includes(job.event_name)) eSel.value = job.event_name;
+      else {
         eSel.value = 'Other';
         document.getElementById('f-edit-event-other').value = job.event_name;
         document.getElementById('f-edit-event-other-wrap').classList.remove('hidden');
       }
     }
 
-    // Handle Job Type Selection
     if (job.job_type) {
-      if (_jobTypes.includes(job.job_type)) {
-        jtSel.value = job.job_type;
-      } else {
+      if (_jobTypes.includes(job.job_type)) jtSel.value = job.job_type;
+      else {
         jtSel.value = 'Other';
         document.getElementById('f-edit-job-other').value = job.job_type;
         document.getElementById('f-edit-job-other-wrap').classList.remove('hidden');
       }
-    } else {
-      jtSel.value = _jobTypes[0];
-    }
+    } else jtSel.value = _jobTypes[0];
 
     document.getElementById('f-edit-amount').value = job.amount || '';
     document.getElementById('f-edit-work-status').value = job.work_status;
@@ -2902,6 +2940,7 @@ function openEditJobModal(id = null) {
   } else {
     document.getElementById('f-edit-id').value = '';
     document.getElementById('f-edit-client').value = '';
+    document.getElementById('f-edit-date').value = today();
     cSel.value = '';
     eSel.value = '';
     jtSel.value = _jobTypes[0] || '';
@@ -2919,7 +2958,6 @@ function openEditJobModal(id = null) {
 async function saveEditJob() {
   const id = document.getElementById('f-edit-id').value || uid();
 
-  // Validate and Save Custom Job Type
   let jobType = document.getElementById('f-edit-job-type').value;
   if (jobType === 'Other') {
     jobType = document.getElementById('f-edit-job-other').value.trim() || 'Photo Edit';
@@ -2929,7 +2967,6 @@ async function saveEditJob() {
     }
   }
 
-  // Validate and Save Custom Event
   let eventName = document.getElementById('f-edit-event').value;
   if (eventName === 'Other') {
     eventName = document.getElementById('f-edit-event-other').value.trim();
@@ -2939,10 +2976,17 @@ async function saveEditJob() {
     }
   }
 
+  const jobDate = document.getElementById('f-edit-date').value;
+  if (!jobDate) {
+    showToast('Date is required.', 'error');
+    return;
+  }
+
   const job = {
     id: id,
     user_id: currentUser.id,
     client_name: document.getElementById('f-edit-client').value.trim(),
+    date: jobDate,
     job_type: jobType,
     company_name: document.getElementById('f-edit-company').value,
     event_name: eventName,
