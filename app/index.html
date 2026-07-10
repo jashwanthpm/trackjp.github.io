@@ -542,11 +542,14 @@
     <!-- Populated by JS -->
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+ <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
     <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
       <i class="ti ti-search text-neutral-500"></i>
       <input type="text" id="edit-search" placeholder="Search jobs..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="debouncedEditSearch()"/>
     </div>
+    <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="edit-filter-company" onchange="renderEditingList()">
+      <option value="">All Companies</option>
+      </select>
     <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="edit-filter-work" onchange="renderEditingList()">
       <option value="">All Work Status</option>
       <option value="active">Active (In Progress)</option>
@@ -560,9 +563,6 @@
       <option value="pending">Pending Payment</option>
       <option value="done">Settled Payment</option>
     </select>
-    <button onclick="document.getElementById('edit-search').value='';document.getElementById('edit-filter-work').value='';document.getElementById('edit-filter-pay').value='';renderEditingList();" class="flex items-center justify-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition">
-      <i class="ti ti-filter-off"></i> Clear Filters
-    </button>
   </div>
 
   <div class="space-y-2" id="editing-list">
@@ -2884,6 +2884,13 @@ function renderEditingList() {
     </div>
   `;
 
+  // Dynamically populate the Company Filter Dropdown
+  const compDropdown = document.getElementById('edit-filter-company');
+  if (compDropdown) {
+    const cachedSelection = compDropdown.value;
+    compDropdown.innerHTML = '<option value="">All Companies</option>' + _companies.map(c => `<option value="${c}" ${c === cachedSelection ? 'selected' : ''}>${c}</option>`).join('');
+  }
+
   const listEl = document.getElementById('editing-list');
   if (_edits.length === 0) {
     listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No editing jobs found.</div>';
@@ -2894,12 +2901,14 @@ function renderEditingList() {
   const q = (document.getElementById('edit-search')?.value || '').toLowerCase();
   const fw = document.getElementById('edit-filter-work')?.value || '';
   const fp = document.getElementById('edit-filter-pay')?.value || '';
+  const fc = document.getElementById('edit-filter-company')?.value || '';
 
   let filtered = [..._edits];
   if (q) filtered = filtered.filter(e => `${e.client_name || ''} ${e.company_name || ''} ${e.event_name || ''} ${e.job_type || ''}`.toLowerCase().includes(q));
   if (fw === 'active') filtered = filtered.filter(e => e.work_status !== 'completed');
   else if (fw) filtered = filtered.filter(e => e.work_status === fw);
   if (fp) filtered = filtered.filter(e => e.pay_status === fp);
+  if (fc) filtered = filtered.filter(e => e.company_name === fc);
 
   if (filtered.length === 0) {
     listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching editing jobs found.</div>';
@@ -2944,26 +2953,29 @@ function renderEditingList() {
             const mmm = !isNaN(dateObj) ? MONTHS[dateObj.getMonth()].slice(0,3).toUpperCase() : '---';
 
             return `
-              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-2 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-2.5">
-                <div class="flex items-center gap-2.5 min-w-0 flex-1">
-                  <div class="w-9 h-9 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                    <span class="text-xs font-bold text-[#c9a96e] leading-tight">${dd}</span>
-                    <span class="text-[7px] uppercase tracking-wide text-neutral-500 font-semibold">${mmm}</span>
+              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+                <div class="flex items-center gap-3 min-w-0 flex-1">
+                  <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                    <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
+                    <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-1.5 min-w-0">
-                      <h4 class="text-xs font-bold text-white truncate">${escapeHtml(e.client_name)}</h4>
-                      <span class="text-[8px] px-1.5 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider flex-shrink-0">${escapeHtml(e.job_type || 'Edit')}</span>
+                    <div class="flex items-center gap-2 min-w-0">
+                      <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(e.client_name)}</h4>
+                      <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider flex-shrink-0">${escapeHtml(e.job_type || 'Edit')}</span>
                     </div>
-                    <p class="text-[10px] text-neutral-500 truncate mt-0.5">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
-                    <div class="mt-1 inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workStyles}">
+                    <div class="flex flex-wrap items-center gap-2 mt-1">
+                      <span class="text-xs text-neutral-500">${escapeHtml(e.event_name || 'N/A')}</span>
+                      ${e.company_name ? `<span class="text-xs text-neutral-500 truncate">• ${escapeHtml(e.company_name)}</span>` : ''}
+                    </div>
+                    <div class="mt-1.5 inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workStyles}">
                       ${e.work_status.replace('-', ' ')}
                     </div>
                   </div>
                 </div>
                 <div class="text-right flex-shrink-0">
-                  <p class="text-xs font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
-                  <p class="text-[9px] font-bold uppercase tracking-wider mt-0.5 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+                  <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
+                  <p class="text-[9px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
                 </div>
               </div>
             `;
