@@ -39,6 +39,13 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-4 pt-8 pb-12 relative overflow-x-hidden">
 
+  <div id="ptr-indicator" class="fixed top-0 left-0 w-full flex justify-center pointer-events-none z-[9999] transition-transform duration-200" style="transform: translateY(-100%);">
+    <div class="bg-[#0f0f0f]/90 backdrop-blur-md border border-neutral-800 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 mt-4">
+      <i class="ti ti-arrow-down text-[#c9a96e] transition-transform duration-200" id="ptr-icon"></i>
+      <span id="ptr-text" class="text-[10px] font-bold text-white tracking-widest uppercase">Pull to refresh</span>
+    </div>
+  </div>
+
   <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
