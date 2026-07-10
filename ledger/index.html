@@ -558,5 +558,74 @@
 
     window.addEventListener('DOMContentLoaded', loadPortal);
   </script>
+
+<script>
+    // --- PULL TO REFRESH LOGIC ---
+    let ptrStartY = 0;
+    let ptrCurrentY = 0;
+    let ptrIsPulling = false;
+    const ptrIndicator = document.getElementById('ptr-indicator');
+    const ptrIcon = document.getElementById('ptr-icon');
+    const ptrText = document.getElementById('ptr-text');
+
+    document.addEventListener('touchstart', (e) => {
+      // Only allow pulling if we are at the absolute top of the page
+      if (window.scrollY <= 0) {
+        ptrStartY = e.touches[0].clientY;
+        ptrIsPulling = true;
+        ptrIndicator.style.transition = 'none'; // Remove CSS transition so it sticks to the finger
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+      if (!ptrIsPulling) return;
+      
+      ptrCurrentY = e.touches[0].clientY;
+      const pullDistance = ptrCurrentY - ptrStartY;
+      
+      if (pullDistance > 0 && window.scrollY <= 0) {
+        // Apply friction/resistance so it feels heavy like a native app
+        const yPos = Math.min(pullDistance * 0.4, 80); 
+        ptrIndicator.style.transform = `translateY(${yPos - 60}px)`; // -60px is the hidden resting state
+        
+        // Swap icon/text when they pass the refresh threshold
+        if (pullDistance > 120) {
+          ptrText.textContent = "Release to refresh";
+          ptrIcon.className = "ti ti-arrow-up text-[#c9a96e] transition-transform duration-200";
+        } else {
+          ptrText.textContent = "Pull to refresh";
+          ptrIcon.className = "ti ti-arrow-down text-[#c9a96e] transition-transform duration-200";
+        }
+      }
+    }, { passive: true });
+
+    document.addEventListener('touchend', () => {
+      if (!ptrIsPulling) return;
+      ptrIsPulling = false;
+      
+      const pullDistance = ptrCurrentY - ptrStartY;
+      // Add a bouncy release transition
+      ptrIndicator.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+      
+      if (pullDistance > 120 && window.scrollY <= 0) {
+        // Threshold met: Trigger the refresh animation and reload
+        ptrIndicator.style.transform = `translateY(20px)`;
+        ptrText.textContent = "Refreshing...";
+        ptrIcon.className = "ti ti-loader animate-spin text-[#c9a96e]";
+        
+        setTimeout(() => {
+          window.location.reload();
+        }, 500);
+      } else {
+        // Threshold not met: Snap back to the top
+        ptrIndicator.style.transform = `translateY(-100%)`;
+      }
+      
+      // Reset variables
+      ptrStartY = 0;
+      ptrCurrentY = 0;
+    });
+  </script>
+  
 </body>
 </html>
