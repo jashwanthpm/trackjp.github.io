@@ -557,20 +557,36 @@
     <div class="p-5 space-y-4">
       <input type="hidden" id="f-edit-id"/>
       
-      <div class="flex flex-col gap-1.5">
-        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
-        <input type="text" id="f-edit-client" placeholder="e.g., John Doe" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
+          <input type="text" id="f-edit-client" placeholder="e.g., John Doe" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Job Type *</label>
+          <select id="f-edit-job-type" onchange="handleEditJobTypeOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
+        </div>
+      </div>
+
+      <div id="f-edit-job-other-wrap" class="hidden flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Custom Job Type *</label>
+        <input type="text" id="f-edit-job-other" placeholder="e.g., Cinematic Video" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
-          <input type="text" id="f-edit-company" placeholder="e.g., Studio XYZ" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          <select id="f-edit-company" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Name</label>
-          <input type="text" id="f-edit-event" placeholder="e.g., Pre-Wedding" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          <select id="f-edit-event" onchange="handleEditEventOther()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"></select>
         </div>
+      </div>
+
+      <div id="f-edit-event-other-wrap" class="hidden flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Other Event Name *</label>
+        <input type="text" id="f-edit-event-other" placeholder="e.g., Post-Wedding" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-900">
@@ -2292,6 +2308,10 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     
     const eRow = configurations.find(r => r.key === 'events');
     if (eRow) _events = eRow.value;
+    
+    // ADD THIS NEW RULE
+    const jtRow = configurations.find(r => r.key === 'job_types');
+    if (jtRow) _jobTypes = jtRow.value;
 
     const blockRow = configurations.find(r => r.key === 'blocked_dates');
     if (blockRow) _blockedDates = blockRow.value || [];
@@ -2734,6 +2754,19 @@ function getCurrentDeviceDetails() {
     }
 
 let _edits = [];
+let _jobTypes = ['Photo Edit', 'Video Edit', 'Album Design'];
+
+function handleEditJobTypeOther() {
+  const wrap = document.getElementById('f-edit-job-other-wrap');
+  if (document.getElementById('f-edit-job-type').value === 'Other') wrap.classList.remove('hidden');
+  else wrap.classList.add('hidden');
+}
+
+function handleEditEventOther() {
+  const wrap = document.getElementById('f-edit-event-other-wrap');
+  if (document.getElementById('f-edit-event').value === 'Other') wrap.classList.remove('hidden');
+  else wrap.classList.add('hidden');
+}
 
 // Handle the toggle change
 async function saveEditorToggle(isChecked) {
@@ -2792,8 +2825,11 @@ function renderEditingList() {
       <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition cursor-pointer flex justify-between items-center gap-3">
         <div>
           <h4 class="text-sm font-bold text-white">${escapeHtml(e.client_name)}</h4>
-          <p class="text-xs text-neutral-500 mt-1">${escapeHtml(e.company_name)} • ${escapeHtml(e.event_name)}</p>
-          <div class="mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
+          <div class="flex items-center gap-2 mt-1">
+            <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider">${escapeHtml(e.job_type || 'Edit')}</span>
+            <p class="text-xs text-neutral-500">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
+          </div>
+          <div class="mt-2.5 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
             ${e.work_status.replace('-', ' ')}
           </div>
         </div>
@@ -2807,18 +2843,57 @@ function renderEditingList() {
   applyPrivacyUIVisibility();
 }
 
-// Modal Controls
 function openEditJobModal(id = null) {
   const modalBtn = document.getElementById('modal-delete-edit-btn');
   const title = document.getElementById('edit-job-title');
   
+  // Sync Companies Dropdown
+  const cSel = document.getElementById('f-edit-company');
+  cSel.innerHTML = '<option value="">Direct Client / None</option>' + _companies.map(c => `<option value="${c}">${c}</option>`).join('');
+
+  // Sync Events Dropdown
+  const eSel = document.getElementById('f-edit-event');
+  eSel.innerHTML = '<option value="">Select Event</option>' + _events.map(e => `<option value="${e}">${e}</option>`).join('') + '<option value="Other">Add Custom Event</option>';
+
+  // Sync Job Types Dropdown
+  const jtSel = document.getElementById('f-edit-job-type');
+  jtSel.innerHTML = _jobTypes.map(j => `<option value="${j}">${j}</option>`).join('') + '<option value="Other">Add Custom Job Type</option>';
+
+  document.getElementById('f-edit-job-other-wrap').classList.add('hidden');
+  document.getElementById('f-edit-event-other-wrap').classList.add('hidden');
+
   if (id) {
     const job = _edits.find(e => e.id === id);
     if (!job) return;
+    
     document.getElementById('f-edit-id').value = job.id;
     document.getElementById('f-edit-client').value = job.client_name;
-    document.getElementById('f-edit-company').value = job.company_name || '';
-    document.getElementById('f-edit-event').value = job.event_name || '';
+    if (job.company_name) cSel.value = job.company_name;
+
+    // Handle Event Selection
+    if (job.event_name) {
+      if (_events.includes(job.event_name)) {
+        eSel.value = job.event_name;
+      } else {
+        eSel.value = 'Other';
+        document.getElementById('f-edit-event-other').value = job.event_name;
+        document.getElementById('f-edit-event-other-wrap').classList.remove('hidden');
+      }
+    }
+
+    // Handle Job Type Selection
+    if (job.job_type) {
+      if (_jobTypes.includes(job.job_type)) {
+        jtSel.value = job.job_type;
+      } else {
+        jtSel.value = 'Other';
+        document.getElementById('f-edit-job-other').value = job.job_type;
+        document.getElementById('f-edit-job-other-wrap').classList.remove('hidden');
+      }
+    } else {
+      jtSel.value = _jobTypes[0];
+    }
+
     document.getElementById('f-edit-amount').value = job.amount || '';
     document.getElementById('f-edit-work-status').value = job.work_status;
     document.getElementById('f-edit-pay-status').value = job.pay_status;
@@ -2827,8 +2902,11 @@ function openEditJobModal(id = null) {
   } else {
     document.getElementById('f-edit-id').value = '';
     document.getElementById('f-edit-client').value = '';
-    document.getElementById('f-edit-company').value = '';
-    document.getElementById('f-edit-event').value = '';
+    cSel.value = '';
+    eSel.value = '';
+    jtSel.value = _jobTypes[0] || '';
+    document.getElementById('f-edit-event-other').value = '';
+    document.getElementById('f-edit-job-other').value = '';
     document.getElementById('f-edit-amount').value = '';
     document.getElementById('f-edit-work-status').value = 'pending';
     document.getElementById('f-edit-pay-status').value = 'pending';
@@ -2840,12 +2918,34 @@ function openEditJobModal(id = null) {
 
 async function saveEditJob() {
   const id = document.getElementById('f-edit-id').value || uid();
+
+  // Validate and Save Custom Job Type
+  let jobType = document.getElementById('f-edit-job-type').value;
+  if (jobType === 'Other') {
+    jobType = document.getElementById('f-edit-job-other').value.trim() || 'Photo Edit';
+    if (jobType !== 'Photo Edit' && !_jobTypes.includes(jobType)) {
+      _jobTypes.push(jobType);
+      await saveSettingToDB('job_types', _jobTypes);
+    }
+  }
+
+  // Validate and Save Custom Event
+  let eventName = document.getElementById('f-edit-event').value;
+  if (eventName === 'Other') {
+    eventName = document.getElementById('f-edit-event-other').value.trim();
+    if (eventName && !_events.includes(eventName)) {
+      _events.push(eventName);
+      await saveSettingToDB('events', _events);
+    }
+  }
+
   const job = {
     id: id,
     user_id: currentUser.id,
     client_name: document.getElementById('f-edit-client').value.trim(),
-    company_name: document.getElementById('f-edit-company').value.trim(),
-    event_name: document.getElementById('f-edit-event').value.trim(),
+    job_type: jobType,
+    company_name: document.getElementById('f-edit-company').value,
+    event_name: eventName,
     amount: parseFloat(document.getElementById('f-edit-amount').value) || 0,
     work_status: document.getElementById('f-edit-work-status').value,
     pay_status: document.getElementById('f-edit-pay-status').value,
