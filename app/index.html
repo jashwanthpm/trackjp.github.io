@@ -538,8 +538,31 @@
     </button>
   </div>
 
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="editing-stats">
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="editing-stats">
     <!-- Populated by JS -->
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-4 gap-2">
+    <div class="flex items-center gap-2 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 focus-within:border-[#c9a96e] transition">
+      <i class="ti ti-search text-neutral-500"></i>
+      <input type="text" id="edit-search" placeholder="Search jobs..." class="w-full bg-transparent text-sm border-none outline-none text-white placeholder-neutral-600" oninput="debouncedEditSearch()"/>
+    </div>
+    <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="edit-filter-work" onchange="renderEditingList()">
+      <option value="">All Work Status</option>
+      <option value="active">Active (In Progress)</option>
+      <option value="pending">Pending</option>
+      <option value="editing">Editing</option>
+      <option value="review">Review</option>
+      <option value="completed">Completed</option>
+    </select>
+    <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="edit-filter-pay" onchange="renderEditingList()">
+      <option value="">All Payment Status</option>
+      <option value="pending">Pending Payment</option>
+      <option value="done">Settled Payment</option>
+    </select>
+    <button onclick="document.getElementById('edit-search').value='';document.getElementById('edit-filter-work').value='';document.getElementById('edit-filter-pay').value='';renderEditingList();" class="flex items-center justify-center gap-1.5 text-xs font-semibold bg-neutral-900 border border-neutral-800 text-neutral-300 hover:text-white rounded-lg px-3 py-2 transition">
+      <i class="ti ti-filter-off"></i> Clear Filters
+    </button>
   </div>
 
   <div class="space-y-2" id="editing-list">
@@ -2797,18 +2820,31 @@ function renderEditingList() {
   const pendingAmount = _edits.filter(e => e.pay_status === 'pending').reduce((a, b) => a + Number(b.amount || 0), 0);
   const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
 
+  // This Month snapshot (e.g. "July: 5 jobs • ₹total")
+  const now = new Date();
+  const curMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+  const curMonthName = MONTHS[now.getMonth()];
+  const monthJobs = _edits.filter(e => (e.date || e.created || '').slice(0, 7) === curMonthKey);
+  const monthCount = monthJobs.length;
+  const monthTotal = monthJobs.reduce((a, b) => a + Number(b.amount || 0), 0);
+
   document.getElementById('editing-stats').innerHTML = `
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+    <div onclick="document.getElementById('edit-filter-work').value='active';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-blue-950/10 transition cursor-pointer" title="Filter by Active Jobs">
       <div class="text-xs text-blue-400 uppercase tracking-wider font-semibold">Active Jobs</div>
       <div class="text-2xl font-bold text-white mt-2">${activeJobs}</div>
     </div>
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-      <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Revenue</div>
+    <div onclick="document.getElementById('edit-filter-work').value='';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition cursor-pointer" title="View All Jobs">
+      <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Received</div>
       <div class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalAmount)}</div>
     </div>
-    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+    <div onclick="document.getElementById('edit-filter-pay').value='pending';document.getElementById('edit-filter-work').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/10 transition cursor-pointer" title="Filter by Pending Payments">
       <div class="text-xs text-red-400 uppercase tracking-wider font-semibold">Pending Pay</div>
       <div class="text-2xl font-bold text-red-400 mt-2 privacy-target">${fmtAmt(pendingAmount)}</div>
+    </div>
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+      <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">${curMonthName}</div>
+      <div class="text-2xl font-bold text-emerald-500 mt-2">${monthCount} <span class="text-xs font-semibold text-neutral-500">jobs</span></div>
+      <div class="text-[11px] font-bold text-neutral-400 mt-0.5 privacy-target">${fmtAmt(monthTotal)} earned</div>
     </div>
   `;
 
@@ -2818,8 +2854,24 @@ function renderEditingList() {
     return;
   }
 
+  // Apply search + filters (list only — stats above always reflect totals)
+  const q = (document.getElementById('edit-search')?.value || '').toLowerCase();
+  const fw = document.getElementById('edit-filter-work')?.value || '';
+  const fp = document.getElementById('edit-filter-pay')?.value || '';
+
+  let filtered = [..._edits];
+  if (q) filtered = filtered.filter(e => `${e.client_name || ''} ${e.company_name || ''} ${e.event_name || ''} ${e.job_type || ''}`.toLowerCase().includes(q));
+  if (fw === 'active') filtered = filtered.filter(e => e.work_status !== 'completed');
+  else if (fw) filtered = filtered.filter(e => e.work_status === fw);
+  if (fp) filtered = filtered.filter(e => e.pay_status === fp);
+
+  if (filtered.length === 0) {
+    listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching editing jobs found.</div>';
+    return;
+  }
+
   // Sort by date descending
-  const sorted = [..._edits].sort((a,b) => (b.date || b.created).localeCompare(a.date || a.created));
+  const sorted = filtered.sort((a,b) => (b.date || b.created).localeCompare(a.date || a.created));
 
   // Group by Month
   const grouped = {};
@@ -2856,26 +2908,26 @@ function renderEditingList() {
             const mmm = !isNaN(dateObj) ? MONTHS[dateObj.getMonth()].slice(0,3).toUpperCase() : '---';
 
             return `
-              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3">
-                <div class="flex items-center gap-3 min-w-0 flex-1">
-                  <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                    <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
-                    <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-2 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-2.5">
+                <div class="flex items-center gap-2.5 min-w-0 flex-1">
+                  <div class="w-9 h-9 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                    <span class="text-xs font-bold text-[#c9a96e] leading-tight">${dd}</span>
+                    <span class="text-[7px] uppercase tracking-wide text-neutral-500 font-semibold">${mmm}</span>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <h4 class="text-sm font-bold text-white truncate">${escapeHtml(e.client_name)}</h4>
-                    <div class="flex flex-wrap items-center gap-2 mt-1">
-                      <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider">${escapeHtml(e.job_type || 'Edit')}</span>
-                      <p class="text-xs text-neutral-500 truncate">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
+                    <div class="flex items-center gap-1.5 min-w-0">
+                      <h4 class="text-xs font-bold text-white truncate">${escapeHtml(e.client_name)}</h4>
+                      <span class="text-[8px] px-1.5 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider flex-shrink-0">${escapeHtml(e.job_type || 'Edit')}</span>
                     </div>
-                    <div class="mt-2.5 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
+                    <p class="text-[10px] text-neutral-500 truncate mt-0.5">${escapeHtml(e.company_name || 'Direct')} • ${escapeHtml(e.event_name || 'N/A')}</p>
+                    <div class="mt-1 inline-block px-1.5 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workStyles}">
                       ${e.work_status.replace('-', ' ')}
                     </div>
                   </div>
                 </div>
                 <div class="text-right flex-shrink-0">
-                  <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
-                  <p class="text-[10px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+                  <p class="text-xs font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
+                  <p class="text-[9px] font-bold uppercase tracking-wider mt-0.5 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
                 </div>
               </div>
             `;
