@@ -530,6 +530,84 @@
         <div class="space-y-2" id="payments-list"></div>
       </section>
 
+<section id="section-editing" class="app-section hidden space-y-4">
+  <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-neutral-900 pb-4 mb-4 gap-4">
+    <h2 class="text-xl font-bold text-white">Editing & Albums</h2>
+    <button onclick="openEditJobModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black font-semibold text-xs md:text-sm px-3 py-2 rounded-lg shadow-lg transition duration-200">
+      <i class="ti ti-plus text-base"></i> New Edit Job
+    </button>
+  </div>
+
+  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="editing-stats">
+    <!-- Populated by JS -->
+  </div>
+
+  <div class="space-y-2" id="editing-list">
+    <!-- Populated by JS -->
+  </div>
+</section>
+
+<!-- EDITING JOB MODAL -->
+<div id="edit-job-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'edit-job-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-md overflow-hidden transform translate-y-4 transition-transform duration-200 flex flex-col">
+    <div class="flex items-center justify-between px-5 py-4 border-b border-neutral-900">
+      <h3 id="edit-job-title" class="text-base font-bold text-white tracking-wide">Edit Job Details</h3>
+      <button onclick="closeModal('edit-job-modal-backdrop')" class="text-neutral-500 hover:text-white transition"><i class="ti ti-x text-xl"></i></button>
+    </div>
+    <div class="p-5 space-y-4">
+      <input type="hidden" id="f-edit-id"/>
+      
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Client Name *</label>
+        <input type="text" id="f-edit-client" placeholder="e.g., John Doe" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Company</label>
+          <input type="text" id="f-edit-company" placeholder="e.g., Studio XYZ" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Event Name</label>
+          <input type="text" id="f-edit-event" placeholder="e.g., Pre-Wedding" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-2 gap-3 pt-2 border-t border-neutral-900">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-blue-400 tracking-wider">Work Status</label>
+          <select id="f-edit-work-status" class="bg-neutral-950 border border-blue-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-blue-500 transition">
+            <option value="pending">Pending</option>
+            <option value="editing">Editing in Progress</option>
+            <option value="review">Sent for Review</option>
+            <option value="completed">Completed / Delivered</option>
+          </select>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-[#c9a96e] tracking-wider">Payment Status</label>
+          <select id="f-edit-pay-status" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+            <option value="pending">Pending</option>
+            <option value="done">Settled</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
+        <input type="number" id="f-edit-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+    </div>
+    
+    <div class="px-5 py-4 border-t border-neutral-900 flex items-center justify-between gap-2">
+      <button id="modal-delete-edit-btn" onclick="deleteEditJob()" class="hidden items-center gap-1 text-xs font-semibold text-red-400 border border-red-950/60 hover:bg-red-950/20 px-3 py-2 rounded-lg transition"><i class="ti ti-trash"></i> Delete</button>
+      <div class="flex items-center gap-2 ml-auto">
+        <button onclick="closeModal('edit-job-modal-backdrop')" class="px-4 py-2 text-xs font-semibold border border-neutral-800 rounded-lg hover:text-white transition">Cancel</button>
+        <button onclick="saveEditJob()" class="px-4 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#e6c98a] text-black rounded-lg transition">Save Job</button>
+      </div>
+    </div>
+  </div>
+</div>
+      
       <section id="section-account" class="app-section hidden">
         <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
           <h2 class="text-xl font-bold text-white">Account Settings</h2>
@@ -815,6 +893,22 @@
 
             <div id="account-settings" class="account-content-section">
               <div class="space-y-5">
+
+                <!-- Editor Workspace Toggle -->
+<div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 mb-5">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <i class="ti ti-photo-edit text-[#c9a96e]"></i> Editor Workspace
+      </h3>
+      <p class="text-xs text-neutral-500 mt-1">Enable a dedicated tab to track off-season editing and album design jobs.</p>
+    </div>
+    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+      <input type="checkbox" id="toggle-editor-workspace" class="sr-only peer" onchange="saveEditorToggle(this.checked)">
+      <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+    </label>
+  </div>
+</div>
                 
                 <!-- Studio Companies (Collapsible) -->
                 <details class="group bg-[#0f0f0f] border border-neutral-900 rounded-xl [&_summary::-webkit-details-marker]:hidden" open>
@@ -1108,6 +1202,9 @@
       <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
       <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
       <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
+      <!-- PASTE THE NEW BUTTON HERE -->
+      <button onclick="switchTab('editing')" id="tab-editing" class="hidden nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-photo-edit text-xl"></i>Editing</button>
+      
       <button onclick="switchTab('account')" id="tab-account" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-user-circle text-xl"></i>Account</button>
     </nav>
     <div id="shoot-modal-backdrop" class="fixed inset-0 bg-black/80 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'shoot-modal-backdrop')">
@@ -2170,6 +2267,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
     _shoots = raw.map(dbToShoot);
 
+    // PASTE THIS NEW BLOCK HERE:
+    try {
+      const rawEdits = await sbFetch(`edits?user_id=eq.${userId}&order=created.desc`);
+      _edits = rawEdits;
+    } catch (err) {
+      console.warn("Edits table missing. Skipping fetch.");
+    }
+
     // Fetch only settings belonging to this specific user
     const configurationsRaw = await sbFetch(`settings?user_id=eq.${userId}&select=*`);
     
@@ -2627,6 +2732,175 @@ function getCurrentDeviceDetails() {
         await saveSettingToDB('active_devices', activeDevices);
       }
     }
+
+let _edits = [];
+
+// Handle the toggle change
+async function saveEditorToggle(isChecked) {
+  _profile.isEditor = isChecked;
+  await saveSettingToDB('profile', _profile);
+  
+  const navTab = document.getElementById('tab-editing');
+  if (isChecked) {
+    navTab.classList.remove('hidden');
+    showToast('Editor Workspace enabled!', 'success');
+  } else {
+    navTab.classList.add('hidden');
+    // If they hide it while on the tab, kick them back to dashboard
+    if (document.getElementById('section-editing').classList.contains('hidden') === false) {
+      switchTab('dashboard');
+    }
+  }
+}
+
+// Render the Editing View
+function renderEditingList() {
+  const totalAmount = _edits.reduce((a, b) => a + Number(b.amount || 0), 0);
+  const pendingAmount = _edits.filter(e => e.pay_status === 'pending').reduce((a, b) => a + Number(b.amount || 0), 0);
+  const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
+
+  document.getElementById('editing-stats').innerHTML = `
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+      <div class="text-xs text-blue-400 uppercase tracking-wider font-semibold">Active Jobs</div>
+      <div class="text-2xl font-bold text-white mt-2">${activeJobs}</div>
+    </div>
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+      <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Revenue</div>
+      <div class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalAmount)}</div>
+    </div>
+    <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4">
+      <div class="text-xs text-red-400 uppercase tracking-wider font-semibold">Pending Pay</div>
+      <div class="text-2xl font-bold text-red-400 mt-2 privacy-target">${fmtAmt(pendingAmount)}</div>
+    </div>
+  `;
+
+  const listEl = document.getElementById('editing-list');
+  if (_edits.length === 0) {
+    listEl.innerHTML = '<div class="text-center py-8 text-xs text-neutral-600">No editing jobs found.</div>';
+    return;
+  }
+
+  listEl.innerHTML = _edits.sort((a,b) => new Date(b.created) - new Date(a.created)).map(e => {
+    const workStyles = {
+      'pending': 'bg-neutral-900 text-neutral-400',
+      'editing': 'bg-blue-950/50 text-blue-400 border border-blue-900/50',
+      'review': 'bg-amber-950/50 text-amber-400 border border-amber-900/50',
+      'completed': 'bg-emerald-950/50 text-emerald-400 border border-emerald-900/50'
+    }[e.work_status] || 'bg-neutral-900 text-neutral-400';
+
+    return `
+      <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-4 hover:border-neutral-700 transition cursor-pointer flex justify-between items-center gap-3">
+        <div>
+          <h4 class="text-sm font-bold text-white">${escapeHtml(e.client_name)}</h4>
+          <p class="text-xs text-neutral-500 mt-1">${escapeHtml(e.company_name)} • ${escapeHtml(e.event_name)}</p>
+          <div class="mt-2 inline-block px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider ${workStyles}">
+            ${e.work_status.replace('-', ' ')}
+          </div>
+        </div>
+        <div class="text-right">
+          <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
+          <p class="text-[10px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
+  applyPrivacyUIVisibility();
+}
+
+// Modal Controls
+function openEditJobModal(id = null) {
+  const modalBtn = document.getElementById('modal-delete-edit-btn');
+  const title = document.getElementById('edit-job-title');
+  
+  if (id) {
+    const job = _edits.find(e => e.id === id);
+    if (!job) return;
+    document.getElementById('f-edit-id').value = job.id;
+    document.getElementById('f-edit-client').value = job.client_name;
+    document.getElementById('f-edit-company').value = job.company_name || '';
+    document.getElementById('f-edit-event').value = job.event_name || '';
+    document.getElementById('f-edit-amount').value = job.amount || '';
+    document.getElementById('f-edit-work-status').value = job.work_status;
+    document.getElementById('f-edit-pay-status').value = job.pay_status;
+    title.textContent = 'Update Edit Job';
+    modalBtn.classList.remove('hidden');
+  } else {
+    document.getElementById('f-edit-id').value = '';
+    document.getElementById('f-edit-client').value = '';
+    document.getElementById('f-edit-company').value = '';
+    document.getElementById('f-edit-event').value = '';
+    document.getElementById('f-edit-amount').value = '';
+    document.getElementById('f-edit-work-status').value = 'pending';
+    document.getElementById('f-edit-pay-status').value = 'pending';
+    title.textContent = 'New Edit Job';
+    modalBtn.classList.add('hidden');
+  }
+  openModal('edit-job-modal-backdrop');
+}
+
+async function saveEditJob() {
+  const id = document.getElementById('f-edit-id').value || uid();
+  const job = {
+    id: id,
+    user_id: currentUser.id,
+    client_name: document.getElementById('f-edit-client').value.trim(),
+    company_name: document.getElementById('f-edit-company').value.trim(),
+    event_name: document.getElementById('f-edit-event').value.trim(),
+    amount: parseFloat(document.getElementById('f-edit-amount').value) || 0,
+    work_status: document.getElementById('f-edit-work-status').value,
+    pay_status: document.getElementById('f-edit-pay-status').value,
+    created: new Date().toISOString()
+  };
+
+  if (!job.client_name) {
+    showToast('Client name is required.', 'error');
+    return;
+  }
+
+  setSyncStatus('syncing', 'Saving Edit Job...');
+  try {
+    const existingIdx = _edits.findIndex(e => e.id === id);
+    if (existingIdx >= 0) {
+      await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, {
+        method: 'PATCH',
+        body: JSON.stringify(job)
+      });
+      _edits[existingIdx] = job;
+    } else {
+      await sbFetch('edits', {
+        method: 'POST',
+        body: JSON.stringify(job)
+      });
+      _edits.push(job);
+    }
+    
+    setSyncStatus('synced', 'Saved Successfully');
+    showToast('Editing job saved!');
+    closeModal('edit-job-modal-backdrop');
+    renderEditingList();
+  } catch (err) {
+    setSyncStatus('error', 'Save Failed');
+    showToast('Error saving job.', 'error');
+  }
+}
+
+async function deleteEditJob() {
+  const id = document.getElementById('f-edit-id').value;
+  if (!id) return;
+  
+  setSyncStatus('syncing', 'Deleting Job...');
+  try {
+    await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, { method: 'DELETE' });
+    _edits = _edits.filter(e => e.id !== id);
+    setSyncStatus('synced', 'Deleted');
+    showToast('Editing job removed.');
+    closeModal('edit-job-modal-backdrop');
+    renderEditingList();
+  } catch (err) {
+    setSyncStatus('error', 'Delete Failed');
+    showToast('Error deleting job.', 'error');
+  }
+}
     
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
@@ -2644,6 +2918,9 @@ function getCurrentDeviceDetails() {
       if (tab === 'calendar') renderCalendar();
       if (tab === 'shoots') renderShootsList();
       if (tab === 'payments') renderPayments();
+      // PASTE THIS NEW LINE:
+      if (tab === 'editing') renderEditingList();
+      
       if (tab === 'account') {
         renderSettings();
         populateProfileUI();
@@ -3588,6 +3865,9 @@ async function toggleBlockDate(dateStr) {
       const heroNameEl = document.getElementById('acc-hero-name');
       if (heroNameEl) heroNameEl.textContent = heroName;
       renderAccountAvatar();
+    // ADD THESE NEW LINES:
+      document.getElementById('toggle-editor-workspace').checked = _profile.isEditor || false;
+      if (_profile.isEditor) document.getElementById('tab-editing').classList.remove('hidden');
     }
 
     function renderAccountAvatar() {
