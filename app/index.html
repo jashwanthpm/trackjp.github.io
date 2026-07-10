@@ -3346,11 +3346,18 @@ async function toggleBlockDate(dateStr) {
       // SMART FILTER LOGIC
       if ((fs === 'pending' || fs === 'part') && fe === 'pending') {
         filtered = filtered.filter(s => 
-          s.payStatus === fs || 
+          s.payStatus === 'pending' || s.payStatus === 'part' || 
           (Number(s.expense || 0) > 0 && s.expenseStatus === 'pending')
         );
       } else {
-        if (fs) filtered = filtered.filter(s => s.payStatus === fs);
+        if (fs === 'pending') {
+          // Show both fully pending and partially paid shoots
+          filtered = filtered.filter(s => s.payStatus === 'pending' || s.payStatus === 'part');
+        } else if (fs) {
+          // Otherwise, strictly match the status (e.g., 'part' or 'done')
+          filtered = filtered.filter(s => s.payStatus === fs);
+        }
+        
         if (fe) filtered = filtered.filter(s => Number(s.expense || 0) > 0 && s.expenseStatus === fe);
       }
 
@@ -3950,11 +3957,16 @@ async function toggleBlockDate(dateStr) {
       
       if ((fs === 'pending' || fs === 'part') && fe === 'pending') {
         filtered = filtered.filter(s => 
-          s.payStatus === fs || 
+          s.payStatus === 'pending' || s.payStatus === 'part' || 
           (Number(s.expense || 0) > 0 && s.expenseStatus === 'pending')
         );
       } else {
-        if (fs) filtered = filtered.filter(s => s.payStatus === fs);
+        if (fs === 'pending') {
+          filtered = filtered.filter(s => s.payStatus === 'pending' || s.payStatus === 'part');
+        } else if (fs) {
+          filtered = filtered.filter(s => s.payStatus === fs);
+        }
+        
         if (fe) filtered = filtered.filter(s => Number(s.expense || 0) > 0 && s.expenseStatus === fe);
       }
 
