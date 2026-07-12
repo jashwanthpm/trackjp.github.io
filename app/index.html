@@ -466,7 +466,7 @@
         </div>
 
 
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3" id="shoots-stats">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="shoots-stats">
           <div onclick="document.getElementById('filter-timeline').value=''; renderShootsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-neutral-900 transition cursor-pointer" title="View All Shoots">
             <div class="text-xs text-neutral-500 uppercase tracking-wider font-semibold">Total Shoots</div>
             <div class="text-2xl font-bold text-white mt-2" id="stat-total">0</div>
@@ -568,6 +568,7 @@
     <select class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition" id="edit-filter-pay" onchange="renderEditingList()">
       <option value="">All Payment Status</option>
       <option value="pending">Pending Payment</option>
+      <option value="part">Partial Payment</option>
       <option value="done">Settled Payment</option>
     </select>
   </div>
@@ -636,8 +637,9 @@
         </div>
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-[#c9a96e] tracking-wider">Payment Status</label>
-          <select id="f-edit-pay-status" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+          <select id="f-edit-pay-status" onchange="handleEditPayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
             <option value="pending">Pending</option>
+            <option value="part">Partial</option>
             <option value="done">Settled</option>
           </select>
         </div>
@@ -646,6 +648,11 @@
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
         <input type="number" id="f-edit-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div id="f-edit-part-pay-wrap" class="hidden bg-purple-950/10 border border-purple-900/20 p-3 rounded-xl flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-purple-400 tracking-wider">Amount Paid Till Now (₹)</label>
+        <input type="number" id="f-edit-part-paid" placeholder="Enter received amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-purple-500 transition"/>
       </div>
     </div>
     
@@ -2867,8 +2874,8 @@ async function saveEditorToggle() {
 
 // Render the Editing View (Now grouped by Month)
 function renderEditingList() {
-  const totalAmount = _edits.reduce((a, b) => a + Number(b.amount || 0), 0);
-  const pendingAmount = _edits.filter(e => e.pay_status === 'pending').reduce((a, b) => a + Number(b.amount || 0), 0);
+  const totalAmount = _edits.reduce((a, b) => b.pay_status === 'done' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + Number(b.part_paid || 0) : a, 0);
+  const pendingAmount = _edits.reduce((a, b) => b.pay_status === 'pending' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + (Number(b.amount || 0) - Number(b.part_paid || 0)) : a, 0);
   const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
 
   // This Month snapshot (e.g. "July: 5 jobs • ₹total")
@@ -2990,7 +2997,7 @@ function renderEditingList() {
                 </div>
                 <div class="text-right flex-shrink-0">
                   <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
-                  <p class="text-[9px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : 'Pending'}</p>
+                  <p class="text-[9px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : e.pay_status === 'part' ? 'text-purple-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : e.pay_status === 'part' ? 'Partial' : 'Pending'}</p>
                 </div>
               </div>
             `;
@@ -3050,6 +3057,8 @@ function openEditJobModal(id = null) {
     document.getElementById('f-edit-amount').value = job.amount || '';
     document.getElementById('f-edit-work-status').value = job.work_status;
     document.getElementById('f-edit-pay-status').value = job.pay_status;
+    document.getElementById('f-edit-part-paid').value = job.part_paid || '';
+    handleEditPayStatusChange();
     title.textContent = 'Update Edit Job';
     modalBtn.classList.remove('hidden');
   } else {
@@ -3064,6 +3073,8 @@ function openEditJobModal(id = null) {
     document.getElementById('f-edit-amount').value = '';
     document.getElementById('f-edit-work-status').value = 'pending';
     document.getElementById('f-edit-pay-status').value = 'pending';
+    document.getElementById('f-edit-part-paid').value = '';
+    handleEditPayStatusChange();
     title.textContent = 'New Edit Job';
     modalBtn.classList.add('hidden');
   }
@@ -3097,6 +3108,10 @@ async function saveEditJob() {
     return;
   }
 
+  const amount = parseFloat(document.getElementById('f-edit-amount').value) || 0;
+  const payStatus = document.getElementById('f-edit-pay-status').value;
+  const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-edit-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
+
   const job = {
     id: id,
     user_id: currentUser.id,
@@ -3105,9 +3120,10 @@ async function saveEditJob() {
     job_type: jobType,
     company_name: document.getElementById('f-edit-company').value,
     event_name: eventName,
-    amount: parseFloat(document.getElementById('f-edit-amount').value) || 0,
+    amount: amount,
     work_status: document.getElementById('f-edit-work-status').value,
-    pay_status: document.getElementById('f-edit-pay-status').value,
+    pay_status: payStatus,
+    part_paid: partPaid,
     created: new Date().toISOString()
   };
 
@@ -5390,6 +5406,12 @@ async function toggleBlockDate(dateStr) {
       const wrap = document.getElementById('f-part-pay-wrap');
       if (document.getElementById('f-shoot-pay-status').value === 'part') wrap.style.display = 'flex';
       else wrap.style.display = 'none';
+    }
+
+    function handleEditPayStatusChange() {
+      const wrap = document.getElementById('f-edit-part-pay-wrap');
+      if (document.getElementById('f-edit-pay-status').value === 'part') wrap.classList.remove('hidden');
+      else wrap.classList.add('hidden');
     }
 
     async function saveShoot() {
