@@ -2313,10 +2313,29 @@ function updateNotificationUI() {
   if (actionUrl.startsWith('#')) {
     // Navigate straight to external subelements configuration paths
     window.location.href = window.location.origin + '/' + actionUrl;
-  } else {
-    // Trigger localized layout switch tab trace operations within the application view matrices
-    document.getElementById('notification-dropdown').classList.add('hidden');
+    return;
+  }
+
+  document.getElementById('notification-dropdown').classList.add('hidden');
+
+  // Some destinations composed from the admin Broadcast Center are ACCOUNT
+  // sub-tabs, not top-level app tabs (e.g. "profile" lives inside Account).
+  // Map those correctly instead of trying (and failing) to switchTab() them.
+  const ACCOUNT_SUBTABS = ['profile', 'payment', 'appearance', 'security', 'whatsapp', 'settings', 'data', 'support', 'devices'];
+  const TOP_LEVEL_TABS = ['dashboard', 'calendar', 'shoots', 'payments', 'editing', 'account'];
+
+  if (TOP_LEVEL_TABS.includes(actionUrl)) {
     switchTab(actionUrl);
+  } else if (ACCOUNT_SUBTABS.includes(actionUrl)) {
+    switchTab('account');
+    switchAccountTab(actionUrl);
+  } else if (actionUrl === 'notifications') {
+    // No dedicated notifications screen to jump to — they're already
+    // looking at it via this dropdown, so there's nothing more to do.
+  } else {
+    // Unrecognized/custom value — fail safe to the dashboard instead of
+    // silently breaking on a missing element.
+    switchTab('dashboard');
   }
 }
 
