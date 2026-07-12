@@ -2322,7 +2322,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     }
 
    function shootToDb(s) {
-  const userId = currentUser?.id || currentUser?.email || 'default_user';
+  const userId = 'f5d2f624-4063-4208-85e2-d0f5224edd69';
   return {
     id: s.id,
     user_id: userId,
