@@ -3827,14 +3827,39 @@ async function toggleBlockDate(dateStr) {
       const fl = document.getElementById('filter-loc')?.value || '';
       const td = today();
 
-      const totalShoots = baseShoots.length;
-      const upcomingShoots = baseShoots.filter(s => s.date >= td).length;
-      const completedShoots = baseShoots.filter(s => s.date < td).length;
-      
-      document.getElementById('stat-total').textContent = totalShoots;
-      document.getElementById('stat-upcoming').textContent = upcomingShoots;
-      document.getElementById('stat-completed').textContent = completedShoots;
+      // 1. Filter for Stats (apply Company, Location, and Search filters FIRST)
+      let statsFiltered = baseShoots;
+      if (q) statsFiltered = statsFiltered.filter(s => (s.name + (s.location || '') + (s.company || '') + (s.notes || '')).toLowerCase().includes(q));
+      if (fc) statsFiltered = statsFiltered.filter(s => s.company === fc);
+      if (fl) statsFiltered = statsFiltered.filter(s => s.location === fl);
 
+      const totalShoots = statsFiltered.length;
+      const upcomingShoots = statsFiltered.filter(s => s.date >= td).length;
+      const completedShoots = statsFiltered.filter(s => s.date < td).length;
+
+      // 2. Dynamic Label for the cards (e.g., "(Colors & Emotions)")
+      const compLabel = fc ? ` (${escapeHtml(fc)})` : '';
+
+      // 3. Dynamically rewrite the stats cards
+      const statsContainer = document.getElementById('shoots-stats');
+      if (statsContainer) {
+        statsContainer.innerHTML = `
+          <div onclick="document.getElementById('filter-timeline').value=''; renderShootsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-neutral-900 transition cursor-pointer flex flex-col justify-between" title="View All Shoots">
+            <div class="text-[10px] md:text-xs text-neutral-500 uppercase tracking-wider font-semibold truncate" title="Total Shoots${compLabel}">Total Shoots${compLabel}</div>
+            <div class="text-2xl font-bold text-white mt-2">${totalShoots}</div>
+          </div>
+          <div onclick="document.getElementById('filter-timeline').value='upcoming'; renderShootsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-amber-950/10 transition cursor-pointer flex flex-col justify-between" title="Filter by Upcoming">
+            <div class="text-[10px] md:text-xs text-[#c9a96e] uppercase tracking-wider font-semibold truncate" title="Upcoming${compLabel}">Upcoming${compLabel}</div>
+            <div class="text-2xl font-bold text-[#c9a96e] mt-2">${upcomingShoots}</div>
+          </div>
+          <div onclick="document.getElementById('filter-timeline').value='completed'; renderShootsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-emerald-950/10 transition cursor-pointer flex flex-col justify-between" title="Filter by Completed">
+            <div class="text-[10px] md:text-xs text-emerald-500 uppercase tracking-wider font-semibold truncate" title="Completed${compLabel}">Completed${compLabel}</div>
+            <div class="text-2xl font-bold text-emerald-500 mt-2">${completedShoots}</div>
+          </div>
+        `;
+      }
+
+      // 4. Populate Dropdowns
       const compDropdown = document.getElementById('filter-company');
       if (compDropdown) {
         const cachedSelection = compDropdown.value;
@@ -3847,12 +3872,8 @@ async function toggleBlockDate(dateStr) {
         locDropdown.innerHTML = '<option value="">All Locations</option>' + [...DEFAULT_LOCS, ..._locs].map(l => `<option value="${l}" ${l === cachedSelection ? 'selected' : ''}>${l}</option>`).join('');
       }
 
-      // ONLY DECLARE THIS ONCE
-      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
-      
-      if (q) filtered = filtered.filter(s => (s.name + s.location + s.company + s.notes).toLowerCase().includes(q));
-      if (fc) filtered = filtered.filter(s => s.company === fc);
-      if (fl) filtered = filtered.filter(s => s.location === fl);
+      // 5. Final list filtering (Timeline)
+      let filtered = statsFiltered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
       
       if (ft === 'upcoming') {
         filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
