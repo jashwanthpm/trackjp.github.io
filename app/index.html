@@ -1912,20 +1912,60 @@ setTimeout(() => {
       banner.innerHTML = '<i class="ti ti-eye"></i> ADMIN OVERRIDE MODE ACTIVE &mdash; VIEWING CLIENT DATA';
       document.body.prepend(banner);
     }
+
+    // Master admin's email — must match the ALLOWED_ADMIN_EMAIL gate in admin.html
+    // and the "Master Admin" RLS policies in the database.
+    const MASTER_ADMIN_EMAIL = 'jashwanthjp18@gmail.com';
+
+    // Reads the real Supabase Auth session that supabase-js stores in
+    // localStorage (shared across tabs on this same origin, e.g. after
+    // logging into the Admin Command Center). We do NOT fabricate a session —
+    // if one isn't found and verified, override mode is refused.
+    function getRealAdminSession() {
+      try {
+        const key = Object.keys(localStorage).find(k => k.startsWith('sb-') && k.endsWith('-auth-token'));
+        if (!key) return null;
+        const raw = localStorage.getItem(key);
+        if (!raw) return null;
+        const parsed = JSON.parse(raw);
+        // supabase-js v2 stores the session directly; older/edge cases may nest it
+        const session = parsed?.access_token ? parsed : parsed?.currentSession;
+        if (!session || !session.access_token || !session.user) return null;
+        return session;
+      } catch (e) {
+        return null;
+      }
+    }
     
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', () => {
       
-      // --- NEW: ADMIN OVERRIDE CHECK ---
+      // --- ADMIN OVERRIDE CHECK ---
       const urlParams = new URLSearchParams(window.location.search);
       const adminOverrideId = urlParams.get('admin_override');
       
       if (adminOverrideId) {
-        // Trick the app into using the target user's ID
+        const session = getRealAdminSession();
+        const sessionEmail = (session?.user?.email || '').toLowerCase();
+        const isVerifiedAdmin = session && sessionEmail === MASTER_ADMIN_EMAIL;
+
+        if (!isVerifiedAdmin) {
+          // Refuse to fake it — send them back to admin login instead of
+          // silently showing empty data under a false "active" banner.
+          document.getElementById('login-modal').classList.add('active');
+          showToast('Admin session not found or not verified. Please open this link from the Admin Command Center while logged in.', 'error');
+          return;
+        }
+
+        // Use the admin's REAL, verified token. The "Master Admin" RLS
+        // policies let this real token read/write any user's rows; we only
+        // change which user_id we filter the UI by.
         currentUser = {
           id: adminOverrideId,
-          email: 'admin@sakkhi',
+          email: sessionEmail,
           name: 'Admin Override',
+          token: session.access_token,
+          refreshToken: session.refresh_token,
           user_metadata: { name: 'Admin Override' }
         };
         
