@@ -1573,11 +1573,57 @@ setTimeout(() => {
       renderDashboard();
     }
 
+    async function refreshSupabaseSession() {
+      if (!currentUser || !currentUser.refreshToken) return false;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: currentUser.refreshToken })
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        currentUser.token = data.access_token;
+        currentUser.refreshToken = data.refresh_token || currentUser.refreshToken;
+        // Keep whichever storage already held the session in sync
+        if (localStorage.getItem('currentUser')) {
+          localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        } else if (sessionStorage.getItem('currentUser')) {
+          sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        }
+        return true;
+      } catch (e) {
+        return false;
+      }
+    }
+
     async function sbFetch(path, opts = {}) {
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
-        ...opts,
-        headers: { ...HEADERS, ...(opts.headers || {}) }
-      });
+      // Use the logged-in user's real Supabase session token when available,
+      // so requests run as the "authenticated" role and satisfy RLS policies
+      // like "auth.uid() = user_id". Falling back to the anon key only makes
+      // sense for calls made before login exists.
+      const doFetch = () => {
+        const authToken = (currentUser && currentUser.token) ? currentUser.token : SUPABASE_KEY;
+        return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {
+          ...opts,
+          headers: {
+            ...HEADERS,
+            'Authorization': 'Bearer ' + authToken,
+            ...(opts.headers || {})
+          }
+        });
+      };
+
+      let res = await doFetch();
+
+      // Access token likely expired mid-session — refresh once and retry
+      if (res.status === 401 && currentUser && currentUser.refreshToken) {
+        const refreshed = await refreshSupabaseSession();
+        if (refreshed) {
+          res = await doFetch();
+        }
+      }
+
       if (!res.ok) {
         const err = await res.text();
         throw new Error(err);
@@ -1675,6 +1721,7 @@ setTimeout(() => {
           email: data.user.email,
           name: data.user.user_metadata?.name || decoded.name,
           token: data.access_token, 
+          refreshToken: data.refresh_token,
           user_metadata: data.user.user_metadata || {},
           avatarUrl: decoded.picture || data.user.user_metadata?.avatar_url || data.user.user_metadata?.picture || null
         };
@@ -1796,6 +1843,7 @@ setTimeout(() => {
           email: data.user.email,
           name: data.user.user_metadata?.name || data.user.email.split('@')[0], 
           token: data.access_token,
+          refreshToken: data.refresh_token,
           user_metadata: data.user.user_metadata || {}
         };
 
