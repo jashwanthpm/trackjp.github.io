@@ -1007,9 +1007,15 @@
                     </div>
                     
                     <!-- Disclaimer for the User -->
-<div class="flex items-start gap-1.5 text-[11px] text-neutral-500 bg-white/5 p-2.5 rounded-lg border border-white/10">
-  <i class="ti ti-info-circle mt-0.5 text-blue-400"></i>
-  <p><strong>Note:</strong> Ledger links automatically hide fully settled shoots older than 6 months to prevent invoice bloat. Unpaid shoots will always remain visible. Magic Booking links will automatically hide dates you are already booked to prevent double-bookings.</p>
+<div class="flex items-start gap-2 text-[11px] text-neutral-400 bg-white/5 p-3 rounded-lg border border-white/10 leading-relaxed">
+  <i class="ti ti-info-circle mt-0.5 text-blue-400 text-sm flex-shrink-0"></i>
+  <div class="space-y-1.5">
+    <p><strong class="text-neutral-300">How your smart links work:</strong></p>
+    <ul class="list-disc pl-4 space-y-1">
+      <li><strong class="text-blue-400">Ledger Links:</strong> Fully settled shoots older than 6 months are hidden to keep invoices clean. Unpaid shoots will always remain visible.</li>
+      <li><strong class="text-emerald-400">Booking Links:</strong> Dates where you already have a shoot (or have manually blocked) are automatically hidden to prevent double-bookings.</li>
+    </ul>
+  </div>
 </div>
                     
                   </div>
