@@ -2376,6 +2376,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     
     const pinRow = configurations.find(r => r.key === 'app_pin');
     if (pinRow) _appPin = pinRow.value;
+
+    // Restore this user's own Financial Privacy Mode preference (per-account, from 'settings' row keyed to their user_id).
+    const privacyRow = configurations.find(r => r.key === 'privacy_mode');
+    if (privacyRow) {
+      _privacyModeActive = !!privacyRow.value;
+      const privacyIconEl = document.getElementById('privacy-icon');
+      if (privacyIconEl) privacyIconEl.className = _privacyModeActive ? 'ti ti-eye-off text-lg' : 'ti ti-eye text-lg';
+    }
     
     const profileRow = configurations.find(r => r.key === 'profile');
     if (profileRow) {
@@ -5221,6 +5229,7 @@ async function toggleBlockDate(dateStr) {
           _privacyModeActive = false;
           applyPrivacyUIVisibility();
           document.getElementById('privacy-icon').className = 'ti ti-eye text-lg';
+          saveSettingToDB('privacy_mode', _privacyModeActive);
         } else {
           updatePinHint(); // <--- ADD THIS CALL
           document.getElementById('privacy-pass-input').value = '';
@@ -5231,6 +5240,9 @@ async function toggleBlockDate(dateStr) {
         _privacyModeActive = true;
         applyPrivacyUIVisibility();
         document.getElementById('privacy-icon').className = 'ti ti-eye-off text-lg';
+        // Save this user's own preference only — saveSettingToDB scopes the key to this account's user_id,
+        // so it never leaks to or overwrites any other user's setting.
+        saveSettingToDB('privacy_mode', _privacyModeActive);
       }
     }
     
@@ -5244,6 +5256,8 @@ async function toggleBlockDate(dateStr) {
         const icon = document.getElementById('privacy-icon');
         icon.className = 'ti ti-eye text-lg';
         closePrivacyPrompt();
+        // Persist for this account only, same as the direct toggle above.
+        saveSettingToDB('privacy_mode', _privacyModeActive);
       } else {
         errorLabel.classList.remove('hidden');
       }
