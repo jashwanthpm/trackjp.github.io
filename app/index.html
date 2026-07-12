@@ -2395,6 +2395,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     const profileRow = configurations.find(r => r.key === 'profile');
     if (profileRow) {
       _profile = { ..._profile, ...profileRow.value };
+      applyEditorTabVisibility();
       if (_profile.theme) {
         setAppTheme(_profile.theme, true);
       }
@@ -3179,6 +3180,13 @@ async function deleteEditJob() {
   }
 }
     
+    function applyEditorTabVisibility() {
+      const navTab = document.getElementById('tab-editing');
+      if (!navTab) return;
+      if (_profile.isEditor) navTab.classList.remove('hidden');
+      else navTab.classList.add('hidden');
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(t => {
