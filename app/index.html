@@ -6369,6 +6369,70 @@ async function executeDeleteAll() {
     });
 
 
+    // ==========================================
+    // "ENTER" KEY TO SAVE/SUBMIT BINDINGS
+    // ==========================================
+    document.addEventListener('keydown', function(event) {
+      // Check if the pressed key is Enter
+      if (event.key === 'Enter') {
+        const activeTag = event.target.tagName.toLowerCase();
+        
+        // Only trigger the auto-save if the user is typing inside an input or dropdown.
+        // We explicitly ignore 'textarea' so users can still use Enter for new lines in Notes/Bank details.
+        // We ignore 'button' so we don't accidentally double-trigger click events.
+        if (activeTag === 'input' || activeTag === 'select') {
+          
+          // 1. Shoot Modal
+          if (event.target.closest('#shoot-modal')) {
+            event.preventDefault(); // Stop default browser behavior
+            saveShoot();
+          } 
+          
+          // 2. Edit Job Modal
+          else if (event.target.closest('#edit-job-modal-backdrop')) {
+            event.preventDefault();
+            saveEditJob();
+          } 
+          
+          // 3. Financial Privacy PIN Unlock
+          else if (event.target.closest('#privacy-prompt-backdrop')) {
+            event.preventDefault();
+            verifyPrivacyPassword();
+          } 
+          
+          // 4. Delete All Database PIN Modal
+          else if (event.target.closest('#delete-all-modal-backdrop')) {
+            event.preventDefault();
+            executeDeleteAll();
+          } 
+          
+          // 5. Change Password PIN Modal
+          else if (event.target.closest('#password-pin-modal-backdrop')) {
+            event.preventDefault();
+            executeSetNewPassword();
+          } 
+          
+          // 6. Account Settings (Profile & Payment Tabs)
+          else if (event.target.closest('#account-profile') || event.target.closest('#account-payment')) {
+            event.preventDefault();
+            saveProfileSettings();
+          }
+          
+          // 7. Small Inline Inputs (Adding Companies, Locations, Events)
+          else if (event.target.id === 'new-company-input') {
+            event.preventDefault();
+            addCompany();
+          } else if (event.target.id === 'new-loc-input') {
+            event.preventDefault();
+            addLocation();
+          } else if (event.target.id === 'new-event-input') {
+            event.preventDefault();
+            addEvent();
+          }
+        }
+      }
+    });
+
   </script>
 
     <script>
