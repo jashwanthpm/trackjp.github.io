@@ -1355,11 +1355,22 @@
             <input type="text" id="f-shoot-loc-other" placeholder="e.g., Rajasthan Palace" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
           </div>
 
-          <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-3 gap-3">
+          <div class="border-t border-neutral-900 pt-3 grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Amount (₹)</label>
               <input type="number" id="f-shoot-amount" placeholder="Total deal amount" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
             </div>
+            <div class="flex flex-col gap-1.5">
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
+              <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
+                <option value="pending">Pending</option>
+                <option value="part">Partial</option>
+                <option value="done">Settled</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
             <div class="flex flex-col gap-1.5">
               <label class="text-[10px] uppercase font-bold text-amber-500/90 tracking-wider">Expenses (₹)</label>
               <input type="number" id="f-shoot-expense" placeholder="Shoot expenses" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition"/>
@@ -1369,17 +1380,6 @@
               <select id="f-shoot-expense-status" class="bg-neutral-950 border border-amber-900/30 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500/50 transition">
                 <option value="pending">Pending</option>
                 <option value="settled">Settled</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-            <div class="flex flex-col gap-1.5">
-              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Payment Status</label>
-              <select id="f-shoot-pay-status" onchange="handlePayStatusChange()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-                <option value="pending">Pending</option>
-                <option value="part">Partial</option>
-                <option value="done">Settled</option>
               </select>
             </div>
           </div>
