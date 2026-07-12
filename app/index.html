@@ -2953,13 +2953,15 @@ function renderEditingList() {
     const jobs = grouped[monthKey];
     const [year, month] = monthKey.split('-');
     const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
+    const monthTotal = jobs.reduce((a, b) => a + Number(b.amount || 0), 0);
     
     html += `
       <div class="mb-6">
-        <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-          <i class="ti ti-calendar text-[#c9a96e]"></i>
-          <h3 class="text-sm font-bold text-white tracking-wide">${monthName} ${year}</h3>
-          <span class="text-xs text-neutral-500 ml-auto">${jobs.length} jobs</span>
+        <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+          <div class="flex justify-between items-center">
+            <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
+            <span class="text-xs text-neutral-500 privacy-target">${jobs.length} jobs • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
+          </div>
         </div>
         <div class="space-y-2">
           ${jobs.map(e => {
@@ -2975,29 +2977,29 @@ function renderEditingList() {
             const mmm = !isNaN(dateObj) ? MONTHS[dateObj.getMonth()].slice(0,3).toUpperCase() : '---';
 
             return `
-              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+              <div onclick="openEditJobModal('${e.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div class="flex items-center gap-3 min-w-0 flex-1">
-                  <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-                    <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
-                    <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+                  <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+                    <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
+                    <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
                   </div>
                   <div class="min-w-0 flex-1">
-                    <div class="flex items-center gap-2 min-w-0">
-                      <h4 class="text-sm font-semibold text-white truncate">${escapeHtml(e.client_name)}</h4>
-                      <span class="text-[9px] px-2 py-0.5 font-bold rounded bg-purple-950/30 text-purple-400 border border-purple-900/50 uppercase tracking-wider flex-shrink-0">${escapeHtml(e.job_type || 'Edit')}</span>
-                    </div>
+                    <div class="text-sm font-semibold text-white truncate">${escapeHtml(e.client_name)}</div>
                     <div class="flex flex-wrap items-center gap-2 mt-1">
+                      <span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-purple-950 text-purple-400 border border-purple-900">${escapeHtml(e.job_type || 'Edit')}</span>
                       <span class="text-xs text-neutral-500">${escapeHtml(e.event_name || 'N/A')}</span>
-                      ${e.company_name ? `<span class="text-xs text-neutral-500 truncate">• ${escapeHtml(e.company_name)}</span>` : ''}
-                    </div>
-                    <div class="mt-1.5 inline-block px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider ${workStyles}">
-                      ${e.work_status.replace('-', ' ')}
+                      ${e.company_name ? `<span class="text-xs text-neutral-500 truncate">${escapeHtml(e.company_name)}</span>` : ''}
                     </div>
                   </div>
                 </div>
-                <div class="text-right flex-shrink-0">
-                  <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
-                  <p class="text-[9px] font-bold uppercase tracking-wider mt-1 ${e.pay_status === 'done' ? 'text-emerald-400' : e.pay_status === 'part' ? 'text-purple-400' : 'text-red-400'}">${e.pay_status === 'done' ? 'Settled' : e.pay_status === 'part' ? 'Partial' : 'Pending'}</p>
+                <div class="flex flex-wrap items-center gap-2 sm:gap-4 flex-shrink-0">
+                  <div class="text-right">
+                    <p class="text-sm font-bold text-[#c9a96e] privacy-target">${fmtAmt(e.amount)}</p>
+                    <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block ${e.pay_status === 'done' ? 'bg-emerald-950 text-emerald-400' : e.pay_status === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500'}">${e.pay_status === 'done' ? 'Settled' : e.pay_status === 'part' ? 'Partial' : 'Pending'}</span>
+                  </div>
+                  <div class="text-right">
+                    <span class="text-[9px] px-2 py-1 font-bold rounded mt-1 inline-block uppercase tracking-wider ${workStyles}">${e.work_status.replace('-', ' ')}</span>
+                  </div>
                 </div>
               </div>
             `;
@@ -3597,26 +3599,28 @@ async function deleteEditJob() {
       }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
 
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3 flex-wrap sm:flex-nowrap">
+        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-14 h-14 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-lg font-bold text-[#c9a96e] leading-tight">${dd}</span>
-              <span class="text-[9px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+            <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+              <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
+              <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
             </div>
             
             <div class="min-w-0 flex-1">
               <div class="text-sm font-semibold text-white">${escapeHtml(s.name)}</div>
               <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-[9px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${escapeHtml(s.event)}</span>
+                <span class="text-[8px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${escapeHtml(s.event)}</span>
                 <span class="text-xs text-neutral-500">${escapeHtml(s.location) || 'N/A'}</span>
                 ${s.company ? `<span class="text-xs text-neutral-500 truncate">${escapeHtml(s.company)}</span>` : ''}
               </div>
             </div>
           </div>
 
-          <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition flex-shrink-0">
-            <i class="ti ti-brand-whatsapp text-sm"></i>
-          </button>
+          <div class="flex items-center gap-1 flex-shrink-0 self-end sm:self-auto">
+            <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
+              <i class="ti ti-brand-whatsapp text-sm"></i>
+            </button>
+          </div>
         </div>`;
     }
 
@@ -3861,12 +3865,14 @@ async function toggleBlockDate(dateStr) {
           const [year, month] = monthKey.split('-');
           const monthName = MONTHS[parseInt(month) - 1];
           const monthLabel = `${monthName} ${year}`;
+          const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
           
           html += `<div class="mb-6">
-            <div class="flex items-center gap-2 px-2 py-2 mb-3 border-b border-neutral-900">
-              <i class="ti ti-calendar text-[#c9a96e]"></i>
-              <h3 class="text-sm font-bold text-white tracking-wide">${monthLabel}</h3>
-              <span class="text-xs text-neutral-500 ml-auto">${shoots.length} shoots</span>
+            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-[#c9a96e]">${monthLabel}</h3>
+                <span class="text-xs text-neutral-500 privacy-target">${shoots.length} shoots • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
+              </div>
             </div>
             <div class="space-y-2">
               ${shoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}
