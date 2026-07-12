@@ -3164,13 +3164,16 @@ async function deleteEditJob() {
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(t => {
-        t.className = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all";
+        const baseClass = "nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all";
+        // Preserve the Editing tab's hidden state — it should only ever show when Editor Workspace is on for this user.
+        t.className = (t.id === 'tab-editing' && !_profile.isEditor) ? ('hidden ' + baseClass) : baseClass;
       });
       
       document.getElementById('section-' + tab).classList.remove('hidden');
       const targetTab = document.getElementById('tab-' + tab);
       if (targetTab) {
-        targetTab.className = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+        const activeClass = "nav-tab flex flex-col items-center gap-1 py-1 px-3 rounded-lg text-[10px] tracking-wide font-bold transition-all text-[#c9a96e] bg-amber-500/5 border border-amber-500/10";
+        targetTab.className = (tab === 'editing' && !_profile.isEditor) ? ('hidden ' + activeClass) : activeClass;
       }
       
       if (tab === 'dashboard') renderDashboard();
