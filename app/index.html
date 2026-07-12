@@ -3890,9 +3890,23 @@ async function toggleBlockDate(dateStr) {
 
       const targetContainer = document.getElementById('shoots-list');
       if (!targetContainer) return;
+      
       if (!filtered.length) {
-        targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
-      } else {
+        const fySelect = document.getElementById('shoots-filter-fy');
+        const fyValue = fySelect?.value || 'all';
+        const fyLabel = fySelect ? (fySelect.options[fySelect.selectedIndex]?.text || 'All Time') : 'All Time';
+
+        if (fyValue !== 'all') {
+          targetContainer.innerHTML = `
+            <div class="text-center py-12 px-4 text-xs text-neutral-500 space-y-3 border border-neutral-900 border-dashed rounded-xl">
+              <p>No shoots found. You're currently viewing <span class="text-white font-semibold">${escapeHtml(fyLabel)}</span> — the data may be from a different period.</p>
+              <button onclick="document.getElementById('shoots-filter-fy').value='all'; handleTimeFilterChange('shoots', 'renderShootsList');" class="text-[11px] font-bold text-[#c9a96e] hover:text-[#e6c98a] underline underline-offset-2 transition">Switch to All Time</button>
+            </div>`;
+        } else {
+          targetContainer.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching shoots found.</div>';
+        }
+        return;
+      }
         let html = '';
         const sortedMonths = Object.keys(grouped).sort().reverse();
         sortedMonths.forEach(monthKey => {
