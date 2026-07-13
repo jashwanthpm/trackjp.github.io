@@ -11,6 +11,7 @@
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
   
   <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -138,6 +139,15 @@
       <span class="text-[9px] uppercase tracking-widest font-bold">Secure Encrypted Ledger</span>
     </div>
 
+    <div class="grid grid-cols-2 gap-2 pt-1">
+      <a id="ui-whatsapp-btn" href="#" target="_blank" rel="noopener" class="hidden items-center justify-center gap-1.5 bg-emerald-950/30 border border-emerald-900/40 hover:bg-emerald-950/50 text-emerald-400 font-bold py-2.5 rounded-lg text-[11px] transition-all">
+        <i class="ti ti-brand-whatsapp text-sm"></i> Message
+      </a>
+      <button onclick="downloadReceipt()" class="flex items-center justify-center gap-1.5 bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-neutral-300 font-bold py-2.5 rounded-lg text-[11px] transition-all">
+        <i class="ti ti-file-download text-sm"></i> Receipt
+      </button>
+    </div>
+
 </div>
         
       <div id="settled-section" class="hidden mt-6 bg-gradient-to-b from-emerald-950/40 to-[#0f0f0f] border border-emerald-900/40 rounded-xl p-8 text-center shadow-[0_0_30px_rgba(16,185,129,0.05)]">
@@ -148,6 +158,16 @@
         <p class="text-xs text-emerald-500/80 leading-relaxed">Thank you for your prompt payments. Your ledger is completely clear.</p>
       </div>
 
+    </div>
+
+    <!-- Upcoming Shoots -->
+    <div id="upcoming-shoots-wrap" class="hidden w-full px-2 sm:px-0">
+      <div class="flex items-center gap-3 mb-4">
+        <div class="h-px bg-white/5 flex-1"></div>
+        <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Upcoming Shoots</h3>
+        <div class="h-px bg-white/5 flex-1"></div>
+      </div>
+      <div id="upcoming-shoots-list" class="space-y-2 mb-2"></div>
     </div>
 
     <!-- Shoot History List -->
@@ -311,12 +331,17 @@
           body: JSON.stringify({ p_ref: currentRefCode, p_amount: amountPaid, p_note: claimMode === 'partial' ? 'Partial payment' : 'Full payment' })
         });
         if (!res.ok) throw new Error('Failed');
+        const data = await res.json();
 
-        localStorage.setItem(guardKey, String(Date.now()));
         panel.classList.add('hidden');
         btn.classList.remove('hidden');
         btn.disabled = true;
-        document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Notified!`;
+        if (data.status === 'already_sent') {
+          document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Already Notified`;
+        } else {
+          localStorage.setItem(guardKey, String(Date.now()));
+          document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Notified!`;
+        }
       } catch (e) {
         panel.querySelector('button[onclick="submitPaymentClaim()"]').textContent = 'Send';
         alert("Couldn't send the notification. Please try again.");
@@ -387,6 +412,85 @@
       });
     }
     
+    function renderUpcomingShoots(allCompanyShoots, companyName) {
+      const todayStr = new Date().toISOString().split('T')[0];
+      const upcoming = allCompanyShoots
+        .filter(s => s.date >= todayStr)
+        .sort((a, b) => a.date.localeCompare(b.date));
+
+      if (upcoming.length === 0) return;
+
+      document.getElementById('upcoming-shoots-wrap').classList.remove('hidden');
+      document.getElementById('upcoming-shoots-list').innerHTML = upcoming.map(s => {
+        const [y, m, d] = s.date.split('-');
+        const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
+        return `
+          <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3.5 flex items-center gap-4">
+            <div class="w-10 h-12 bg-[#1a1a1a] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+              <span class="text-xs font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
+              <span class="text-[7px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
+            </div>
+            <div class="min-w-0 flex-1">
+              <div class="text-xs font-bold text-white truncate">${s.event}</div>
+              <div class="text-[10px] text-neutral-400 mt-0.5 truncate">${s.location || 'TBA'}</div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    async function checkExistingClaim() {
+      if (!currentRefCode) return;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/check_payment_claim_status`, {
+          method: 'POST', headers: HEADERS,
+          body: JSON.stringify({ p_ref: currentRefCode })
+        });
+        const data = await res.json();
+        if (data && data.status === 'already_sent') {
+          document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Already Notified`;
+          document.getElementById('ui-claim-btn').disabled = true;
+        }
+      } catch (e) { /* fail silent — button just stays in its default state */ }
+    }
+
+    function downloadReceipt() {
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const name = document.getElementById('ui-company-name').textContent;
+      const biz = document.getElementById('ui-biz-name').textContent;
+
+      doc.setFontSize(16); doc.text(biz, 14, 18);
+      doc.setFontSize(11); doc.text(`Ledger Statement — ${name}`, 14, 26);
+      doc.setFontSize(9); doc.text(new Date().toLocaleDateString('en-IN'), 14, 32);
+
+      let y = 44;
+      doc.setFontSize(10);
+      doc.text('Date', 14, y); doc.text('Event', 50, y); doc.text('Amount', 130, y); doc.text('Status', 160, y);
+      y += 4; doc.line(14, y, 196, y); y += 6;
+
+      currentReceiptShoots.forEach(s => {
+        if (y > 270) { doc.addPage(); y = 20; }
+        doc.text(String(s.date || ''), 14, y);
+        doc.text(String(s.event || '').substring(0, 28), 50, y);
+        doc.text(formatAmt(s.amount || 0), 130, y);
+        doc.text(s.pay_status === 'done' ? 'Settled' : (s.pay_status === 'part' ? 'Partial' : 'Pending'), 160, y);
+        y += 7;
+      });
+
+      y += 4; doc.line(14, y, 196, y); y += 8;
+      doc.setFontSize(11);
+      doc.text(`Total Billed: ${formatAmt(currentTotals.billed)}`, 14, y); y += 7;
+      doc.text(`Payments Received: ${formatAmt(currentTotals.paid)}`, 14, y); y += 7;
+      doc.setTextColor(180, 130, 40);
+      doc.text(`Pending Balance: ${formatAmt(currentTotals.due)}`, 14, y);
+
+      doc.save(`Ledger_${name.replace(/[^a-z0-9]/gi, '_')}.pdf`);
+    }
+
+    let currentReceiptShoots = [];
+    let currentTotals = { billed: 0, paid: 0, due: 0 };
+
     async function loadPortal() {
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = urlParams.get('ref');
@@ -446,6 +550,9 @@
         // Due = (Gross Billed - Payments Received) + Unsettled Expenses
         const due = (totalBilled - totalPaid) + totalPendingExpenses;
         currentDueAmount = due;
+        currentTotals = { billed: totalBilled, paid: totalPaid, due: due };
+        currentReceiptShoots = shootData;
+        renderUpcomingShoots(shootData_full, companyName);
 
         // --- POPULATE UI ---
         document.getElementById('ui-company-name').textContent = companyName;
@@ -457,6 +564,19 @@
         document.getElementById('ui-expenses').textContent = formatAmt(totalPendingExpenses);
         document.getElementById('ui-paid').textContent = formatAmt(totalPaid);
         document.getElementById('ui-due').textContent = formatAmt(due);
+
+        // WhatsApp quick-message button
+        if (profile.phone) {
+          const digitsOnly = String(profile.phone).replace(/[^0-9]/g, '');
+          const waText = encodeURIComponent(`Hi ${ownerDisplayName}, this is ${companyName} regarding our ledger.`);
+          const waBtn = document.getElementById('ui-whatsapp-btn');
+          waBtn.href = `https://wa.me/${digitsOnly}?text=${waText}`;
+          waBtn.classList.remove('hidden');
+          waBtn.classList.add('flex');
+        }
+
+        // Check the database (not just this device) for a recent claim
+        checkExistingClaim();
 
         // Payment Buttons
         if (due <= 0) {
