@@ -480,7 +480,8 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
       
       if (subData && subData.length > 0) {
         const currentSub = subData[0];
-        const isCurrentlyActive = currentSub.status === 'active' && (!currentSub.expires_at || new Date(currentSub.expires_at) > new Date());
+        const daysLeft = currentSub.expires_at ? Math.ceil((new Date(currentSub.expires_at) - new Date()) / 86400000) : 999;
+const isCurrentlyActive = currentSub.status === 'active' && daysLeft > 3;
         
         if (isCurrentlyActive) {
           // Create a custom styled popup matching the Sakkhi theme
