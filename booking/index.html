@@ -56,13 +56,6 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
 
-  <div id="ptr-indicator" class="fixed top-0 left-0 w-full flex justify-center pointer-events-none z-[9999] transition-transform duration-200" style="transform: translateY(-100%);">
-    <div class="bg-[#0f0f0f]/90 backdrop-blur-md border border-neutral-800 rounded-full px-4 py-2 shadow-2xl flex items-center gap-2 mt-4">
-      <i class="ti ti-arrow-down text-[#c9a96e] transition-transform duration-200" id="ptr-icon"></i>
-      <span id="ptr-text" class="text-[10px] font-bold text-white tracking-widest uppercase">Pull to refresh</span>
-    </div>
-  </div>
-
   <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
@@ -204,6 +197,18 @@
     let targetUserId = '';
     let activeStudio = '';
     let targetUserName = '';
+    let currentRefCode = '';
+
+    async function sbRpc(fn, args) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(args)
+      });
+      if (!res.ok) throw new Error('Database Error');
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    }
     
     // Calendar state
     let dateStatusMap = {}; 
@@ -220,41 +225,19 @@
 
       if (refCode) {
         try {
-          // Fetch initial link payload
-          const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.link_${refCode}&select=value`, { headers: HEADERS });
-          const data = await res.json();
+          currentRefCode = refCode;
+          // Single secure call — resolves the link code, business name,
+          // subscription status, and availability server-side, without
+          // exposing raw table access to the anon key.
+          const portal = await sbRpc('get_booking_portal', { p_ref: refCode });
 
-          if (data && data.length > 0) {
-            const payload = data[0].value;
-            targetUserId = payload.u;
-            activeStudio = payload.s;
-            targetUserName = payload.n;
+          if (portal) {
+            targetUserId = portal.userId;
+            activeStudio = portal.studio;
+            targetUserName = portal.name;
 
-            // Default fallbacks
-            let displayBizName = targetUserName; 
-            let isSubActive = false; 
-
-            try {
-              // 1 & 2. Fetch LIVE Business Name from the user's profile
-              const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${targetUserId}_profile&select=value`, { headers: HEADERS });
-              const profileData = await profileRes.json();
-              if (profileData && profileData.length > 0 && profileData[0].value.bizName) {
-                displayBizName = profileData[0].value.bizName;
-              }
-
-              // 3. Fetch LIVE Subscription Status
-              const subRes = await fetch(`${SUPABASE_URL}/rest/v1/subscriptions?user_id=eq.${targetUserId}&select=status,expires_at`, { headers: HEADERS });
-              const subData = await subRes.json();
-              if (subData && subData.length > 0) {
-                const sub = subData[0];
-                // Check if status is active and hasn't passed expiration date
-                if (sub.status === 'active' && (!sub.expires_at || new Date(sub.expires_at) > new Date())) {
-                  isSubActive = true;
-                }
-              }
-            } catch (err) {
-              console.warn("Live check failed. Using fallbacks.", err);
-            }
+            let displayBizName = portal.bizName || targetUserName;
+            const isSubActive = !!portal.isSubActive;
 
             // ENFORCE SUBSCRIPTION BLOCK (If inactive, show lock screen)
             if (!isSubActive) {
@@ -282,7 +265,7 @@
               container.style.transform = 'translateY(0)';
             }, 50);
             
-            await fetchBlockedDates(targetUserId, activeStudio);
+            applyPortalAvailability(portal);
           } else {
             throw new Error("Link expired or invalid");
           }
@@ -306,13 +289,11 @@
     // ==========================================
     // 3. FETCH DATES & STUDIO SHOOTS
     // ==========================================
-    async function fetchBlockedDates(userId, studioName) {
+    function applyPortalAvailability(portal) {
       try {
-        // 1. Fetch Existing Shoots
-        const resAll = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&select=date,session`, { headers: HEADERS });
-        const dataAll = await resAll.json();
-        
-        dataAll.forEach(s => {
+        // 1. Build the date/session availability map from the shoots the
+        //    RPC already returned — no further network calls needed.
+        (portal.allShoots || []).forEach(s => {
           if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
           if (!s.session || s.session === 'Full Day') {
             dateStatusMap[s.date].push('Morning Session', 'Evening Session', 'Afternoon Session');
@@ -321,25 +302,16 @@
           }
         });
 
-        // 2. Fetch Manually Blocked Dates from Dashboard
-        const resBlocked = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${userId}_blocked_dates&select=value`, { headers: HEADERS });
-        const blockedData = await resBlocked.json();
-        if (blockedData && blockedData.length > 0) {
-          blockedDatesMap = blockedData[0].value || [];
-        }
+        // 2. Manually blocked dates
+        blockedDatesMap = portal.blockedDates || [];
 
         renderCalendarGrid();
 
-        // 3. Fetch specific studio shoots for the list below
-        const todayStr = new Date().toISOString().split('T')[0];
-        const encodedStudio = encodeURIComponent(studioName);
-        const resStudio = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${userId}&company=eq.${encodedStudio}&date=gte.${todayStr}&order=date.asc&select=name,date,event,location`, { headers: HEADERS });
-        
-        const studioShoots = await resStudio.json();
-        renderStudioShoots(studioShoots);
+        // 3. Studio-specific upcoming shoots list
+        renderStudioShoots(portal.studioShoots || []);
 
       } catch (e) {
-        console.error("Could not fetch availability.", e);
+        console.error("Could not apply availability.", e);
       }
     }
 
@@ -497,32 +469,18 @@
       btn.disabled = true;
       btn.classList.add('opacity-80', 'cursor-not-allowed');
 
-      const newShoot = {
-        id: Date.now().toString(36) + Math.random().toString(36).substr(2),
-        user_id: targetUserId, 
-        name: document.getElementById('client-name').value.trim(),
-        date: document.getElementById('event-date').value,
-        event: document.getElementById('event-type').value,
-        session: document.getElementById('event-session').value,
-        location: document.getElementById('event-location').value.trim(),
-        company: activeStudio, 
-        notes: "[WEB LEAD] " + document.getElementById('event-notes').value.trim(),
-        amount: 0,
-        expense: 0,
-        expense_status: 'pending',
-        pay_status: 'pending',
-        part_paid: 0,
-        created: new Date().toISOString()
-      };
-
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots`, {
-          method: 'POST',
-          headers: HEADERS,
-          body: JSON.stringify(newShoot)
+        const ok = await sbRpc('submit_booking_request', {
+          p_ref: currentRefCode,
+          p_client_name: document.getElementById('client-name').value.trim(),
+          p_date: document.getElementById('event-date').value,
+          p_event: document.getElementById('event-type').value,
+          p_session: document.getElementById('event-session').value,
+          p_location: document.getElementById('event-location').value.trim(),
+          p_notes: document.getElementById('event-notes').value.trim()
         });
 
-        if (!res.ok) throw new Error("Database rejection");
+        if (!ok) throw new Error("Database rejection");
 
         // Smooth transition out
         const container = document.getElementById('booking-container');
@@ -554,75 +512,6 @@
       }
     }
   </script>
-
-<script>
-    // --- PULL TO REFRESH LOGIC ---
-    let ptrStartY = 0;
-    let ptrCurrentY = 0;
-    let ptrIsPulling = false;
-    const ptrIndicator = document.getElementById('ptr-indicator');
-    const ptrIcon = document.getElementById('ptr-icon');
-    const ptrText = document.getElementById('ptr-text');
-
-    document.addEventListener('touchstart', (e) => {
-      // Only allow pulling if we are at the absolute top of the page
-      if (window.scrollY <= 0) {
-        ptrStartY = e.touches[0].clientY;
-        ptrIsPulling = true;
-        ptrIndicator.style.transition = 'none'; // Remove CSS transition so it sticks to the finger
-      }
-    }, { passive: true });
-
-    document.addEventListener('touchmove', (e) => {
-      if (!ptrIsPulling) return;
-      
-      ptrCurrentY = e.touches[0].clientY;
-      const pullDistance = ptrCurrentY - ptrStartY;
-      
-      if (pullDistance > 0 && window.scrollY <= 0) {
-        // Apply friction/resistance so it feels heavy like a native app
-        const yPos = Math.min(pullDistance * 0.4, 80); 
-        ptrIndicator.style.transform = `translateY(${yPos - 60}px)`; // -60px is the hidden resting state
-        
-        // Swap icon/text when they pass the refresh threshold
-        if (pullDistance > 120) {
-          ptrText.textContent = "Release to refresh";
-          ptrIcon.className = "ti ti-arrow-up text-[#c9a96e] transition-transform duration-200";
-        } else {
-          ptrText.textContent = "Pull to refresh";
-          ptrIcon.className = "ti ti-arrow-down text-[#c9a96e] transition-transform duration-200";
-        }
-      }
-    }, { passive: true });
-
-    document.addEventListener('touchend', () => {
-      if (!ptrIsPulling) return;
-      ptrIsPulling = false;
-      
-      const pullDistance = ptrCurrentY - ptrStartY;
-      // Add a bouncy release transition
-      ptrIndicator.style.transition = 'transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
-      
-      if (pullDistance > 120 && window.scrollY <= 0) {
-        // Threshold met: Trigger the refresh animation and reload
-        ptrIndicator.style.transform = `translateY(20px)`;
-        ptrText.textContent = "Refreshing...";
-        ptrIcon.className = "ti ti-loader animate-spin text-[#c9a96e]";
-        
-        setTimeout(() => {
-          window.location.reload();
-        }, 500);
-      } else {
-        // Threshold not met: Snap back to the top
-        ptrIndicator.style.transform = `translateY(-100%)`;
-      }
-      
-      // Reset variables
-      ptrStartY = 0;
-      ptrCurrentY = 0;
-    });
-  </script>
-  
   <script>
   if ('serviceWorker' in navigator) {
     window.addEventListener('load', () => {
