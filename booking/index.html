@@ -168,6 +168,17 @@
     <div class="w-20 h-20 bg-emerald-950/40 border border-emerald-900/50 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)]"><i class="ti ti-circle-check"></i></div>
     <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Request Sent!</h2>
     <p class="text-sm text-neutral-400 font-light leading-relaxed">Your booking request has been securely delivered to the studio. You will receive a confirmation shortly.</p>
+    <a id="success-whatsapp-btn" href="#" target="_blank" rel="noopener" class="hidden mt-6 items-center justify-center gap-2 bg-emerald-950/30 border border-emerald-900/40 hover:bg-emerald-950/50 text-emerald-400 font-bold py-3 rounded-xl text-xs transition-all">
+      <i class="ti ti-brand-whatsapp text-base"></i> Message on WhatsApp
+    </a>
+  </div>
+
+  <!-- Pending Request Container (shown on a repeat visit to this same link) -->
+  <div id="pending-container" class="text-center hidden relative z-10 w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-amber-900/30 rounded-[2rem] shadow-2xl">
+    <div class="w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6"><i class="ti ti-clock-hour-4"></i></div>
+    <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Request Pending</h2>
+    <p id="pending-details" class="text-sm text-neutral-400 font-light leading-relaxed"></p>
+    <button onclick="startNewBooking()" class="mt-6 w-full bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold py-3 rounded-xl text-xs transition-all">Submit Another Request</button>
   </div>
 
   <!-- BRANDING FOOTER -->
@@ -198,6 +209,7 @@
     let activeStudio = '';
     let targetUserName = '';
     let currentRefCode = '';
+    let whatsappLink = '';
 
     async function sbRpc(fn, args) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -254,7 +266,25 @@
             // Update UI with the dynamic business name
             document.getElementById('photographer-name').textContent = `Book with ${displayBizName}`;
             document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
-            
+
+            // WhatsApp quick-message link (used on both success and pending states)
+            if (portal.phone) {
+              const digitsOnly = String(portal.phone).replace(/[^0-9]/g, '');
+              const waText = encodeURIComponent(`Hi ${displayBizName}, I just submitted a booking request via ${activeStudio}.`);
+              whatsappLink = `https://wa.me/${digitsOnly}?text=${waText}`;
+            }
+
+            // If this browser already submitted a request for this link, show
+            // its pending status instead of a blank form again.
+            const pendingRaw = localStorage.getItem(`sakkhi_booking_${refCode}`);
+            if (pendingRaw) {
+              const pending = JSON.parse(pendingRaw);
+              document.getElementById('pending-details').textContent =
+                `Your ${pending.event} request for ${pending.date} is awaiting confirmation from ${displayBizName}.`;
+              document.getElementById('pending-container').classList.remove('hidden');
+              return;
+            }
+
             // Reveal the form smoothly
             const container = document.getElementById('booking-container');
             container.classList.remove('hidden');
@@ -469,18 +499,40 @@
       btn.disabled = true;
       btn.classList.add('opacity-80', 'cursor-not-allowed');
 
+      const clientName = document.getElementById('client-name').value.trim();
+      const eventDate = document.getElementById('event-date').value;
+      const eventType = document.getElementById('event-type').value;
+
       try {
-        const ok = await sbRpc('submit_booking_request', {
+        const result = await sbRpc('submit_booking_request', {
           p_ref: currentRefCode,
-          p_client_name: document.getElementById('client-name').value.trim(),
-          p_date: document.getElementById('event-date').value,
-          p_event: document.getElementById('event-type').value,
+          p_client_name: clientName,
+          p_date: eventDate,
+          p_event: eventType,
           p_session: document.getElementById('event-session').value,
           p_location: document.getElementById('event-location').value.trim(),
           p_notes: document.getElementById('event-notes').value.trim()
         });
 
-        if (!ok) throw new Error("Database rejection");
+        if (!result || !result.success) {
+          if (result && result.reason === 'rate_limited') {
+            throw new Error("Too many requests sent recently. Please try again a bit later, or contact the studio directly.");
+          }
+          throw new Error("Database rejection");
+        }
+
+        // Remember this locally so a repeat visit shows status, not a blank form
+        localStorage.setItem(`sakkhi_booking_${currentRefCode}`, JSON.stringify({
+          event: eventType, date: eventDate, sentAt: Date.now()
+        }));
+
+        // Wire the WhatsApp button for this success screen
+        const waBtn = document.getElementById('success-whatsapp-btn');
+        if (whatsappLink) {
+          waBtn.href = whatsappLink;
+          waBtn.classList.remove('hidden');
+          waBtn.classList.add('flex');
+        }
 
         // Smooth transition out
         const container = document.getElementById('booking-container');
@@ -505,11 +557,20 @@
         }, 300);
 
       } catch (err) {
-        alert("Something went wrong securely delivering the request. Please try again.");
+        alert(err.message && err.message !== "Database rejection" ? err.message : "Something went wrong securely delivering the request. Please try again.");
         btn.innerHTML = 'Submit Booking Request';
         btn.disabled = false;
         btn.classList.remove('opacity-80', 'cursor-not-allowed');
       }
+    }
+
+    function startNewBooking() {
+      localStorage.removeItem(`sakkhi_booking_${currentRefCode}`);
+      document.getElementById('pending-container').classList.add('hidden');
+      const container = document.getElementById('booking-container');
+      container.classList.remove('hidden');
+      container.style.opacity = '1';
+      container.style.transform = 'none';
     }
   </script>
   <script>
