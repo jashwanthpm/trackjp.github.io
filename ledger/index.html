@@ -103,9 +103,22 @@
           <i class="ti ti-qrcode text-lg text-[#c9a96e]"></i> Show QR Code
         </button>
 
-        <button id="ui-claim-btn" onclick="submitPaymentClaim()" class="w-full flex items-center justify-center gap-2 bg-transparent border border-emerald-800/50 hover:bg-emerald-950/30 text-emerald-400 font-bold tracking-wide py-3 rounded-xl text-xs transition-all">
-          <i class="ti ti-send text-base"></i> I've Already Paid — Notify Studio
+        <button id="ui-claim-btn" onclick="openClaimPanel()" class="w-full flex items-center justify-center gap-2 bg-transparent border border-emerald-800/50 hover:bg-emerald-950/30 text-emerald-400 font-bold tracking-wide py-3 rounded-xl text-xs transition-all">
+          <i class="ti ti-send text-base"></i> <span id="ui-claim-btn-label">I've Already Paid — Notify</span>
         </button>
+
+        <div id="ui-claim-panel" class="hidden bg-[#0f0f0f] border border-emerald-900/40 rounded-xl p-4 space-y-3">
+          <p class="text-xs text-neutral-300 font-medium">How much have you paid?</p>
+          <div class="flex gap-2">
+            <button onclick="setClaimMode('full')" id="claim-mode-full" class="flex-1 py-2 rounded-lg text-xs font-bold border border-emerald-800/50 text-emerald-400">Full Amount</button>
+            <button onclick="setClaimMode('partial')" id="claim-mode-partial" class="flex-1 py-2 rounded-lg text-xs font-bold border border-neutral-700 text-neutral-400">Partial Amount</button>
+          </div>
+          <input type="number" id="claim-amount-input" placeholder="Enter amount paid" class="hidden w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e]">
+          <div class="flex gap-2 pt-1">
+            <button onclick="closeClaimPanel()" class="flex-1 py-2.5 rounded-lg text-xs font-bold bg-neutral-900 text-neutral-400">Cancel</button>
+            <button onclick="submitPaymentClaim()" class="flex-1 py-2.5 rounded-lg text-xs font-bold bg-emerald-600 text-black">Send</button>
+          </div>
+        </div>
         
         <div id="ui-bank-details-wrap" class="bg-[#0f0f0f] border border-white/5 rounded-xl p-5 hidden mt-3 relative group">
           <div class="flex justify-between items-center mb-3">
@@ -239,39 +252,73 @@
     let currentRefCode = null;
     let currentDueAmount = 0;
 
+    let claimMode = 'full';
+    let ownerDisplayName = 'Studio';
+
+    function openClaimPanel() {
+      document.getElementById('ui-claim-panel').classList.remove('hidden');
+      document.getElementById('ui-claim-btn').classList.add('hidden');
+    }
+    function closeClaimPanel() {
+      document.getElementById('ui-claim-panel').classList.add('hidden');
+      document.getElementById('ui-claim-btn').classList.remove('hidden');
+    }
+    function setClaimMode(mode) {
+      claimMode = mode;
+      const fullBtn = document.getElementById('claim-mode-full');
+      const partBtn = document.getElementById('claim-mode-partial');
+      const input = document.getElementById('claim-amount-input');
+      if (mode === 'full') {
+        fullBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold border border-emerald-800/50 text-emerald-400';
+        partBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold border border-neutral-700 text-neutral-400';
+        input.classList.add('hidden');
+      } else {
+        partBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold border border-emerald-800/50 text-emerald-400';
+        fullBtn.className = 'flex-1 py-2 rounded-lg text-xs font-bold border border-neutral-700 text-neutral-400';
+        input.classList.remove('hidden');
+      }
+    }
+
     async function submitPaymentClaim() {
       const btn = document.getElementById('ui-claim-btn');
+      const panel = document.getElementById('ui-claim-panel');
       if (!currentRefCode) return;
+
+      let amountPaid = currentDueAmount;
+      if (claimMode === 'partial') {
+        const entered = Number(document.getElementById('claim-amount-input').value);
+        if (!entered || entered <= 0) { alert('Please enter a valid amount.'); return; }
+        amountPaid = entered;
+      }
 
       // Simple local guard so an impatient tap doesn't spam the studio —
       // the real status change still only ever happens on the studio's side.
       const guardKey = `sakkhi_claim_sent_${currentRefCode}`;
       const lastSent = localStorage.getItem(guardKey);
       if (lastSent && (Date.now() - Number(lastSent)) < 12 * 60 * 60 * 1000) {
-        btn.innerHTML = '<i class="ti ti-circle-check text-base"></i> Studio Already Notified';
-        btn.disabled = true;
+        panel.classList.add('hidden');
+        btn.classList.remove('hidden');
+        document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Already Notified`;
         return;
       }
 
-      const confirmed = confirm(`Let the studio know you've sent ${formatAmt(currentDueAmount)}? They'll get a notification to verify and update your ledger.`);
-      if (!confirmed) return;
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="ti ti-loader animate-spin text-base"></i> Sending...';
+      panel.querySelector('button[onclick="submitPaymentClaim()"]').textContent = 'Sending...';
 
       try {
         const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_payment_claim`, {
           method: 'POST',
           headers: HEADERS,
-          body: JSON.stringify({ p_ref: currentRefCode, p_amount: currentDueAmount, p_note: null })
+          body: JSON.stringify({ p_ref: currentRefCode, p_amount: amountPaid, p_note: claimMode === 'partial' ? 'Partial payment' : 'Full payment' })
         });
         if (!res.ok) throw new Error('Failed');
 
         localStorage.setItem(guardKey, String(Date.now()));
-        btn.innerHTML = '<i class="ti ti-circle-check text-base"></i> Studio Notified!';
+        panel.classList.add('hidden');
+        btn.classList.remove('hidden');
+        btn.disabled = true;
+        document.getElementById('ui-claim-btn-label').textContent = `${ownerDisplayName} Notified!`;
       } catch (e) {
-        btn.disabled = false;
-        btn.innerHTML = '<i class="ti ti-send text-base"></i> I\'ve Already Paid — Notify Studio';
+        panel.querySelector('button[onclick="submitPaymentClaim()"]').textContent = 'Send';
         alert("Couldn't send the notification. Please try again.");
       }
     }
@@ -403,6 +450,8 @@
         // --- POPULATE UI ---
         document.getElementById('ui-company-name').textContent = companyName;
         document.getElementById('ui-biz-name').textContent = `Ledger • ${profile.bizName || 'Sakkhi Studio'}`;
+        ownerDisplayName = profile.bizName || 'Studio';
+        document.getElementById('ui-claim-btn-label').textContent = `I've Already Paid — Notify ${ownerDisplayName}`;
         
         document.getElementById('ui-total').textContent = formatAmt(totalBilled);
         document.getElementById('ui-expenses').textContent = formatAmt(totalPendingExpenses);
