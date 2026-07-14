@@ -286,13 +286,28 @@
               if (pending.id) {
                 try {
                   const statusRes = await sbRpc('check_booking_status', { p_ref: refCode, p_shoot_id: pending.id });
+                  
                   if (statusRes && statusRes.status === 'confirmed') {
                     titleEl.textContent = 'Request Confirmed!';
                     iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
                     iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
                     statusText = `${displayBizName} has confirmed your ${pending.event} shoot for ${pending.date}.`;
+                  } else if (statusRes && statusRes.status === 'pending') {
+                    // It is still in your app waiting to be accepted. Keep the default pending text.
+                  } else {
+                    // If it returns null or anything else, you deleted it / declined it.
+                    titleEl.textContent = 'Request Declined';
+                    iconEl.className = 'w-20 h-20 bg-red-950/30 border border-red-900/40 rounded-2xl flex items-center justify-center text-red-400 text-4xl mx-auto mb-6';
+                    iconEl.innerHTML = '<i class="ti ti-circle-x"></i>';
+                    statusText = `Unfortunately, ${displayBizName} is unable to confirm your ${pending.event} request at this time.`;
                   }
-                } catch (e) { /* fall back to the pending message above */ }
+                } catch (e) { 
+                  // If the database query errors entirely (meaning the row is completely gone)
+                  titleEl.textContent = 'Request Declined';
+                  iconEl.className = 'w-20 h-20 bg-red-950/30 border border-red-900/40 rounded-2xl flex items-center justify-center text-red-400 text-4xl mx-auto mb-6';
+                  iconEl.innerHTML = '<i class="ti ti-circle-x"></i>';
+                  statusText = `Unfortunately, ${displayBizName} is unable to accommodate this request.`;
+                }
               }
 
               document.getElementById('pending-details').textContent = statusText;
