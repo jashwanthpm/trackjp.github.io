@@ -2189,7 +2189,7 @@ function addNotification(title, message, targetId, actionUrl = null, actionLabel
   saveNotifications();
   updateNotificationUI();
 }
-
+    
 // Updated: Removes a single notification locally and from the cloud
 async function removeNotification(id) {
   // 1. Remove from the local UI immediately for a snappy feel
@@ -2309,36 +2309,30 @@ function updateNotificationUI() {
 }
 
    async function executeNotificationAction(id, actionUrl) {
-  // Mark as read in the array structure configuration
   const target = _notifications.find(n => n.id === id);
   if (target && !target.isRead) {
     target.isRead = true;
     saveNotifications();
     updateNotificationUI();
     
-    // Update structural persistence state inside Supabase backend 
     if (!id.toString().startsWith('notif_')) {
       try {
         await sbFetch(`notifications?id=eq.${id}`, {
           method: 'PATCH',
           body: JSON.stringify({ is_read: true })
         });
-      } catch(e) { console.error("Could not sync mutation trace down pipeline:", e); }
+      } catch(e) { console.error(e); }
     }
   }
 
-  // NEW: Deep link into a specific shoot
-  if (actionUrl.startsWith('shoot:')) {
+  // Smooth scroll and highlight the shoot row
+  if (actionUrl && actionUrl.startsWith('shoot:')) {
     const shootId = actionUrl.split(':')[1];
     document.getElementById('notification-dropdown').classList.add('hidden');
     
-    // Switch to the shoots tab
     switchTab('shoots');
     
-    // Give the UI a millisecond to render the tab, then scroll and open
     setTimeout(() => {
-      openEditShootModal(shootId);
-      
       const row = document.querySelector(`[onclick="openEditShootModal('${shootId}')"]`);
       if (row) {
         row.scrollIntoView({ behavior: 'smooth', block: 'center' });
@@ -2352,16 +2346,13 @@ function updateNotificationUI() {
     return;
   }
 
-  // Execute structural workspace view state transitions
-  if (actionUrl.startsWith('#')) {
-    // Navigate straight to external subelements configuration paths
+  if (actionUrl && actionUrl.startsWith('#')) {
     window.location.href = window.location.origin + '/' + actionUrl;
     return;
   }
 
   document.getElementById('notification-dropdown').classList.add('hidden');
 
-  // ... KEEP THE REST OF YOUR EXISTING executeNotificationAction LOGIC BELOW THIS ...
   const ACCOUNT_SUBTABS = ['profile', 'payment', 'appearance', 'security', 'whatsapp', 'settings', 'data', 'support', 'devices'];
   const TOP_LEVEL_TABS = ['dashboard', 'calendar', 'shoots', 'payments', 'editing', 'account'];
 
@@ -2370,12 +2361,7 @@ function updateNotificationUI() {
   } else if (ACCOUNT_SUBTABS.includes(actionUrl)) {
     switchTab('account');
     switchAccountTab(actionUrl);
-  } else if (actionUrl === 'notifications') {
-    // No dedicated notifications screen to jump to — they're already
-    // looking at it via this dropdown, so there's nothing more to do.
-  } else {
-    // Unrecognized/custom value — fail safe to the dashboard instead of
-    // silently breaking on a missing element.
+  } else if (actionUrl !== 'notifications') {
     switchTab('dashboard');
   }
 }
@@ -2642,10 +2628,10 @@ if (newBookings.length > 0 && !isDemoMode) {
     newBookings.forEach(booking => {
       addNotification(
         'New Booking Request! 🎉', 
-        `${booking.name || 'A client'} just requested a shoot via Magic Link.`, 
+        `${booking.name || 'A client'} just requested a shoot.`, 
         booking.id,
         `shoot:${booking.id}`,
-        'Review Request'
+        'View Request'
       );
     });
     showToast(`${newBookings.length} new booking(s) received. Check notifications.`, 'success');
