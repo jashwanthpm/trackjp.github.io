@@ -50,10 +50,10 @@
   </div>
 
   <!-- Main Content Layout (Locked 2-Column Grid for Desktop) -->
-  <div id="main-content" class="hidden w-full max-w-5xl mx-auto flex-col lg:flex-row items-center lg:items-start justify-center gap-8 lg:gap-16 relative z-10 transition-all duration-500 opacity-0 mb-12">
+  <div id="main-content" class="hidden w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-10 lg:gap-16">
     
     <!-- LEFT COLUMN: Main Ledger Box (centered content) -->
-<div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 space-y-6 text-center">
+<div class="w-full max-w-md shrink-0 mx-auto lg:mx-0">
   
       <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
@@ -157,7 +157,7 @@
     </div>
 
     <!-- RIGHT COLUMN: Upcoming Shoots & History (only these two sections) -->
-    <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 lg:mt-6 space-y-10 px-2 sm:px-0">
+    <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 lg:mt-6 space-y-8 px-2 sm:px-0">
 
       <!-- Upcoming Shoots Open Display -->
       <div id="upcoming-shoots-wrap" class="hidden w-full">
@@ -171,14 +171,14 @@
 
       <!-- Shoot History List -->
       <div class="w-full block">
-        <div class="flex flex-col items-center mb-5 gap-2">
-          <div class="w-full flex items-center gap-3">
+        <div class="mb-5">
+          <div class="flex items-center gap-3 mb-2">
             <div class="h-px bg-white/10 flex-1"></div>
             <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Detailed Shoot History</h3>
             <div class="h-px bg-white/10 flex-1"></div>
           </div>
           <!-- 6-Month Transparency Badge -->
-          <span class="text-[8px] uppercase tracking-wider text-neutral-600 font-bold bg-[#0f0f0f] px-2.5 py-1 rounded-full border border-white/5 flex items-center gap-1.5 shadow-inner">
+          <span class="inline-flex items-center gap-1.5 text-[8px] uppercase tracking-wider text-neutral-600 font-bold bg-[#0f0f0f] px-2.5 py-1 rounded-full border border-white/5">
             <i class="ti ti-history text-[10px] text-neutral-500"></i>
             Showing active & past 6 months
           </span>
@@ -414,7 +414,7 @@
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
         return `
-          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-4 transition-colors">
+          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 text-left">
             <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
               <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
               <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
