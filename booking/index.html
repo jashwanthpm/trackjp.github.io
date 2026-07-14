@@ -302,13 +302,14 @@
                       iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
                       statusTextEl.textContent = `Your ${pending.event} request for ${pending.date} is currently being reviewed by ${displayBizName}.`;
                     }
-                  } else {
-                    // Only show this if the record was actually deleted from your app
-                    titleEl.textContent = 'Request Status Unknown';
-                    iconEl.className = 'w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-2xl flex items-center justify-center text-neutral-500 text-4xl mx-auto mb-6';
-                    iconEl.innerHTML = '<i class="ti ti-help"></i>';
-                    statusTextEl.textContent = `We cannot find the status of this request. Please contact ${displayBizName} directly.`;
-                  }
+                  // Inside the pendingRaw status check block
+            } else {
+              // The record is in the database, but not 'confirmed'
+              titleEl.textContent = 'Request Pending';
+              iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
+              iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
+              statusTextEl.textContent = `Your request for ${pending.date} is currently awaiting approval.`;
+            }
                 } catch (e) { console.error(e); }
               }
 
@@ -380,28 +381,29 @@
     function renderStudioShoots(shoots) {
       const container = document.getElementById('company-shoots-container');
       const list = document.getElementById('company-shoots-list');
-      
       if (!shoots || shoots.length === 0) return;
 
       container.classList.remove('hidden');
       let html = '';
-      
       shoots.forEach(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
+        const isApproved = s.booking_status === 'confirmed';
         
-        // Premium Card styling for the shoots list
         html += `
-          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-4 transition-colors">
-            <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
+          <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
+            <div class="w-12 h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
               <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
               <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">${monthName}</span>
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-sm font-bold text-white truncate">${s.name}</div>
-              <div class="text-[10px] text-neutral-400 mt-1 font-medium flex items-center gap-1.5 truncate">
-                <i class="ti ti-map-pin text-[#c9a96e]"></i> ${s.location || 'TBA'} <span class="text-neutral-700">•</span> ${s.event}
+              <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate">
+                ${s.event} • ${s.location || 'TBA'}
               </div>
+            </div>
+            <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
+              ${isApproved ? 'Approved' : 'Pending'}
             </div>
           </div>
         `;
