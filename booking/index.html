@@ -388,14 +388,10 @@
       shoots.forEach(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
-        // Check both naming conventions. If the RPC completely omits the status, assume it's an older confirmed shoot.
-const bStatus = s.booking_status || s.bookingStatus;
-const isApproved = bStatus === 'confirmed' || bStatus === undefined;
-
-// Handle payment status naming differences safely
-const pStatus = s.pay_status || s.payStatus || 'pending';
-const payLabel = { done: 'Paid', part: 'Partial Paid', pending: 'Payment Due' }[pStatus] || 'Payment Due';
-const payColor = pStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : pStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-red-950/60 text-red-400';
+        
+        // Robust check for status
+        const bStatus = s.booking_status || s.bookingStatus;
+        const isApproved = bStatus === 'confirmed' || bStatus === undefined;
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
@@ -410,10 +406,9 @@ const payColor = pStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : pStatu
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
-              <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
-                ${isApproved ? 'Approved' : 'Pending'}
+              <div class="text-[9px] font-bold uppercase tracking-widest ${isApproved ? 'text-neutral-600 opacity-60' : 'text-neutral-400'}">
+                ${isApproved ? 'Blocked' : 'Pending'}
               </div>
-              ${isApproved ? `<div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${payColor}">${payLabel}</div>` : ''}
             </div>
           </div>
         `;
