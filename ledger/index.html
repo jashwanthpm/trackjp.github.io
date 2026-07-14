@@ -275,17 +275,30 @@
 
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    let ledgerData = { companyName: '', profile: {}, shoots: [] };
+    let ledgerData = null;
     let currentRef = '';
-    let targetUserId = '';
     let totals = { billed: 0, paid: 0, expenses: 0, balance: 0 };
     let notifyType = 'full';
 
     const fmtMoney = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
     // ==========================================
-    // 2. DIRECT DB FETCHING (Replaces RPC logic)
+    // 2. RESTORED RPC CONNECTION
     // ==========================================
+    async function sbRpc(fn, args) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: 'POST',
+        headers: HEADERS,
+        body: JSON.stringify(args)
+      });
+      if (!res.ok) {
+        const errText = await res.text();
+        throw new Error(`Database Error: ${res.status} - ${errText}`);
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : null;
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       let refCode = urlParams.get('ref');
@@ -303,28 +316,14 @@
       window.addEventListener('resize', applyLayout);
 
       try {
-        // STEP 1: Get the link mapping from settings table (same as app.html)
-        const linkRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.ledger_${currentRef}&select=value`, { headers: HEADERS });
-        if (!linkRes.ok) throw new Error("Failed to fetch link");
-        const linkData = await linkRes.json();
+        // Fetch via RPC as intended — this avoids the RLS block completely!
+        const payload = await sbRpc('get_ledger_portal', { p_ref: currentRef });
         
-        if (!linkData || linkData.length === 0 || !linkData[0].value) {
-          throw new Error("Invalid Link or Link Expired");
+        if (!payload || !payload.companyName || !payload.profile) {
+          throw new Error("Invalid Link or Missing Data inside Database");
         }
         
-        targetUserId = linkData[0].value.u;
-        const targetCompany = linkData[0].value.c;
-        ledgerData.companyName = targetCompany;
-
-        // STEP 2: Get the studio's profile settings
-        const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${targetUserId}_profile&select=value`, { headers: HEADERS });
-        const profileData = await profileRes.json();
-        ledgerData.profile = (profileData && profileData.length > 0) ? profileData[0].value : {};
-
-        // STEP 3: Get all shoots for this company
-        const shootsRes = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${targetUserId}&company=eq.${encodeURIComponent(targetCompany)}`, { headers: HEADERS });
-        ledgerData.shoots = await shootsRes.json();
-
+        ledgerData = payload;
         calculateTotals();
         renderLedger();
         checkClaimStatus();
@@ -388,11 +387,14 @@
     }
 
     function renderLedger() {
-      const profile = ledgerData.profile;
+      const profile = ledgerData.profile || {};
       
-      // SMART FALLBACKS: Fixing the "split undefined" error
-      const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
-      const displayOwnerName = rawBizName.split(' ')[0];
+      // SMART FALLBACKS: This prevents the javascript "split" crash!
+      const rawBizName = profile.bizName || profile.businessName || profile.ownerName || 'Studio Partner';
+      const displayOwnerName = rawBizName.split(' ')[0] || 'Studio';
+      const upiToUse = profile.upi || profile.upiId || '';
+      const bankToUse = profile.bank || profile.bankDetails || '';
+      const phoneToUse = profile.phone || '';
       
       document.getElementById('client-name').textContent = ledgerData.companyName;
       document.getElementById('studio-badge').textContent = `Ledger • ${rawBizName}`;
@@ -406,8 +408,7 @@
         document.getElementById('payment-actions').classList.add('hidden');
         document.getElementById('success-actions').classList.remove('hidden');
       } else {
-        if (profile.upi || profile.upiId) {
-          const upiToUse = profile.upi || profile.upiId;
+        if (upiToUse) {
           const upiLink = `upi://pay?pa=${upiToUse}&pn=${encodeURIComponent(rawBizName)}&am=${totals.balance}&cu=INR`;
           document.getElementById('btn-upi-pay').href = upiLink;
           document.getElementById('btn-upi-pay').classList.remove('hidden');
@@ -420,13 +421,13 @@
         document.getElementById('notify-btn-text').textContent = `I've Already Paid — Notify ${displayOwnerName}`;
       }
 
-      if (profile.bank || profile.bankDetails) {
+      if (bankToUse) {
         document.getElementById('bank-details-box').classList.remove('hidden');
-        document.getElementById('bank-text').textContent = profile.bank || profile.bankDetails;
+        document.getElementById('bank-text').textContent = bankToUse;
       }
 
-      if (profile.phone) {
-        const digits = String(profile.phone).replace(/[^0-9]/g, '');
+      if (phoneToUse) {
+        const digits = String(phoneToUse).replace(/[^0-9]/g, '');
         document.getElementById('btn-whatsapp').href = `https://wa.me/${digits}`;
         document.getElementById('btn-whatsapp').classList.remove('hidden');
         document.getElementById('btn-whatsapp').classList.add('flex');
@@ -449,7 +450,7 @@
       sixMonthsAgo.setMonth(todayObj.getMonth() - 6);
 
       shoots.forEach(s => {
-        if (!s.date) return; // Skip invalid records
+        if (!s.date) return;
         const shootDate = new Date(s.date);
         const [y, m, d] = s.date.split('-');
         const moStr = MONTHS[parseInt(m)-1];
@@ -534,9 +535,9 @@
     function toggleQRModal(show) {
       const modal = document.getElementById('qr-modal');
       if (show) {
-        const profile = ledgerData.profile;
+        const profile = ledgerData.profile || {};
         const upiToUse = profile.upi || profile.upiId;
-        const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
+        const rawBizName = profile.bizName || profile.businessName || profile.ownerName || 'Studio Partner';
 
         const upiLink = `upi://pay?pa=${upiToUse}&pn=${encodeURIComponent(rawBizName)}&am=${totals.balance}&cu=INR`;
         document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
@@ -592,22 +593,8 @@
       btn.disabled = true;
 
       try {
-        // Send notification directly to the studio's dashboard notification center
-        const notif = {
-          user_id: targetUserId,
-          title: "Payment Claimed",
-          message: `${ledgerData.companyName} claims to have paid ${fmtMoney(amount)} against their ledger. Please verify your bank/UPI.`,
-          type: 'info',
-          is_read: false
-        };
-
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
-          method: 'POST',
-          headers: HEADERS,
-          body: JSON.stringify(notif)
-        });
-        
-        if (!res.ok) throw new Error("Database push failed");
+        // Restored original RPC notification method to match your DB logic exactly
+        await sbRpc('submit_payment_claim', { p_ref: currentRef, p_amount: amount });
 
         localStorage.setItem(`sakkhi_claim_${currentRef}`, Date.now().toString());
         toggleNotifyPanel();
@@ -657,8 +644,8 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      const profile = ledgerData.profile;
-      const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
+      const profile = ledgerData.profile || {};
+      const rawBizName = profile.bizName || profile.businessName || profile.ownerName || 'Studio Partner';
       const clientName = ledgerData.companyName;
       
       doc.setFillColor(10, 10, 10);
