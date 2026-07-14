@@ -37,9 +37,39 @@
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
 
-    /* Deterministic show/hide — avoids Tailwind's hidden/flex specificity race */
-    #main-content { display: none; }
-    #main-content.is-visible { display: flex; }
+    /* Grid layout: 1 column mobile, 2 columns desktop */
+    #main-content { 
+      display: none; 
+    }
+    #main-content.is-visible { 
+      display: grid;
+      grid-template-columns: 1fr;
+      column-gap: 2.5rem;
+      row-gap: 2.5rem;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      padding: 2rem;
+    }
+    @media (min-width: 1024px) {
+      #main-content.is-visible {
+        grid-template-columns: minmax(0, 420px) 1fr;
+        justify-content: center;
+        padding: 2rem 1rem;
+      }
+    }
+
+    /* Left column: fixed width ledger card */
+    #left-column {
+      max-width: 28rem;
+      width: 100%;
+    }
+
+    /* Right column: flexible */
+    #right-column {
+      width: 100%;
+      max-width: 100%;
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
@@ -53,11 +83,11 @@
     <p class="text-sm text-neutral-400 font-medium tracking-wide">Securing connection to ledger...</p>
   </div>
 
-  <!-- Main Content Layout (Locked 2-Column Grid for Desktop) -->
-  <div id="main-content" class="hidden w-full max-w-6xl mx-auto flex-col lg:flex-row items-start justify-center gap-10 lg:gap-16">
+  <!-- Main Content Layout (2-Column Grid: Left=Ledger, Right=Shoots) -->
+  <div id="main-content" class="hidden opacity-0 transition-opacity duration-500">
     
-    <!-- LEFT COLUMN: Main Ledger Box (centered content) -->
-<div class="w-full max-w-md shrink-0 mx-auto lg:mx-0">
+    <!-- LEFT COLUMN: Main Ledger Box -->
+    <div id="left-column">
   
       <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
@@ -160,9 +190,8 @@
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: Upcoming Shoots & History (only these two sections) -->
-    <!-- FIX: Removed lg:mt-6 so this column aligns perfectly with the top of the Left Column -->
-    <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 space-y-8 px-2 sm:px-0">
+    <!-- RIGHT COLUMN: Upcoming Shoots & History -->
+    <div id="right-column" class="space-y-8">
 
       <!-- Upcoming Shoots Open Display -->
       <div id="upcoming-shoots-wrap" class="hidden w-full">
@@ -226,11 +255,21 @@
     </div>
   </div>
 
-  <!-- Error State -->
-  <div id="error-state" class="hidden relative z-10 w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl text-center mx-auto mt-20">
-    <div class="w-20 h-20 bg-red-950/40 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-4xl mx-auto mb-6"><i class="ti ti-link-off"></i></div>
-    <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Link Invalid</h2>
-    <p class="text-sm text-neutral-500 font-light leading-relaxed">This secure ledger link has expired or is invalid. Please request a new link.</p>
+  <!-- Error State (Full Screen) -->
+  <div id="error-state" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center min-h-screen p-4 bg-[#030303]">
+    <div class="w-full max-w-md relative z-10">
+      <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-red-900/30 rounded-[2rem] p-10 shadow-[0_0_50px_rgba(220,38,38,0.1)] text-center">
+        <div class="w-24 h-24 bg-red-950/50 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-5xl mx-auto mb-6 shadow-[0_0_30px_rgba(220,38,38,0.2)]">
+          <i class="ti ti-alert-circle"></i>
+        </div>
+        <h2 class="text-3xl font-bold text-white mb-3 tracking-tight">Link Invalid or Expired</h2>
+        <p class="text-sm text-neutral-400 font-light leading-relaxed mb-6">This secure ledger link has expired, is malformed, or does not exist. Please request a new link from the studio owner.</p>
+        <div class="pt-6 border-t border-white/5">
+          <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Secured By</p>
+          <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-5 mx-auto mt-3 grayscale opacity-60"/>
+        </div>
+      </div>
+    </div>
   </div>
 
   <!-- BRANDING FOOTER (Strictly Locked to Bottom Center) -->
@@ -418,9 +457,6 @@
       document.getElementById('upcoming-shoots-list').innerHTML = upcoming.map(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
-        const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
-        const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
-        const hasPP = ppEnabled && ppAmount > 0;
         return `
           <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 flex items-center gap-4 text-left">
             <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
@@ -432,7 +468,6 @@
               <div class="text-[10px] text-neutral-400 mt-1 font-medium flex items-center gap-1.5 truncate">
                 <i class="ti ti-map-pin text-[#c9a96e]"></i> ${s.location || 'TBA'}
               </div>
-              ${hasPP ? `<div class="inline-flex items-center gap-1 mt-1.5 text-[8px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 border border-violet-500/20 px-1.5 py-0.5 rounded-full"><i class="ti ti-video text-[9px]"></i>Post-Production</div>` : ''}
             </div>
           </div>
         `;
@@ -495,8 +530,7 @@
       const urlParams = new URLSearchParams(window.location.search);
       const refCode = (urlParams.get('ref') || '').trim();
 
-      // A valid ref is a compact alphanumeric code. Anything missing, empty,
-      // too short/long, or containing unexpected characters is an invalid link.
+      // Validate link format: alphanumeric, 4-32 chars. Catches too short/long/malformed links.
       const isValidFormat = /^[a-zA-Z0-9]{4,32}$/.test(refCode);
       if (!refCode || !isValidFormat) return showError();
       currentRefCode = refCode;
@@ -538,17 +572,6 @@
 
           if (expense > 0 && s.expense_status !== 'settled') {
             totalPendingExpenses += expense;
-          }
-
-          // Post-production is an optional add-on toggled per shoot in the studio app.
-          const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
-          const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
-          if (ppEnabled && ppAmount > 0) {
-            const ppStatus = s.post_production_status ?? s.postProductionStatus ?? s.pp_status ?? 'pending';
-            const ppPartPaid = Number(s.post_production_part_paid ?? s.pp_part_paid ?? 0);
-            totalBilled += ppAmount;
-            if (ppStatus === 'done') totalPaid += ppAmount;
-            else if (ppStatus === 'part') totalPaid += ppPartPaid;
           }
         });
 
@@ -622,16 +645,6 @@
             const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
-            // Post-production add-on (only shows if toggled on for this shoot in the studio app)
-            const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
-            const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
-            const hasPP = ppEnabled && ppAmount > 0;
-            const ppStatus = s.post_production_status ?? s.postProductionStatus ?? s.pp_status ?? 'pending';
-            const ppPartPaid = Number(s.post_production_part_paid ?? s.pp_part_paid ?? 0);
-            const ppStatusColor = ppStatus === 'done' ? 'text-emerald-400' : (ppStatus === 'part' ? 'text-amber-400' : 'text-red-400');
-            const ppStatusLabel = ppStatus === 'done' ? 'Settled' : (ppStatus === 'part' ? 'Partial' : 'Pending');
-            const ppStatusDisplay = ppStatus === 'part' ? `Partially Paid (${formatAmt(ppPartPaid)})` : ppStatusLabel;
-
             return `
               <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors text-left">
                 <div class="flex items-center gap-4">
@@ -643,7 +656,6 @@
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-bold text-white truncate">${s.name}</div>
                     <div class="text-[10px] text-neutral-400 mt-1 font-medium truncate">${s.event} • ${s.location || 'TBA'}</div>
-                    ${hasPP ? `<div class="inline-flex items-center gap-1 mt-1.5 text-[8px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 border border-violet-500/20 px-1.5 py-0.5 rounded-full"><i class="ti ti-video text-[9px]"></i>Post-Production</div>` : ''}
                   </div>
                   <div class="text-right flex-shrink-0 pl-2">
                     <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
@@ -651,7 +663,7 @@
                   </div>
                 </div>
                 
-                ${(hasExp || hasPP || hasNotes) ? `
+                ${(hasExp || hasNotes) ? `
                 <div class="pt-3 border-t border-white/5 flex flex-col gap-2.5">
                   ${hasExp ? `
                   <div class="flex items-center justify-between">
@@ -659,15 +671,6 @@
                     <div class="text-right flex items-center gap-2">
                       <span class="text-xs font-bold text-amber-500">${formatAmt(exp)}</span>
                       <span class="text-[8px] uppercase font-bold tracking-wider ${expStatusColor}">[${expStatusLabel}]</span>
-                    </div>
-                  </div>` : ''}
-
-                  ${hasPP ? `
-                  <div class="flex items-center justify-between">
-                    <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="ti ti-video text-violet-400/80 text-xs"></i>Post-Production Work</span>
-                    <div class="text-right flex items-center gap-2">
-                      <span class="text-xs font-bold text-violet-400">${formatAmt(ppAmount)}</span>
-                      <span class="text-[8px] uppercase font-bold tracking-wider ${ppStatusColor}">[${ppStatusDisplay}]</span>
                     </div>
                   </div>` : ''}
 
@@ -685,7 +688,6 @@
         document.getElementById('loading-state').style.display = 'none';
         const mainContent = document.getElementById('main-content');
         
-        mainContent.classList.remove('hidden');
         mainContent.classList.add('is-visible');
         
         setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
