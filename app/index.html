@@ -3744,47 +3744,29 @@ async function deleteEditJob() {
     }
 
     function getShootRowHtmlTemplate(s, isDashboardFrame) {
-      const { dd, mmm } = ddMmm(s.date);
-      
-      const badgeStyles = {
-        'Wedding':'bg-amber-950 text-[#c9a96e] border border-amber-900',
-        'Reception':'bg-blue-950 text-blue-400 border border-blue-900',
-        'Sangeet':'bg-purple-950 text-purple-400 border border-purple-900',
-        'Haldi':'bg-yellow-950 text-yellow-400 border border-yellow-900',
-        'Pellikoduku':'bg-teal-950 text-teal-400 border border-teal-900',
-        'Pellikuthuru':'bg-pink-950 text-pink-400 border border-pink-900',
-        'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
-      }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
+  const { dd, mmm } = ddMmm(s.date);
+  // This checks the booking_status (which we call bookingStatus in our logic)
+  const isApproved = s.bookingStatus === 'confirmed';
+  
+  return `
+    <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3">
+      <div class="flex items-center gap-3 min-w-0 flex-1">
+        <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
+          <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
+          <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
+        </div>
+        
+        <div class="min-w-0 flex-1">
+          <div class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</div>
+          <div class="text-xs text-neutral-500 truncate mt-0.5">${escapeHtml(s.event)} • ${escapeHtml(s.location) || 'TBA'}</div>
+        </div>
+      </div>
 
-      const isPendingLead = (s.notes || '').startsWith('[WEB LEAD]') && s.bookingStatus === 'pending';
-
-      return `
-        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border ${isPendingLead ? 'border-amber-800/50' : 'border-neutral-900'} rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-          <div class="flex items-center gap-3 min-w-0 flex-1">
-            <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
-              <span class="text-[8px] uppercase tracking-wide text-neutral-500 font-semibold mt-0.5">${mmm}</span>
-            </div>
-            
-            <div class="min-w-0 flex-1">
-              <div class="text-sm font-semibold text-white">${escapeHtml(s.name)}</div>
-              <div class="flex flex-wrap items-center gap-2 mt-1">
-                <span class="text-[8px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${escapeHtml(s.event)}</span>
-                <span class="text-xs text-neutral-500">${escapeHtml(s.location) || 'N/A'}</span>
-                ${s.company ? `<span class="text-xs text-neutral-500 truncate">${escapeHtml(s.company)}</span>` : ''}
-                ${isPendingLead ? `<span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-amber-400 border border-amber-800">New Request</span>` : ''}
-              </div>
-            </div>
-          </div>
-
-          <div class="flex items-center gap-1 flex-shrink-0 self-end sm:self-auto">
-            ${isPendingLead ? `<button onclick="event.stopPropagation(); acceptBookingRequest('${s.id}')" class="px-3 py-1.5 bg-emerald-600 text-black text-xs font-bold rounded-lg hover:bg-emerald-500 transition">Accept</button>` : ''}
-            <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
-              <i class="ti ti-brand-whatsapp text-sm"></i>
-            </button>
-          </div>
-        </div>`;
-    }
+      <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
+        ${isApproved ? 'Approved' : 'Pending'}
+      </div>
+    </div>`;
+}
 
     async function acceptBookingRequest(shootId) {
       try {
