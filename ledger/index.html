@@ -51,7 +51,7 @@
       margin: 0 auto;
       padding: 2rem;
     }
-    @media (min-width: 1024px) {
+    @media (min-width: 860px) {
       #main-content.is-visible {
         grid-template-columns: minmax(0, 420px) 1fr;
         justify-content: center;
@@ -258,13 +258,11 @@
   <!-- Error State (Full Screen) -->
   <div id="error-state" class="hidden fixed inset-0 z-50 flex flex-col items-center justify-center min-h-screen p-4 bg-[#030303]">
     <div class="w-full max-w-md relative z-10">
-      <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-red-900/30 rounded-[2rem] p-10 shadow-[0_0_50px_rgba(220,38,38,0.1)] text-center">
-        <div class="w-24 h-24 bg-red-950/50 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-5xl mx-auto mb-6 shadow-[0_0_30px_rgba(220,38,38,0.2)]">
-          <i class="ti ti-alert-circle"></i>
-        </div>
-        <h2 class="text-3xl font-bold text-white mb-3 tracking-tight">Link Invalid or Expired</h2>
-        <p class="text-sm text-neutral-400 font-light leading-relaxed mb-6">This secure ledger link has expired, is malformed, or does not exist. Please request a new link from the studio owner.</p>
-        <div class="pt-6 border-t border-white/5">
+      <div class="text-center bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] p-10 shadow-2xl">
+        <div class="w-20 h-20 bg-red-950/40 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(239,68,68,0.15)]"><i class="ti ti-alert-triangle"></i></div>
+        <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Link Invalid</h2>
+        <p class="text-sm text-neutral-500 font-light">This secure ledger link has expired or is no longer valid. Please request a new link.</p>
+        <div class="mt-8 pt-6 border-t border-white/5">
           <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Secured By</p>
           <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-5 mx-auto mt-3 grayscale opacity-60"/>
         </div>
@@ -689,6 +687,7 @@
         const mainContent = document.getElementById('main-content');
         
         mainContent.classList.add('is-visible');
+        applyResponsiveGrid();
         
         setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
 
@@ -696,6 +695,19 @@
         showError();
       }
     }
+
+    // Bulletproof layout: measures actual pixel width directly, independent of
+    // CSS media queries (guards against zoom/DPI edge cases hiding the 2-column view).
+    function applyResponsiveGrid() {
+      const mc = document.getElementById('main-content');
+      if (!mc || !mc.classList.contains('is-visible')) return;
+      if (window.innerWidth >= 860) {
+        mc.style.gridTemplateColumns = 'minmax(0, 420px) 1fr';
+      } else {
+        mc.style.gridTemplateColumns = '1fr';
+      }
+    }
+    window.addEventListener('resize', applyResponsiveGrid);
 
     function showError() {
       document.getElementById('loading-state').style.display = 'none';
