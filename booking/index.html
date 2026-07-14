@@ -225,7 +225,7 @@
   if (!res.ok) {
     const err = await res.json();
     console.error("RPC Error:", err);
-    throw new Error('Database Error');
+    throw new Error('Database Error: ' + (err.message || 'Unknown'));
   }
   
   const text = await res.text();
