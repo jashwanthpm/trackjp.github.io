@@ -7,10 +7,10 @@
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
   <title>Client Ledger | Sakkhi</title>
 
-  <link rel="icon" type="image/png" href="/sakkhi 300px.png">
+<link rel="icon" type="image/png" href="/sakkhi 300px.png">
   <link rel="shortcut icon" href="/sakkhi 300px.png">
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
-
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -25,7 +25,7 @@
             darkbg: '#050505',
             cardbg: '#0a0a0a',
             surface: '#111111',
-            success: '#25D366', // Adjusted to match WhatsApp/Screenshot green
+            success: '#25D366', 
             warning: '#f59e0b',
             danger: '#ef4444',
             postprod: '#8b5cf6'
@@ -43,6 +43,11 @@
       font-family: 'Plus Jakarta Sans', sans-serif;
       background-color: #050505;
       color: #e8e8e8;
+      /* Subtle noise/grid pattern */
+      background-image: linear-gradient(to right, rgba(255,255,255,0.02) 1px, transparent 1px), 
+                        linear-gradient(to bottom, rgba(255,255,255,0.02) 1px, transparent 1px);
+      background-size: 40px 40px;
+      background-attachment: fixed;
     }
     
     .premium-card {
@@ -73,26 +78,41 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-4 pt-8 relative overflow-x-hidden">
 
+  <!-- Background Decorative Glow -->
+  <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.04] blur-[100px] rounded-full pointer-events-none z-0"></div>
+
+  <!-- LOADING STATE -->
   <div id="loading-state" class="w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[60vh] relative z-10 transition-opacity duration-300">
     <div class="w-12 h-12 border-4 border-white/5 border-t-gold rounded-full animate-spin mb-6"></div>
     <h2 class="text-xs font-bold text-neutral-500 tracking-widest uppercase">Securing connection...</h2>
   </div>
 
-  <div id="error-state" class="hidden absolute inset-0 z-50 flex items-center justify-center p-4 bg-darkbg">
-    <div class="text-center w-full max-w-md p-10 premium-card">
-      <div class="w-16 h-16 bg-danger/10 border border-danger/20 rounded-2xl flex items-center justify-center text-danger text-3xl mx-auto mb-6">
+  <!-- ERROR / INVALID LINK STATE -->
+  <div id="error-state" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center p-4">
+    <div class="text-center w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl relative z-10">
+      <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-[1.25rem] flex items-center justify-center text-red-500 text-3xl mx-auto mb-6 shadow-[0_0_30px_rgba(239,68,68,0.1)]">
         <i class="ti ti-alert-triangle"></i>
       </div>
       <h2 class="text-xl font-bold text-white mb-2">Link Invalid</h2>
-      <p class="text-sm text-neutral-500 mb-8">This secure ledger link has expired or is no longer valid. Please request a new link.</p>
+      <p class="text-sm text-neutral-500 font-light">This secure ledger link has expired or is no longer valid.<br>Please request a new link.</p>
+    </div>
+    <!-- Footer specific to Error State -->
+    <div class="mt-8 flex flex-col items-center relative z-10 w-full">
+      <p class="text-[8px] uppercase tracking-widest text-neutral-600 font-bold mb-3">Secured By</p>
+      <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block">
+        <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 sm:h-5 opacity-40 grayscale hover:opacity-100 hover:grayscale-0 transition-all duration-300" onerror="this.style.display='none'"/>
+      </a>
     </div>
   </div>
 
+  <!-- MAIN LEDGER LAYOUT -->
   <div id="main-layout" class="hidden w-full max-w-6xl mx-auto relative z-10 opacity-0 transition-opacity duration-700">
     
+    <!-- LEFT COLUMN -->
     <div id="ledger-col" class="w-full shrink-0">
       <div class="premium-card p-6 sm:p-8">
         
+        <!-- Header -->
         <div class="text-center mb-8">
           <div class="w-12 h-12 bg-[#111111] border border-white/10 rounded-[14px] flex items-center justify-center mx-auto mb-5 shadow-lg">
             <i class="ti ti-wallet text-xl text-gold"></i>
@@ -101,6 +121,7 @@
           <span id="studio-badge" class="text-[9px] text-gold font-bold tracking-widest uppercase bg-[#1a150e] px-4 py-1.5 rounded-full border border-gold/20"></span>
         </div>
 
+        <!-- Financial Breakdown -->
         <div class="bg-surface rounded-2xl p-6 mb-6">
           <div class="text-center mb-6">
             <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1.5">Pending Balance</p>
@@ -127,6 +148,7 @@
           </div>
         </div>
 
+        <!-- Payment Actions Area -->
         <div id="payment-actions" class="space-y-3">
           <a id="btn-upi-pay" href="#" class="flex items-center justify-center gap-2 w-full bg-gold hover:bg-gold-hover text-black font-bold text-sm py-4 rounded-xl transition-all duration-300">
             <i class="ti ti-device-mobile"></i> Pay Now via UPI App
@@ -140,6 +162,7 @@
               <i class="ti ti-send"></i> <span id="notify-btn-text">I've Already Paid — Notify Studio</span>
             </button>
             
+            <!-- Inline Notify Panel -->
             <div id="notify-panel" class="hidden overflow-hidden transition-all duration-300 mt-3 bg-surface rounded-xl p-4">
               <div class="flex gap-2 mb-3 bg-[#0a0a0a] rounded-lg p-1">
                 <button id="toggle-full" onclick="setNotifyType('full')" class="flex-1 text-xs font-bold py-2 rounded-md bg-[#222] text-white transition-colors">Full Amount</button>
@@ -156,6 +179,7 @@
           </div>
         </div>
 
+        <!-- Success Area -->
         <div id="success-actions" class="hidden bg-[#0d1712] border border-success/20 rounded-xl p-6 text-center">
           <div class="w-10 h-10 bg-success/20 rounded-full flex items-center justify-center text-success text-xl mx-auto mb-3">
             <i class="ti ti-check"></i>
@@ -164,6 +188,7 @@
           <p class="text-xs text-success/70">Your ledger balance is fully settled.</p>
         </div>
 
+        <!-- Bank Details -->
         <div id="bank-details-box" class="hidden mt-6 bg-surface rounded-xl p-5 relative">
           <div class="flex justify-between items-center mb-4">
             <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Or Pay via Bank Transfer</p>
@@ -174,6 +199,7 @@
           <pre id="bank-text" class="text-xs text-neutral-300 font-mono whitespace-pre-wrap leading-relaxed"></pre>
         </div>
 
+        <!-- Footer actions & Trust Line -->
         <div class="mt-8 pt-4">
           <div class="flex items-center justify-center gap-1.5 text-[8px] text-neutral-600 uppercase tracking-widest font-bold mb-5">
             <i class="ti ti-lock text-[10px]"></i> Secure Encrypted Ledger
@@ -191,8 +217,10 @@
       </div>
     </div>
 
+    <!-- RIGHT COLUMN: SHOOTS -->
     <div id="shoots-col" class="w-full min-w-0">
       
+      <!-- Upcoming Shoots -->
       <div id="upcoming-container" class="hidden mb-10">
         <div class="flex items-center gap-4 mb-6">
           <div class="h-px bg-white/5 flex-1"></div>
@@ -202,6 +230,7 @@
         <div id="upcoming-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
       </div>
 
+      <!-- Shoot History -->
       <div id="history-container" class="hidden">
         <div class="flex items-center gap-4 mb-3">
           <div class="h-px bg-white/5 flex-1"></div>
@@ -214,6 +243,7 @@
     </div>
   </div>
 
+  <!-- MAIN BRANDING FOOTER (Shown only when ledger is active) -->
   <div id="page-footer" class="hidden mt-12 mb-8 flex flex-col items-center relative z-10 w-full">
     <p class="text-[8px] uppercase tracking-widest text-neutral-600 font-bold mb-3">Secured By</p>
     <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block">
@@ -221,6 +251,7 @@
     </a>
   </div>
 
+  <!-- QR CODE MODAL -->
   <div id="qr-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/90 backdrop-blur-sm modal-enter" onclick="toggleQRModal(false)"></div>
     <div class="bg-surface border border-white/5 rounded-[2rem] p-8 max-w-sm w-full relative z-10 modal-content-enter text-center">
@@ -245,6 +276,7 @@
     // ==========================================
     // 1. CONFIGURATION
     // ==========================================
+    // Restored the actual Supabase URL and Key so backend fetching works!
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co'; 
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo'; 
     
@@ -282,8 +314,8 @@
       const urlParams = new URLSearchParams(window.location.search);
       let refCode = urlParams.get('ref');
       
-      // FIX: Regex updated to allow periods, underscores, and hyphens (e.g. "With_love.in")
-      const refRegex = /^[a-zA-Z0-9_.\-]{3,64}$/;
+      // Highly relaxed regex to ensure ANY code copied from the app gets processed
+      const refRegex = /^[a-zA-Z0-9_.\-~]{3,128}$/;
       
       if (!refCode || !refRegex.test(refCode.trim())) {
         showError();
