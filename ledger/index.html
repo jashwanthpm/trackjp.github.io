@@ -38,22 +38,22 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 pt-8 pb-12 relative overflow-x-hidden">
+<body class="min-h-screen relative overflow-x-hidden pt-8 pb-24">
 
   <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
   <!-- Loading State -->
-  <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full h-[60vh] max-w-md relative z-10">
+  <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full mt-[20vh] relative z-10">
     <div class="spinner"></div>
     <p class="text-sm text-neutral-400 font-medium tracking-wide">Securing connection to ledger...</p>
   </div>
 
-  <!-- Main Content State (Updated to match Side-by-Side layout) -->
-  <div id="main-content" class="hidden w-full max-w-md lg:max-w-5xl xl:max-w-6xl space-y-10 lg:space-y-0 lg:flex lg:flex-row lg:gap-12 lg:items-start opacity-0 transition-opacity duration-700 relative z-10 mx-auto">
+  <!-- Main Content State (Explicit Flex-Row for Desktop) -->
+  <div id="main-content" class="hidden flex-col md:flex-row w-full max-w-[1200px] mx-auto px-4 md:px-8 gap-10 md:gap-16 items-start opacity-0 transition-opacity duration-700 relative z-10">
     
-    <!-- Left Column: Main Ledger -->
-    <div class="w-full lg:w-[450px] flex-shrink-0 space-y-6">
+    <!-- Left Column: Main Ledger & Payments -->
+    <div class="w-full md:w-[400px] lg:w-[420px] flex-shrink-0 space-y-6">
 
       <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
@@ -162,11 +162,11 @@
       </div>
     </div>
 
-    <!-- Right column: Upcoming Shoots + Detailed Shoot History (Side-by-side on Desktop) -->
-    <div class="w-full lg:flex-1 space-y-10 pt-2 lg:pt-0">
+    <!-- Right column: Upcoming Shoots + Detailed Shoot History -->
+    <div class="w-full md:flex-1 space-y-10 pt-4 md:pt-0">
 
-      <!-- Upcoming Shoots Open Display -->
-      <div id="upcoming-shoots-wrap" class="hidden w-full px-2 sm:px-0">
+      <!-- Upcoming Shoots -->
+      <div id="upcoming-shoots-wrap" class="hidden w-full">
         <div class="w-full flex items-center gap-3 mb-5">
           <div class="h-px bg-white/5 flex-1"></div>
           <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Your Upcoming Shoots</h3>
@@ -176,7 +176,7 @@
       </div>
 
       <!-- Shoot History List -->
-      <div class="w-full px-2 sm:px-0">
+      <div class="w-full">
         <div class="flex flex-col items-center mb-5 gap-2">
           <div class="w-full flex items-center gap-3">
             <div class="h-px bg-white/5 flex-1"></div>
@@ -235,10 +235,10 @@
     <p class="text-sm text-neutral-500 font-light leading-relaxed">This secure ledger link has expired or is invalid. Please request a new link.</p>
   </div>
 
-  <!-- BRANDING FOOTER -->
-  <div class="mt-8 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10">
-    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-2">Powered By</p>
-    <a href="https://sakkhi.co.in" target="_blank" class="cursor-pointer block hover:scale-105 transition-transform duration-300">
+  <!-- BRANDING FOOTER - FIXED TO BOTTOM RIGHT -->
+  <div class="fixed bottom-6 right-6 opacity-40 hover:opacity-100 transition-opacity duration-300 z-50 flex flex-col items-end pointer-events-auto">
+    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-1.5">Powered By</p>
+    <a href="https://sakkhi.co.in" target="_blank" class="cursor-pointer block hover:scale-105 transition-transform duration-300 origin-bottom-right">
       <img src="/SAKKHIheader.png" alt="Sakkhi" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
     </a>
   </div>
@@ -645,7 +645,11 @@
 
         document.getElementById('loading-state').style.display = 'none';
         const mainContent = document.getElementById('main-content');
+        
+        // Correctly apply the flex layout when showing the content
         mainContent.classList.remove('hidden');
+        mainContent.classList.add('flex');
+        
         setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
 
       } catch (err) {
