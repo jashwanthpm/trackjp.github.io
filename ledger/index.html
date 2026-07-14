@@ -414,7 +414,7 @@
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
         return `
-          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 text-left">
+          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 flex items-center gap-4 text-left">
             <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
               <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
               <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
@@ -600,7 +600,7 @@
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
             return `
-              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors">
+              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors text-left">
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-14 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
                     <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
