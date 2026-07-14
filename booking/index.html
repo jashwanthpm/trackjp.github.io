@@ -388,9 +388,14 @@
       shoots.forEach(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
-        const isApproved = s.booking_status === 'confirmed';
-        const payLabel = { done: 'Paid', part: 'Partial Paid', pending: 'Payment Due' }[s.pay_status] || 'Payment Due';
-        const payColor = s.pay_status === 'done' ? 'bg-emerald-950 text-emerald-400' : s.pay_status === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-red-950/60 text-red-400';
+        // Check both naming conventions. If the RPC completely omits the status, assume it's an older confirmed shoot.
+const bStatus = s.booking_status || s.bookingStatus;
+const isApproved = bStatus === 'confirmed' || bStatus === undefined;
+
+// Handle payment status naming differences safely
+const pStatus = s.pay_status || s.payStatus || 'pending';
+const payLabel = { done: 'Paid', part: 'Partial Paid', pending: 'Payment Due' }[pStatus] || 'Payment Due';
+const payColor = pStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : pStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-red-950/60 text-red-400';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
