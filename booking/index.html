@@ -274,48 +274,45 @@
               whatsappLink = `https://wa.me/${digitsOnly}?text=${waText}`;
             }
 
-            // If this browser already submitted a request for this link, show real status
+            // If this browser already submitted a request for this link
             const pendingRaw = localStorage.getItem(`sakkhi_booking_${refCode}`);
             if (pendingRaw) {
               const pending = JSON.parse(pendingRaw);
-              let statusText = `Your ${pending.event} request for ${pending.date} is awaiting confirmation from ${displayBizName}.`;
               const iconEl = document.querySelector('#pending-container .w-20');
               const titleEl = document.querySelector('#pending-container h2');
+              const statusTextEl = document.getElementById('pending-details');
 
               if (pending.id) {
                 try {
-                  // Direct database check instead of RPC
                   const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?id=eq.${pending.id}&select=booking_status`, { headers: HEADERS });
                   const statusRes = await res.json();
                   
                   if (statusRes && statusRes.length > 0) {
                     const status = statusRes[0].booking_status;
+                    
                     if (status === 'confirmed') {
-                      titleEl.textContent = 'Request Confirmed!';
+                      titleEl.textContent = 'Request Approved';
                       iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
-                      statusText = `${displayBizName} has confirmed your ${pending.event} shoot for ${pending.date}.`;
+                      statusTextEl.textContent = `${displayBizName} has approved your ${pending.event} shoot request.`;
                     } else {
-                      titleEl.textContent = 'Request Pending';
+                      // This covers both 'pending' and cases where you added it manually in the app
+                      titleEl.textContent = 'Pending Approval';
                       iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
-                      statusText = `Your ${pending.event} request for ${pending.date} is awaiting confirmation from ${displayBizName}.`;
+                      statusTextEl.textContent = `Your ${pending.event} request for ${pending.date} is currently being reviewed by ${displayBizName}.`;
                     }
                   } else {
-                    // Row was deleted from the app (Declined)
-                    titleEl.textContent = 'Request Declined';
-                    iconEl.className = 'w-20 h-20 bg-red-950/30 border border-red-900/40 rounded-2xl flex items-center justify-center text-red-400 text-4xl mx-auto mb-6';
-                    iconEl.innerHTML = '<i class="ti ti-circle-x"></i>';
-                    statusText = `Unfortunately, ${displayBizName} is unable to accommodate this request.`;
+                    // Only show this if the record was actually deleted from your app
+                    titleEl.textContent = 'Request Status Unknown';
+                    iconEl.className = 'w-20 h-20 bg-neutral-900 border border-neutral-800 rounded-2xl flex items-center justify-center text-neutral-500 text-4xl mx-auto mb-6';
+                    iconEl.innerHTML = '<i class="ti ti-help"></i>';
+                    statusTextEl.textContent = `We cannot find the status of this request. Please contact ${displayBizName} directly.`;
                   }
-                } catch (e) {
-                  console.error(e);
-                }
+                } catch (e) { console.error(e); }
               }
 
-              document.getElementById('pending-details').textContent = statusText;
               document.getElementById('pending-container').classList.remove('hidden');
-              
               applyPortalAvailability(portal);
               return;
             }
