@@ -7,16 +7,23 @@
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
   <title>Client Ledger | Sakkhi</title>
 
-  <link rel="icon" type="image/png" href="/sakkhi 300px.png">
+<link rel="icon" type="image/png" href="/sakkhi 300px.png">
   <link rel="shortcut icon" href="/sakkhi 300px.png">
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
-
+  
   <script src="https://cdn.tailwindcss.com"></script>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
   <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
   <script>
+    // Failsafe to unregister any stuck service workers
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.getRegistrations().then(function(registrations) {
+        for(let registration of registrations) { registration.unregister(); }
+      });
+    }
+
     tailwind.config = {
       theme: {
         extend: {
@@ -77,16 +84,13 @@
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start p-4 pt-8 relative overflow-x-hidden">
 
-  <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.04] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
-  <!-- LOADING STATE -->
   <div id="loading-state" class="w-full max-w-md mx-auto flex flex-col items-center justify-center min-h-[60vh] relative z-10 transition-opacity duration-300">
     <div class="w-12 h-12 border-4 border-white/5 border-t-gold rounded-full animate-spin mb-6"></div>
     <h2 class="text-xs font-bold text-neutral-500 tracking-widest uppercase">Securing connection...</h2>
   </div>
 
-  <!-- ERROR / INVALID LINK STATE -->
   <div id="error-state" class="hidden absolute inset-0 z-50 flex flex-col items-center justify-center p-4">
     <div class="text-center w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl relative z-10">
       <div class="w-16 h-16 bg-red-950/30 border border-red-900/50 rounded-[1.25rem] flex items-center justify-center text-red-500 text-3xl mx-auto mb-6 shadow-[0_0_30px_rgba(239,68,68,0.1)]">
@@ -103,14 +107,11 @@
     </div>
   </div>
 
-  <!-- MAIN LEDGER LAYOUT -->
   <div id="main-layout" class="hidden w-full max-w-6xl mx-auto relative z-10 opacity-0 transition-opacity duration-700">
     
-    <!-- LEFT COLUMN -->
     <div id="ledger-col" class="w-full shrink-0">
       <div class="premium-card p-6 sm:p-8">
         
-        <!-- Header -->
         <div class="text-center mb-8">
           <div class="w-12 h-12 bg-[#111111] border border-white/10 rounded-[14px] flex items-center justify-center mx-auto mb-5 shadow-lg">
             <i class="ti ti-wallet text-xl text-gold"></i>
@@ -119,7 +120,6 @@
           <span id="studio-badge" class="text-[9px] text-gold font-bold tracking-widest uppercase bg-[#1a150e] px-4 py-1.5 rounded-full border border-gold/20"></span>
         </div>
 
-        <!-- Financial Breakdown -->
         <div class="bg-surface rounded-2xl p-6 mb-6">
           <div class="text-center mb-6">
             <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1.5">Pending Balance</p>
@@ -146,7 +146,6 @@
           </div>
         </div>
 
-        <!-- Payment Actions Area -->
         <div id="payment-actions" class="space-y-3">
           <a id="btn-upi-pay" href="#" class="flex items-center justify-center gap-2 w-full bg-gold hover:bg-gold-hover text-black font-bold text-sm py-4 rounded-xl transition-all duration-300">
             <i class="ti ti-device-mobile"></i> Pay Now via UPI App
@@ -160,7 +159,6 @@
               <i class="ti ti-send"></i> <span id="notify-btn-text">I've Already Paid — Notify Studio</span>
             </button>
             
-            <!-- Inline Notify Panel -->
             <div id="notify-panel" class="hidden overflow-hidden transition-all duration-300 mt-3 bg-surface rounded-xl p-4">
               <div class="flex gap-2 mb-3 bg-[#0a0a0a] rounded-lg p-1">
                 <button id="toggle-full" onclick="setNotifyType('full')" class="flex-1 text-xs font-bold py-2 rounded-md bg-[#222] text-white transition-colors">Full Amount</button>
@@ -177,7 +175,6 @@
           </div>
         </div>
 
-        <!-- Success Area -->
         <div id="success-actions" class="hidden bg-[#0d1712] border border-success/20 rounded-xl p-6 text-center">
           <div class="w-10 h-10 bg-success/20 rounded-full flex items-center justify-center text-success text-xl mx-auto mb-3">
             <i class="ti ti-check"></i>
@@ -186,7 +183,6 @@
           <p class="text-xs text-success/70">Your ledger balance is fully settled.</p>
         </div>
 
-        <!-- Bank Details -->
         <div id="bank-details-box" class="hidden mt-6 bg-surface rounded-xl p-5 relative">
           <div class="flex justify-between items-center mb-4">
             <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Or Pay via Bank Transfer</p>
@@ -197,7 +193,6 @@
           <pre id="bank-text" class="text-xs text-neutral-300 font-mono whitespace-pre-wrap leading-relaxed"></pre>
         </div>
 
-        <!-- Footer actions & Trust Line -->
         <div class="mt-8 pt-4">
           <div class="flex items-center justify-center gap-1.5 text-[8px] text-neutral-600 uppercase tracking-widest font-bold mb-5">
             <i class="ti ti-lock text-[10px]"></i> Secure Encrypted Ledger
@@ -215,10 +210,8 @@
       </div>
     </div>
 
-    <!-- RIGHT COLUMN: SHOOTS -->
     <div id="shoots-col" class="w-full min-w-0">
       
-      <!-- Upcoming Shoots -->
       <div id="upcoming-container" class="hidden mb-10">
         <div class="flex items-center gap-4 mb-6">
           <div class="h-px bg-white/5 flex-1"></div>
@@ -228,7 +221,6 @@
         <div id="upcoming-list" class="grid grid-cols-1 sm:grid-cols-2 gap-4"></div>
       </div>
 
-      <!-- Shoot History -->
       <div id="history-container" class="hidden">
         <div class="flex items-center gap-4 mb-3">
           <div class="h-px bg-white/5 flex-1"></div>
@@ -241,7 +233,6 @@
     </div>
   </div>
 
-  <!-- MAIN BRANDING FOOTER -->
   <div id="page-footer" class="hidden mt-12 mb-8 flex flex-col items-center relative z-10 w-full">
     <p class="text-[8px] uppercase tracking-widest text-neutral-600 font-bold mb-3">Secured By</p>
     <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block">
@@ -249,7 +240,6 @@
     </a>
   </div>
 
-  <!-- QR CODE MODAL -->
   <div id="qr-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
     <div class="absolute inset-0 bg-black/90 backdrop-blur-sm modal-enter" onclick="toggleQRModal(false)"></div>
     <div class="bg-surface border border-white/5 rounded-[2rem] p-8 max-w-sm w-full relative z-10 modal-content-enter text-center">
@@ -280,37 +270,22 @@
     const HEADERS = {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
-      'Authorization': 'Bearer ' + SUPABASE_KEY,
-      'Prefer': 'return=representation'
+      'Authorization': 'Bearer ' + SUPABASE_KEY
     };
 
     const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
-    let ledgerData = null;
+    let ledgerData = { companyName: '', profile: {}, shoots: [] };
     let currentRef = '';
+    let targetUserId = '';
     let totals = { billed: 0, paid: 0, expenses: 0, balance: 0 };
     let notifyType = 'full';
 
     const fmtMoney = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
     // ==========================================
-    // 2. RPC CALL & INIT
+    // 2. DIRECT DB FETCHING (Replaces RPC logic)
     // ==========================================
-    async function sbRpc(fn, args) {
-      // Cleaned up the fetch URL to exactly match how booking.html works
-      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
-        method: 'POST',
-        headers: HEADERS,
-        body: JSON.stringify(args)
-      });
-      if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(`Database Error: ${res.status} - ${errText}`);
-      }
-      const text = await res.text();
-      return text ? JSON.parse(text) : null;
-    }
-
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       let refCode = urlParams.get('ref');
@@ -328,13 +303,28 @@
       window.addEventListener('resize', applyLayout);
 
       try {
-        const payload = await sbRpc('get_ledger_portal', { p_ref: currentRef });
+        // STEP 1: Get the link mapping from settings table (same as app.html)
+        const linkRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.ledger_${currentRef}&select=value`, { headers: HEADERS });
+        if (!linkRes.ok) throw new Error("Failed to fetch link");
+        const linkData = await linkRes.json();
         
-        if (!payload || !payload.companyName || !payload.profile) {
-          throw new Error("Invalid Link or Missing Data inside Database");
+        if (!linkData || linkData.length === 0 || !linkData[0].value) {
+          throw new Error("Invalid Link or Link Expired");
         }
         
-        ledgerData = payload;
+        targetUserId = linkData[0].value.u;
+        const targetCompany = linkData[0].value.c;
+        ledgerData.companyName = targetCompany;
+
+        // STEP 2: Get the studio's profile settings
+        const profileRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${targetUserId}_profile&select=value`, { headers: HEADERS });
+        const profileData = await profileRes.json();
+        ledgerData.profile = (profileData && profileData.length > 0) ? profileData[0].value : {};
+
+        // STEP 3: Get all shoots for this company
+        const shootsRes = await fetch(`${SUPABASE_URL}/rest/v1/shoots?user_id=eq.${targetUserId}&company=eq.${encodeURIComponent(targetCompany)}`, { headers: HEADERS });
+        ledgerData.shoots = await shootsRes.json();
+
         calculateTotals();
         renderLedger();
         checkClaimStatus();
@@ -382,18 +372,14 @@
       const shoots = ledgerData.shoots || [];
 
       shoots.forEach(s => {
-        totals.billed += (s.amount || 0);
-        if (s.pay_status === 'done') totals.paid += (s.amount || 0);
-        else if (s.pay_status === 'part') totals.paid += (s.part_paid || 0);
+        // Core shoot amount
+        totals.billed += (Number(s.amount) || 0);
+        if (s.pay_status === 'done') totals.paid += (Number(s.amount) || 0);
+        else if (s.pay_status === 'part') totals.paid += (Number(s.part_paid) || 0);
 
-        if (s.post_production) {
-          totals.billed += (s.post_production_amount || 0);
-          if (s.post_production_status === 'done') totals.paid += (s.post_production_amount || 0);
-          else if (s.post_production_status === 'part') totals.paid += (s.post_production_part_paid || 0);
-        }
-
-        if (s.expense > 0 && s.expense_status !== 'settled') {
-          totals.expenses += s.expense;
+        // Expenses
+        if (Number(s.expense) > 0 && s.expense_status !== 'settled') {
+          totals.expenses += Number(s.expense);
         }
       });
 
@@ -403,10 +389,13 @@
 
     function renderLedger() {
       const profile = ledgerData.profile;
-      const displayOwnerName = profile.ownerName.split(' ')[0];
+      
+      // SMART FALLBACKS: Fixing the "split undefined" error
+      const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
+      const displayOwnerName = rawBizName.split(' ')[0];
       
       document.getElementById('client-name').textContent = ledgerData.companyName;
-      document.getElementById('studio-badge').textContent = `Ledger • ${profile.businessName || profile.ownerName}`;
+      document.getElementById('studio-badge').textContent = `Ledger • ${rawBizName}`;
       
       document.getElementById('pending-balance').textContent = fmtMoney(totals.balance);
       document.getElementById('total-billed').textContent = fmtMoney(totals.billed);
@@ -417,8 +406,9 @@
         document.getElementById('payment-actions').classList.add('hidden');
         document.getElementById('success-actions').classList.remove('hidden');
       } else {
-        if (profile.upiId) {
-          const upiLink = `upi://pay?pa=${profile.upiId}&pn=${encodeURIComponent(profile.businessName || profile.ownerName)}&am=${totals.balance}&cu=INR`;
+        if (profile.upi || profile.upiId) {
+          const upiToUse = profile.upi || profile.upiId;
+          const upiLink = `upi://pay?pa=${upiToUse}&pn=${encodeURIComponent(rawBizName)}&am=${totals.balance}&cu=INR`;
           document.getElementById('btn-upi-pay').href = upiLink;
           document.getElementById('btn-upi-pay').classList.remove('hidden');
           document.getElementById('btn-show-qr').classList.remove('hidden');
@@ -430,9 +420,9 @@
         document.getElementById('notify-btn-text').textContent = `I've Already Paid — Notify ${displayOwnerName}`;
       }
 
-      if (profile.bankDetails) {
+      if (profile.bank || profile.bankDetails) {
         document.getElementById('bank-details-box').classList.remove('hidden');
-        document.getElementById('bank-text').textContent = profile.bankDetails;
+        document.getElementById('bank-text').textContent = profile.bank || profile.bankDetails;
       }
 
       if (profile.phone) {
@@ -459,13 +449,12 @@
       sixMonthsAgo.setMonth(todayObj.getMonth() - 6);
 
       shoots.forEach(s => {
+        if (!s.date) return; // Skip invalid records
         const shootDate = new Date(s.date);
         const [y, m, d] = s.date.split('-');
         const moStr = MONTHS[parseInt(m)-1];
 
-        const isUnsettled = (s.pay_status !== 'done') || 
-                            (s.post_production && s.post_production_status !== 'done') ||
-                            (s.expense > 0 && s.expense_status !== 'settled');
+        const isUnsettled = (s.pay_status !== 'done') || (Number(s.expense) > 0 && s.expense_status !== 'settled');
 
         if (shootDate >= todayObj) {
           upcomingHtml += `
@@ -475,9 +464,8 @@
                 <span class="text-[9px] font-bold text-neutral-500 uppercase tracking-widest mt-1">${moStr}</span>
               </div>
               <div class="min-w-0">
-                <h4 class="text-sm font-bold text-white truncate">${s.event}</h4>
+                <h4 class="text-sm font-bold text-white truncate">${s.event || 'Shoot'}</h4>
                 <p class="text-[10px] text-neutral-400 mt-0.5">${s.location || 'TBA'}</p>
-                ${s.post_production ? `<div class="mt-1.5"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest bg-postprod/10 text-postprod"><i class="ti ti-camera text-[9px]"></i> Post-Production</span></div>` : ''}
               </div>
             </div>
           `;
@@ -486,28 +474,19 @@
         if (isUnsettled || shootDate >= sixMonthsAgo) {
           let statusLabel = '';
           if (s.pay_status === 'done') statusLabel = `<span class="text-success text-[10px] uppercase font-bold tracking-widest">Settled</span>`;
-          else if (s.pay_status === 'part') statusLabel = `<span class="text-warning text-[10px] uppercase font-bold tracking-widest">Partial (${fmtMoney(s.part_paid)})</span>`;
+          else if (s.pay_status === 'part') statusLabel = `<span class="text-warning text-[10px] uppercase font-bold tracking-widest">Partial (${fmtMoney(s.part_paid || 0)})</span>`;
           else statusLabel = `<span class="text-danger text-[10px] uppercase font-bold tracking-widest">Pending</span>`;
 
-          const hasLowerSection = (s.expense > 0) || s.post_production || s.notes;
+          const hasLowerSection = (Number(s.expense) > 0) || s.notes;
           let lowerHtml = '';
 
           if (hasLowerSection) {
             lowerHtml += `<div class="mt-4 pt-4 border-t border-white/5 space-y-2.5 text-xs">`;
             
-            if (s.expense > 0) {
+            if (Number(s.expense) > 0) {
               const eTag = s.expense_status === 'settled' ? '[Settled]' : '[Pending]';
               const eColor = s.expense_status === 'settled' ? 'text-neutral-500' : 'text-warning';
               lowerHtml += `<div class="flex justify-between"><span class="text-neutral-400">Shoot Expenses</span><span class="${eColor} font-semibold">${fmtMoney(s.expense)} <span class="text-[9px] opacity-70">${eTag}</span></span></div>`;
-            }
-
-            if (s.post_production && s.post_production_amount > 0) {
-              let pTag = '[Pending]';
-              if(s.post_production_status === 'done') pTag = '[Settled]';
-              else if (s.post_production_status === 'part') pTag = `[Partial (${fmtMoney(s.post_production_part_paid)})]`;
-              
-              const pColor = s.post_production_status === 'done' ? 'text-success' : 'text-postprod';
-              lowerHtml += `<div class="flex justify-between"><span class="text-neutral-400">Post-Production Work</span><span class="${pColor} font-semibold">${fmtMoney(s.post_production_amount)} <span class="text-[9px] opacity-70">${pTag}</span></span></div>`;
             }
 
             if (s.notes) {
@@ -522,12 +501,11 @@
               <div class="flex justify-between items-start gap-4">
                 <div class="flex-1 min-w-0">
                   <div class="text-[9px] text-neutral-500 font-bold uppercase tracking-widest mb-1.5">${d} ${moStr} ${y}</div>
-                  <h4 class="text-sm font-bold text-white mb-0.5 truncate">${s.name}</h4>
-                  <div class="text-xs text-neutral-400 truncate">${s.event} • ${s.location || 'TBA'}</div>
-                  ${s.post_production ? `<div class="mt-2"><span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-[8px] font-bold uppercase tracking-widest bg-postprod/10 text-postprod"><i class="ti ti-video text-[9px]"></i> Post-Production</span></div>` : ''}
+                  <h4 class="text-sm font-bold text-white mb-0.5 truncate">${s.name || 'Client'}</h4>
+                  <div class="text-xs text-neutral-400 truncate">${s.event || 'Shoot'} • ${s.location || 'TBA'}</div>
                 </div>
                 <div class="text-right shrink-0">
-                  <div class="text-base font-bold text-white mb-1">${fmtMoney(s.amount)}</div>
+                  <div class="text-base font-bold text-white mb-1">${fmtMoney(s.amount || 0)}</div>
                   ${statusLabel}
                 </div>
               </div>
@@ -556,10 +534,14 @@
     function toggleQRModal(show) {
       const modal = document.getElementById('qr-modal');
       if (show) {
-        const upiLink = `upi://pay?pa=${ledgerData.profile.upiId}&pn=${encodeURIComponent(ledgerData.profile.businessName || ledgerData.profile.ownerName)}&am=${totals.balance}&cu=INR`;
+        const profile = ledgerData.profile;
+        const upiToUse = profile.upi || profile.upiId;
+        const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
+
+        const upiLink = `upi://pay?pa=${upiToUse}&pn=${encodeURIComponent(rawBizName)}&am=${totals.balance}&cu=INR`;
         document.getElementById('qr-image').src = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(upiLink)}`;
         document.getElementById('qr-amount-text').textContent = fmtMoney(totals.balance);
-        document.getElementById('qr-upi-id').textContent = ledgerData.profile.upiId;
+        document.getElementById('qr-upi-id').textContent = upiToUse;
         modal.classList.remove('hidden');
       } else {
         modal.classList.add('hidden');
@@ -610,7 +592,23 @@
       btn.disabled = true;
 
       try {
-        await sbRpc('submit_payment_claim', { p_ref: currentRef, p_amount: amount });
+        // Send notification directly to the studio's dashboard notification center
+        const notif = {
+          user_id: targetUserId,
+          title: "Payment Claimed",
+          message: `${ledgerData.companyName} claims to have paid ${fmtMoney(amount)} against their ledger. Please verify your bank/UPI.`,
+          type: 'info',
+          is_read: false
+        };
+
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/notifications`, {
+          method: 'POST',
+          headers: HEADERS,
+          body: JSON.stringify(notif)
+        });
+        
+        if (!res.ok) throw new Error("Database push failed");
+
         localStorage.setItem(`sakkhi_claim_${currentRef}`, Date.now().toString());
         toggleNotifyPanel();
         checkClaimStatus();
@@ -659,7 +657,8 @@
       const { jsPDF } = window.jspdf;
       const doc = new jsPDF();
       
-      const bizName = ledgerData.profile.businessName || ledgerData.profile.ownerName;
+      const profile = ledgerData.profile;
+      const rawBizName = profile.bizName || profile.ownerName || 'Studio Partner';
       const clientName = ledgerData.companyName;
       
       doc.setFillColor(10, 10, 10);
@@ -672,7 +671,7 @@
       
       doc.setFontSize(11);
       doc.setTextColor(200, 200, 200);
-      doc.text(`Studio: ${bizName}`, 20, 40);
+      doc.text(`Studio: ${rawBizName}`, 20, 40);
       doc.text(`Client: ${clientName}`, 20, 47);
       doc.text(`Date Generated: ${new Date().toLocaleDateString()}`, 20, 54);
       
@@ -691,16 +690,12 @@
         
         let status = "Pending";
         if (s.pay_status === 'done') status = "Settled";
-        else if (s.pay_status === 'part') status = `Partial (Paid Rs.${s.part_paid})`;
+        else if (s.pay_status === 'part') status = `Partial (Paid Rs.${s.part_paid || 0})`;
         
-        doc.text(`Amount: Rs.${s.amount} - Status: ${status}`, 20, y + 6);
+        doc.text(`Amount: Rs.${s.amount || 0} - Status: ${status}`, 20, y + 6);
         
         let offset = 12;
-        if (s.post_production) {
-          doc.text(`Post-Production: Rs.${s.post_production_amount} (${s.post_production_status})`, 25, y + offset);
-          offset += 6;
-        }
-        if (s.expense > 0) {
+        if (Number(s.expense) > 0) {
           doc.text(`Expenses: Rs.${s.expense} (${s.expense_status})`, 25, y + offset);
           offset += 6;
         }
