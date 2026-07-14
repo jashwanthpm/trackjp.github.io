@@ -493,7 +493,7 @@
                   <h4 class="text-sm font-bold text-white truncate">${s.event || 'Shoot'}</h4>
                   ${s.isEditJob ? `<span class="text-[8px] bg-postprod/20 text-postprod border border-postprod/30 px-2 py-0.5 rounded font-bold uppercase tracking-widest">Post-Production</span>` : ''}
                 </div>
-                <p class="text-[10px] text-neutral-400 mt-0.5">${s.location || s.client_name || 'TBA'}</p>
+                <p class="text-[10px] text-neutral-400 mt-0.5">${s.location || (s.isEditJob ? '' : 'TBA')}</p>
               </div>
             </div>
           `;
@@ -527,7 +527,7 @@
             }
 
             if (s.notes) {
-              lowerHtml += `<div class="mt-2 bg-[#0a0a0a] p-3 rounded-lg text-neutral-400 text-[11px] italic flex gap-2 items-start"><i class="ti ti-notes mt-0.5 text-neutral-500"></i> <p>${s.notes}</p></div>`;
+              lowerHtml += `<div class="mt-2 bg-[#0a0a0a] p-3 rounded-lg text-neutral-400 text-[11px] italic flex gap-2 items-start"><i class="ti ti-notes mt-0.5 text-neutral-500 flex-shrink-0"></i> <p class="whitespace-pre-wrap leading-relaxed">${s.notes}</p></div>`;
             }
             
             lowerHtml += `</div>`;
@@ -548,7 +548,7 @@
                     <h4 class="text-sm font-bold text-white truncate">${s.name || s.client_name || 'Client'}</h4>
                     ${s.isEditJob ? `<span class="text-[8px] bg-postprod/20 text-postprod border border-postprod/30 px-2 py-0.5 rounded font-bold uppercase tracking-widest">Post-Production</span>` : ''}
                   </div>
-                  <div class="text-xs text-neutral-400 truncate">${s.event || 'Shoot'} • ${s.location || 'TBA'}</div>
+                  <div class="text-xs text-neutral-400 truncate">${s.event || 'Shoot'}${s.location ? ' • ' + s.location : (s.isEditJob ? '' : ' • TBA')}</div>
                 </div>
                 <div class="text-right shrink-0 mt-1">
                   <div class="text-base font-bold text-white mb-1">${fmtMoney(s.amount || 0)}</div>
