@@ -2441,6 +2441,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
         expenseStatus: r.expense_status || 'pending',
         payStatus: r.pay_status || 'pending',
         partPaid: Number(r.part_paid || 0),
+        bookingStatus: r.booking_status || null,
         created: r.created
       };
     }
@@ -3740,8 +3741,10 @@ async function deleteEditJob() {
         'House Warming':'bg-sky-950 text-sky-400 border border-sky-900'
       }[s.event] || 'bg-neutral-900 text-neutral-400 border border-neutral-800';
 
+      const isPendingLead = (s.notes || '').startsWith('[WEB LEAD]') && s.bookingStatus === 'pending';
+
       return `
-        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+        <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border ${isPendingLead ? 'border-amber-800/50' : 'border-neutral-900'} rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
           <div class="flex items-center gap-3 min-w-0 flex-1">
             <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
               <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
@@ -3754,16 +3757,30 @@ async function deleteEditJob() {
                 <span class="text-[8px] px-2 py-0.5 font-semibold rounded ${badgeStyles}">${escapeHtml(s.event)}</span>
                 <span class="text-xs text-neutral-500">${escapeHtml(s.location) || 'N/A'}</span>
                 ${s.company ? `<span class="text-xs text-neutral-500 truncate">${escapeHtml(s.company)}</span>` : ''}
+                ${isPendingLead ? `<span class="text-[8px] px-2 py-0.5 font-semibold rounded bg-amber-950 text-amber-400 border border-amber-800">New Request</span>` : ''}
               </div>
             </div>
           </div>
 
           <div class="flex items-center gap-1 flex-shrink-0 self-end sm:self-auto">
+            ${isPendingLead ? `<button onclick="event.stopPropagation(); acceptBookingRequest('${s.id}')" class="px-3 py-1.5 bg-emerald-600 text-black text-xs font-bold rounded-lg hover:bg-emerald-500 transition">Accept</button>` : ''}
             <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20 transition">
               <i class="ti ti-brand-whatsapp text-sm"></i>
             </button>
           </div>
         </div>`;
+    }
+
+    async function acceptBookingRequest(shootId) {
+      try {
+        await sbFetch(`shoots?id=eq.${shootId}`, { method: 'PATCH', body: JSON.stringify({ booking_status: 'confirmed' }) });
+        const s = _shoots.find(x => x.id === shootId);
+        if (s) s.bookingStatus = 'confirmed';
+        renderShootsList();
+        showToast('Booking accepted!');
+      } catch (e) {
+        showToast('Could not accept booking. Try again.', 'error');
+      }
     }
 
 async function toggleBlockDate(dateStr) {
@@ -4001,7 +4018,7 @@ async function toggleBlockDate(dateStr) {
       }
 
       // 5. Final list filtering (Timeline)
-      let filtered = statsFiltered.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      let filtered = statsFiltered.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
       
       if (ft === 'upcoming') {
         filtered = filtered.filter(s => s.date >= td).sort((a, b) => (a.date || '').localeCompare(b.date || ''));
@@ -4036,7 +4053,7 @@ async function toggleBlockDate(dateStr) {
         return;
       }
         let html = '';
-        const sortedMonths = Object.keys(grouped).sort().reverse();
+        const sortedMonths = Object.keys(grouped).sort();
         sortedMonths.forEach(monthKey => {
           const shoots = grouped[monthKey];
           const [year, month] = monthKey.split('-');
@@ -4090,7 +4107,7 @@ async function toggleBlockDate(dateStr) {
         : applyTimeFilter(_shoots.filter(s => s.amount), 'pay');
 
       // ONLY DECLARE THIS ONCE
-      let filtered = baseShoots.sort((a, b) => (b.date || '').localeCompare(a.date || ''));
+      let filtered = baseShoots.sort((a, b) => (a.date || '').localeCompare(b.date || ''));
       
       if (q) filtered = filtered.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) filtered = filtered.filter(s => s.company === fc);
@@ -4185,9 +4202,10 @@ async function toggleBlockDate(dateStr) {
         if (!grouped[monthKey]) grouped[monthKey] = [];
         grouped[monthKey].push(s);
       });
+      Object.values(grouped).forEach(arr => arr.sort((a, b) => (a.payStatus === 'done' ? 0 : 1) - (b.payStatus === 'done' ? 0 : 1)));
 
       let html = '';
-      Object.keys(grouped).sort().reverse().forEach(monthKey => {
+      Object.keys(grouped).sort().forEach(monthKey => {
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
