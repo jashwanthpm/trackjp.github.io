@@ -2473,6 +2473,7 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     expense_status: s.expenseStatus || 'pending',
     pay_status: s.payStatus || 'pending',
     part_paid: s.partPaid || 0,
+    booking_status: s.bookingStatus || 'confirmed',
     created: s.created || new Date().toISOString()
   };
 }
@@ -3749,7 +3750,7 @@ async function deleteEditJob() {
   const isApproved = s.bookingStatus === 'confirmed';
   
   return `
-    <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3">
+    <div onclick="openEditShootModal('${s.id}')" class="bg-neutral-950 border ${isApproved ? 'border-neutral-900' : 'border-amber-900/40'} rounded-lg p-3 hover:border-neutral-700 transition cursor-pointer flex items-center justify-between gap-3">
       <div class="flex items-center gap-3 min-w-0 flex-1">
         <div class="w-12 h-12 bg-[#0f0f0f] border border-neutral-800 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
           <span class="text-base font-bold text-[#c9a96e] leading-tight">${dd}</span>
@@ -3759,25 +3760,48 @@ async function deleteEditJob() {
         <div class="min-w-0 flex-1">
           <div class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</div>
           <div class="text-xs text-neutral-500 truncate mt-0.5">${escapeHtml(s.event)} • ${escapeHtml(s.location) || 'TBA'}</div>
+          ${!isApproved ? '<div class="text-[9px] font-bold uppercase tracking-wider text-amber-400 mt-1">Needs Approval</div>' : ''}
         </div>
       </div>
 
-      <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
-        ${isApproved ? 'Approved' : 'Pending'}
+      <div class="flex items-center gap-1 flex-shrink-0">
+        ${!isApproved ? `
+          <button onclick="acceptBookingRequest('${s.id}', event)" title="Approve" class="p-2 bg-emerald-950/20 text-emerald-400 rounded-lg hover:bg-emerald-900/30">
+            <i class="ti ti-check text-sm"></i>
+          </button>
+          <button onclick="rejectBookingRequest('${s.id}', event)" title="Reject" class="p-2 bg-red-950/20 text-red-400 rounded-lg hover:bg-red-900/30">
+            <i class="ti ti-x text-sm"></i>
+          </button>
+        ` : ''}
+        <button onclick="triggerRowWhatsApp('${s.id}', event, 'reminder')" title="WhatsApp" class="p-2 bg-emerald-950/10 text-emerald-400 rounded-lg hover:bg-emerald-900/20">
+          <i class="ti ti-brand-whatsapp text-sm"></i>
+        </button>
       </div>
     </div>`;
 }
 
-    async function acceptBookingRequest(shootId) {
+    async function acceptBookingRequest(shootId, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
       try {
         await sbFetch(`shoots?id=eq.${shootId}`, { method: 'PATCH', body: JSON.stringify({ booking_status: 'confirmed' }) });
         const s = _shoots.find(x => x.id === shootId);
         if (s) s.bookingStatus = 'confirmed';
-        renderShootsList();
-        showToast('Booking accepted!');
+        refreshCurrentView();
+        showToast('Booking approved — added to your schedule!');
       } catch (e) {
         showToast('Could not accept booking. Try again.', 'error');
       }
+    }
+
+    function rejectBookingRequest(shootId, event) {
+      if (event && event.stopPropagation) event.stopPropagation();
+      const s = _shoots.find(x => x.id === shootId); if (!s) return;
+      _pendingDropTargetId = shootId;
+      document.getElementById('confirm-title').textContent = 'Reject Booking Request?';
+      document.getElementById('confirm-sub-text').textContent = `This will permanently delete the request from "${s.name}".`;
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = executeConfirmedRecordDrop;
+      openModal('confirm-modal-backdrop');
     }
 
 async function toggleBlockDate(dateStr) {
@@ -4023,8 +4047,11 @@ async function toggleBlockDate(dateStr) {
         filtered = filtered.filter(s => s.date < td);
       }
 
+      const needsApproval = filtered.filter(s => s.bookingStatus !== 'confirmed');
+      const scheduled = filtered.filter(s => s.bookingStatus === 'confirmed');
+
       const grouped = {};
-      filtered.forEach(s => {
+      scheduled.forEach(s => {
         const monthKey = s.date.slice(0, 7);
         if (!grouped[monthKey]) grouped[monthKey] = [];
         grouped[monthKey].push(s);
@@ -4050,6 +4077,19 @@ async function toggleBlockDate(dateStr) {
         return;
       }
         let html = '';
+        if (needsApproval.length) {
+          html += `<div class="mb-6">
+            <div class="px-3 py-2 bg-amber-950/20 border-b border-amber-900/40 mb-3 rounded-t-lg">
+              <div class="flex justify-between items-center">
+                <h3 class="text-sm font-bold text-amber-400 flex items-center gap-1.5"><i class="ti ti-clock-hour-4"></i> Needs Approval</h3>
+                <span class="text-xs text-amber-500/70">${needsApproval.length} request${needsApproval.length !== 1 ? 's' : ''}</span>
+              </div>
+            </div>
+            <div class="space-y-2">
+              ${needsApproval.map(s => getShootRowHtmlTemplate(s, false)).join('')}
+            </div>
+          </div>`;
+        }
         const sortedMonths = Object.keys(grouped).sort();
         sortedMonths.forEach(monthKey => {
           const shoots = grouped[monthKey];
@@ -5652,6 +5692,7 @@ async function toggleBlockDate(dateStr) {
         company: document.getElementById('f-shoot-company').value,
         notes: document.getElementById('f-shoot-notes').value.trim(),
         amount, expense, expenseStatus, payStatus, partPaid,
+        bookingStatus: editId ? (_shoots.find(x => x.id === editId)?.bookingStatus || 'confirmed') : 'confirmed',
         created: editId ? (_shoots.find(x => x.id === editId)?.created || new Date().toISOString()) : new Date().toISOString()
       };
 
