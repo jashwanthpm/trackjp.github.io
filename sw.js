@@ -61,11 +61,6 @@ self.addEventListener('fetch', event => {
     return;
   }
 
-  // Fix for Supabase/RPC POST requests breaking the cache
-  if (event.request.method !== 'GET') {
-    return;
-  }
-
   // Network-first for everything (GitHub Pages prefers this)
   event.respondWith(
     fetch(event.request)
