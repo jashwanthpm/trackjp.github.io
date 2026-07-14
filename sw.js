@@ -55,7 +55,10 @@ self.addEventListener('activate', event => {
 // ============================================
 self.addEventListener('fetch', event => {
   const url = new URL(event.request.url);
-  
+
+  // ADD THIS LINE HERE:
+  if (event.request.method !== 'GET') return;
+
   // Skip chrome extensions and non-http
   if (url.protocol !== 'http:' && url.protocol !== 'https:') {
     return;
