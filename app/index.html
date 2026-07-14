@@ -1287,7 +1287,13 @@
     <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
       <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
       <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
-      <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-camera text-xl"></i>Shoots</button>
+      <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab relative flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all">
+        <span class="relative inline-block">
+          <i class="ti ti-camera text-xl"></i>
+          <span id="shoots-pending-badge" class="hidden absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 bg-red-500 rounded-full flex items-center justify-center text-[8px] font-bold text-white shadow-[0_0_5px_rgba(239,68,68,0.8)]"></span>
+        </span>
+        Shoots
+      </button>
       <button onclick="switchTab('payments')" id="tab-payments" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-wallet text-xl"></i>Ledger</button>
       <!-- PASTE THE NEW BUTTON HERE -->
       <button onclick="switchTab('editing')" id="tab-editing" class="hidden nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-photo-edit text-xl"></i>Editing</button>
@@ -1571,6 +1577,7 @@ setTimeout(() => {
 
       applyPrivacyUIVisibility();
       renderDashboard();
+      updateShootsNavBadge();
     }
 
     async function refreshSupabaseSession() {
@@ -2622,6 +2629,7 @@ try {
       
       initTimeFilters(); // <--- ADD THIS LINE RIGHT HERE
       renderDashboard();
+      updateShootsNavBadge();
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
@@ -5795,7 +5803,22 @@ async function toggleBlockDate(dateStr) {
       triggerRowWhatsApp(id, { stopPropagation: () => {} }, contextMode);
     }
 
+    function updateShootsNavBadge() {
+      const badge = document.getElementById('shoots-pending-badge');
+      if (!badge) return;
+      // Same definition of "pending" already used per-row in getShootRowHtmlTemplate
+      // (anything whose booking_status isn't 'confirmed' shows a "Needs Approval" tag there).
+      const pendingCount = _shoots.filter(s => s.bookingStatus !== 'confirmed').length;
+      if (pendingCount > 0) {
+        badge.textContent = pendingCount > 9 ? '9+' : pendingCount;
+        badge.classList.remove('hidden');
+      } else {
+        badge.classList.add('hidden');
+      }
+    }
+
     function refreshCurrentView() {
+      updateShootsNavBadge();
       const activeNode = document.querySelector('.nav-tab.text-\\[\\#c9a96e\\]');
       if (!activeNode) return;
       const activeTabId = activeNode.id.replace('tab-', '');
