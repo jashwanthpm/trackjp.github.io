@@ -389,6 +389,8 @@
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
         const isApproved = s.booking_status === 'confirmed';
+        const payLabel = { done: 'Paid', part: 'Partial Paid', pending: 'Payment Due' }[s.pay_status] || 'Payment Due';
+        const payColor = s.pay_status === 'done' ? 'bg-emerald-950 text-emerald-400' : s.pay_status === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-red-950/60 text-red-400';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
@@ -402,8 +404,11 @@
                 ${s.event} • ${s.location || 'TBA'}
               </div>
             </div>
-            <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
-              ${isApproved ? 'Approved' : 'Pending'}
+            <div class="flex flex-col items-end gap-1">
+              <div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${isApproved ? 'bg-emerald-950 text-emerald-400' : 'bg-neutral-900 text-neutral-500'}">
+                ${isApproved ? 'Approved' : 'Pending'}
+              </div>
+              ${isApproved ? `<div class="text-[9px] font-bold uppercase tracking-wider px-2 py-1 rounded ${payColor}">${payLabel}</div>` : ''}
             </div>
           </div>
         `;
