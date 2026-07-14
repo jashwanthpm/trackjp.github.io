@@ -270,17 +270,32 @@
             // WhatsApp quick-message link (used on both success and pending states)
             if (portal.phone) {
               const digitsOnly = String(portal.phone).replace(/[^0-9]/g, '');
-              const waText = encodeURIComponent(`Hi ${displayBizName}, I just submitted a booking request via ${activeStudio}.`);
+              const waText = encodeURIComponent(`Hi ${displayBizName}! I just sent a booking request via ${activeStudio} — looking forward to hearing back from you.`);
               whatsappLink = `https://wa.me/${digitsOnly}?text=${waText}`;
             }
 
             // If this browser already submitted a request for this link, show
-            // its pending status instead of a blank form again.
+            // its real status instead of a blank form again.
             const pendingRaw = localStorage.getItem(`sakkhi_booking_${refCode}`);
             if (pendingRaw) {
               const pending = JSON.parse(pendingRaw);
-              document.getElementById('pending-details').textContent =
-                `Your ${pending.event} request for ${pending.date} is awaiting confirmation from ${displayBizName}.`;
+              let statusText = `Your ${pending.event} request for ${pending.date} is awaiting confirmation from ${displayBizName}.`;
+              const iconEl = document.querySelector('#pending-container .w-20');
+              const titleEl = document.querySelector('#pending-container h2');
+
+              if (pending.id) {
+                try {
+                  const statusRes = await sbRpc('check_booking_status', { p_ref: refCode, p_shoot_id: pending.id });
+                  if (statusRes && statusRes.status === 'confirmed') {
+                    titleEl.textContent = 'Request Confirmed!';
+                    iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
+                    iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
+                    statusText = `${displayBizName} has confirmed your ${pending.event} shoot for ${pending.date}.`;
+                  }
+                } catch (e) { /* fall back to the pending message above */ }
+              }
+
+              document.getElementById('pending-details').textContent = statusText;
               document.getElementById('pending-container').classList.remove('hidden');
               return;
             }
@@ -523,7 +538,7 @@
 
         // Remember this locally so a repeat visit shows status, not a blank form
         localStorage.setItem(`sakkhi_booking_${currentRefCode}`, JSON.stringify({
-          event: eventType, date: eventDate, sentAt: Date.now()
+          id: result.id, event: eventType, date: eventDate, sentAt: Date.now()
         }));
 
         // Wire the WhatsApp button for this success screen
@@ -566,9 +581,33 @@
 
     function startNewBooking() {
       localStorage.removeItem(`sakkhi_booking_${currentRefCode}`);
-      document.getElementById('pending-container').classList.add('hidden');
+
+      const pendingC = document.getElementById('pending-container');
+      const successC = document.getElementById('success-container');
       const container = document.getElementById('booking-container');
+      const shootsContainer = document.getElementById('company-shoots-container');
+
+      pendingC.classList.add('hidden');
+
+      // Fully reset success container back to its pre-shown state so the
+      // NEXT submission's fade-in animation actually runs instead of
+      // silently staying at a stale opacity/transform until a reload.
+      successC.classList.add('hidden');
+      successC.style.transition = 'none';
+      successC.style.opacity = '0';
+      successC.style.transform = 'scale(0.95)';
+      document.getElementById('success-whatsapp-btn').classList.add('hidden');
+
+      document.getElementById('booking-form').reset();
+      const btn = document.getElementById('submit-btn');
+      btn.innerHTML = 'Submit Booking Request';
+      btn.disabled = false;
+      btn.classList.remove('opacity-80', 'cursor-not-allowed');
+
+      if (shootsContainer) shootsContainer.classList.remove('hidden');
+
       container.classList.remove('hidden');
+      container.style.transition = 'none';
       container.style.opacity = '1';
       container.style.transform = 'none';
     }
