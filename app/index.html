@@ -2174,15 +2174,16 @@ function formatNotificationTime(isoDateStr) {
   }
 }
 
-function addNotification(title, message, targetId) {
+function addNotification(title, message, targetId, actionUrl = null, actionLabel = null) {
   const notifId = 'notif_' + Date.now() + Math.random().toString(36).substr(2, 5);
   _notifications.unshift({ 
     id: notifId, 
     targetId: targetId, 
     title, 
     message, 
-    // We now save the raw timestamp instead of a hardcoded text string
-    timestamp: new Date().toISOString() 
+    timestamp: new Date().toISOString(),
+    actionUrl: actionUrl,
+    actionLabel: actionLabel
   });
   
   saveNotifications();
@@ -2307,7 +2308,7 @@ function updateNotificationUI() {
   }
 }
 
-    async function executeNotificationAction(id, actionUrl) {
+   async function executeNotificationAction(id, actionUrl) {
   // Mark as read in the array structure configuration
   const target = _notifications.find(n => n.id === id);
   if (target && !target.isRead) {
@@ -2326,6 +2327,31 @@ function updateNotificationUI() {
     }
   }
 
+  // NEW: Deep link into a specific shoot
+  if (actionUrl.startsWith('shoot:')) {
+    const shootId = actionUrl.split(':')[1];
+    document.getElementById('notification-dropdown').classList.add('hidden');
+    
+    // Switch to the shoots tab
+    switchTab('shoots');
+    
+    // Give the UI a millisecond to render the tab, then scroll and open
+    setTimeout(() => {
+      openEditShootModal(shootId);
+      
+      const row = document.querySelector(`[onclick="openEditShootModal('${shootId}')"]`);
+      if (row) {
+        row.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        row.style.transition = 'all 0.5s ease';
+        row.classList.add('ring-2', 'ring-[#c9a96e]', 'ring-offset-2', 'ring-offset-[#050505]', 'scale-[1.02]');
+        setTimeout(() => {
+          row.classList.remove('ring-2', 'ring-[#c9a96e]', 'ring-offset-2', 'ring-offset-[#050505]', 'scale-[1.02]');
+        }, 2500);
+      }
+    }, 150);
+    return;
+  }
+
   // Execute structural workspace view state transitions
   if (actionUrl.startsWith('#')) {
     // Navigate straight to external subelements configuration paths
@@ -2335,9 +2361,7 @@ function updateNotificationUI() {
 
   document.getElementById('notification-dropdown').classList.add('hidden');
 
-  // Some destinations composed from the admin Broadcast Center are ACCOUNT
-  // sub-tabs, not top-level app tabs (e.g. "profile" lives inside Account).
-  // Map those correctly instead of trying (and failing) to switchTab() them.
+  // ... KEEP THE REST OF YOUR EXISTING executeNotificationAction LOGIC BELOW THIS ...
   const ACCOUNT_SUBTABS = ['profile', 'payment', 'appearance', 'security', 'whatsapp', 'settings', 'data', 'support', 'devices'];
   const TOP_LEVEL_TABS = ['dashboard', 'calendar', 'shoots', 'payments', 'editing', 'account'];
 
@@ -2616,9 +2640,14 @@ try {
 if (newBookings.length > 0 && !isDemoMode) {
   setTimeout(() => {
     newBookings.forEach(booking => {
-      addNotification('New Booking Arrived! 🎉', booking.name || 'A new shoot was added via Magic Link.', booking.id);
+      addNotification(
+        'New Booking Request! 🎉', 
+        `${booking.name || 'A client'} just requested a shoot via Magic Link.`, 
+        booking.id,
+        `shoot:${booking.id}`,
+        'Review Request'
+      );
     });
-    // Optional: play a sound or trigger a small toast here if you still want a brief screen alert
     showToast(`${newBookings.length} new booking(s) received. Check notifications.`, 'success');
   }, 800);
 }
