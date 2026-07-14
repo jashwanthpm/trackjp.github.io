@@ -389,9 +389,9 @@
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
         
-        // Robust check for status
+        // Strict check: Database now reliably tells us if it is pending or confirmed
         const bStatus = s.booking_status || s.bookingStatus;
-        const isApproved = bStatus === 'confirmed' || bStatus === undefined;
+        const isApproved = bStatus === 'confirmed';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
