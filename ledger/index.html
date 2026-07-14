@@ -38,27 +38,21 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="min-h-screen relative overflow-x-hidden pt-8 pb-24">
+<body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
 
-  <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
-  <!-- Loading State -->
-  <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full mt-[20vh] relative z-10">
+  <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full h-[60vh] max-w-md relative z-10 shrink-0">
     <div class="spinner"></div>
     <p class="text-sm text-neutral-400 font-medium tracking-wide">Securing connection to ledger...</p>
   </div>
 
-  <!-- Main Content State (Explicit Flex-Row for Desktop) -->
-  <div id="main-content" class="hidden flex-col md:flex-row w-full max-w-[1200px] mx-auto px-4 md:px-8 gap-10 md:gap-16 items-start opacity-0 transition-opacity duration-700 relative z-10">
+  <div id="main-content" class="hidden flex-col lg:flex-row w-full max-w-5xl mx-auto items-center lg:items-start justify-center gap-8 lg:gap-16 relative z-10 transition-all duration-500 opacity-0 shrink-0">
     
-    <!-- Left Column: Main Ledger & Payments -->
-    <div class="w-full md:w-[400px] lg:w-[420px] flex-shrink-0 space-y-6">
+    <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 space-y-6">
 
-      <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
         
-        <!-- Header -->
         <div class="text-center mb-8 relative">
           <div class="absolute inset-0 bg-[#c9a96e] opacity-10 blur-2xl rounded-full w-20 h-20 mx-auto"></div>
           <div class="w-14 h-14 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(201,169,110,0.1)] relative z-10">
@@ -68,28 +62,23 @@
           <p id="ui-biz-name" class="text-[10px] text-[#c9a96e] mt-2 font-bold tracking-widest uppercase bg-[#c9a96e]/10 inline-block px-3 py-1 rounded-full border border-[#c9a96e]/20">Studio Ledger</p>
         </div>
 
-        <!-- Financial Breakdown -->
         <div class="bg-[#0f0f0f] border border-white/5 rounded-2xl p-6 shadow-inner space-y-5">
           
-          <!-- 1. Pending Balance -->
           <div class="pb-4 border-b border-white/5 flex flex-col items-center justify-center text-center">
             <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-1">Pending Balance</span>
             <span id="ui-due" class="text-4xl font-bold text-[#c9a96e] tracking-tight drop-shadow-[0_0_15px_rgba(201,169,110,0.2)]">₹0</span>
           </div>
 
-          <!-- 2. Payments Received -->
           <div class="flex justify-between items-center border-b border-white/5 pb-4 pt-1">
             <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Payments Received</span>
             <span id="ui-paid" class="text-sm font-bold text-emerald-400">₹0</span>
           </div>
           
-          <!-- 3. Pending Expenses -->
           <div class="flex justify-between items-center border-b border-white/5 pb-4">
             <span class="text-xs uppercase tracking-wider font-bold text-neutral-500">Pending Expenses</span>
             <span id="ui-expenses" class="text-sm font-bold text-amber-500">₹0</span>
           </div>
           
-          <!-- 4. Total Billed -->
           <div class="flex justify-between items-center pt-1">
             <span class="text-xs uppercase tracking-wider font-bold text-neutral-600">Total Billed</span>
             <span id="ui-total" class="text-sm font-bold text-neutral-400">₹0</span>
@@ -97,7 +86,6 @@
           
         </div>
 
-        <!-- Payment Actions -->
         <div id="payment-section" class="mt-6 space-y-3">
           <a id="ui-pay-btn" href="#" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold tracking-wide py-4 rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5">
             <i class="ti ti-device-mobile-bolt text-lg"></i> Pay Now via UPI App
@@ -136,7 +124,6 @@
             <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
           </div>
 
-        <!-- TRUST SIGNAL -->
         <div class="flex items-center justify-center gap-1.5 pt-2 pb-2 text-neutral-600">
           <i class="ti ti-lock text-[10px]"></i>
           <span class="text-[9px] uppercase tracking-widest font-bold">Secure Encrypted Ledger</span>
@@ -162,43 +149,37 @@
       </div>
     </div>
 
-    <!-- Right column: Upcoming Shoots + Detailed Shoot History -->
-    <div class="w-full md:flex-1 space-y-10 pt-4 md:pt-0">
+    <div class="w-full max-w-md px-2 sm:px-0 shrink-0 lg:mt-6 mx-auto lg:mx-0 space-y-10">
 
-      <!-- Upcoming Shoots -->
       <div id="upcoming-shoots-wrap" class="hidden w-full">
-        <div class="w-full flex items-center gap-3 mb-5">
-          <div class="h-px bg-white/5 flex-1"></div>
+        <div class="flex items-center gap-3 mb-5">
+          <div class="h-px bg-white/10 flex-1"></div>
           <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Your Upcoming Shoots</h3>
-          <div class="h-px bg-white/5 flex-1"></div>
+          <div class="h-px bg-white/10 flex-1"></div>
         </div>
         <div id="upcoming-shoots-list" class="space-y-3"></div>
       </div>
 
-      <!-- Shoot History List -->
       <div class="w-full">
         <div class="flex flex-col items-center mb-5 gap-2">
           <div class="w-full flex items-center gap-3">
-            <div class="h-px bg-white/5 flex-1"></div>
+            <div class="h-px bg-white/10 flex-1"></div>
             <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Detailed Shoot History</h3>
-            <div class="h-px bg-white/5 flex-1"></div>
+            <div class="h-px bg-white/10 flex-1"></div>
           </div>
-          <!-- 6-Month Transparency Badge -->
           <span class="text-[8px] uppercase tracking-wider text-neutral-600 font-bold bg-[#0f0f0f] px-2.5 py-1 rounded-full border border-white/5 flex items-center gap-1.5 shadow-inner">
             <i class="ti ti-history text-[10px] text-neutral-500"></i>
             Showing active & past 6 months
           </span>
         </div>
         <div id="company-shoots-list" class="space-y-3">
-          <!-- Javascript injects shoots here -->
-        </div>
+          </div>
       </div>
 
     </div>
 
   </div>
 
-  <!-- QR Code Modal -->
   <div id="qr-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-[#0f0f0f] border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center transform scale-95 transition-transform duration-300" id="qr-modal-content">
       <button onclick="closeQRModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-xl"></i></button>
@@ -211,7 +192,6 @@
       <p class="text-xs text-neutral-400 mb-6">Use any UPI app to scan and clear your pending balance.</p>
       
       <div class="bg-white p-3 rounded-2xl inline-block mb-4 shadow-[0_0_30px_rgba(201,169,110,0.15)] relative">
-        <!-- Loading spinner for QR image -->
         <div id="qr-loader" class="absolute inset-0 flex items-center justify-center">
             <div class="spinner w-6 h-6 border-2 border-black/10 border-l-[#c9a96e]"></div>
         </div>
@@ -228,18 +208,16 @@
     </div>
   </div>
 
-  <!-- Error State -->
   <div id="error-state" class="hidden relative z-10 w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl text-center mx-auto mt-20">
     <div class="w-20 h-20 bg-red-950/40 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-4xl mx-auto mb-6"><i class="ti ti-link-off"></i></div>
     <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Link Invalid</h2>
     <p class="text-sm text-neutral-500 font-light leading-relaxed">This secure ledger link has expired or is invalid. Please request a new link.</p>
   </div>
 
-  <!-- BRANDING FOOTER - FIXED TO BOTTOM RIGHT -->
-  <div class="fixed bottom-6 right-6 opacity-40 hover:opacity-100 transition-opacity duration-300 z-50 flex flex-col items-end pointer-events-auto">
-    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-1.5">Powered By</p>
-    <a href="https://sakkhi.co.in" target="_blank" class="cursor-pointer block hover:scale-105 transition-transform duration-300 origin-bottom-right">
-      <img src="/SAKKHIheader.png" alt="Sakkhi" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
+  <div class="mt-10 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10 pb-8 shrink-0">
+    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-2">Secured By</p>
+    <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block hover:scale-105 transition-transform duration-300">
+      <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
     </a>
   </div>
 
@@ -421,14 +399,16 @@
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
         return `
-          <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3.5 flex items-center gap-4">
-            <div class="w-10 h-12 bg-[#1a1a1a] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0">
-              <span class="text-xs font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
-              <span class="text-[7px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
+          <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-3 flex items-center gap-4 transition-colors">
+            <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
+              <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
+              <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
             </div>
             <div class="min-w-0 flex-1">
-              <div class="text-xs font-bold text-white truncate">${s.event}</div>
-              <div class="text-[10px] text-neutral-400 mt-0.5 truncate">${s.location || 'TBA'}</div>
+              <div class="text-sm font-bold text-white truncate">${s.event}</div>
+              <div class="text-[10px] text-neutral-400 mt-1 font-medium flex items-center gap-1.5 truncate">
+                <i class="ti ti-map-pin text-[#c9a96e]"></i> ${s.location || 'TBA'}
+              </div>
             </div>
           </div>
         `;
@@ -604,7 +584,7 @@
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
             return `
-              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 flex flex-col gap-3 transition-colors hover:border-white/10">
+              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors">
                 <div class="flex items-center gap-4">
                   <div class="w-12 h-14 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
                     <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
@@ -646,7 +626,6 @@
         document.getElementById('loading-state').style.display = 'none';
         const mainContent = document.getElementById('main-content');
         
-        // Correctly apply the flex layout when showing the content
         mainContent.classList.remove('hidden');
         mainContent.classList.add('flex');
         
