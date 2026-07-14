@@ -38,7 +38,7 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 pt-12 relative overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
 
   <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
@@ -50,10 +50,10 @@
   </div>
 
   <!-- Main Content Layout (Locked 2-Column Grid for Desktop) -->
-  <div id="main-content" class="hidden w-full max-w-5xl mx-auto grid grid-cols-1 lg:grid-cols-2 items-start justify-items-center gap-10 lg:gap-16 relative z-10 transition-all duration-500 opacity-0 mb-12">
+  <div id="main-content" class="hidden flex flex-col lg:flex-row w-full max-w-5xl mx-auto items-center lg:items-start justify-center gap-8 lg:gap-16 relative z-10 transition-all duration-500 opacity-0 mb-12">
     
     <!-- LEFT COLUMN: Main Ledger Box (centered content) -->
-    <div class="w-full max-w-md mx-auto space-y-6 text-center">
+    <div class="w-full max-w-md mx-auto lg:mx-0 shrink-0 space-y-6 text-center">
 
       <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
@@ -157,7 +157,7 @@
     </div>
 
     <!-- RIGHT COLUMN: Upcoming Shoots & History (only these two sections) -->
-    <div class="w-full max-w-md mx-auto lg:mt-4 space-y-10 px-2 sm:px-0">
+    <div class="w-full max-w-md mx-auto lg:mx-0 shrink-0 lg:mt-4 space-y-10 px-2 sm:px-0">
 
       <!-- Upcoming Shoots Open Display -->
       <div id="upcoming-shoots-wrap" class="hidden w-full">
@@ -229,7 +229,7 @@
   </div>
 
   <!-- BRANDING FOOTER (Strictly Locked to Bottom Center) -->
-  <div class="mt-auto pt-10 pb-8 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10 w-full">
+  <div class="mt-10 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10 pb-8">
     <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-2">Secured By</p>
     <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block hover:scale-105 transition-transform duration-300">
       <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
