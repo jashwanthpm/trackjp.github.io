@@ -36,6 +36,10 @@
       animation: spin 1s linear infinite;
     }
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+    /* Deterministic show/hide — avoids Tailwind's hidden/flex specificity race */
+    #main-content { display: none; }
+    #main-content.is-visible { display: flex; }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
@@ -50,7 +54,7 @@
   </div>
 
   <!-- Main Content Layout (Locked 2-Column Grid for Desktop) -->
-  <div id="main-content" class="hidden w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-10 lg:gap-16">
+  <div id="main-content" class="hidden w-full max-w-6xl mx-auto flex-col lg:flex-row items-start justify-center gap-10 lg:gap-16">
     
     <!-- LEFT COLUMN: Main Ledger Box (centered content) -->
 <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0">
@@ -489,14 +493,17 @@
 
     async function loadPortal() {
       const urlParams = new URLSearchParams(window.location.search);
-      const refCode = urlParams.get('ref');
+      const refCode = (urlParams.get('ref') || '').trim();
 
-      if (!refCode) return showError();
+      // A valid ref is a compact alphanumeric code. Anything missing, empty,
+      // too short/long, or containing unexpected characters is an invalid link.
+      const isValidFormat = /^[a-zA-Z0-9]{4,32}$/.test(refCode);
+      if (!refCode || !isValidFormat) return showError();
       currentRefCode = refCode;
 
       try {
         const portal = await sbRpc('get_ledger_portal', { p_ref: refCode });
-        if (!portal) return showError();
+        if (!portal || !portal.companyName) return showError();
 
         const companyName = portal.companyName;
         const profile = portal.profile || {};
@@ -679,7 +686,7 @@
         const mainContent = document.getElementById('main-content');
         
         mainContent.classList.remove('hidden');
-        mainContent.classList.add('flex');
+        mainContent.classList.add('is-visible');
         
         setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
 
