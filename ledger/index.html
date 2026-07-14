@@ -414,6 +414,9 @@
       document.getElementById('upcoming-shoots-list').innerHTML = upcoming.map(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m) - 1].substring(0, 3);
+        const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
+        const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
+        const hasPP = ppEnabled && ppAmount > 0;
         return `
           <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 rounded-xl p-4 flex items-center gap-4 text-left">
             <div class="w-12 h-12 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
@@ -425,6 +428,7 @@
               <div class="text-[10px] text-neutral-400 mt-1 font-medium flex items-center gap-1.5 truncate">
                 <i class="ti ti-map-pin text-[#c9a96e]"></i> ${s.location || 'TBA'}
               </div>
+              ${hasPP ? `<div class="inline-flex items-center gap-1 mt-1.5 text-[8px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 border border-violet-500/20 px-1.5 py-0.5 rounded-full"><i class="ti ti-video text-[9px]"></i>Post-Production</div>` : ''}
             </div>
           </div>
         `;
@@ -528,6 +532,17 @@
           if (expense > 0 && s.expense_status !== 'settled') {
             totalPendingExpenses += expense;
           }
+
+          // Post-production is an optional add-on toggled per shoot in the studio app.
+          const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
+          const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
+          if (ppEnabled && ppAmount > 0) {
+            const ppStatus = s.post_production_status ?? s.postProductionStatus ?? s.pp_status ?? 'pending';
+            const ppPartPaid = Number(s.post_production_part_paid ?? s.pp_part_paid ?? 0);
+            totalBilled += ppAmount;
+            if (ppStatus === 'done') totalPaid += ppAmount;
+            else if (ppStatus === 'part') totalPaid += ppPartPaid;
+          }
         });
 
         const due = (totalBilled - totalPaid) + totalPendingExpenses;
@@ -600,6 +615,16 @@
             const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
             const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
 
+            // Post-production add-on (only shows if toggled on for this shoot in the studio app)
+            const ppEnabled = !!(s.post_production ?? s.postProduction ?? s.pp_enabled ?? s.has_post_production);
+            const ppAmount = Number(s.post_production_amount ?? s.postProductionAmount ?? s.pp_amount ?? 0);
+            const hasPP = ppEnabled && ppAmount > 0;
+            const ppStatus = s.post_production_status ?? s.postProductionStatus ?? s.pp_status ?? 'pending';
+            const ppPartPaid = Number(s.post_production_part_paid ?? s.pp_part_paid ?? 0);
+            const ppStatusColor = ppStatus === 'done' ? 'text-emerald-400' : (ppStatus === 'part' ? 'text-amber-400' : 'text-red-400');
+            const ppStatusLabel = ppStatus === 'done' ? 'Settled' : (ppStatus === 'part' ? 'Partial' : 'Pending');
+            const ppStatusDisplay = ppStatus === 'part' ? `Partially Paid (${formatAmt(ppPartPaid)})` : ppStatusLabel;
+
             return `
               <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors text-left">
                 <div class="flex items-center gap-4">
@@ -611,6 +636,7 @@
                   <div class="min-w-0 flex-1">
                     <div class="text-sm font-bold text-white truncate">${s.name}</div>
                     <div class="text-[10px] text-neutral-400 mt-1 font-medium truncate">${s.event} • ${s.location || 'TBA'}</div>
+                    ${hasPP ? `<div class="inline-flex items-center gap-1 mt-1.5 text-[8px] uppercase font-bold tracking-wider text-violet-400 bg-violet-500/10 border border-violet-500/20 px-1.5 py-0.5 rounded-full"><i class="ti ti-video text-[9px]"></i>Post-Production</div>` : ''}
                   </div>
                   <div class="text-right flex-shrink-0 pl-2">
                     <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
@@ -618,7 +644,7 @@
                   </div>
                 </div>
                 
-                ${(hasExp || hasNotes) ? `
+                ${(hasExp || hasPP || hasNotes) ? `
                 <div class="pt-3 border-t border-white/5 flex flex-col gap-2.5">
                   ${hasExp ? `
                   <div class="flex items-center justify-between">
@@ -626,6 +652,15 @@
                     <div class="text-right flex items-center gap-2">
                       <span class="text-xs font-bold text-amber-500">${formatAmt(exp)}</span>
                       <span class="text-[8px] uppercase font-bold tracking-wider ${expStatusColor}">[${expStatusLabel}]</span>
+                    </div>
+                  </div>` : ''}
+
+                  ${hasPP ? `
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="ti ti-video text-violet-400/80 text-xs"></i>Post-Production Work</span>
+                    <div class="text-right flex items-center gap-2">
+                      <span class="text-xs font-bold text-violet-400">${formatAmt(ppAmount)}</span>
+                      <span class="text-[8px] uppercase font-bold tracking-wider ${ppStatusColor}">[${ppStatusDisplay}]</span>
                     </div>
                   </div>` : ''}
 
