@@ -457,9 +457,10 @@
           date: e.date || (e.created ? e.created.split('T')[0] : '')
         }));
         allItems = [...allItems, ...formattedEdits];
-        // Re-sort everything chronologically
-        allItems.sort((a, b) => new Date(b.date) - new Date(a.date));
       }
+
+      // Sort everything chronologically from Oldest to Newest (Jan to Dec)
+      allItems.sort((a, b) => new Date(a.date) - new Date(b.date));
 
       const upcomingList = document.getElementById('upcoming-list');
       const historyList = document.getElementById('history-list');
@@ -725,6 +726,9 @@
       const shoots = ledgerData.shoots || [];
       const edits = (profile.ledgerEdits && ledgerData.edits) ? ledgerData.edits : [];
       const allItems = [...shoots, ...edits];
+
+      // Sort chronologically for the generated PDF document
+      allItems.sort((a, b) => new Date(a.date || a.created) - new Date(b.date || b.created));
       
       allItems.forEach(s => {
         if (y > 260) { doc.addPage(); doc.setFillColor(10,10,10); doc.rect(0,0,210,297,'F'); y = 20; doc.setTextColor(200,200,200); }
