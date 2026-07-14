@@ -50,8 +50,9 @@
   </div>
 
   <!-- Main Content State -->
-  <div id="main-content" class="hidden w-full max-w-lg space-y-6 opacity-0 transition-opacity duration-700 relative z-10 mx-auto">
-    
+  <div id="main-content" class="hidden w-full max-w-lg lg:max-w-4xl space-y-6 lg:space-y-0 lg:flex lg:flex-row lg:gap-8 lg:items-start opacity-0 transition-opacity duration-700 relative z-10 mx-auto">
+    <div class="w-full lg:max-w-md space-y-6">
+
     <!-- Glassmorphism Container -->
     <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
       
@@ -160,16 +161,6 @@
 
     </div>
 
-    <!-- Upcoming Shoots -->
-    <div id="upcoming-shoots-wrap" class="hidden w-full px-2 sm:px-0">
-      <div class="flex items-center gap-3 mb-4">
-        <div class="h-px bg-white/5 flex-1"></div>
-        <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Upcoming Shoots</h3>
-        <div class="h-px bg-white/5 flex-1"></div>
-      </div>
-      <div id="upcoming-shoots-list" class="space-y-2 mb-2"></div>
-    </div>
-
     <!-- Shoot History List -->
     <div class="w-full px-2 sm:px-0">
       <div class="flex flex-col items-center mb-5 gap-2">
@@ -187,6 +178,18 @@
       <div id="company-shoots-list" class="space-y-3">
         <!-- Javascript injects shoots here -->
       </div>
+    </div>
+
+    </div>
+
+    <!-- Upcoming Shoots — right column on desktop, matching booking.html's layout -->
+    <div id="upcoming-shoots-wrap" class="hidden w-full lg:w-80 lg:flex-shrink-0 lg:sticky lg:top-8 px-2 sm:px-0">
+      <button onclick="document.getElementById('upcoming-shoots-list').classList.toggle('hidden'); document.getElementById('upcoming-chevron').classList.toggle('rotate-180')" class="w-full flex items-center gap-3 mb-3">
+        <div class="h-px bg-white/5 flex-1"></div>
+        <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 flex items-center gap-1.5">Upcoming Shoots <i id="upcoming-chevron" class="ti ti-chevron-down text-xs transition-transform"></i></h3>
+        <div class="h-px bg-white/5 flex-1"></div>
+      </button>
+      <div id="upcoming-shoots-list" class="hidden space-y-2 mb-2"></div>
     </div>
 
   </div>
@@ -568,7 +571,7 @@
         // WhatsApp quick-message button
         if (profile.phone) {
           const digitsOnly = String(profile.phone).replace(/[^0-9]/g, '');
-          const waText = encodeURIComponent(`Hi ${ownerDisplayName}, this is ${companyName} regarding our ledger.`);
+          const waText = encodeURIComponent(`Hi ${ownerDisplayName}, this is ${companyName}. We had a question about our ledger — could you help us out?`);
           const waBtn = document.getElementById('ui-whatsapp-btn');
           waBtn.href = `https://wa.me/${digitsOnly}?text=${waText}`;
           waBtn.classList.remove('hidden');
