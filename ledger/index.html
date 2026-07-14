@@ -38,20 +38,27 @@
     @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden w-full">
+<body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
 
+  <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
+  <!-- Loading State -->
   <div id="loading-state" class="flex flex-col items-center justify-center gap-4 w-full h-[50vh] max-w-md relative z-10 flex-none">
     <div class="spinner"></div>
     <p class="text-sm text-neutral-400 font-medium tracking-wide">Securing connection to ledger...</p>
   </div>
 
-  <div id="main-content" class="hidden w-full max-w-5xl mx-auto flex-col md:flex-row flex-nowrap items-start justify-center gap-8 md:gap-12 relative z-10">
+  <!-- Main Content Layout (Locked 2-Column Grid for Desktop) -->
+  <div id="main-content" class="hidden w-full max-w-6xl mx-auto flex flex-col lg:flex-row items-start justify-center gap-10 lg:gap-16">
     
-    <div class="w-full max-w-md shrink-0 mx-auto md:mx-0">
+    <!-- LEFT COLUMN: Main Ledger Box (centered content) -->
+<div class="w-full max-w-md shrink-0 mx-auto lg:mx-0">
+  
+      <!-- Glassmorphism Container -->
       <div class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
         
+        <!-- Header -->
         <div class="text-center mb-8 relative">
           <div class="absolute inset-0 bg-[#c9a96e] opacity-10 blur-2xl rounded-full w-20 h-20 mx-auto"></div>
           <div class="w-14 h-14 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(201,169,110,0.1)] relative z-10">
@@ -61,7 +68,9 @@
           <p id="ui-biz-name" class="text-[10px] text-[#c9a96e] mt-2 font-bold tracking-widest uppercase bg-[#c9a96e]/10 inline-block px-3 py-1 rounded-full border border-[#c9a96e]/20">Studio Ledger</p>
         </div>
 
+        <!-- Financial Breakdown -->
         <div class="bg-[#0f0f0f] border border-white/5 rounded-2xl p-6 shadow-inner space-y-5">
+          
           <div class="pb-4 border-b border-white/5 flex flex-col items-center justify-center text-center">
             <span class="text-[10px] uppercase font-bold text-neutral-500 tracking-widest mb-1">Pending Balance</span>
             <span id="ui-due" class="text-4xl font-bold text-[#c9a96e] tracking-tight drop-shadow-[0_0_15px_rgba(201,169,110,0.2)]">₹0</span>
@@ -81,8 +90,10 @@
             <span class="text-xs uppercase tracking-wider font-bold text-neutral-600">Total Billed</span>
             <span id="ui-total" class="text-sm font-bold text-neutral-400">₹0</span>
           </div>
+          
         </div>
 
+        <!-- Payment Actions -->
         <div id="payment-section" class="mt-6 space-y-3">
           <a id="ui-pay-btn" href="#" class="w-full flex items-center justify-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold tracking-wide py-4 rounded-xl text-sm transition-all shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5">
             <i class="ti ti-device-mobile-bolt text-lg"></i> Pay Now via UPI App
@@ -119,6 +130,7 @@
             <p id="ui-bank-details" class="text-xs text-neutral-300 leading-relaxed font-mono whitespace-pre-wrap"></p>
           </div>
 
+        <!-- TRUST SIGNAL -->
         <div class="w-full flex items-center justify-center gap-1.5 pt-2 pb-2 text-neutral-600">
           <i class="ti ti-lock text-[10px]"></i>
           <span class="text-[9px] uppercase tracking-widest font-bold">Secure Encrypted Ledger</span>
@@ -144,8 +156,11 @@
       </div>
     </div>
 
-    <div class="w-full max-w-md shrink-0 mx-auto md:mx-0 space-y-8">
-      
+    <!-- RIGHT COLUMN: Upcoming Shoots & History (only these two sections) -->
+    <!-- FIX: Removed lg:mt-6 so this column aligns perfectly with the top of the Left Column -->
+    <div class="w-full max-w-md shrink-0 mx-auto lg:mx-0 space-y-8 px-2 sm:px-0">
+
+      <!-- Upcoming Shoots Open Display -->
       <div id="upcoming-shoots-wrap" class="hidden w-full">
         <div class="flex items-center gap-3 mb-5">
           <div class="h-px bg-white/10 flex-1"></div>
@@ -155,6 +170,7 @@
         <div id="upcoming-shoots-list" class="space-y-3"></div>
       </div>
 
+      <!-- Shoot History List -->
       <div class="w-full block">
         <div class="mb-5">
           <div class="flex items-center gap-3 mb-2">
@@ -162,6 +178,7 @@
             <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Detailed Shoot History</h3>
             <div class="h-px bg-white/10 flex-1"></div>
           </div>
+          <!-- 6-Month Transparency Badge -->
           <span class="inline-flex items-center gap-1.5 text-[8px] uppercase tracking-wider text-neutral-600 font-bold bg-[#0f0f0f] px-2.5 py-1 rounded-full border border-white/5">
             <i class="ti ti-history text-[10px] text-neutral-500"></i>
             Showing active & past 6 months
@@ -169,18 +186,15 @@
         </div>
         
         <div id="company-shoots-list" class="space-y-3">
-          </div>
+          <!-- Javascript injects shoots here -->
+        </div>
       </div>
 
     </div>
 
-  </div> <div class="w-full mt-12 mb-8 flex flex-col items-center justify-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10">
-    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-2">Secured By</p>
-    <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block hover:scale-105 transition-transform duration-300">
-      <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
-    </a>
-  </div>
+  </div> <!-- End Main Content -->
 
+  <!-- QR Code Modal -->
   <div id="qr-modal" class="fixed inset-0 bg-black/90 backdrop-blur-sm z-[100] hidden items-center justify-center p-4 opacity-0 transition-opacity duration-300">
     <div class="bg-[#0f0f0f] border border-white/10 rounded-3xl p-8 max-w-sm w-full shadow-2xl relative text-center transform scale-95 transition-transform duration-300" id="qr-modal-content">
       <button onclick="closeQRModal()" class="absolute top-4 right-4 text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-xl"></i></button>
@@ -208,10 +222,19 @@
     </div>
   </div>
 
+  <!-- Error State -->
   <div id="error-state" class="hidden relative z-10 w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] shadow-2xl text-center mx-auto mt-20">
     <div class="w-20 h-20 bg-red-950/40 border border-red-900/50 rounded-2xl flex items-center justify-center text-red-500 text-4xl mx-auto mb-6"><i class="ti ti-link-off"></i></div>
     <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Link Invalid</h2>
     <p class="text-sm text-neutral-500 font-light leading-relaxed">This secure ledger link has expired or is invalid. Please request a new link.</p>
+  </div>
+
+  <!-- BRANDING FOOTER (Strictly Locked to Bottom Center) -->
+  <div class="mt-10 flex flex-col items-center opacity-40 hover:opacity-100 transition-opacity duration-300 relative z-10 pb-8">
+    <p class="text-[8px] uppercase tracking-widest text-neutral-500 font-bold mb-2">Secured By</p>
+    <a href="https://sakkhi.co.in" target="_blank" rel="noopener noreferrer" class="cursor-pointer block hover:scale-105 transition-transform duration-300">
+      <img src="/SAKKHIheader.png" alt="Sakkhi Shoot Management" class="h-4 sm:h-5 grayscale hover:grayscale-0 transition duration-300"/>
+    </a>
   </div>
 
   <script>
@@ -530,4 +553,128 @@
           const waBtn = document.getElementById('ui-whatsapp-btn');
           waBtn.href = `https://wa.me/${digitsOnly}?text=${waText}`;
           waBtn.classList.remove('hidden');
-          waBtn.
+          waBtn.classList.add('flex');
+        }
+
+        checkExistingClaim();
+
+        if (due <= 0) {
+          document.getElementById('payment-section').classList.add('hidden');
+          document.getElementById('settled-section').classList.remove('hidden');
+        } else {
+          if (profile.upi) {
+            const upiLink = `upi://pay?pa=${profile.upi}&pn=${encodeURIComponent(profile.bizName || 'Sakkhi Studio')}&am=${due}&cu=INR`;
+            document.getElementById('ui-pay-btn').href = upiLink;
+            
+            document.getElementById('ui-qr-btn').onclick = () => {
+              openQRModal(profile.upi, profile.bizName || 'Sakkhi Studio', due);
+            };
+          } else {
+            document.getElementById('ui-pay-btn').style.display = 'none';
+            document.getElementById('ui-qr-btn').style.display = 'none';
+          }
+          if (profile.bank) {
+            document.getElementById('ui-bank-details-wrap').classList.remove('hidden');
+            document.getElementById('ui-bank-details').textContent = profile.bank;
+          }
+        }
+
+        const listContainer = document.getElementById('company-shoots-list');
+        if (shootData.length === 0) {
+          listContainer.innerHTML = '<p class="text-xs text-neutral-500 text-center py-4 italic">No shoots found for this company.</p>';
+        } else {
+          listContainer.innerHTML = shootData.map(s => {
+            const [y, m, d] = s.date.split('-');
+            const monthName = MONTHS[parseInt(m)-1].substring(0,3);
+            
+            const amt = Number(s.amount || 0);
+            const exp = Number(s.expense || 0);
+            const partPaid = Number(s.part_paid || 0);
+            const hasExp = exp > 0;
+            const hasNotes = s.notes && s.notes.trim() !== '';
+            
+            const payStatusColor = s.pay_status === 'done' ? 'text-emerald-400' : (s.pay_status === 'part' ? 'text-amber-400' : 'text-red-400');
+            const payStatusLabel = s.pay_status === 'done' ? 'Settled' : (s.pay_status === 'part' ? 'Partial' : 'Pending');
+            const payStatusDisplay = s.pay_status === 'part' ? `Partially Paid (${formatAmt(partPaid)})` : payStatusLabel;
+            
+            const expStatusLabel = s.expense_status === 'settled' ? 'Exp Settled' : 'Exp Pending';
+            const expStatusColor = s.expense_status === 'settled' ? 'text-emerald-400' : 'text-amber-500';
+
+            return `
+              <div class="bg-[#0a0a0a]/80 backdrop-blur-md border border-white/5 hover:border-white/10 rounded-xl p-4 flex flex-col gap-3 transition-colors text-left">
+                <div class="flex items-center gap-4">
+                  <div class="w-12 h-14 bg-gradient-to-b from-[#1a1a1a] to-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center flex-shrink-0 shadow-inner">
+                    <span class="text-sm font-bold text-[#c9a96e] leading-none mb-0.5">${d}</span>
+                    <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold leading-none">${monthName}</span>
+                    <span class="text-[7px] text-neutral-600 font-bold mt-0.5">${y}</span>
+                  </div>
+                  <div class="min-w-0 flex-1">
+                    <div class="text-sm font-bold text-white truncate">${s.name}</div>
+                    <div class="text-[10px] text-neutral-400 mt-1 font-medium truncate">${s.event} • ${s.location || 'TBA'}</div>
+                  </div>
+                  <div class="text-right flex-shrink-0 pl-2">
+                    <div class="text-xs font-bold text-white">${formatAmt(amt)}</div>
+                    <div class="text-[9px] uppercase font-bold tracking-wider mt-1 ${payStatusColor}">${payStatusDisplay}</div>
+                  </div>
+                </div>
+                
+                ${(hasExp || hasNotes) ? `
+                <div class="pt-3 border-t border-white/5 flex flex-col gap-2.5">
+                  ${hasExp ? `
+                  <div class="flex items-center justify-between">
+                    <span class="text-[10px] text-neutral-500 font-bold uppercase tracking-wider flex items-center gap-1.5"><i class="ti ti-receipt text-amber-500/70 text-xs"></i>Shoot Expenses</span>
+                    <div class="text-right flex items-center gap-2">
+                      <span class="text-xs font-bold text-amber-500">${formatAmt(exp)}</span>
+                      <span class="text-[8px] uppercase font-bold tracking-wider ${expStatusColor}">[${expStatusLabel}]</span>
+                    </div>
+                  </div>` : ''}
+
+                  ${hasNotes ? `
+                  <div class="bg-neutral-900/50 rounded-lg p-2.5 border border-white/5 mt-0.5 flex gap-1.5 items-start">
+                    <i class="ti ti-notes text-neutral-500 mt-0.5 text-xs opacity-70"></i>
+                    <p class="text-[10px] text-neutral-400 leading-relaxed italic whitespace-pre-wrap">${s.notes}</p>
+                  </div>` : ''}
+                </div>` : ''}
+              </div>
+            `;
+          }).join('');
+        }
+
+        document.getElementById('loading-state').style.display = 'none';
+        const mainContent = document.getElementById('main-content');
+        
+        mainContent.classList.remove('hidden');
+        mainContent.classList.add('flex');
+        
+        setTimeout(() => { mainContent.classList.remove('opacity-0'); }, 50);
+
+      } catch (err) {
+        showError();
+      }
+    }
+
+    function showError() {
+      document.getElementById('loading-state').style.display = 'none';
+      document.getElementById('main-content').classList.add('hidden');
+      document.getElementById('error-state').classList.remove('hidden');
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        const modal = document.getElementById('qr-modal');
+        if (modal && !modal.classList.contains('hidden')) {
+          closeQRModal();
+        }
+      }
+    });
+
+    document.getElementById('qr-modal').addEventListener('click', function(event) {
+      if (event.target === this) {
+        closeQRModal();
+      }
+    });
+
+    window.addEventListener('DOMContentLoaded', loadPortal);
+  </script>
+</body>
+</html>
