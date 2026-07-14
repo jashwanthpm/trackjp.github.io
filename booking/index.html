@@ -395,7 +395,8 @@
 
       container.classList.remove('hidden');
       let html = '';
-      shoots.forEach(s => {
+      const sortedShoots = [...shoots].sort((a, b) => a.date.localeCompare(b.date));
+      sortedShoots.forEach(s => {
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
         
