@@ -2109,8 +2109,9 @@ let _isSubActive = false;
 
         setSyncStatus('synced', 'Link Ready');
 
-        // Added .html to the path to ensure it works properly on GitHub Pages
-        const magicLink = window.location.origin + '/ledger?ref=' + shortCode;
+        // Route through the Supabase Edge Function so WhatsApp/social scrapers
+        // get real og:title / og:description tags instead of a blank preview.
+        const magicLink = 'https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/smart-preview?type=ledger&ref=' + shortCode;
         
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Ledger Portal link for ${companyName} copied!`, 'success');
@@ -6286,7 +6287,9 @@ async function executeDeleteAll() {
 
         setSyncStatus('synced', 'Link Ready');
 
-        const magicLink = window.location.origin + '/booking?ref=' + shortCode;
+        // Route through the Supabase Edge Function so WhatsApp/social scrapers
+        // get real og:title / og:description tags instead of a blank preview.
+        const magicLink = 'https://smyupcjfusgduaoxqfvu.supabase.co/functions/v1/smart-preview?type=booking&ref=' + shortCode;
         
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Short link for ${companyName} copied!`, 'success');
