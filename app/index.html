@@ -1656,6 +1656,7 @@ setTimeout(() => {
     }
 
     function handleSessionExpired() {
+      stopLivePolling();
       try {
         localStorage.removeItem('currentUser');
         sessionStorage.removeItem('currentUser');
@@ -2294,6 +2295,119 @@ function toggleNotifications() {
   }
 }
 
+// ==========================================
+// LIVE UPDATES (no reload needed)
+// ==========================================
+// The dashboard originally only picked up new Magic Link bookings and
+// notifications when the whole page was reloaded (loadAll() runs once at
+// login). This block polls Supabase quietly in the background while the
+// tab is open and active, so a new booking or notification appears live —
+// toast + badge + list — without the user having to refresh.
+let _pollIntervalId = null;
+const LIVE_POLL_INTERVAL_MS = 20000; // 20s — quick enough to feel live, gentle on the DB
+
+function startLivePolling() {
+  if (_pollIntervalId || isDemoMode || !currentUser) return;
+  _pollIntervalId = setInterval(pollForUpdates, LIVE_POLL_INTERVAL_MS);
+}
+
+function stopLivePolling() {
+  if (_pollIntervalId) {
+    clearInterval(_pollIntervalId);
+    _pollIntervalId = null;
+  }
+}
+
+// Re-renders whichever section the user is currently looking at, using the
+// freshly-updated global arrays (_shoots, _notifications). This mirrors the
+// per-tab render calls already inside switchTab().
+function refreshActiveSectionUI() {
+  const activeSection = document.querySelector('.app-section:not(.hidden)');
+  if (!activeSection) return;
+  const tab = activeSection.id.replace('section-', '');
+  if (tab === 'dashboard') renderDashboard();
+  else if (tab === 'calendar') renderCalendar();
+  else if (tab === 'shoots') renderShootsList();
+  else if (tab === 'payments') renderPayments();
+  else if (tab === 'editing') renderEditingList();
+  updateShootsNavBadge();
+}
+
+async function pollForUpdates() {
+  if (!currentUser || isDemoMode) return;
+  try {
+    const userId = currentUser?.id || currentUser?.email || 'default_user';
+    const ownShootIds = new Set(JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]'));
+    const existingIds = new Set(_shoots.map(s => s.id));
+
+    // 1. Check for new or changed shoots (new Magic Link booking requests,
+    //    or edits made from another device)
+    const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
+    const freshShoots = raw.map(dbToShoot);
+    const brandNew = freshShoots.filter(s => !existingIds.has(s.id) && !ownShootIds.has(s.id));
+
+    const dataChanged = freshShoots.length !== _shoots.length ||
+      JSON.stringify(freshShoots) !== JSON.stringify(_shoots);
+
+    if (dataChanged) {
+      _shoots = freshShoots;
+      refreshActiveSectionUI();
+    }
+
+    if (brandNew.length > 0) {
+      brandNew.forEach(booking => {
+        addNotification(
+          'New Booking Request! 🎉',
+          `${booking.name || 'A client'} just requested a shoot.`,
+          booking.id,
+          `shoot:${booking.id}`,
+          'View Request'
+        );
+      });
+      showToast(`${brandNew.length} new booking${brandNew.length > 1 ? 's' : ''} received!`, 'success');
+      localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
+    }
+
+    // 2. Check for new notifications created directly in the cloud
+    //    (e.g. an admin announcement, or an alert from another device)
+    const dbNotifs = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc`);
+    const existingNotifIds = new Set(_notifications.map(n => n.id));
+    const newDbNotifs = dbNotifs.filter(n => !existingNotifIds.has(n.id));
+
+    if (newDbNotifs.length > 0) {
+      newDbNotifs.forEach(n => {
+        _notifications.unshift({
+          id: n.id,
+          title: n.title,
+          message: n.message,
+          timestamp: n.created_at,
+          type: n.type || 'info',
+          actionLabel: n.action_label,
+          actionUrl: n.action_url,
+          isRead: n.is_read
+        });
+      });
+      saveNotifications();
+      updateNotificationUI();
+    }
+  } catch (e) {
+    // Fail quietly — a missed poll just means we try again in 20s.
+    // We deliberately don't toast this so it never interrupts active use.
+    console.warn('Live poll skipped:', e.message);
+  }
+}
+
+// Pause polling when the tab is backgrounded (saves battery/requests),
+// and catch up immediately the moment the user comes back to it.
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) {
+    stopLivePolling();
+  } else if (currentUser) {
+    startLivePolling();
+    pollForUpdates();
+  }
+});
+
 function handleNotificationClick(targetId) {
   if (targetId) {
     openEditShootModal(targetId);
@@ -2696,6 +2810,10 @@ try {
       if (_needsOnboarding && !isDemoMode) {
         setTimeout(openOnboardingModal, 600);
       }
+
+      // Start background polling so new bookings/notifications show up live,
+      // without needing a manual reload.
+      startLivePolling();
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
@@ -6077,6 +6195,7 @@ function updateAccountDisplay() {
          return;
       }
       try {
+        stopLivePolling();
         currentUser = null;
         _shoots = [];
         _companies = [];
