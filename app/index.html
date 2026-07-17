@@ -1463,6 +1463,57 @@
       </div>
     </div>
     
+<!-- ========================================== -->
+    <!-- NEW USER ONBOARDING MODAL -->
+    <!-- Shown once after first sign-in so the user can fill in their -->
+    <!-- studio/business details. Fully skippable via the top-right link. -->
+    <!-- ========================================== -->
+    <div id="onboarding-modal-backdrop" class="fixed inset-0 bg-black/85 z-[110] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+      <div class="bg-[#0f0f0f] border border-neutral-900 sm:rounded-2xl rounded-t-2xl w-full sm:max-w-md p-6 shadow-2xl relative translate-y-full sm:translate-y-4 transition-transform duration-300 max-h-[90vh] overflow-y-auto">
+
+        <!-- Skip — small, top right, exactly where mobile apps put it -->
+        <button onclick="skipOnboarding()" class="absolute top-4 right-4 text-[11px] font-semibold text-neutral-500 hover:text-neutral-300 transition flex items-center gap-1">
+          Skip <i class="ti ti-x text-sm"></i>
+        </button>
+
+        <div class="w-14 h-14 bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mb-4">
+          <i class="ti ti-building-store"></i>
+        </div>
+
+        <h3 class="text-lg font-bold text-white tracking-wide pr-10">Set up your studio</h3>
+        <p class="text-xs text-neutral-500 mt-1 mb-5 leading-relaxed">Add your business details so quotes, invoices and client WhatsApp messages carry your info. Takes less than a minute — you can always edit this later in Account settings.</p>
+
+        <div class="space-y-4">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
+            <input type="text" id="ob-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
+            <input type="tel" id="ob-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
+            <input type="text" id="ob-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID <span class="text-neutral-600 normal-case font-medium">(for payment links)</span></label>
+            <input type="text" id="ob-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+        </div>
+
+        <div class="pt-5 flex gap-2">
+          <button onclick="saveOnboarding()" class="w-full flex items-center justify-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-3 rounded-lg text-xs font-bold transition">
+            <i class="ti ti-check"></i> Save & Continue
+          </button>
+        </div>
+        <button onclick="skipOnboarding()" class="w-full text-center text-[11px] text-neutral-600 hover:text-neutral-400 transition mt-3">I'll do this later</button>
+      </div>
+    </div>
+
 <!-- PASTE THE DELETE ALL MODAL HERE (Line 1055) -->
     <div id="delete-all-modal-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
       <div class="bg-[#0f0f0f] border border-red-900/50 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center relative overflow-hidden">
@@ -2069,6 +2120,7 @@ let _isSubActive = false;
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
     };
+    let _needsOnboarding = false; // set in loadAll() once the synced profile is known
 
 // ==========================================
     // PERFORMANCE ENHANCEMENTS (DEBOUNCING)
@@ -2553,6 +2605,14 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     await syncCurrentDevice(devRow ? devRow.value : []);
     // ------------------------------------
     }
+
+    // --- NEW USER ONBOARDING CHECK ---
+    // Someone counts as "still needs onboarding" if they haven't filled in a
+    // business name yet AND haven't explicitly skipped it before. This is
+    // read from the synced profile, so a skip/save on one device is
+    // respected on every device.
+    _needsOnboarding = !_profile.bizName && !_profile.onboardingSkipped;
+    // ------------------------------------
 try {
       const subRaw = await sbFetch(`subscriptions?user_id=eq.${userId}&select=*`);
       if (subRaw && subRaw.length > 0) {
@@ -2630,6 +2690,12 @@ try {
       initTimeFilters(); // <--- ADD THIS LINE RIGHT HERE
       renderDashboard();
       updateShootsNavBadge();
+
+      // First-time visitors get a quick "set up your studio" prompt.
+      // Runs after everything else so it never blocks the dashboard render.
+      if (_needsOnboarding && !isDemoMode) {
+        setTimeout(openOnboardingModal, 600);
+      }
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
@@ -4450,6 +4516,43 @@ async function toggleBlockDate(dateStr) {
       
       await saveSettingToDB('profile', _profile);
       showToast('Profile configuration records updated successfully.');
+    }
+
+    // ==========================================
+    // NEW USER ONBOARDING (skippable "set up your studio" prompt)
+    // ==========================================
+    function openOnboardingModal() {
+      // Pre-fill in case _profile already has partial data (e.g. synced from another device)
+      document.getElementById('ob-biz-name').value = _profile.bizName || '';
+      document.getElementById('ob-phone').value = _profile.phone || '';
+      document.getElementById('ob-instagram').value = _profile.instagram || '';
+      document.getElementById('ob-upi').value = _profile.upi || '';
+      openModal('onboarding-modal-backdrop');
+    }
+
+    async function saveOnboarding() {
+      _profile.bizName = document.getElementById('ob-biz-name').value.trim();
+      _profile.phone = document.getElementById('ob-phone').value.trim();
+      _profile.instagram = document.getElementById('ob-instagram').value.trim();
+      _profile.upi = document.getElementById('ob-upi').value.trim();
+
+      await saveSettingToDB('profile', _profile);
+
+      // Keep the Account settings tab in sync so it reflects what was just entered
+      populateProfileUI();
+
+      closeModal('onboarding-modal-backdrop');
+      _needsOnboarding = false;
+      showToast(`Welcome aboard${_profile.bizName ? ', ' + _profile.bizName : ''}! Your studio details are saved.`);
+    }
+
+    async function skipOnboarding() {
+      closeModal('onboarding-modal-backdrop');
+      _needsOnboarding = false;
+      // Remember the skip in the synced profile so it doesn't re-appear on
+      // this or any other device — until they fill in a business name themselves.
+      _profile.onboardingSkipped = true;
+      await saveSettingToDB('profile', _profile);
     }
 
     async function updatePrivacyPIN() {
