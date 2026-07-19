@@ -378,7 +378,7 @@
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-        <a href="/deep_analysis" target="_blank" rel="noopener" class="w-full text-left relative overflow-hidden bg-gradient-to-r from-[#1a1610] via-[#12100c] to-[#0f0f0f] border border-[#c9a96e]/20 hover:border-[#c9a96e]/40 rounded-xl p-4 md:p-5 flex items-center gap-4 transition group">
+        <a href="/deep-analysis.html" target="_blank" rel="noopener" class="w-full text-left relative overflow-hidden bg-gradient-to-r from-[#1a1610] via-[#12100c] to-[#0f0f0f] border border-[#c9a96e]/20 hover:border-[#c9a96e]/40 rounded-xl p-4 md:p-5 flex items-center gap-4 transition group">
           <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background: radial-gradient(circle at 10% 50%, #c9a96e 0%, transparent 45%);"></div>
           <div class="relative w-10 h-10 flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e] text-lg group-hover:scale-105 transition">
             <i class="ti ti-sparkles"></i>
@@ -389,6 +389,10 @@
           </div>
           <i class="ti ti-external-link relative text-neutral-600 group-hover:text-[#c9a96e] group-hover:translate-x-0.5 transition"></i>
         </a>
+
+        <div id="dash-analysis-embed" class="hidden">
+          <iframe id="dash-analysis-iframe" class="w-full rounded-xl border border-neutral-900" style="height:1500px; background:#050505;"></iframe>
+        </div>
 
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
           <div class="lg:col-span-7 space-y-4">
@@ -746,6 +750,17 @@
                     <p id="acc-hero-name" class="text-lg font-bold text-white truncate">Your Studio</p>
                     <p id="acc-hero-email" class="text-xs text-neutral-500 truncate">Loading...</p>
                   </div>
+                </div>
+
+                <div class="flex items-center justify-between gap-4 bg-neutral-950/50 border border-neutral-800 rounded-lg p-4">
+                  <div>
+                    <h4 class="text-sm font-bold text-neutral-200 flex items-center gap-1.5"><i class="ti ti-sparkles text-[#c9a96e] text-sm"></i> Show Deep Analysis in Dashboard</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5">When on, it appears embedded right on your Dashboard too — synced to your account on every device.</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input type="checkbox" id="acc-show-analysis-dash" class="sr-only peer" onchange="toggleAnalysisInDash()">
+                    <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                  </label>
                 </div>
 
                 <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-4 space-y-3">
@@ -2233,7 +2248,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!',
       terms: DEFAULT_TERMS_TEMPLATE,
-      requireTerms: true
+      requireTerms: true,
+      showAnalysisInDash: false
     };
     let _needsOnboarding = false; // set in loadAll() once the synced profile is known
 
@@ -3805,6 +3821,7 @@ async function deleteEditJob() {
     }
     
     function renderDashboard() {
+      renderDashAnalysisEmbed();
       // ---> NEW FILTER APPLY <---
       let shoots = applyTimeFilter([..._shoots], 'dash');
       _dashFilteredShoots = shoots; // Save for Top Companies
@@ -4703,6 +4720,9 @@ async function toggleBlockDate(dateStr) {
       if (document.getElementById('acc-require-terms')) {
         document.getElementById('acc-require-terms').checked = _profile.requireTerms !== false;
       }
+      if (document.getElementById('acc-show-analysis-dash')) {
+        document.getElementById('acc-show-analysis-dash').checked = !!_profile.showAnalysisInDash;
+      }
       
       const heroName = _profile.bizName || 'Your Studio';
       const heroNameEl = document.getElementById('acc-hero-name');
@@ -4802,6 +4822,25 @@ async function toggleBlockDate(dateStr) {
         if (!confirm('This will replace your current Terms & Conditions text with the default template. Continue?')) return;
       }
       box.value = DEFAULT_TERMS_TEMPLATE;
+    }
+
+    async function toggleAnalysisInDash() {
+      _profile.showAnalysisInDash = document.getElementById('acc-show-analysis-dash').checked;
+      await saveSettingToDB('profile', _profile);
+      renderDashAnalysisEmbed();
+      showToast(_profile.showAnalysisInDash ? 'Deep Analysis will now show on your Dashboard.' : 'Deep Analysis removed from your Dashboard.');
+    }
+
+    function renderDashAnalysisEmbed() {
+      const wrap = document.getElementById('dash-analysis-embed');
+      if (!wrap) return;
+      if (_profile.showAnalysisInDash) {
+        wrap.classList.remove('hidden');
+        const frame = document.getElementById('dash-analysis-iframe');
+        if (frame && !frame.src) frame.src = '/deep-analysis.html';
+      } else {
+        wrap.classList.add('hidden');
+      }
     }
 
     async function saveTermsSettings() {
