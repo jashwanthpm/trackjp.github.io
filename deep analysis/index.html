@@ -1,0 +1,672 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover"/>
+  <title>Deep Analysis | Sakkhi</title>
+  <meta name="description" content="A deep, detailed look at how your studio is performing — growth, clients, payments, and more.">
+  <meta name="theme-color" content="#050505">
+
+  <link rel="icon" type="image/png" href="/sakkhi 300px.png">
+  <link rel="shortcut icon" href="/sakkhi 300px.png">
+  <link rel="apple-touch-icon" href="/sakkhi 300px.png">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      background-color: #050505;
+      color: #e8e8e8;
+    }
+    .brand-serif { font-family: 'Cinzel', serif; }
+    ::-webkit-scrollbar { width: 4px; height: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #2a2a2a; border-radius: 2px; }
+    .blur-financial { filter: blur(5px); user-select: none; pointer-events: none; transition: filter 0.2s ease-in-out; }
+    .card { background:#0f0f0f; border:1px solid #1a1a1a; border-radius:1rem; }
+    .fade-in { animation: fadeIn .4s ease both; }
+    @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+  <!-- Loading state -->
+  <div id="loading-screen" class="fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-4">
+    <img src="/SAKKHIheader.png" class="h-10 w-auto object-contain" alt="Sakkhi"/>
+    <div class="w-8 h-8 border-2 border-[#c9a96e]/20 border-t-[#c9a96e] rounded-full animate-spin"></div>
+    <p class="text-xs text-neutral-500">Crunching your numbers...</p>
+  </div>
+
+  <!-- Not logged in -->
+  <div id="auth-required" class="hidden fixed inset-0 bg-[#050505] z-[999] flex flex-col items-center justify-center gap-4 text-center p-6">
+    <img src="/SAKKHIheader.png" class="h-10 w-auto object-contain mb-2" alt="Sakkhi"/>
+    <div class="w-14 h-14 bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl">
+      <i class="ti ti-lock"></i>
+    </div>
+    <h2 class="text-lg font-bold text-white">Please log in to view this</h2>
+    <p class="text-xs text-neutral-500 max-w-xs">Deep Analysis needs your Sakkhi session. Log in from the main app, then open this tab again.</p>
+    <a href="/app/" class="mt-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-5 py-2.5 rounded-lg text-xs font-bold transition">Go to Sakkhi App</a>
+  </div>
+
+  <div id="main" class="hidden">
+    <!-- Header -->
+    <div class="border-b border-neutral-900 bg-[#0a0a0a]/80 backdrop-blur sticky top-0 z-40">
+      <div class="max-w-6xl mx-auto px-5 md:px-8 py-4 flex items-center justify-between gap-4">
+        <div class="flex items-center gap-3">
+          <img src="/SAKKHIheader.png" class="h-7 md:h-8 w-auto object-contain" alt="Sakkhi"/>
+          <div class="h-6 w-px bg-neutral-800 hidden sm:block"></div>
+          <div class="hidden sm:block">
+            <p class="text-sm font-bold text-white flex items-center gap-1.5"><i class="ti ti-sparkles text-[#c9a96e] text-base"></i> Deep Analysis</p>
+          </div>
+        </div>
+        <a href="/app/" class="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400 hover:text-[#c9a96e] transition">
+          <i class="ti ti-arrow-left"></i> Back to Dashboard
+        </a>
+      </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto px-5 md:px-8 py-6 md:py-8 space-y-6">
+
+      <div>
+        <h1 class="text-2xl md:text-3xl font-bold text-white">Deep Analysis</h1>
+        <p class="text-xs md:text-sm text-neutral-500 mt-1">A full breakdown of how <span id="da-bizname" class="text-neutral-300 font-semibold">your studio</span> is really doing — generated <span id="da-gendate"></span>.</p>
+      </div>
+
+      <!-- Locked state -->
+      <div id="da-locked" class="hidden">
+        <div class="relative overflow-hidden card p-10 text-center">
+          <div class="absolute inset-0 opacity-[0.04] pointer-events-none" style="background: radial-gradient(circle at 30% 20%, #c9a96e 0%, transparent 45%), radial-gradient(circle at 80% 80%, #c9a96e 0%, transparent 40%);"></div>
+          <div class="relative w-16 h-16 mx-auto bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e] text-3xl mb-5">
+            <i class="ti ti-lock"></i>
+          </div>
+          <h3 class="text-lg font-bold text-white">Deep Analysis is a Pro feature</h3>
+          <p class="text-xs text-neutral-500 max-w-sm mx-auto mt-2 leading-relaxed">Growth trends, revenue insights, client breakdowns and a lot more — all built from your real shoot data. Renew your plan to unlock it.</p>
+          <a href="/#pricing" class="inline-block mt-6 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-6 py-2.5 rounded-lg text-xs font-bold transition">Renew Plan</a>
+        </div>
+      </div>
+
+      <!-- Unlocked content -->
+      <div id="da-content" class="hidden space-y-6">
+
+        <!-- Hero Insight -->
+        <div class="relative overflow-hidden bg-gradient-to-br from-[#1a1610] via-[#0f0f0f] to-[#0a0a0a] border border-[#c9a96e]/20 rounded-2xl p-5 md:p-6 fade-in">
+          <div class="absolute inset-0 opacity-[0.06] pointer-events-none" style="background: radial-gradient(circle at 15% 30%, #c9a96e 0%, transparent 40%);"></div>
+          <div class="relative flex items-start gap-3">
+            <div class="w-9 h-9 flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e]"><i class="ti ti-bulb text-lg"></i></div>
+            <div>
+              <p id="da-insight-text" class="text-sm md:text-base font-semibold text-white leading-snug">Crunching your numbers...</p>
+              <p id="da-insight-sub" class="text-[11px] text-neutral-500 mt-1"></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- KPI grid -->
+        <div id="da-kpi-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3 fade-in"></div>
+
+        <!-- Growth comparison -->
+        <div class="card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-trending-up text-[#c9a96e]"></i> This Month vs Last Month</h3>
+          <div id="da-growth-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        </div>
+
+        <!-- Trend chart -->
+        <div class="card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-1"><i class="ti ti-chart-line text-[#c9a96e]"></i> Revenue & Bookings — Last 12 Months</h3>
+          <p class="text-[10px] text-neutral-600 mb-4">Bars show revenue booked, line shows number of shoots.</p>
+          <div class="h-60 md:h-72"><canvas id="da-trend-chart"></canvas></div>
+        </div>
+
+        <!-- Year over year (only shown if multi-year data) -->
+        <div id="da-yoy-wrap" class="hidden card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-1"><i class="ti ti-calendar-time text-[#c9a96e]"></i> Year-on-Year Revenue</h3>
+          <p class="text-[10px] text-neutral-600 mb-4">Total booked revenue, compared across years.</p>
+          <div class="h-48"><canvas id="da-yoy-chart"></canvas></div>
+        </div>
+
+        <!-- Next month projection -->
+        <div id="da-projection" class="card p-5 fade-in"></div>
+
+        <!-- Event mix: chart + full breakdown table -->
+        <div class="card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-1"><i class="ti ti-chart-donut-3 text-[#c9a96e]"></i> Event Mix</h3>
+          <p class="text-[10px] text-neutral-600 mb-4">Every event type you shoot, with counts and revenue.</p>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="h-56 flex items-center justify-center"><canvas id="da-event-chart"></canvas></div>
+            <div id="da-event-table" class="space-y-2"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Payment health -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-wallet text-[#c9a96e]"></i> Payment Health</h3>
+            <div class="h-48 flex items-center justify-center"><canvas id="da-payment-chart"></canvas></div>
+            <div id="da-payment-legend" class="mt-3 space-y-1.5"></div>
+          </div>
+
+          <!-- Booking status funnel -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-git-branch text-[#c9a96e]"></i> Booking Status</h3>
+            <div id="da-booking-status" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Top clients -->
+        <div class="card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-crown text-[#c9a96e]"></i> Top Clients</h3>
+          <div id="da-top-clients" class="space-y-2"></div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Top locations -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-map-pin text-[#c9a96e]"></i> Top Locations</h3>
+            <div id="da-top-locations" class="space-y-3"></div>
+          </div>
+
+          <!-- Referral partners / companies -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-building-store text-[#c9a96e]"></i> Top Referral Partners</h3>
+            <div id="da-top-companies" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <!-- Session preference -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-sun text-[#c9a96e]"></i> Session Preference</h3>
+            <div id="da-session-bars" class="space-y-3"></div>
+          </div>
+
+          <!-- Weekday vs weekend -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-calendar-week text-[#c9a96e]"></i> Weekday vs Weekend</h3>
+            <div id="da-weekday-bars" class="space-y-3"></div>
+          </div>
+        </div>
+
+        <!-- Busiest months all time -->
+        <div class="card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-calendar-stats text-[#c9a96e]"></i> Busiest Months (All-Time)</h3>
+          <div id="da-busy-months" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        </div>
+
+        <!-- Editing workspace stats (only if editor mode is on) -->
+        <div id="da-editing-wrap" class="hidden card p-5 fade-in">
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-edit text-[#c9a96e]"></i> Editing Workspace</h3>
+          <div id="da-editing-grid" class="grid grid-cols-2 md:grid-cols-4 gap-3"></div>
+        </div>
+
+        <p class="text-center text-[10px] text-neutral-700 pt-4 pb-8">Deep Analysis · powered by Sakkhi · built entirely from your own shoot data</p>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==========================================
+    // CONFIG — same project as the main app
+    // ==========================================
+    const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
+    const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+    const HEADERS = { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY, 'Prefer': 'return=representation' };
+
+    let currentUser = null;
+    let _profile = { bizName: '', isEditor: false };
+    let _isSubActive = false;
+    let _shoots = [];
+    let _edits = [];
+
+    async function refreshSupabaseSession() {
+      if (!currentUser || !currentUser.refreshToken) return false;
+      try {
+        const res = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY },
+          body: JSON.stringify({ refresh_token: currentUser.refreshToken })
+        });
+        if (!res.ok) return false;
+        const data = await res.json();
+        currentUser.token = data.access_token;
+        currentUser.refreshToken = data.refresh_token || currentUser.refreshToken;
+        if (localStorage.getItem('currentUser')) localStorage.setItem('currentUser', JSON.stringify(currentUser));
+        else if (sessionStorage.getItem('currentUser')) sessionStorage.setItem('currentUser', JSON.stringify(currentUser));
+        return true;
+      } catch (e) { return false; }
+    }
+
+    async function sbFetch(path, opts = {}) {
+      const doFetch = () => {
+        const authToken = (currentUser && currentUser.token) ? currentUser.token : SUPABASE_KEY;
+        return fetch(`${SUPABASE_URL}/rest/v1/${path}`, { ...opts, headers: { ...HEADERS, 'Authorization': 'Bearer ' + authToken, ...(opts.headers || {}) } });
+      };
+      let res = await doFetch();
+      if (res.status === 401 && currentUser && currentUser.refreshToken) {
+        const refreshed = await refreshSupabaseSession();
+        if (refreshed) res = await doFetch();
+      }
+      if (!res.ok) {
+        if (res.status === 401) throw new Error('SESSION_EXPIRED');
+        throw new Error(await res.text());
+      }
+      const text = await res.text();
+      return text ? JSON.parse(text) : [];
+    }
+
+    function dbToShoot(r) {
+      return {
+        id: r.id, name: r.name || '', date: r.date || '', event: r.event || 'Wedding', session: r.session || 'Morning Session',
+        location: r.location || '', company: r.company || '', amount: Number(r.amount || 0), expense: Number(r.expense || 0),
+        payStatus: r.pay_status || 'pending', partPaid: Number(r.part_paid || 0), bookingStatus: r.booking_status || 'confirmed', created: r.created
+      };
+    }
+
+    function fmtAmt(n) { return n ? '₹' + Math.floor(n).toLocaleString('en-IN') : '₹0'; }
+    function escapeHtml(str) {
+      const div = document.createElement('div'); div.textContent = str == null ? '' : str; return div.innerHTML;
+    }
+    function daReceived(s) {
+      if (s.payStatus === 'done') return Number(s.amount || 0);
+      if (s.payStatus === 'part') return Number(s.partPaid || 0);
+      return 0;
+    }
+
+    // ==========================================
+    // BOOTSTRAP
+    // ==========================================
+    document.addEventListener('DOMContentLoaded', async () => {
+      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      if (!savedUser) {
+        document.getElementById('loading-screen').classList.add('hidden');
+        document.getElementById('auth-required').classList.remove('hidden');
+        return;
+      }
+      currentUser = JSON.parse(savedUser);
+
+      try {
+        const userId = currentUser?.id || currentUser?.email || 'default_user';
+
+        const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
+        _shoots = raw.map(dbToShoot);
+
+        try {
+          _edits = await sbFetch(`edits?user_id=eq.${userId}&order=created.desc`);
+        } catch (e) { _edits = []; }
+
+        const configurationsRaw = await sbFetch(`settings?user_id=eq.${userId}&select=*`);
+        const configurations = configurationsRaw.map(r => ({ key: r.key.replace(`${userId}_`, ''), value: r.value }));
+        const profileRow = configurations.find(r => r.key === 'profile');
+        if (profileRow) _profile = { ..._profile, ...profileRow.value };
+
+        try {
+          const subRaw = await sbFetch(`subscriptions?user_id=eq.${userId}&select=*`);
+          if (subRaw && subRaw.length > 0) {
+            let status = subRaw[0].status;
+            if (subRaw[0].expires_at && new Date(subRaw[0].expires_at) < new Date()) status = 'expired';
+            _isSubActive = status === 'active';
+          } else {
+            _isSubActive = false;
+          }
+        } catch (e) { _isSubActive = false; }
+
+        document.getElementById('loading-screen').classList.add('hidden');
+        document.getElementById('main').classList.remove('hidden');
+        document.getElementById('da-bizname').textContent = _profile.bizName || 'your studio';
+        document.getElementById('da-gendate').textContent = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'long', year: 'numeric' });
+
+        const locked = !_isSubActive;
+        document.getElementById('da-locked').classList.toggle('hidden', !locked);
+        document.getElementById('da-content').classList.toggle('hidden', locked);
+        if (!locked) renderDeepAnalysis();
+
+      } catch (err) {
+        document.getElementById('loading-screen').classList.add('hidden');
+        if (err.message === 'SESSION_EXPIRED') {
+          document.getElementById('auth-required').classList.remove('hidden');
+        } else {
+          document.getElementById('main').classList.remove('hidden');
+          document.getElementById('da-content').innerHTML = `<div class="card p-8 text-center text-sm text-red-400">Something went wrong loading your data. Please try reopening this tab.</div>`;
+          document.getElementById('da-content').classList.remove('hidden');
+        }
+      }
+    });
+
+    // ==========================================
+    // ANALYSIS
+    // ==========================================
+    let _daTrendChart = null, _daYoyChart = null, _daEventChart = null, _daPaymentChart = null;
+    const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+    const DAY_NAMES = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+    const palette = ['#c9a96e', '#60a5fa', '#34d399', '#a78bfa', '#f87171', '#fb923c', '#22d3ee', '#f472b6'];
+
+    function renderDeepAnalysis() {
+      const shoots = _shoots.filter(s => s.date);
+      const now = new Date();
+      const monthKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
+      const thisMonthKey = monthKey(now);
+      const lastMonthDate = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const lastMonthKey = monthKey(lastMonthDate);
+      const thisMonthShoots = shoots.filter(s => s.date.slice(0, 7) === thisMonthKey);
+      const lastMonthShoots = shoots.filter(s => s.date.slice(0, 7) === lastMonthKey);
+
+      const totalRevenue = shoots.reduce((a, s) => a + s.amount, 0);
+      const totalReceived = shoots.reduce((a, s) => a + daReceived(s), 0);
+      const totalShoots = shoots.length;
+      const avgValue = totalShoots ? totalRevenue / totalShoots : 0;
+      const collectionRate = totalRevenue ? Math.round((totalReceived / totalRevenue) * 100) : 0;
+
+      const nameCount = {};
+      shoots.forEach(s => { const n = s.name.trim().toLowerCase(); if (n) nameCount[n] = (nameCount[n] || 0) + 1; });
+      const uniqueClients = Object.keys(nameCount).length;
+      const repeatClients = Object.values(nameCount).filter(c => c > 1).length;
+      const repeatRate = uniqueClients ? Math.round((repeatClients / uniqueClients) * 100) : 0;
+
+      const firstShootDate = shoots.length ? shoots.reduce((min, s) => s.date < min ? s.date : min, shoots[0].date) : null;
+      const activeDays = firstShootDate ? Math.max(1, Math.round((now - new Date(firstShootDate)) / 86400000)) : 0;
+      const uniqueLocations = new Set(shoots.map(s => (s.location || '').trim().toLowerCase()).filter(Boolean)).size;
+
+      // ---- Hero insight ----
+      const revThisMonth = thisMonthShoots.reduce((a, s) => a + s.amount, 0);
+      const revLastMonth = lastMonthShoots.reduce((a, s) => a + s.amount, 0);
+      const revChangePct = revLastMonth > 0 ? Math.round(((revThisMonth - revLastMonth) / revLastMonth) * 100) : (revThisMonth > 0 ? 100 : 0);
+      const insightEl = document.getElementById('da-insight-text');
+      const insightSubEl = document.getElementById('da-insight-sub');
+      if (totalShoots === 0) {
+        insightEl.textContent = "No shoots logged yet — once you add some, this page comes alive.";
+        insightSubEl.textContent = '';
+      } else if (revChangePct > 0) {
+        insightEl.textContent = `You're up ${revChangePct}% this month — booked value has grown compared to last month.`;
+        insightSubEl.textContent = `${fmtAmt(revThisMonth)} booked so far this month vs ${fmtAmt(revLastMonth)} last month · ${collectionRate}% collection rate all-time.`;
+      } else if (revChangePct < 0) {
+        insightEl.textContent = `Bookings have dipped ${Math.abs(revChangePct)}% this month compared to last month.`;
+        insightSubEl.textContent = `${fmtAmt(revThisMonth)} booked so far this month vs ${fmtAmt(revLastMonth)} last month · ${collectionRate}% collection rate all-time.`;
+      } else {
+        insightEl.textContent = `Steady month — booked value is holding at ${fmtAmt(revThisMonth)}, same pace as last month.`;
+        insightSubEl.textContent = `Collection rate stands at ${collectionRate}% across all shoots on record.`;
+      }
+
+      // ---- KPI grid ----
+      const kpis = [
+        { label: 'Total Revenue', value: fmtAmt(totalRevenue), sub: 'All shoots, all time', icon: 'ti-cash', color: '#c9a96e' },
+        { label: 'Total Shoots', value: totalShoots, sub: `${uniqueClients} unique client${uniqueClients !== 1 ? 's' : ''}`, icon: 'ti-camera', color: '#c9a96e' },
+        { label: 'Avg. Shoot Value', value: fmtAmt(avgValue), sub: 'Per booking, all time', icon: 'ti-report-money', color: '#60a5fa' },
+        { label: 'Collection Rate', value: collectionRate + '%', sub: fmtAmt(totalReceived) + ' collected', icon: 'ti-checkbox', color: '#34d399' },
+        { label: 'Repeat Clients', value: repeatRate + '%', sub: `${repeatClients} of ${uniqueClients} rebooked`, icon: 'ti-repeat', color: '#a78bfa' },
+        { label: 'Outstanding', value: fmtAmt(totalRevenue - totalReceived), sub: 'Yet to be collected', icon: 'ti-alert-circle', color: '#f87171' },
+        { label: 'Locations Covered', value: uniqueLocations, sub: 'Distinct shoot locations', icon: 'ti-map-pin', color: '#22d3ee' },
+        { label: 'Active Since', value: firstShootDate ? `${activeDays}d` : '—', sub: firstShootDate ? `First shoot: ${new Date(firstShootDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'No shoots yet', icon: 'ti-clock', color: '#fb923c' },
+      ];
+      document.getElementById('da-kpi-grid').innerHTML = kpis.map(k => `
+        <div class="card p-4 hover:border-neutral-700 transition">
+          <div class="flex items-start justify-between mb-2">
+            <p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500">${k.label}</p>
+            <i class="ti ${k.icon} text-base" style="color:${k.color}; opacity:0.5"></i>
+          </div>
+          <p class="text-lg md:text-xl font-bold privacy-target" style="color:${k.color}">${k.value}</p>
+          <p class="text-[10px] text-neutral-600 mt-1">${k.sub}</p>
+        </div>`).join('');
+
+      // ---- Growth comparison ----
+      function growthCard(label, cur, prev, isMoney) {
+        const pct = prev > 0 ? Math.round(((cur - prev) / prev) * 100) : (cur > 0 ? 100 : 0);
+        const up = pct >= 0;
+        return `
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3">
+            <p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1.5">${label}</p>
+            <p class="text-base font-bold text-white privacy-target">${isMoney ? fmtAmt(cur) : cur}</p>
+            <p class="text-[10px] mt-1 font-bold ${up ? 'text-emerald-400' : 'text-red-400'} flex items-center gap-1"><i class="ti ti-arrow-${up ? 'up' : 'down'}-right"></i> ${Math.abs(pct)}% vs last month</p>
+          </div>`;
+      }
+      document.getElementById('da-growth-grid').innerHTML =
+        growthCard('Revenue Booked', revThisMonth, revLastMonth, true) +
+        growthCard('Shoots Booked', thisMonthShoots.length, lastMonthShoots.length, false) +
+        growthCard('Received', thisMonthShoots.reduce((a, s) => a + daReceived(s), 0), lastMonthShoots.reduce((a, s) => a + daReceived(s), 0), true) +
+        growthCard('New Clients', thisMonthShoots.filter(s => nameCount[s.name.trim().toLowerCase()] === 1).length, lastMonthShoots.filter(s => nameCount[s.name.trim().toLowerCase()] === 1).length, false);
+
+      // ---- 12-month trend ----
+      const trendLabels = [], trendRevenue = [], trendCounts = [];
+      for (let i = 11; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = monthKey(d);
+        const monthShoots = shoots.filter(s => s.date.slice(0, 7) === key);
+        trendLabels.push(`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`);
+        trendRevenue.push(monthShoots.reduce((a, s) => a + s.amount, 0));
+        trendCounts.push(monthShoots.length);
+      }
+      const trendCtx = document.getElementById('da-trend-chart').getContext('2d');
+      if (_daTrendChart) _daTrendChart.destroy();
+      _daTrendChart = new Chart(trendCtx, {
+        data: {
+          labels: trendLabels,
+          datasets: [
+            { type: 'bar', label: 'Revenue', data: trendRevenue, backgroundColor: '#c9a96e', borderRadius: 3, barPercentage: 0.6, categoryPercentage: 0.7, yAxisID: 'y' },
+            { type: 'line', label: 'Shoots', data: trendCounts, borderColor: '#60a5fa', backgroundColor: '#60a5fa', pointRadius: 3, pointBackgroundColor: '#60a5fa', tension: 0.35, yAxisID: 'y1' }
+          ]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
+          plugins: {
+            legend: { display: true, position: 'top', align: 'end', labels: { color: '#737373', boxWidth: 8, usePointStyle: true, font: { size: 9, family: "'Plus Jakarta Sans', sans-serif", weight: 'bold' } } },
+            tooltip: { backgroundColor: '#050505', titleColor: '#c9a96e', bodyColor: '#e8e8e8', borderColor: '#262626', borderWidth: 1, padding: 8, cornerRadius: 6 }
+          },
+          scales: {
+            x: { grid: { display: false, drawBorder: false }, ticks: { color: '#737373', font: { size: 9 }, maxRotation: 45, minRotation: 45 } },
+            y: { position: 'left', grid: { color: '#1a1a1a', drawBorder: false }, ticks: { color: '#525252', font: { size: 9 }, callback: v => v >= 1000 ? (v / 1000) + 'k' : v, maxTicksLimit: 5 } },
+            y1: { position: 'right', grid: { display: false, drawBorder: false }, ticks: { color: '#525252', font: { size: 9 }, stepSize: 1, maxTicksLimit: 5 } }
+          }
+        }
+      });
+
+      // ---- Year on year (only if data spans multiple years) ----
+      const yearTotals = {};
+      shoots.forEach(s => { const y = s.date.slice(0, 4); yearTotals[y] = (yearTotals[y] || 0) + s.amount; });
+      const years = Object.keys(yearTotals).sort();
+      if (years.length > 1) {
+        document.getElementById('da-yoy-wrap').classList.remove('hidden');
+        const yoyCtx = document.getElementById('da-yoy-chart').getContext('2d');
+        if (_daYoyChart) _daYoyChart.destroy();
+        _daYoyChart = new Chart(yoyCtx, {
+          type: 'bar',
+          data: { labels: years, datasets: [{ label: 'Revenue', data: years.map(y => yearTotals[y]), backgroundColor: '#c9a96e', borderRadius: 4, barPercentage: 0.5 }] },
+          options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { legend: { display: false }, tooltip: { backgroundColor: '#050505', titleColor: '#c9a96e', bodyColor: '#e8e8e8', borderColor: '#262626', borderWidth: 1, padding: 8, cornerRadius: 6 } },
+            scales: {
+              x: { grid: { display: false, drawBorder: false }, ticks: { color: '#737373', font: { size: 10, weight: 'bold' } } },
+              y: { grid: { color: '#1a1a1a', drawBorder: false }, ticks: { color: '#525252', font: { size: 9 }, callback: v => v >= 1000 ? (v / 1000) + 'k' : v } }
+            }
+          }
+        });
+      }
+
+      // ---- Next month projection (simple 3-month rolling average) ----
+      const last3 = [];
+      for (let i = 0; i < 3; i++) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = monthKey(d);
+        last3.push(shoots.filter(s => s.date.slice(0, 7) === key).reduce((a, s) => a + s.amount, 0));
+      }
+      const projected = last3.reduce((a, b) => a + b, 0) / 3;
+      const nextMonthName = MONTH_NAMES[(now.getMonth() + 1) % 12];
+      document.getElementById('da-projection').innerHTML = `
+        <div class="flex items-start gap-3">
+          <div class="w-9 h-9 flex-shrink-0 bg-blue-500/10 border border-blue-500/25 rounded-full flex items-center justify-center text-blue-400"><i class="ti ti-telescope text-lg"></i></div>
+          <div>
+            <h3 class="text-sm font-bold text-white">Estimated ${nextMonthName} Revenue</h3>
+            <p class="text-xl font-bold text-blue-400 mt-1 privacy-target">${fmtAmt(projected)}</p>
+            <p class="text-[10px] text-neutral-600 mt-1">A simple estimate based on your average booked revenue over the last 3 months — not a guarantee, just a heads-up on the trend.</p>
+          </div>
+        </div>`;
+
+      // ---- Event mix: chart + table ----
+      const eventStats = {};
+      shoots.forEach(s => {
+        const e = s.event || 'Other';
+        if (!eventStats[e]) eventStats[e] = { count: 0, revenue: 0 };
+        eventStats[e].count++;
+        eventStats[e].revenue += s.amount;
+      });
+      const eventEntries = Object.entries(eventStats).sort((a, b) => b[1].revenue - a[1].revenue);
+      const eventCtx = document.getElementById('da-event-chart').getContext('2d');
+      if (_daEventChart) _daEventChart.destroy();
+      if (eventEntries.length) {
+        _daEventChart = new Chart(eventCtx, {
+          type: 'doughnut',
+          data: { labels: eventEntries.map(e => e[0]), datasets: [{ data: eventEntries.map(e => e[1].revenue), backgroundColor: palette, borderColor: '#0f0f0f', borderWidth: 2 }] },
+          options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#050505', titleColor: '#c9a96e', bodyColor: '#e8e8e8', borderColor: '#262626', borderWidth: 1, padding: 8, cornerRadius: 6, callbacks: { label: ctx => ` ${fmtAmt(ctx.parsed)}` } } } }
+        });
+      }
+      document.getElementById('da-event-table').innerHTML = eventEntries.map(([name, d], i) => `
+        <div class="flex items-center justify-between text-xs py-1.5 border-b border-neutral-900 last:border-0">
+          <span class="flex items-center gap-2 text-neutral-300 font-medium"><span class="w-2 h-2 rounded-full flex-shrink-0" style="background:${palette[i % palette.length]}"></span>${escapeHtml(name)} <span class="text-neutral-600">(${d.count})</span></span>
+          <span class="text-neutral-300 font-bold privacy-target">${fmtAmt(d.revenue)}</span>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+
+      // ---- Payment health ----
+      const payBuckets = { done: 0, part: 0, pending: 0 };
+      shoots.forEach(s => { payBuckets[s.payStatus === 'done' ? 'done' : s.payStatus === 'part' ? 'part' : 'pending']++; });
+      const payCtx = document.getElementById('da-payment-chart').getContext('2d');
+      if (_daPaymentChart) _daPaymentChart.destroy();
+      _daPaymentChart = new Chart(payCtx, {
+        type: 'doughnut',
+        data: { labels: ['Fully Paid', 'Partially Paid', 'Pending'], datasets: [{ data: [payBuckets.done, payBuckets.part, payBuckets.pending], backgroundColor: ['#34d399', '#facc15', '#f87171'], borderColor: '#0f0f0f', borderWidth: 2 }] },
+        options: { responsive: true, maintainAspectRatio: false, cutout: '68%', plugins: { legend: { display: false }, tooltip: { backgroundColor: '#050505', titleColor: '#c9a96e', bodyColor: '#e8e8e8', borderColor: '#262626', borderWidth: 1, padding: 8, cornerRadius: 6 } } }
+      });
+      document.getElementById('da-payment-legend').innerHTML = `
+        <div class="flex items-center justify-between text-[11px]"><span class="flex items-center gap-2 text-neutral-400"><span class="w-2 h-2 rounded-full bg-emerald-400"></span>Fully Paid</span><span class="text-neutral-300 font-semibold">${payBuckets.done}</span></div>
+        <div class="flex items-center justify-between text-[11px]"><span class="flex items-center gap-2 text-neutral-400"><span class="w-2 h-2 rounded-full bg-yellow-400"></span>Partially Paid</span><span class="text-neutral-300 font-semibold">${payBuckets.part}</span></div>
+        <div class="flex items-center justify-between text-[11px]"><span class="flex items-center gap-2 text-neutral-400"><span class="w-2 h-2 rounded-full bg-red-400"></span>Pending</span><span class="text-neutral-300 font-semibold">${payBuckets.pending}</span></div>`;
+
+      // ---- Booking status funnel ----
+      const statusBuckets = {};
+      shoots.forEach(s => { const st = s.bookingStatus || 'confirmed'; statusBuckets[st] = (statusBuckets[st] || 0) + 1; });
+      const statusColors = { confirmed: '#34d399', pending: '#facc15', cancelled: '#f87171', completed: '#60a5fa' };
+      const statusEntries = Object.entries(statusBuckets).sort((a, b) => b[1] - a[1]);
+      const maxStatus = statusEntries.length ? Math.max(...statusEntries.map(e => e[1])) : 1;
+      document.getElementById('da-booking-status').innerHTML = statusEntries.map(([label, count]) => `
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400 capitalize">${escapeHtml(label)}</span><span class="text-neutral-300 font-semibold">${count}</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${Math.max(4, Math.round((count / maxStatus) * 100))}%; background:${statusColors[label] || '#a78bfa'}"></div></div>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+
+      // ---- Top clients ----
+      const clientTotals = {};
+      shoots.forEach(s => {
+        const key = s.name.trim() || 'Unknown';
+        if (!clientTotals[key]) clientTotals[key] = { revenue: 0, count: 0 };
+        clientTotals[key].revenue += s.amount;
+        clientTotals[key].count++;
+      });
+      const topClients = Object.entries(clientTotals).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 8);
+      const maxClientRev = topClients.length ? topClients[0][1].revenue : 1;
+      document.getElementById('da-top-clients').innerHTML = topClients.map(([name, d], i) => `
+        <div class="flex items-center gap-3">
+          <span class="w-5 text-[11px] font-bold text-neutral-600">#${i + 1}</span>
+          <div class="flex-1 min-w-0">
+            <div class="flex items-center justify-between mb-1">
+              <span class="text-xs font-semibold text-white truncate">${escapeHtml(name)} <span class="text-neutral-600 font-normal">(${d.count} shoot${d.count !== 1 ? 's' : ''})</span></span>
+              <span class="text-xs font-bold text-[#c9a96e] privacy-target ml-2 flex-shrink-0">${fmtAmt(d.revenue)}</span>
+            </div>
+            <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#c9a96e] rounded-full" style="width:${Math.max(4, Math.round((d.revenue / maxClientRev) * 100))}%"></div></div>
+          </div>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+
+      // ---- Top locations ----
+      const locTotals = {};
+      shoots.forEach(s => {
+        const key = (s.location || 'Unspecified').trim();
+        if (!locTotals[key]) locTotals[key] = { count: 0, revenue: 0 };
+        locTotals[key].count++;
+        locTotals[key].revenue += s.amount;
+      });
+      const topLocs = Object.entries(locTotals).sort((a, b) => b[1].count - a[1].count).slice(0, 6);
+      const maxLoc = topLocs.length ? topLocs[0][1].count : 1;
+      document.getElementById('da-top-locations').innerHTML = topLocs.map(([label, d]) => `
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400">${escapeHtml(label)}</span><span class="text-neutral-300 font-semibold">${d.count} · ${fmtAmt(d.revenue)}</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#22d3ee] rounded-full" style="width:${Math.max(4, Math.round((d.count / maxLoc) * 100))}%"></div></div>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+
+      // ---- Top companies / referral partners ----
+      const compTotals = {};
+      shoots.forEach(s => {
+        const key = (s.company || '').trim();
+        if (!key) return;
+        if (!compTotals[key]) compTotals[key] = { count: 0, revenue: 0 };
+        compTotals[key].count++;
+        compTotals[key].revenue += s.amount;
+      });
+      const topComps = Object.entries(compTotals).sort((a, b) => b[1].count - a[1].count).slice(0, 6);
+      const maxComp = topComps.length ? topComps[0][1].count : 1;
+      document.getElementById('da-top-companies').innerHTML = topComps.map(([label, d]) => `
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400">${escapeHtml(label)}</span><span class="text-neutral-300 font-semibold">${d.count} · ${fmtAmt(d.revenue)}</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#fb923c] rounded-full" style="width:${Math.max(4, Math.round((d.count / maxComp) * 100))}%"></div></div>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No referral partners logged yet</p>';
+
+      // ---- Session preference ----
+      const sessionCounts = {};
+      shoots.forEach(s => { const key = s.session || 'Unspecified'; sessionCounts[key] = (sessionCounts[key] || 0) + 1; });
+      const sessionEntries = Object.entries(sessionCounts).sort((a, b) => b[1] - a[1]);
+      const maxSession = sessionEntries.length ? sessionEntries[0][1] : 1;
+      document.getElementById('da-session-bars').innerHTML = sessionEntries.map(([label, count]) => `
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400">${escapeHtml(label)}</span><span class="text-neutral-300 font-semibold">${count}</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#60a5fa] rounded-full" style="width:${Math.max(4, Math.round((count / maxSession) * 100))}%"></div></div>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+
+      // ---- Weekday vs weekend ----
+      let weekdayCount = 0, weekendCount = 0;
+      const dowCounts = [0, 0, 0, 0, 0, 0, 0];
+      shoots.forEach(s => {
+        const d = new Date(s.date);
+        if (isNaN(d)) return;
+        const dow = d.getDay();
+        dowCounts[dow]++;
+        if (dow === 0 || dow === 6) weekendCount++; else weekdayCount++;
+      });
+      const wkTotal = weekdayCount + weekendCount || 1;
+      document.getElementById('da-weekday-bars').innerHTML = `
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400">Weekdays (Mon–Fri)</span><span class="text-neutral-300 font-semibold">${weekdayCount} (${Math.round(weekdayCount / wkTotal * 100)}%)</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#a78bfa] rounded-full" style="width:${Math.max(4, Math.round(weekdayCount / wkTotal * 100))}%"></div></div>
+        </div>
+        <div>
+          <div class="flex items-center justify-between text-[11px] mb-1"><span class="text-neutral-400">Weekends (Sat–Sun)</span><span class="text-neutral-300 font-semibold">${weekendCount} (${Math.round(weekendCount / wkTotal * 100)}%)</span></div>
+          <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#c9a96e] rounded-full" style="width:${Math.max(4, Math.round(weekendCount / wkTotal * 100))}%"></div></div>
+        </div>
+        <p class="text-[10px] text-neutral-600 pt-1">Busiest day: ${DAY_NAMES[dowCounts.indexOf(Math.max(...dowCounts))]}</p>`;
+
+      // ---- Busiest months all-time ----
+      const monthTotals = {};
+      shoots.forEach(s => { const d = new Date(s.date); if (isNaN(d)) return; const label = MONTH_NAMES[d.getMonth()]; monthTotals[label] = (monthTotals[label] || 0) + 1; });
+      const busiest = Object.entries(monthTotals).sort((a, b) => b[1] - a[1]).slice(0, 4);
+      document.getElementById('da-busy-months').innerHTML = busiest.map(([label, count], i) => `
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 text-center">
+          <p class="text-lg font-bold text-white">${count}</p>
+          <p class="text-[10px] text-neutral-500 mt-0.5">${label} ${i === 0 ? '· Busiest' : ''}</p>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6 col-span-4">No shoots yet</p>';
+
+      // ---- Editing workspace (only if enabled) ----
+      if (_profile.isEditor && _edits && _edits.length) {
+        document.getElementById('da-editing-wrap').classList.remove('hidden');
+        const totalEditRevenue = _edits.reduce((a, e) => e.pay_status === 'done' ? a + Number(e.amount || 0) : e.pay_status === 'part' ? a + Number(e.part_paid || 0) : a, 0);
+        const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
+        const completedJobs = _edits.filter(e => e.work_status === 'completed').length;
+        document.getElementById('da-editing-grid').innerHTML = `
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Total Jobs</p><p class="text-base font-bold text-white">${_edits.length}</p></div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Active</p><p class="text-base font-bold text-blue-400">${activeJobs}</p></div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Completed</p><p class="text-base font-bold text-emerald-400">${completedJobs}</p></div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Revenue</p><p class="text-base font-bold text-[#c9a96e] privacy-target">${fmtAmt(totalEditRevenue)}</p></div>`;
+      }
+
+      // Apply blur to any privacy-target elements if the user had privacy mode on (best-effort; this tab has no toggle of its own yet)
+    }
+  </script>
+</body>
+</html>
