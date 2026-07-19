@@ -138,7 +138,20 @@
           <textarea id="event-notes" placeholder="Any special requirements..." class="premium-input rounded-xl px-4 py-3 text-sm text-white h-20 resize-none"></textarea>
         </div>
 
-        <button type="submit" id="submit-btn" class="w-full mt-4 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+        <!-- ========================================== -->
+        <!-- TERMS & CONDITIONS / PAYMENT POLICY -->
+        <!-- ========================================== -->
+        <div class="flex flex-col gap-2">
+          <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Terms & Conditions</label>
+          <div id="terms-box" class="premium-input rounded-xl px-4 py-3 text-[11px] text-neutral-400 leading-relaxed h-32 overflow-y-auto whitespace-pre-wrap">Loading terms...</div>
+        </div>
+
+        <label id="terms-checkbox-row" class="flex items-start gap-2.5 px-1 cursor-pointer select-none">
+          <input type="checkbox" id="terms-agree-checkbox" onchange="onTermsAgreeChange()" class="mt-0.5 w-4 h-4 rounded border-white/20 bg-transparent text-[#c9a96e] focus:ring-0 focus:ring-offset-0 accent-[#c9a96e] cursor-pointer flex-shrink-0"/>
+          <span class="text-[11px] text-neutral-400 leading-relaxed">I have read and agree to the Terms & Conditions and Payment Policy above.</span>
+        </label>
+
+        <button type="submit" id="submit-btn" disabled class="w-full mt-4 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none">
           Submit Booking Request
         </button>
       </form>
@@ -210,6 +223,40 @@
     let targetUserName = '';
     let currentRefCode = '';
     let whatsappLink = '';
+    let termsRequired = true; // safe default: require agreement unless the studio explicitly turns it off
+
+    // Shown whenever the studio hasn't set (or the portal hasn't yet been
+    // wired to return) their own custom Terms & Conditions text. Mirrors the
+    // default template in the studio dashboard's Account > Terms tab, so an
+    // studio editing their terms there will override this automatically.
+    const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
+Your date is held tentatively upon submitting this request and is confirmed only once the studio approves it and the advance/booking amount (as communicated separately) is received.
+
+2. PAYMENT SCHEDULE
+The remaining balance is payable as per the schedule shared by the studio. Deliverables/final edits will be released only after the full and final payment is received.
+
+3. CANCELLATION & REFUND POLICY
+Cancellations made more than 30 days before the event date: advance amount is refundable after deducting a nominal processing fee. Cancellations within 30 days of the event: advance amount is non-refundable, as the date has already been blocked for you.
+
+4. RESCHEDULING
+One reschedule request is accommodated free of charge, subject to availability, provided it is requested at least 15 days in advance.
+
+5. DELIVERABLES & TIMELINE
+Estimated delivery timelines will be communicated at the time of booking and are approximate, not guaranteed to the day.
+
+6. COPYRIGHT & USAGE RIGHTS
+The studio retains copyright over all photographs/videos captured. The client receives a license to use delivered media for personal, non-commercial purposes.
+
+7. OVERTIME & ADDITIONAL HOURS
+Any extension of hours beyond what was booked will be charged additionally at the studio's standard rate.
+
+8. FORCE MAJEURE
+The studio is not liable for delays due to circumstances beyond reasonable control (natural disasters, medical emergencies, government restrictions, etc.). A substitute or reschedule will be arranged wherever possible.
+
+9. LIABILITY
+The studio's total liability shall not exceed the total amount paid by the client for this specific shoot.
+
+By ticking the box and submitting this booking request, you confirm that you have read, understood, and agreed to the above Terms & Conditions and Payment Policy.`;
 
     async function sbRpc(fn, args) {
   const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -282,6 +329,20 @@
               const digitsOnly = String(portal.phone).replace(/[^0-9]/g, '');
               const waText = encodeURIComponent(`Hi ${displayBizName}! I just sent a booking request via ${activeStudio} — looking forward to hearing back from you.`);
               whatsappLink = `https://wa.me/${digitsOnly}?text=${waText}`;
+            }
+
+            // Terms & Conditions — uses the studio's own custom text once
+            // their backend portal includes it; falls back to a solid
+            // default template so the agreement gate always works.
+            const termsBox = document.getElementById('terms-box');
+            if (termsBox) termsBox.textContent = portal.terms || DEFAULT_TERMS;
+            termsRequired = portal.requireTerms !== false;
+            const checkboxRow = document.getElementById('terms-checkbox-row');
+            const submitBtn = document.getElementById('submit-btn');
+            if (!termsRequired) {
+              // Studio has switched the requirement off — still show the terms, just don't gate submission on it
+              if (checkboxRow) checkboxRow.classList.add('hidden');
+              if (submitBtn) submitBtn.disabled = false;
             }
 
             // If this browser already submitted a request for this link
@@ -538,12 +599,25 @@
       document.getElementById('calendar-dropdown').classList.add('hidden');
     }
 
+    function onTermsAgreeChange() {
+      const checked = document.getElementById('terms-agree-checkbox').checked;
+      document.getElementById('submit-btn').disabled = termsRequired ? !checked : false;
+    }
+
     // ==========================================
     // 5. SUBMIT FORM
     // ==========================================
     async function submitBooking(e) {
       e.preventDefault();
-      
+
+      // Safety net — the button is disabled until this is ticked, but a
+      // belt-and-braces check here means nothing can slip through.
+      const termsChecked = document.getElementById('terms-agree-checkbox').checked;
+      if (termsRequired && !termsChecked) {
+        alert('Please tick the box to confirm you agree to the Terms & Conditions before submitting.');
+        return;
+      }
+            
       const btn = document.getElementById('submit-btn');
       btn.innerHTML = '<i class="ti ti-loader animate-spin mr-2 text-lg"></i> Processing...';
       btn.disabled = true;
@@ -552,6 +626,15 @@
       const clientName = document.getElementById('client-name').value.trim();
       const eventDate = document.getElementById('event-date').value;
       const eventType = document.getElementById('event-type').value;
+      const rawNotes = document.getElementById('event-notes').value.trim();
+
+      // Record clear, on-record proof of Terms & Conditions agreement, since
+      // this is the one field the existing booking RPC already stores and
+      // surfaces back in the studio's dashboard — no backend change required.
+      const acceptanceLine = termsRequired
+        ? `[T&Cs agreed by client at ${new Date().toLocaleString('en-IN')}]`
+        : '';
+      const notesWithProof = [acceptanceLine, rawNotes].filter(Boolean).join('\n');
 
       try {
         const result = await sbRpc('submit_booking_request', {
@@ -561,7 +644,7 @@
           p_event: eventType,
           p_session: document.getElementById('event-session').value,
           p_location: document.getElementById('event-location').value.trim(),
-          p_notes: document.getElementById('event-notes').value.trim()
+          p_notes: notesWithProof
         });
 
         if (!result || !result.success) {
@@ -635,7 +718,7 @@
       document.getElementById('booking-form').reset();
       const btn = document.getElementById('submit-btn');
       btn.innerHTML = 'Submit Booking Request';
-      btn.disabled = false;
+      btn.disabled = termsRequired; // re-lock submit until the box is ticked again
       btn.classList.remove('opacity-80', 'cursor-not-allowed');
 
       if (shootsContainer) shootsContainer.classList.remove('hidden');
