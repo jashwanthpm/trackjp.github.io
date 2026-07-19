@@ -694,6 +694,10 @@
                 <i class="ti ti-brand-whatsapp text-lg"></i>
                 <span>WhatsApp</span>
               </button>
+              <button onclick="switchAccountTab('terms')" class="account-sidebar-item" data-tab="terms">
+                <i class="ti ti-file-text text-lg"></i>
+                <span>Terms</span>
+              </button>
               <button onclick="switchAccountTab('settings')" class="account-sidebar-item" data-tab="settings">
                 <i class="ti ti-settings text-lg"></i>
                 <span>Management</span>
@@ -944,6 +948,45 @@
                 <div class="flex gap-2 pt-3">
                   <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
                     <i class="ti ti-device-floppy"></i> Save Templates
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div id="account-terms" class="account-content-section">
+              <div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 space-y-5">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                    <i class="ti ti-file-text text-[#c9a96e]"></i> Terms & Conditions
+                  </h3>
+                  <p class="text-xs text-neutral-500 mt-1">This is shown to every client on your booking page. They must tick a box confirming they've read and agreed to it before their request can be submitted — so there's always a clear, on-record agreement.</p>
+                </div>
+
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-950/50 border border-neutral-800 rounded-lg p-4">
+                  <div>
+                    <h4 class="text-sm font-bold text-neutral-200">Require agreement before booking</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5">When off, clients can still see these terms but aren't forced to tick the box.</p>
+                  </div>
+                  <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                    <input type="checkbox" id="acc-require-terms" class="sr-only peer" checked>
+                    <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                  </label>
+                </div>
+
+                <div class="flex flex-col gap-1.5">
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Terms & Payment Policy Text</label>
+                    <button onclick="restoreDefaultTerms()" class="text-[10px] font-bold text-neutral-500 hover:text-[#c9a96e] transition flex items-center gap-1">
+                      <i class="ti ti-refresh text-xs"></i> Restore Default Template
+                    </button>
+                  </div>
+                  <textarea id="acc-terms" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition h-80 resize-y leading-relaxed"></textarea>
+                  <p class="text-[10px] text-neutral-600">Tip: adjust the advance %, cancellation windows, and delivery timelines to match how you actually work — clients will see exactly what you save here.</p>
+                </div>
+
+                <div class="flex gap-2 pt-3">
+                  <button onclick="saveTermsSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
+                    <i class="ti ti-device-floppy"></i> Save Terms
                   </button>
                 </div>
               </div>
@@ -2111,6 +2154,59 @@ setTimeout(() => {
 let _isSubActive = false;
 
     let _appPin = '1234'; 
+    // ==========================================
+    // DEFAULT TERMS & CONDITIONS TEMPLATE
+    // Studios can fully edit or replace this from Account > Terms.
+    // Kept as a plain, numbered, easy-to-scan template so it reads
+    // comfortably in a scrollable box on the client's booking page.
+    // ==========================================
+    const DEFAULT_TERMS_TEMPLATE = `1. BOOKING CONFIRMATION & ADVANCE
+Your date is held tentatively upon submitting this request and is confirmed only once the studio approves it and the advance/booking amount (as communicated separately) is received. Advances are non-transferable to another date once the event date is within 30 days of the shoot.
+
+2. PAYMENT SCHEDULE
+The remaining balance is payable as per the schedule shared by the studio (commonly: 50% advance on confirmation, remaining balance on or before the day of the event, unless agreed otherwise in writing). Deliverables/final edits will be released only after the full and final payment is received.
+
+3. CANCELLATION & REFUND POLICY
+Cancellations made more than 30 days before the event date: advance amount is refundable after deducting a nominal processing fee. Cancellations within 30 days of the event: advance amount is non-refundable, as the date has already been blocked and other bookings for that date declined. No refunds will be issued once the shoot has taken place.
+
+4. RESCHEDULING
+One reschedule request is accommodated free of charge, subject to the studio's availability on the new date, provided it is requested at least 15 days in advance. Rescheduling requests within 15 days of the event may attract a rescheduling fee.
+
+5. DELIVERABLES & TIMELINE
+Estimated delivery timelines for edited photos/videos will be communicated at the time of booking and are approximate, not guaranteed to the day — they can vary based on the season, number of ongoing projects, and scope of the assignment. Delays will be communicated proactively wherever possible.
+
+6. RAW FILES & BACKUPS
+Raw/unedited files are not part of standard deliverables unless explicitly agreed and paid for separately. The studio retains backups of shoot data for a limited period (typically up to 90 days) after final delivery, after which files may be archived or removed.
+
+7. COPYRIGHT & USAGE RIGHTS
+The studio retains copyright over all photographs/videos captured. The client receives a license to use delivered media for personal, non-commercial purposes (prints, social media, albums). Commercial use, resale, or use by third parties requires prior written consent from the studio.
+
+8. PORTFOLIO & PROMOTIONAL USE
+Unless the client specifically opts out in writing before the event, the studio may use select images/videos from the shoot for its own portfolio, website, social media, and promotional material.
+
+9. OVERTIME & ADDITIONAL HOURS
+Coverage is provided for the duration agreed at booking. Any extension of hours on the event day, beyond what was originally booked, will be charged additionally at the studio's standard overtime rate, payable on the same day or immediately after.
+
+10. TRAVEL, STAY & OUTSTATION CHARGES
+For locations outside the studio's base city, applicable travel, accommodation, and per-diem charges (if any) are to be borne by the client, as communicated and agreed at the time of booking.
+
+11. FORCE MAJEURE
+The studio shall not be held liable for delays, incomplete coverage, or inability to perform due to circumstances beyond reasonable control — including but not limited to natural disasters, extreme weather, medical emergencies, government restrictions, strikes, or accidents. In such cases, the studio will make reasonable efforts to arrange a substitute photographer/videographer or reschedule at no additional cost.
+
+12. EQUIPMENT & TECHNICAL LIMITATIONS
+While every precaution is taken, the studio is not liable for loss of data due to unforeseeable equipment or media card failure, beyond making all reasonable professional efforts to prevent this. In the rare event of data loss, liability is limited to a refund of fees paid for that specific session.
+
+13. CLIENT RESPONSIBILITIES
+The client agrees to ensure timely access to the venue, cooperation from other vendors/family members for schedule coordination, and to communicate any special requirements, restricted areas, or venue-specific photography rules in advance.
+
+14. LIABILITY
+The studio's total liability under this agreement, for any reason whatsoever, shall not exceed the total amount paid by the client for the specific shoot in question.
+
+15. GOVERNING LAW
+This agreement is governed by the laws of India, and any disputes shall be subject to the jurisdiction of the courts in the studio's registered city of operation, unless otherwise agreed in writing.
+
+By ticking the box and submitting this booking request, you confirm that you have read, understood, and agreed to the above Terms & Conditions and Payment Policy.`;
+
     let _profile = { 
       bizName: '', 
       phone: '',
@@ -2119,7 +2215,9 @@ let _isSubActive = false;
       bank: '',
       theme: 'midnight',
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
-      waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!'
+      waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!',
+      terms: DEFAULT_TERMS_TEMPLATE,
+      requireTerms: true
     };
     let _needsOnboarding = false; // set in loadAll() once the synced profile is known
 
@@ -4583,6 +4681,12 @@ async function toggleBlockDate(dateStr) {
       if (document.getElementById('acc-wa-template-payment')) {
         document.getElementById('acc-wa-template-payment').value = _profile.waTemplatePayment || '';
       }
+      if (document.getElementById('acc-terms')) {
+        document.getElementById('acc-terms').value = _profile.terms || DEFAULT_TERMS_TEMPLATE;
+      }
+      if (document.getElementById('acc-require-terms')) {
+        document.getElementById('acc-require-terms').checked = _profile.requireTerms !== false;
+      }
       
       const heroName = _profile.bizName || 'Your Studio';
       const heroNameEl = document.getElementById('acc-hero-name');
@@ -4671,6 +4775,24 @@ async function toggleBlockDate(dateStr) {
       // this or any other device — until they fill in a business name themselves.
       _profile.onboardingSkipped = true;
       await saveSettingToDB('profile', _profile);
+    }
+
+    // ==========================================
+    // TERMS & CONDITIONS (Account > Terms)
+    // ==========================================
+    function restoreDefaultTerms() {
+      const box = document.getElementById('acc-terms');
+      if (box.value.trim() && box.value.trim() !== DEFAULT_TERMS_TEMPLATE.trim()) {
+        if (!confirm('This will replace your current Terms & Conditions text with the default template. Continue?')) return;
+      }
+      box.value = DEFAULT_TERMS_TEMPLATE;
+    }
+
+    async function saveTermsSettings() {
+      _profile.terms = document.getElementById('acc-terms').value.trim() || DEFAULT_TERMS_TEMPLATE;
+      _profile.requireTerms = document.getElementById('acc-require-terms').checked;
+      await saveSettingToDB('profile', _profile);
+      showToast('Terms & Conditions updated — your booking page will use this from now on.');
     }
 
     async function updatePrivacyPIN() {
