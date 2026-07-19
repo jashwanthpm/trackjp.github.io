@@ -4867,6 +4867,13 @@ async function toggleBlockDate(dateStr) {
             doc.addPage();
             drawHeader();
             yPos = 34;
+            // drawHeader() changes the font size/weight/color to draw the
+            // business name — restore the body's font settings afterward,
+            // otherwise every line after a page break inherits the header's
+            // larger, bold, gold styling instead of the normal body text style.
+            doc.setFontSize(9.5);
+            doc.setFont(undefined, isHeading ? 'bold' : 'normal');
+            doc.setTextColor(...(isHeading ? [178, 138, 70] : [40, 40, 40]));
           }
           doc.text(line, margin, yPos);
           yPos += 5;
