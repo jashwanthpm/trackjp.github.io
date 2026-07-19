@@ -378,8 +378,7 @@
 
         <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4" id="dash-stats"></div>
 
-        <a href="/deep-analysis" target="_blank" rel="noopener" class="w-full text-left relative overflow-hidden bg-gradient-to-r from-[#1a1610] via-[#12100c] to-[#0f0f0f] border border-[#c9a96e]/20 hover:border-[#c9a96e]/40 rounded-xl p-4 md:p-5 flex items-center gap-4 transition group">
-          <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background: radial-gradient(circle at 10% 50%, #c9a96e 0%, transparent 45%);"></div>
+<a href="/deep-analysis" target="_blank" rel="noopener" class="w-full text-left relative overflow-hidden bg-gradient-to-r from-[#1a1610] via-[#12100c] to-[#0f0f0f] border border-[#c9a96e]/20 hover:border-[#c9a96e]/40 rounded-xl p-4 md:p-5 flex items-center gap-4 transition group" id="dash-deep-analysis-card">          <div class="absolute inset-0 opacity-[0.05] pointer-events-none" style="background: radial-gradient(circle at 10% 50%, #c9a96e 0%, transparent 45%);"></div>
           <div class="relative w-10 h-10 flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/25 rounded-full flex items-center justify-center text-[#c9a96e] text-lg group-hover:scale-105 transition">
             <i class="ti ti-sparkles"></i>
           </div>
@@ -1047,6 +1046,22 @@
         <div class="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-blue-500"></div>
       </label>
     </div>
+  </div>
+</div>
+
+<!-- Deep Analysis Toggle -->
+<div class="bg-[#0f0f0f] border border-neutral-900 rounded-xl p-6 mb-5 space-y-4">
+  <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div>
+      <h3 class="text-base font-bold text-white flex items-center gap-2">
+        <i class="ti ti-sparkles text-[#c9a96e]"></i> Deep Analysis Shortcut
+      </h3>
+      <p class="text-xs text-neutral-500 mt-1">Show the Deep Analysis card on your main Dashboard.</p>
+    </div>
+    <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+      <input type="checkbox" id="toggle-deep-analysis" class="sr-only peer" onchange="saveDeepAnalysisToggle()" checked>
+      <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+    </label>
   </div>
 </div>
                 
@@ -2233,7 +2248,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
       waTemplate: 'Hi [Client Name],\nJust confirming our schedule for the [Event] shoot on [Date].\nLooking forward to working with you!',
       waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!',
       terms: DEFAULT_TERMS_TEMPLATE,
-      requireTerms: true
+      requireTerms: true,
+      showDeepAnalysis: true
     };
     let _needsOnboarding = false; // set in loadAll() once the synced profile is known
 
@@ -3299,6 +3315,23 @@ function handleEditEventOther() {
   else wrap.classList.add('hidden');
 }
 
+async function saveDeepAnalysisToggle() {
+  const isDaOn = document.getElementById('toggle-deep-analysis').checked;
+  _profile.showDeepAnalysis = isDaOn;
+  
+  await saveSettingToDB('profile', _profile);
+  
+  const daCard = document.getElementById('dash-deep-analysis-card');
+  if (daCard) {
+    if (isDaOn) {
+      daCard.classList.remove('hidden');
+    } else {
+      daCard.classList.add('hidden');
+    }
+  }
+  showToast('Dashboard layout updated!', 'success');
+}
+    
 // Handle the toggle change
 async function saveEditorToggle() {
   const isEditorOn = document.getElementById('toggle-editor-workspace').checked;
@@ -3944,6 +3977,15 @@ async function deleteEditJob() {
           </div>
         </div>`;
 
+const daCard = document.getElementById('dash-deep-analysis-card');
+if (daCard) {
+  if (_profile.showDeepAnalysis === false) {
+    daCard.classList.add('hidden');
+  } else {
+    daCard.classList.remove('hidden');
+  }
+}
+      
       applyPrivacyUIVisibility();
       renderTopCompanies();
     }
@@ -4722,12 +4764,18 @@ async function toggleBlockDate(dateStr) {
       const integrations = document.getElementById('editor-integrations');
       
       if (_profile.isEditor) {
-         document.getElementById('tab-editing').classList.remove('hidden');
-         if (integrations) integrations.classList.remove('hidden');
-      } else {
-         if (integrations) integrations.classList.add('hidden');
-      }
+       document.getElementById('tab-editing').classList.remove('hidden');
+       if (integrations) integrations.classList.remove('hidden');
+    } else {
+       if (integrations) integrations.classList.add('hidden');
     }
+
+    // Deep Analysis Toggle
+    const daToggle = document.getElementById('toggle-deep-analysis');
+    if (daToggle) {
+      daToggle.checked = _profile.showDeepAnalysis !== false; // Defaults to true if untouched
+    }
+  }
 
     function renderAccountAvatar() {
       const el = document.getElementById('acc-avatar-initial');
