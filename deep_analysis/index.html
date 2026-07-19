@@ -32,6 +32,35 @@
     .card { background:#0f0f0f; border:1px solid #1a1a1a; border-radius:1rem; }
     .fade-in { animation: fadeIn .4s ease both; }
     @keyframes fadeIn { from { opacity:0; transform: translateY(6px); } to { opacity:1; transform: translateY(0); } }
+
+    @media print {
+      /* Hide UI elements that shouldn't be printed */
+      #auth-required, #loading-screen, .no-print, .sticky {
+        display: none !important;
+      }
+      
+      /* Force background to white and text to black for better printing */
+      body {
+        background-color: white !important;
+        color: black !important;
+      }
+      
+      /* Make cards look good on paper */
+      .card {
+        background: white !important;
+        border: 1px solid #e5e5e5 !important;
+        box-shadow: none !important;
+        break-inside: avoid; /* Prevents cards from splitting across pages */
+      }
+
+      /* Override dark mode text colors for print */
+      .text-white, .text-neutral-300, .text-neutral-400 {
+        color: #1a1a1a !important;
+      }
+      .bg-neutral-950, .bg-neutral-900 {
+        background-color: #f5f5f5 !important;
+      }
+    }
   </style>
 </head>
 <body>
@@ -65,9 +94,17 @@
             <p class="text-sm font-bold text-white flex items-center gap-1.5"><i class="ti ti-sparkles text-[#c9a96e] text-base"></i> Deep Analysis</p>
           </div>
         </div>
-        <a href="/app/" class="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400 hover:text-[#c9a96e] transition">
-          <i class="ti ti-arrow-left"></i> Back to Dashboard
-        </a>
+        <div class="flex items-center gap-4">
+          <button id="privacy-toggle" class="text-neutral-400 hover:text-[#c9a96e] transition flex items-center gap-1.5 text-[11px] font-bold no-print">
+            <i id="privacy-icon" class="ti ti-eye"></i> <span class="hidden sm:inline">Privacy</span>
+          </button>
+          <button onclick="window.print()" class="text-neutral-400 hover:text-[#c9a96e] transition flex items-center gap-1.5 text-[11px] font-bold no-print">
+            <i class="ti ti-printer"></i> <span class="hidden sm:inline">Export</span>
+          </button>
+          <a href="/app/" class="flex items-center gap-1.5 text-[11px] font-bold text-neutral-400 hover:text-[#c9a96e] transition no-print">
+            <i class="ti ti-arrow-left"></i> Back to Dashboard
+          </a>
+        </div>
       </div>
     </div>
 
@@ -117,8 +154,8 @@
 
         <!-- Trend chart -->
         <div class="card p-5 fade-in">
-          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-1"><i class="ti ti-chart-line text-[#c9a96e]"></i> Revenue & Bookings — Last 12 Months</h3>
-          <p class="text-[10px] text-neutral-600 mb-4">Bars show revenue booked, line shows number of shoots.</p>
+          <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-1"><i class="ti ti-chart-line text-[#c9a96e]"></i> Revenue, Profit & Bookings — Last 12 Months</h3>
+          <p class="text-[10px] text-neutral-600 mb-4">Bars show gross revenue vs net profit, line shows number of shoots.</p>
           <div class="h-60 md:h-72"><canvas id="da-trend-chart"></canvas></div>
         </div>
 
@@ -142,7 +179,7 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
           <!-- Payment health -->
           <div class="card p-5 fade-in">
             <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-wallet text-[#c9a96e]"></i> Payment Health</h3>
@@ -154,6 +191,13 @@
           <div class="card p-5 fade-in">
             <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-git-branch text-[#c9a96e]"></i> Booking Status</h3>
             <div id="da-booking-status" class="space-y-3"></div>
+          </div>
+
+          <!-- Outstanding Ledger -->
+          <div class="card p-5 fade-in">
+            <h3 class="text-sm font-bold text-white flex items-center gap-2 mb-4"><i class="ti ti-receipt text-[#f87171]"></i> Actionable Ledger</h3>
+            <p class="text-[10px] text-neutral-600 mb-4">Top clients with pending payments.</p>
+            <div id="da-outstanding-ledger" class="space-y-3"></div>
           </div>
         </div>
 
@@ -356,6 +400,9 @@
 
       const totalRevenue = shoots.reduce((a, s) => a + s.amount, 0);
       const totalReceived = shoots.reduce((a, s) => a + daReceived(s), 0);
+      const totalExpense = shoots.reduce((a, s) => a + (s.expense || 0), 0);
+      const netProfit = totalRevenue - totalExpense;
+      const profitMargin = totalRevenue > 0 ? Math.round((netProfit / totalRevenue) * 100) : 0;
       const totalShoots = shoots.length;
       const avgValue = totalShoots ? totalRevenue / totalShoots : 0;
       const collectionRate = totalRevenue ? Math.round((totalReceived / totalRevenue) * 100) : 0;
@@ -366,9 +413,25 @@
       const repeatClients = Object.values(nameCount).filter(c => c > 1).length;
       const repeatRate = uniqueClients ? Math.round((repeatClients / uniqueClients) * 100) : 0;
 
+      let totalLeadDays = 0;
+      let shootsWithLeadTime = 0;
+      shoots.forEach(s => {
+        if (s.created && s.date) {
+          const createdDate = new Date(s.created);
+          const shootDate = new Date(s.date);
+          if (!isNaN(createdDate) && !isNaN(shootDate)) {
+            const diffDays = Math.round((shootDate - createdDate) / 86400000);
+            if (diffDays >= 0) { 
+              totalLeadDays += diffDays;
+              shootsWithLeadTime++;
+            }
+          }
+        }
+      });
+      const avgLeadTime = shootsWithLeadTime > 0 ? Math.round(totalLeadDays / shootsWithLeadTime) : 0;
+
       const firstShootDate = shoots.length ? shoots.reduce((min, s) => s.date < min ? s.date : min, shoots[0].date) : null;
       const activeDays = firstShootDate ? Math.max(1, Math.round((now - new Date(firstShootDate)) / 86400000)) : 0;
-      const uniqueLocations = new Set(shoots.map(s => (s.location || '').trim().toLowerCase()).filter(Boolean)).size;
 
       // ---- Hero insight ----
       const revThisMonth = thisMonthShoots.reduce((a, s) => a + s.amount, 0);
@@ -393,13 +456,13 @@
       // ---- KPI grid ----
       const kpis = [
         { label: 'Total Revenue', value: fmtAmt(totalRevenue), sub: 'All shoots, all time', icon: 'ti-cash', color: '#c9a96e' },
+        { label: 'Net Profit', value: fmtAmt(netProfit), sub: profitMargin + '% overall margin', icon: 'ti-businessplan', color: '#34d399' },
         { label: 'Total Shoots', value: totalShoots, sub: `${uniqueClients} unique client${uniqueClients !== 1 ? 's' : ''}`, icon: 'ti-camera', color: '#c9a96e' },
         { label: 'Avg. Shoot Value', value: fmtAmt(avgValue), sub: 'Per booking, all time', icon: 'ti-report-money', color: '#60a5fa' },
         { label: 'Collection Rate', value: collectionRate + '%', sub: fmtAmt(totalReceived) + ' collected', icon: 'ti-checkbox', color: '#34d399' },
         { label: 'Repeat Clients', value: repeatRate + '%', sub: `${repeatClients} of ${uniqueClients} rebooked`, icon: 'ti-repeat', color: '#a78bfa' },
         { label: 'Outstanding', value: fmtAmt(totalRevenue - totalReceived), sub: 'Yet to be collected', icon: 'ti-alert-circle', color: '#f87171' },
-        { label: 'Locations Covered', value: uniqueLocations, sub: 'Distinct shoot locations', icon: 'ti-map-pin', color: '#22d3ee' },
-        { label: 'Active Since', value: firstShootDate ? `${activeDays}d` : '—', sub: firstShootDate ? `First shoot: ${new Date(firstShootDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}` : 'No shoots yet', icon: 'ti-clock', color: '#fb923c' },
+        { label: 'Avg. Lead Time', value: avgLeadTime ? `${avgLeadTime} days` : '—', sub: 'Average booking notice', icon: 'ti-calendar', color: '#fb923c' },
       ];
       document.getElementById('da-kpi-grid').innerHTML = kpis.map(k => `
         <div class="card p-4 hover:border-neutral-700 transition">
@@ -429,13 +492,18 @@
         growthCard('New Clients', thisMonthShoots.filter(s => nameCount[s.name.trim().toLowerCase()] === 1).length, lastMonthShoots.filter(s => nameCount[s.name.trim().toLowerCase()] === 1).length, false);
 
       // ---- 12-month trend ----
-      const trendLabels = [], trendRevenue = [], trendCounts = [];
+      const trendLabels = [], trendRevenue = [], trendProfit = [], trendCounts = [];
       for (let i = 11; i >= 0; i--) {
         const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
         const key = monthKey(d);
         const monthShoots = shoots.filter(s => s.date.slice(0, 7) === key);
+        
+        const monthRev = monthShoots.reduce((a, s) => a + s.amount, 0);
+        const monthExpense = monthShoots.reduce((a, s) => a + (s.expense || 0), 0);
+        
         trendLabels.push(`${MONTH_NAMES[d.getMonth()]} ${d.getFullYear().toString().slice(2)}`);
-        trendRevenue.push(monthShoots.reduce((a, s) => a + s.amount, 0));
+        trendRevenue.push(monthRev);
+        trendProfit.push(monthRev - monthExpense);
         trendCounts.push(monthShoots.length);
       }
       const trendCtx = document.getElementById('da-trend-chart').getContext('2d');
@@ -444,7 +512,8 @@
         data: {
           labels: trendLabels,
           datasets: [
-            { type: 'bar', label: 'Revenue', data: trendRevenue, backgroundColor: '#c9a96e', borderRadius: 3, barPercentage: 0.6, categoryPercentage: 0.7, yAxisID: 'y' },
+            { type: 'bar', label: 'Revenue', data: trendRevenue, backgroundColor: '#c9a96e', borderRadius: 3, barPercentage: 0.6, yAxisID: 'y' },
+            { type: 'bar', label: 'Net Profit', data: trendProfit, backgroundColor: '#34d399', borderRadius: 3, barPercentage: 0.6, yAxisID: 'y' },
             { type: 'line', label: 'Shoots', data: trendCounts, borderColor: '#60a5fa', backgroundColor: '#60a5fa', pointRadius: 3, pointBackgroundColor: '#60a5fa', tension: 0.35, yAxisID: 'y1' }
           ]
         },
@@ -554,6 +623,22 @@
           <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full rounded-full" style="width:${Math.max(4, Math.round((count / maxStatus) * 100))}%; background:${statusColors[label] || '#a78bfa'}"></div></div>
         </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
 
+      // ---- Actionable Outstanding Ledger ----
+      const outstandingClients = {};
+      shoots.forEach(s => {
+        const owed = s.amount - daReceived(s);
+        if (owed > 0) {
+          const key = s.name.trim() || 'Unknown';
+          outstandingClients[key] = (outstandingClients[key] || 0) + owed;
+        }
+      });
+      const topDebtors = Object.entries(outstandingClients).sort((a, b) => b[1] - a[1]).slice(0, 5);
+      document.getElementById('da-outstanding-ledger').innerHTML = topDebtors.map(([name, owed]) => `
+        <div class="flex items-center justify-between pb-2 border-b border-neutral-900 last:border-0 last:pb-0">
+          <span class="text-xs font-semibold text-white truncate pr-2">${escapeHtml(name)}</span>
+          <span class="text-xs font-bold text-red-400 privacy-target">${fmtAmt(owed)}</span>
+        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No pending payments! 🎉</p>';
+
       // ---- Top clients ----
       const clientTotals = {};
       shoots.forEach(s => {
@@ -564,7 +649,9 @@
       });
       const topClients = Object.entries(clientTotals).sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 8);
       const maxClientRev = topClients.length ? topClients[0][1].revenue : 1;
-      document.getElementById('da-top-clients').innerHTML = topClients.map(([name, d], i) => `
+      document.getElementById('da-top-clients').innerHTML = topClients.map(([name, d], i) => {
+        const ltv = d.revenue / d.count; 
+        return `
         <div class="flex items-center gap-3">
           <span class="w-5 text-[11px] font-bold text-neutral-600">#${i + 1}</span>
           <div class="flex-1 min-w-0">
@@ -572,9 +659,13 @@
               <span class="text-xs font-semibold text-white truncate">${escapeHtml(name)} <span class="text-neutral-600 font-normal">(${d.count} shoot${d.count !== 1 ? 's' : ''})</span></span>
               <span class="text-xs font-bold text-[#c9a96e] privacy-target ml-2 flex-shrink-0">${fmtAmt(d.revenue)}</span>
             </div>
+            <div class="flex items-center justify-between text-[10px] text-neutral-500 mb-1">
+              <span>Avg. LTV: <span class="privacy-target">${fmtAmt(ltv)}</span>/shoot</span>
+            </div>
             <div class="h-1.5 bg-neutral-900 rounded-full overflow-hidden"><div class="h-full bg-[#c9a96e] rounded-full" style="width:${Math.max(4, Math.round((d.revenue / maxClientRev) * 100))}%"></div></div>
           </div>
-        </div>`).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
+        </div>`
+      }).join('') || '<p class="text-xs text-neutral-600 text-center py-6">No shoots yet</p>';
 
       // ---- Top locations ----
       const locTotals = {};
@@ -664,9 +755,26 @@
           <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Completed</p><p class="text-base font-bold text-emerald-400">${completedJobs}</p></div>
           <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3"><p class="text-[10px] uppercase font-bold tracking-widest text-neutral-500 mb-1">Revenue</p><p class="text-base font-bold text-[#c9a96e] privacy-target">${fmtAmt(totalEditRevenue)}</p></div>`;
       }
-
-      // Apply blur to any privacy-target elements if the user had privacy mode on (best-effort; this tab has no toggle of its own yet)
     }
+
+    // ==========================================
+    // PRIVACY TOGGLE LOGIC
+    // ==========================================
+    let isPrivacyMode = false;
+    document.getElementById('privacy-toggle').addEventListener('click', () => {
+      isPrivacyMode = !isPrivacyMode;
+      
+      const icon = document.getElementById('privacy-icon');
+      icon.className = isPrivacyMode ? 'ti ti-eye-off' : 'ti ti-eye';
+      
+      document.querySelectorAll('.privacy-target').forEach(el => {
+        if (isPrivacyMode) {
+          el.classList.add('blur-financial');
+        } else {
+          el.classList.remove('blur-financial');
+        }
+      });
+    });
   </script>
 </body>
 </html>
