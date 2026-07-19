@@ -210,6 +210,9 @@
               <i class="ti ti-file-text text-base"></i> Receipt
             </button>
           </div>
+          <button onclick="toggleTermsModal(true)" class="w-full flex items-center justify-center gap-1.5 text-[10px] text-neutral-500 hover:text-gold font-bold py-3 transition-colors">
+            <i class="ti ti-file-text text-xs"></i> View Terms & Conditions
+          </button>
         </div>
 
       </div>
@@ -272,6 +275,19 @@
     </div>
   </div>
 
+  <div id="terms-modal" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-black/90 backdrop-blur-sm modal-enter" onclick="toggleTermsModal(false)"></div>
+    <div class="bg-surface border border-white/5 rounded-[2rem] p-6 sm:p-8 max-w-lg w-full relative z-10 modal-content-enter max-h-[85vh] flex flex-col">
+      <button onclick="toggleTermsModal(false)" class="absolute top-5 right-5 text-neutral-500 hover:text-white transition-colors">
+        <i class="ti ti-x text-xl"></i>
+      </button>
+      <h3 class="text-sm font-bold text-neutral-300 uppercase tracking-widest mb-4 flex items-center gap-2">
+        <i class="ti ti-file-text text-gold"></i> Terms & Conditions
+      </h3>
+      <div id="terms-modal-content" class="text-[12px] text-neutral-400 leading-relaxed whitespace-pre-wrap overflow-y-auto pr-2 hide-scrollbar"></div>
+    </div>
+  </div>
+
   <script>
     // ==========================================
     // 1. CONFIGURATION
@@ -291,6 +307,35 @@
     let currentRef = '';
     let totals = { billed: 0, paid: 0, expenses: 0, balance: 0 };
     let notifyType = 'full';
+
+    // Same default template used in the studio dashboard and booking page —
+    // shown here only if the studio hasn't customized their own terms yet.
+    const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
+Your date is held tentatively upon submitting a request and is confirmed only once the studio approves it and the advance/booking amount is received.
+
+2. PAYMENT SCHEDULE
+The remaining balance is payable as per the schedule shared by the studio. Deliverables/final edits will be released only after the full and final payment is received.
+
+3. CANCELLATION & REFUND POLICY
+Cancellations made more than 30 days before the event date: advance amount is refundable after deducting a nominal processing fee. Cancellations within 30 days of the event: advance amount is non-refundable.
+
+4. RESCHEDULING
+One reschedule request is accommodated free of charge, subject to availability, provided it is requested at least 15 days in advance.
+
+5. DELIVERABLES & TIMELINE
+Estimated delivery timelines will be communicated at the time of booking and are approximate, not guaranteed to the day.
+
+6. COPYRIGHT & USAGE RIGHTS
+The studio retains copyright over all photographs/videos captured. The client receives a license to use delivered media for personal, non-commercial purposes.
+
+7. OVERTIME & ADDITIONAL HOURS
+Any extension of hours beyond what was booked will be charged additionally at the studio's standard rate.
+
+8. FORCE MAJEURE
+The studio is not liable for delays due to circumstances beyond reasonable control. A substitute or reschedule will be arranged wherever possible.
+
+9. LIABILITY
+The studio's total liability shall not exceed the total amount paid by the client for this specific shoot.`;
 
     const fmtMoney = (val) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(val);
 
@@ -606,6 +651,17 @@
         icon.className = 'ti ti-check text-sm text-success';
         setTimeout(() => { icon.className = 'ti ti-copy text-sm'; }, 2000);
       });
+    }
+
+    function toggleTermsModal(show) {
+      const modal = document.getElementById('terms-modal');
+      if (show) {
+        const profile = (ledgerData && ledgerData.profile) || {};
+        document.getElementById('terms-modal-content').textContent = profile.terms || DEFAULT_TERMS;
+        modal.classList.remove('hidden');
+      } else {
+        modal.classList.add('hidden');
+      }
     }
 
     document.addEventListener('keydown', (e) => {
