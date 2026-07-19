@@ -984,11 +984,15 @@
                   <p class="text-[10px] text-neutral-600">Tip: adjust the advance %, cancellation windows, and delivery timelines to match how you actually work — clients will see exactly what you save here.</p>
                 </div>
 
-                <div class="flex gap-2 pt-3">
+                <div class="flex flex-wrap gap-2 pt-3">
                   <button onclick="saveTermsSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#e6c98a] text-black px-4 py-2 rounded-lg text-xs font-bold transition">
                     <i class="ti ti-device-floppy"></i> Save Terms
                   </button>
+                  <button onclick="downloadTermsPDF()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition border border-neutral-700">
+                    <i class="ti ti-download"></i> Download as PDF
+                  </button>
                 </div>
+                <p class="text-[10px] text-neutral-600 -mt-2">Handy if a client books manually (call/WhatsApp) and you want to send them a copy directly.</p>
               </div>
             </div>
 
@@ -4793,6 +4797,86 @@ async function toggleBlockDate(dateStr) {
       _profile.requireTerms = document.getElementById('acc-require-terms').checked;
       await saveSettingToDB('profile', _profile);
       showToast('Terms & Conditions updated — your booking page will use this from now on.');
+    }
+
+    // Exports whatever is currently saved as a clean, printable PDF —
+    // handy for sending directly to a client who booked manually
+    // (phone/WhatsApp) instead of through the online booking page.
+    function downloadTermsPDF() {
+      const termsText = (document.getElementById('acc-terms')?.value || _profile.terms || DEFAULT_TERMS_TEMPLATE).trim();
+      if (!termsText) {
+        showToast('Nothing to download yet', 'error');
+        return;
+      }
+
+      const { jsPDF } = window.jspdf;
+      const doc = new jsPDF();
+      const pageWidth = doc.internal.pageSize.getWidth();
+      const pageHeight = doc.internal.pageSize.getHeight();
+      const margin = 18;
+      const maxWidth = pageWidth - margin * 2;
+      const bizName = (_profile.bizName || 'My Studio').trim();
+
+      function drawHeader() {
+        doc.setFillColor(15, 15, 15);
+        doc.rect(0, 0, pageWidth, 24, 'F');
+        doc.setDrawColor(201, 169, 110);
+        doc.setLineWidth(0.8);
+        doc.line(0, 24, pageWidth, 24);
+        doc.setFontSize(14);
+        doc.setTextColor(201, 169, 110);
+        doc.setFont(undefined, 'bold');
+        doc.text(bizName.toUpperCase(), margin, 15);
+      }
+
+      drawHeader();
+      let yPos = 34;
+
+      doc.setFontSize(16);
+      doc.setTextColor(20, 20, 20);
+      doc.setFont(undefined, 'bold');
+      doc.text('Terms & Conditions', margin, yPos);
+
+      doc.setFontSize(8);
+      doc.setFont(undefined, 'normal');
+      doc.setTextColor(120, 120, 120);
+      const genDate = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+      doc.text('Generated: ' + genDate, margin, yPos + 6);
+
+      yPos += 12;
+      doc.setDrawColor(220, 220, 220);
+      doc.setLineWidth(0.3);
+      doc.line(margin, yPos, pageWidth - margin, yPos);
+      yPos += 8;
+
+      doc.setFontSize(9.5);
+      doc.setTextColor(40, 40, 40);
+
+      const paragraphs = termsText.split('\n');
+      paragraphs.forEach(para => {
+        if (para.trim() === '') { yPos += 3; return; }
+
+        const isHeading = /^\d+[\.\)]\s/.test(para.trim());
+        doc.setFont(undefined, isHeading ? 'bold' : 'normal');
+        doc.setTextColor(...(isHeading ? [178, 138, 70] : [40, 40, 40]));
+        if (isHeading) yPos += 2;
+
+        const lines = doc.splitTextToSize(para, maxWidth);
+        lines.forEach(line => {
+          if (yPos > pageHeight - margin) {
+            doc.addPage();
+            drawHeader();
+            yPos = 34;
+          }
+          doc.text(line, margin, yPos);
+          yPos += 5;
+        });
+      });
+
+      // Filename: "<Business Name> Terms and Conditions.pdf"
+      const safeName = bizName.replace(/[\\/:*?"<>|]+/g, '').replace(/\s+/g, ' ').trim() || 'My Studio';
+      doc.save(`${safeName} Terms and Conditions.pdf`);
+      showToast('Terms & Conditions downloaded.');
     }
 
     async function updatePrivacyPIN() {
