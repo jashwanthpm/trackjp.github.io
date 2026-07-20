@@ -49,6 +49,23 @@
       box-shadow: 0 10px 40px rgba(0,0,0,0.8);
     }
     .bg-grid { background-image: linear-gradient(to right, rgba(255,255,255,0.03) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.03) 1px, transparent 1px); background-size: 40px 40px; }
+
+    /* Feature card marquee */
+    #features-track { animation: features-scroll 46s linear infinite; }
+    #features-marquee:hover #features-track,
+    #features-track.is-paused { animation-play-state: paused; }
+    .feature-card { width: 270px; }
+    @keyframes features-scroll {
+      from { transform: translateX(0); }
+      to { transform: translateX(-50%); }
+    }
+    @media (max-width: 640px) {
+      #features-track { animation-duration: 30s; }
+      .feature-card { width: 240px; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      #features-track { animation: none; }
+    }
   </style>
 </head>
 <body class="min-h-screen flex flex-col antialiased selection:bg-[#c9a96e] selection:text-black">
@@ -106,59 +123,14 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
         <p class="text-neutral-500 text-base max-w-2xl mx-auto">Nothing it doesn't. Designed to keep your creative workflow organized without the administrative clutter.</p>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        
-        <div onclick="openFeatureModal('ledger')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-emerald-950/40 border border-emerald-900/50 rounded-xl flex items-center justify-center text-emerald-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-wallet"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Smart Financial Ledger</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Automatically calculate gross revenue, isolate your run-costs, and track exactly who owes you money. View partial tranches at a glance.</p>
+      <div class="relative -mx-4 md:-mx-8">
+        <div class="pointer-events-none absolute left-0 top-0 bottom-0 w-16 sm:w-28 z-10 bg-gradient-to-r from-[#080808] to-transparent"></div>
+        <div class="pointer-events-none absolute right-0 top-0 bottom-0 w-16 sm:w-28 z-10 bg-gradient-to-l from-[#080808] to-transparent"></div>
+        <div id="features-marquee" class="overflow-hidden px-4 md:px-8">
+          <div id="features-track" class="flex gap-6 w-max"></div>
         </div>
-        
-        <div onclick="openFeatureModal('whatsapp')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-amber-950/40 border border-amber-900/50 rounded-xl flex items-center justify-center text-[#c9a96e] text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-brand-whatsapp"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">1-Click WhatsApp</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Send beautifully formatted shoot reminders and polite payment requests directly to clients via WhatsApp without typing a word.</p>
-        </div>
-        
-        <div onclick="openFeatureModal('pdf')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-blue-950/40 border border-blue-900/50 rounded-xl flex items-center justify-center text-blue-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-file-type-pdf"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Instant PDF Reports</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Generate branded, multi-page PDF exports of your entire database or filter down to a specific company's ledger in one click.</p>
-        </div>
-        
-        <div onclick="openFeatureModal('privacy')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-red-950/40 border border-red-900/50 rounded-xl flex items-center justify-center text-red-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-eye-off"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Financial Privacy</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Review your schedule safely while on set. Use your 4-digit PIN to instantly blur all sensitive financial data on the main dashboard.</p>
-        </div>
-
-        <div onclick="openFeatureModal('cloud')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-purple-950/40 border border-purple-900/50 rounded-xl flex items-center justify-center text-purple-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-cloud-upload"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Cloud Sync Security</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Your data syncs instantly across devices. Check your schedule whether you are color grading at your desk or out on location.</p>
-        </div>
-
-        <div onclick="openFeatureModal('csv')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-sky-950/40 border border-sky-900/50 rounded-xl flex items-center justify-center text-sky-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-file-spreadsheet"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">CSV Import & Export</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Easily migrate your old spreadsheets into Sakkhi in seconds, or export your full history when it's time to hand off to your accountant.</p>
-        </div>
-
-        <!-- NEW: Magic Booking Links -->
-        <div onclick="openFeatureModal('booking')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-pink-950/40 border border-pink-900/50 rounded-xl flex items-center justify-center text-pink-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-calendar-plus"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Magic Booking Links</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Share your real-time availability with partner studios. Generate unique links that auto-block your busy days to prevent double-booking.</p>
-        </div>
-
-        <!-- NEW: Client Ledger Portal -->
-        <div onclick="openFeatureModal('portal')" class="cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg">
-          <div class="w-14 h-14 bg-indigo-950/40 border border-indigo-900/50 rounded-xl flex items-center justify-center text-indigo-400 text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ti-qrcode"></i></div>
-          <h4 class="text-white font-bold text-lg mb-3">Client Ledger Portal</h4>
-          <p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-3">Send clients a secure, branded link to view their outstanding balance, shoot details, and scan a dynamic UPI QR code to settle dues.</p>
-        </div>
-
       </div>
+
     </div>
   </section>
 
@@ -217,8 +189,9 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
             Stop manually typing out your available dates to studio partners. Generate unique, ultra-short booking links with a built-in smart calendar that automatically blocks your busy days. 
           </p>
           <ul class="space-y-4 pt-4">
-            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-link"></i></div> Generate ultra-short magic booking links.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-link"></i></div> Share one link — clients see only your real, open dates.</li>
             <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-calendar-time"></i></div> Smart half-day/full-day conflict prevention.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-check"></i></div> Every request lands as Pending — Accept or Reject with one tap.</li>
             <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-brand-whatsapp"></i></div> 1-click WhatsApp shoot & payment reminders.</li>
           </ul>
         </div>
@@ -231,24 +204,25 @@ Stop tracking your shoots and payments on messy spreadsheets. Get a clear view o
         </div>
       </div>
 
-      <!-- Feature 4: Financial Analytics -->
+      <!-- Feature 4: Client Ledger Portal -->
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
         <div class="relative group">
           <div class="absolute -inset-4 bg-[#c9a96e]/10 blur-2xl rounded-full opacity-0 group-hover:opacity-100 transition duration-700 pointer-events-none"></div>
           <div class="relative rounded-2xl border border-white/10 p-2 bg-[#0a0a0a]/90 backdrop-blur shadow-2xl">
-            <!-- Take a screenshot of your new chart, name it analytics_chart.jpg and upload to Github! -->
-            <img src="chartss.jpg" onerror="this.src='dashboad.jpg'" alt="Financial Analytics Chart" class="w-full h-auto rounded-xl border border-white/5" />
+            <!-- Take a screenshot of the client ledger portal, name it ledger_portal.jpg and upload to Github! -->
+            <img src="ledgerportalss.jpg" onerror="this.src='dashboad.jpg'" alt="Client Ledger Portal" class="w-full h-auto rounded-xl border border-white/5" />
           </div>
         </div>
         <div class="space-y-6">
-          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Visualize your growth.</h3>
+          <h3 class="text-3xl sm:text-4xl font-bold text-white tracking-tight leading-tight">Give clients their own ledger view.</h3>
           <p class="text-base text-neutral-400 leading-relaxed font-light">
-            Stop guessing how your business is performing. Your dashboard automatically generates beautiful, interactive charts comparing your revenue and run-costs. Pick any custom date range to see exactly where you stand.
+            Share one secure, branded link and skip the "how much do I owe you?" messages entirely. Clients see a live view of their shoot, exactly what's pending, and can settle up on the spot.
           </p>
           <ul class="space-y-4 pt-4">
-            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-chart-bar"></i></div> Interactive, mobile-responsive bar charts.</li>
-            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-calendar-search"></i></div> Filter by custom date ranges.</li>
-            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-device-analytics"></i></div> Instantly syncs with your shoot ledger.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-link"></i></div> One shareable link — no login required for your client.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-wallet"></i></div> Clear breakdown of amount billed, paid, and pending balance.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-receipt"></i></div> Run-costs and expenses factored in automatically.</li>
+            <li class="flex items-center gap-4 text-sm font-medium text-neutral-300"><div class="w-8 h-8 rounded-full bg-[#c9a96e]/10 flex items-center justify-center text-[#c9a96e] border border-[#c9a96e]/20"><i class="ti ti-qrcode"></i></div> Scan-to-pay UPI QR code settles dues instantly.</li>
           </ul>
         </div>
       </div>
@@ -595,53 +569,94 @@ const isCurrentlyActive = currentSub.status === 'active' && daysLeft > 3;
       icon: 'ti-wallet',
       colorClass: 'bg-emerald-950/40 border-emerald-900/50 text-emerald-400',
       title: 'Smart Financial Ledger',
+      blurb: 'Automatically calculate gross revenue, isolate your run-costs, and track exactly who owes you money. View partial tranches at a glance.',
       desc: 'Stop tracking payments in messy spreadsheets. Sakkhi automatically calculates your gross revenue, isolates your run-costs, and tracks exactly who owes you money. View partial payment tranches at a glance and know your exact outstanding balances in real-time.'
     },
     'whatsapp': {
       icon: 'ti-brand-whatsapp',
       colorClass: 'bg-amber-950/40 border-amber-900/50 text-[#c9a96e]',
-      title: '1-Click WhatsApp Prompts',
+      title: '1-Click WhatsApp',
+      blurb: 'Send beautifully formatted shoot reminders and polite payment requests directly to clients via WhatsApp without typing a word.',
       desc: 'Send beautifully formatted shoot reminders and polite payment requests directly to clients via WhatsApp without typing a word. You can customize the templates, which will auto-fill with client names, dates, outstanding amounts, and your bank details.'
     },
     'pdf': {
       icon: 'ti-file-type-pdf',
       colorClass: 'bg-blue-950/40 border-blue-900/50 text-blue-400',
       title: 'Instant PDF Reports',
+      blurb: 'Generate branded, multi-page PDF exports of your entire database or filter down to a specific company\'s ledger in one click.',
       desc: 'Generate branded, multi-page PDF exports of your entire database or filter down to a specific company\'s ledger in one click. Perfect for sharing professional summaries with partner studios or handing off data to your accountant at the end of the month.'
     },
     'privacy': {
       icon: 'ti-eye-off',
       colorClass: 'bg-red-950/40 border-red-900/50 text-red-400',
-      title: 'Financial Privacy Mode',
+      title: 'Financial Privacy',
+      blurb: 'Review your schedule safely while on set. Use your 4-digit PIN to instantly blur all sensitive financial data on the main dashboard.',
       desc: 'Review your schedule safely while on set without clients shoulder-surfing your revenue. Use your custom 4-digit PIN to instantly blur all sensitive financial data on the main dashboard with the click of a single button.'
     },
     'cloud': {
       icon: 'ti-cloud-upload',
       colorClass: 'bg-purple-950/40 border-purple-900/50 text-purple-400',
       title: 'Cloud Sync Security',
+      blurb: 'Your data syncs instantly across devices. Check your schedule whether you are color grading at your desk or out on location.',
       desc: 'Your data syncs instantly across all your devices using enterprise-grade Supabase architecture. Manage your schedule whether you are color grading at your desktop or out on location using your mobile phone.'
     },
     'csv': {
       icon: 'ti-file-spreadsheet',
       colorClass: 'bg-sky-950/40 border-sky-900/50 text-sky-400',
       title: 'CSV Import & Export',
+      blurb: 'Easily migrate your old spreadsheets into Sakkhi in seconds, or export your full history when it\'s time to hand off to your accountant.',
       desc: 'Easily migrate your old spreadsheets into Sakkhi in seconds using our bulk importer. You can also export your full database history to standard CSV formats when it\'s time to perform custom analysis.'
     },
     'booking': {
       icon: 'ti-calendar-plus',
       colorClass: 'bg-pink-950/40 border-pink-900/50 text-pink-400',
       title: 'Magic Booking Links',
-      desc: 'Share your real-time availability with partner studios without the back-and-forth texts. Generate unique, ultra-short links containing a smart calendar that automatically hides your blocked or booked dates to completely eliminate double-booking.'
+      blurb: 'Share your real-time availability with partner studios. Requests land as "Pending" for your review — approve or decline with a single tap.',
+      desc: 'Share your real-time availability with partner studios without the back-and-forth texts. Generate unique, ultra-short links containing a smart calendar that automatically hides your blocked or booked dates. Every request lands in your dashboard as "Needs Approval" — you stay in full control with a one-tap Accept or Reject before anything touches your schedule.'
     },
     'portal': {
       icon: 'ti-qrcode',
       colorClass: 'bg-indigo-950/40 border-indigo-900/50 text-indigo-400',
-      title: 'Client Payment Portals',
+      title: 'Client Ledger Portal',
+      blurb: 'Send clients a secure, branded link to view their outstanding balance, shoot details, and scan a dynamic UPI QR code to settle dues.',
       desc: 'Send clients a secure, beautifully branded web portal to view their shoot history and outstanding balance. From the portal, they can instantly generate a dynamic UPI QR code to scan and settle their exact dues in seconds.'
+    },
+    'terms': {
+      icon: 'ti-file-text',
+      colorClass: 'bg-teal-950/40 border-teal-900/50 text-teal-400',
+      title: 'Custom Terms & Conditions',
+      blurb: 'Attach your own booking & payment policy to every request. Clients must tick to agree before submitting, with a timestamped record kept for you.',
+      desc: 'Add your studio\'s own cancellation, refund, and advance-payment policy once — Sakkhi shows it to every client on your booking link and requires them to explicitly tick a box to agree before they can submit a request. Every acceptance is timestamped and saved with the booking record for your files.'
     }
   };
 
-  // Open Feature Modal Logic
+  // Render the scrolling feature cards (duplicated once for a seamless loop)
+  function renderFeatureCards() {
+    const order = ['ledger','whatsapp','pdf','privacy','cloud','csv','booking','portal','terms'];
+    const track = document.getElementById('features-track');
+    if (!track) return;
+    const cardHtml = order.map(function(key) {
+      const f = featureDetails[key];
+      return '<div onclick="openFeatureModal(\'' + key + '\')" class="feature-card cursor-pointer group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-8 hover:border-[#c9a96e]/30 hover:-translate-y-1 transition-all duration-300 shadow-lg flex-shrink-0">' +
+        '<div class="w-14 h-14 border ' + f.colorClass + ' rounded-xl flex items-center justify-center text-2xl mb-6 group-hover:scale-110 transition-transform"><i class="ti ' + f.icon + '"></i></div>' +
+        '<h4 class="text-white font-bold text-lg mb-3">' + f.title + '</h4>' +
+        '<p class="text-sm text-neutral-400 leading-relaxed font-light line-clamp-4">' + f.blurb + '</p>' +
+      '</div>';
+    }).join('');
+    // Duplicate the set so the CSS animation (translateX -50%) loops seamlessly
+    track.innerHTML = cardHtml + cardHtml;
+
+    // Pause the auto-scroll on touch so mobile users can read/tap a card comfortably
+    let touchPauseTimer;
+    track.addEventListener('touchstart', function() {
+      track.classList.add('is-paused');
+      clearTimeout(touchPauseTimer);
+    }, { passive: true });
+    track.addEventListener('touchend', function() {
+      touchPauseTimer = setTimeout(function() { track.classList.remove('is-paused'); }, 2500);
+    }, { passive: true });
+  }
+  renderFeatureCards();
   window.openFeatureModal = function(key) {
     const feature = featureDetails[key];
     if (!feature) return;
