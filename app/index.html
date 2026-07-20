@@ -55,12 +55,12 @@
     .account-sidebar-item {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-      border-radius: 0.75rem;
+      gap: 0.65rem;
+      padding: 0.6rem 0.85rem;
+      font-size: 0.8125rem;
+      border-radius: 0.5rem;
       cursor: pointer;
-      transition: all 0.25s ease;
+      transition: color 0.2s ease, background-color 0.2s ease;
       border: 1px solid transparent;
       color: #9ca3af;
       white-space: nowrap;
@@ -70,23 +70,13 @@
     .account-sidebar-item:hover {
       color: white;
       background-color: rgba(255,255,255,0.04);
-      border-color: rgba(255,255,255,0.06);
     }
 
     .account-sidebar-item.active {
-      background: linear-gradient(90deg, rgba(201,169,110,0.14), rgba(201,169,110,0.02));
-      border-color: rgba(201,169,110,0.3);
+      background-color: rgba(201,169,110,0.1);
       color: #c9a96e;
       font-weight: 600;
-      box-shadow: inset 2px 0 0 #c9a96e, 0 0 20px rgba(201,169,110,0.06);
-    }
-
-    .account-sidebar-item i {
-      transition: transform 0.25s ease;
-    }
-    .account-sidebar-item:hover i,
-    .account-sidebar-item.active i {
-      transform: scale(1.1);
+      box-shadow: inset 2px 0 0 #c9a96e;
     }
 
     /* Premium icon badges for every Account section header — one CSS rule,
@@ -698,9 +688,9 @@
           </div>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-          <div class="lg:col-span-1">
-            <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-2 md:p-3 flex overflow-x-auto lg:flex-col gap-2 md:space-y-2 sticky top-20 hide-scrollbar shadow-lg" style="scrollbar-width: none;">
+        <div class="grid grid-cols-1 lg:grid-cols-[200px_1fr] gap-5">
+          <div>
+            <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-2 flex overflow-x-auto lg:flex-col gap-1 sticky top-20 hide-scrollbar" style="scrollbar-width: none;">
               <button onclick="switchAccountTab('profile')" class="account-sidebar-item active" data-tab="profile">
                 <i class="ti ti-user text-lg"></i>
                 <span>Profile</span>
@@ -744,10 +734,10 @@
             </div>
           </div>
 
-          <div class="lg:col-span-3 space-y-6">
+          <div class="space-y-4">
             
             <div id="account-profile" class="account-content-section active">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-user text-[#c9a96e]"></i> Profile & Business
@@ -763,7 +753,7 @@
                   </div>
                 </div>
 
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 space-y-3">
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 space-y-2.5">
                   <div class="flex items-center gap-2">
                     <i class="ti ti-login text-[#c9a96e]"></i>
                     <p class="text-xs text-neutral-400 font-semibold">Signed In As</p>
@@ -771,29 +761,31 @@
                   <div class="bg-neutral-900/50 rounded-lg p-3 border border-neutral-800">
                     <p class="text-sm font-bold text-[#c9a96e] break-all" id="account-email-display">Loading account...</p>
                   </div>
-                  <button onclick="logoutConfirm()" class="w-full flex items-center justify-center gap-2 bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-950/50 hover:text-red-300 px-4 py-2.5 rounded-xl text-xs font-bold transition-all duration-300">
+                  <button onclick="logoutConfirm()" class="w-full flex items-center justify-center gap-2 bg-red-950/30 border border-red-900/50 text-red-400 hover:bg-red-950/50 hover:text-red-300 px-4 py-2.5 rounded-lg text-xs font-bold transition-colors">
                     <i class="ti ti-logout"></i> Sign Out
                   </button>
                 </div>
 
                 <div class="space-y-4">
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
-                    <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
-                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Business Name</label>
+                      <input type="text" id="acc-biz-name" placeholder="e.g., Sakkhi Photography" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                    </div>
 
-                  <div class="flex flex-col gap-1.5">
-                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
-                    <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
+                    <div class="flex flex-col gap-1.5">
+                      <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Phone Number</label>
+                      <input type="tel" id="acc-phone" placeholder="+91 00000 00000" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                    </div>
                   </div>
 
                   <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Instagram Handle</label>
-                    <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
+                    <input type="text" id="acc-instagram" placeholder="@yourhandle" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                   </div>
 
-                  <div class="pt-3 flex gap-2">
-                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black px-4 py-2.5 rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+                  <div class="pt-2 flex gap-2">
+                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-4 py-2 rounded-lg text-xs font-bold transition-colors">
                       <i class="ti ti-device-floppy"></i> Save Changes
                     </button>
                   </div>
@@ -802,7 +794,7 @@
             </div>
 
             <div id="account-payment" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-credit-card text-[#c9a96e]"></i> Payment Details
@@ -813,16 +805,16 @@
                 <div class="space-y-4">
                   <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">UPI ID</label>
-                    <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
+                    <input type="text" id="acc-upi" placeholder="yourname@bank" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
                   </div>
 
                   <div class="flex flex-col gap-1.5">
                     <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Bank Details</label>
-                    <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition h-24 resize-none"></textarea>
+                    <textarea id="acc-bank" placeholder="Bank Name: &#10;Account No: &#10;IFSC Code: " class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                   </div>
 
                   <div class="pt-3 flex gap-2">
-                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black px-4 py-2.5 rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+                    <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-4 py-2 rounded-lg text-xs font-bold transition-colors">
                       <i class="ti ti-device-floppy"></i> Save Changes
                     </button>
                   </div>
@@ -831,7 +823,7 @@
             </div>
 
             <div id="account-appearance" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-palette text-[#c9a96e]"></i> UI Theme Selection
@@ -841,7 +833,7 @@
 
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   
-                  <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-2xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0a0a0a]" id="theme-btn-midnight">
+                  <div onclick="setAppTheme('midnight')" class="theme-option cursor-pointer rounded-xl p-1 transition-all ring-2 ring-[#c9a96e] ring-offset-2 ring-offset-[#0d0d0d]" id="theme-btn-midnight">
                     <div class="bg-[#050505] rounded-lg h-24 p-2 flex flex-col gap-2">
                       <div class="w-full h-3 bg-[#0a0a0a] rounded flex justify-between items-center px-1">
                         <div class="w-2 h-2 bg-[#c9a96e] rounded-full"></div>
@@ -854,7 +846,7 @@
                     <p class="text-center text-xs font-bold text-white mt-2">Midnight Studio</p>
                   </div>
 
-                  <div onclick="setAppTheme('boho')" class="theme-option cursor-pointer rounded-2xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0a0a0a]" id="theme-btn-boho">
+                  <div onclick="setAppTheme('boho')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0d0d0d]" id="theme-btn-boho">
                     <div class="bg-[#f9f6f0] rounded-lg h-24 p-2 border border-[#e6dfd5] flex flex-col gap-2">
                       <div class="w-full h-3 bg-[#f2ece4] rounded flex justify-between items-center px-1">
                         <div class="w-2 h-2 bg-[#d4a373] rounded-full"></div>
@@ -867,7 +859,7 @@
                     <p class="text-center text-xs font-bold text-white mt-2">Boho Lounge</p>
                   </div>
 
-                  <div onclick="setAppTheme('minimal')" class="theme-option cursor-pointer rounded-2xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0a0a0a]" id="theme-btn-minimal">
+                  <div onclick="setAppTheme('minimal')" class="theme-option cursor-pointer rounded-xl p-1 transition-all hover:ring-2 hover:ring-neutral-700 hover:ring-offset-2 hover:ring-offset-[#0d0d0d]" id="theme-btn-minimal">
                     <div class="bg-[#ffffff] rounded-lg h-24 p-2 border border-[#e5e7eb] flex flex-col gap-2">
                       <div class="w-full h-3 bg-[#ffffff] rounded flex justify-between items-center px-1">
                         <div class="w-2 h-2 bg-[#111827] rounded-full"></div>
@@ -885,7 +877,7 @@
             </div>
 
             <div id="account-security" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-lock text-amber-500"></i> Financial Privacy PIN
@@ -893,14 +885,14 @@
                   <p class="text-xs text-neutral-500 mt-1">Secure your sensitive financial data</p>
                 </div>
 
-                <div class="bg-amber-950/20 border border-amber-900/30 rounded-xl p-4">
+                <div class="bg-amber-950/20 border border-amber-900/30 rounded-lg p-3.5">
                   <p class="text-xs text-neutral-400">Set a 4-6 digit PIN to protect your ledger and payment information from accidental visibility.</p>
                 </div>
 
                 <div class="space-y-3">
                   <div class="flex gap-2">
-                    <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-amber-500 focus:shadow-[0_0_0_3px_rgba(245,158,11,0.1)] transition text-center tracking-widest"/>
-                    <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-300 border border-neutral-700 hover:-translate-y-0.5">
+                    <input id="acc-pin" type="password" inputmode="numeric" maxlength="6" placeholder="Enter new PIN (4-6 digits)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-amber-500 transition text-center tracking-widest"/>
+                    <button onclick="updatePrivacyPIN()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors border border-neutral-700">
                       <i class="ti ti-check"></i> Update
                     
                     </button>
@@ -929,7 +921,7 @@
                   <div class="space-y-3">
                     <div class="flex gap-2">
                       <input id="new-login-password" type="password" placeholder="New password (min 6 chars)" class="flex-1 bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-emerald-500 focus:shadow-[0_0_0_3px_rgba(16,185,129,0.1)] transition"/>
-                      <button onclick="promptPasswordSecurity()" id="set-pwd-btn" class="flex items-center justify-center min-w-[90px] gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-300 border border-neutral-700 hover:-translate-y-0.5">
+                      <button onclick="promptPasswordSecurity()" id="set-pwd-btn" class="flex items-center justify-center min-w-[90px] gap-2 bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors border border-neutral-700">
                         <i class="ti ti-check"></i> Save
                       </button>
                     </div>
@@ -940,7 +932,7 @@
             
 
             <div id="account-whatsapp" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-brand-whatsapp text-emerald-500"></i> WhatsApp Messages
@@ -948,7 +940,7 @@
                   <p class="text-xs text-neutral-500 mt-1">Customize your communication templates</p>
                 </div>
 
-                <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-3 space-y-2">
+                <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3 space-y-2">
                   <p class="text-xs text-neutral-400 font-semibold">Available placeholders:</p>
                   <div class="flex flex-wrap gap-1.5">
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Client Name]</span>
@@ -964,16 +956,16 @@
 
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
-                  <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition h-24 resize-none"></textarea>
+                  <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                 </div>
 
                 <div class="flex flex-col gap-1.5">
                   <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
-                  <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition h-24 resize-none"></textarea>
+                  <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                 </div>
 
                 <div class="flex gap-2 pt-3">
-                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black px-4 py-2.5 rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+                  <button onclick="saveProfileSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-4 py-2 rounded-lg text-xs font-bold transition-colors">
                     <i class="ti ti-device-floppy"></i> Save Templates
                   </button>
                 </div>
@@ -981,7 +973,7 @@
             </div>
 
             <div id="account-terms" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-file-text text-[#c9a96e]"></i> Terms & Conditions
@@ -989,7 +981,7 @@
                   <p class="text-xs text-neutral-500 mt-1">This is shown to every client on your booking page. They must tick a box confirming they've read and agreed to it before their request can be submitted — so there's always a clear, on-record agreement.</p>
                 </div>
 
-                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-neutral-950/50 border border-neutral-800 rounded-xl p-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5">
                   <div>
                     <h4 class="text-sm font-bold text-neutral-200">Require agreement before booking</h4>
                     <p class="text-[10px] text-neutral-500 mt-0.5">When off, clients can still see these terms but aren't forced to tick the box.</p>
@@ -1007,12 +999,12 @@
                       <i class="ti ti-refresh text-xs"></i> Restore Default Template
                     </button>
                   </div>
-                  <textarea id="acc-terms" class="bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-3 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition h-80 resize-y leading-relaxed"></textarea>
+                  <textarea id="acc-terms" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-3 text-sm text-white outline-none focus:border-[#c9a96e] transition h-80 resize-y leading-relaxed"></textarea>
                   <p class="text-[10px] text-neutral-600">Tip: adjust the advance %, cancellation windows, and delivery timelines to match how you actually work — clients will see exactly what you save here.</p>
                 </div>
 
                 <div class="flex flex-wrap gap-2 pt-3">
-                  <button onclick="saveTermsSettings()" class="flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black px-4 py-2.5 rounded-xl text-xs font-bold shadow-[0_0_15px_rgba(201,169,110,0.15)] hover:shadow-[0_0_25px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300">
+                  <button onclick="saveTermsSettings()" class="flex items-center gap-2 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-4 py-2 rounded-lg text-xs font-bold transition-colors">
                     <i class="ti ti-device-floppy"></i> Save Terms
                   </button>
                   <button onclick="downloadTermsPDF()" class="flex items-center gap-2 bg-neutral-800 hover:bg-neutral-700 text-white px-4 py-2 rounded-lg text-xs font-bold transition border border-neutral-700">
@@ -1027,7 +1019,7 @@
               <div class="space-y-5">
 
                 <!-- Editor Workspace Toggle -->
-<div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 mb-5 space-y-4 shadow-lg">
+<div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 mb-4 space-y-3">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -1066,7 +1058,7 @@
 </div>
 
 <!-- Deep Analysis Toggle -->
-<div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 mb-5 space-y-4 shadow-lg">
+<div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 mb-4 space-y-3">
   <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
     <div>
       <h3 class="text-base font-bold text-white flex items-center gap-2">
@@ -1082,7 +1074,7 @@
 </div>
                 
                 <!-- Studio Companies (Collapsible) -->
-                <details class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl [&_summary::-webkit-details-marker]:hidden shadow-lg" open>
+                <details class="group bg-[#0d0d0d] border border-white/8 rounded-xl [&_summary::-webkit-details-marker]:hidden" open>
                   <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-building text-[#c9a96e]"></i> Studio Companies
@@ -1092,8 +1084,8 @@
                   <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
                     <div id="settings-companies" class="divide-y divide-neutral-900 mb-4"></div>
                     <div class="flex gap-2 mb-4">
-                      <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
-                      <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-300 border border-neutral-700 hover:-translate-y-0.5">Add</button>
+                      <input type="text" id="new-company-input" placeholder="Add new company..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addCompany()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors border border-neutral-700">Add</button>
                     </div>
                     
                     <!-- Disclaimer for the User -->
@@ -1112,7 +1104,7 @@
                 </details>
 
                 <!-- Shoot Locations (Collapsible) -->
-                <details class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl [&_summary::-webkit-details-marker]:hidden shadow-lg">
+                <details class="group bg-[#0d0d0d] border border-white/8 rounded-xl [&_summary::-webkit-details-marker]:hidden">
                   <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-map-pin text-[#c9a96e]"></i> Shoot Locations
@@ -1122,14 +1114,14 @@
                   <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
                     <div id="settings-locations" class="divide-y divide-neutral-900 mb-4"></div>
                     <div class="flex gap-2">
-                      <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
-                      <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-300 border border-neutral-700 hover:-translate-y-0.5">Add</button>
+                      <input type="text" id="new-loc-input" placeholder="Add new location..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addLocation()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors border border-neutral-700">Add</button>
                     </div>
                   </div>
                 </details>
 
                 <!-- Event Categories (Collapsible) -->
-                <details class="group bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl [&_summary::-webkit-details-marker]:hidden shadow-lg">
+                <details class="group bg-[#0d0d0d] border border-white/8 rounded-xl [&_summary::-webkit-details-marker]:hidden">
                   <summary class="flex items-center justify-between p-6 cursor-pointer select-none">
                     <h3 class="text-base font-bold text-white flex items-center gap-2">
                       <i class="ti ti-confetti text-[#c9a96e]"></i> Event Categories
@@ -1139,8 +1131,8 @@
                   <div class="px-6 pb-6 pt-2 border-t border-neutral-800/50 mt-2">
                     <div id="settings-events" class="divide-y divide-neutral-900 mb-4"></div>
                     <div class="flex gap-2">
-                      <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-xl px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] focus:shadow-[0_0_0_3px_rgba(201,169,110,0.08)] transition"/>
-                      <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2.5 rounded-xl transition-all duration-300 border border-neutral-700 hover:-translate-y-0.5">Add</button>
+                      <input type="text" id="new-event-input" placeholder="Add new event..." class="flex-1 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+                      <button onclick="addEvent()" class="bg-neutral-800 hover:bg-neutral-700 text-white font-medium text-xs px-4 py-2 rounded-lg transition-colors border border-neutral-700">Add</button>
                     </div>
                   </div>
                 </details>
@@ -1149,7 +1141,7 @@
             </div>
 
             <div id="account-data" class="account-content-section">
-              <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+              <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
                 <div class="border-b border-neutral-800 pb-4">
                   <h3 class="text-lg font-bold text-white flex items-center gap-2">
                     <i class="ti ti-database text-[#c9a96e]"></i> Data Management
@@ -1158,27 +1150,27 @@
                 </div>
 
                 <div class="space-y-3">
-                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 space-y-3">
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 space-y-2.5">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (PDF)</p>
                       <p class="text-xs text-neutral-500">Download a beautifully formatted, multi-page PDF containing all data points.</p>
                     </div>
-                    <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-xl py-2.5 text-xs font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                    <button onclick="exportAllDataToPDF()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition-colors">
                       <i class="ti ti-file-type-pdf text-lg"></i> Export Full Database (PDF)
                     </button>
                   </div>
 
-                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 space-y-3">
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 space-y-2.5">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Complete Database Export (CSV)</p>
                       <p class="text-xs text-neutral-500">Download a standard spreadsheet CSV file of all your shoot records. Perfect for backup or external analysis.</p>
                     </div>
-                    <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-xl py-2.5 text-xs font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                    <button onclick="exportAllDataToCSV()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg py-2.5 text-xs font-semibold transition-colors">
                       <i class="ti ti-file-spreadsheet text-lg"></i> Export Full Database (CSV)
                     </button>
                   </div>
 
-                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 space-y-3">
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 space-y-2.5">
                     <div class="space-y-2">
                       <div class="flex items-center justify-between w-full">
   <p class="text-xs text-neutral-400 font-semibold">📥 Import Data from CSV</p>
@@ -1197,23 +1189,23 @@
                     <div id="import-status" class="text-xs text-neutral-500 h-5"></div>
                   </div>
 
-                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 space-y-3">
+                  <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 space-y-2.5">
                     <div class="space-y-2">
                       <p class="text-xs text-neutral-400 font-semibold">Cloud Synchronization</p>
                       <p class="text-xs text-neutral-500">Force sync with cloud to ensure all data is up-to-date.</p>
                     </div>
-                    <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-xl py-2.5 text-xs font-semibold transition-all duration-300 hover:-translate-y-0.5">
+                    <button onclick="forceSync()" class="flex items-center gap-2 w-full justify-center bg-neutral-950 border border-neutral-800 text-neutral-300 hover:border-neutral-700 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition-colors">
                       <i class="ti ti-refresh"></i> Force Cloud Sync
                     </button>
                   </div>
-                  <div class="bg-red-950/10 border border-red-900/30 rounded-xl p-4 space-y-3 mt-6">
+                  <div class="bg-red-950/10 border border-red-900/30 rounded-lg p-3.5 space-y-2.5 mt-5">
                 <div class="space-y-2">
                   <p class="text-xs text-red-400 font-semibold flex items-center gap-2">
                     <i class="ti ti-alert-triangle text-base"></i> Danger Zone
                   </p>
                   <p class="text-xs text-neutral-500">Permanently wipe all your shoot records. This action cannot be undone and requires your financial PIN to confirm.</p>
                 </div>
-                <button onclick="promptDeleteAll()" class="flex items-center gap-2 w-full justify-center bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-xl py-2.5 text-xs font-semibold transition-all duration-300">
+                <button onclick="promptDeleteAll()" class="flex items-center gap-2 w-full justify-center bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition-colors">
                   <i class="ti ti-trash"></i> Erase All Database Records
                 </button>
               </div>
@@ -1223,7 +1215,7 @@
 <div id="account-support" class="account-content-section">
   <div class="space-y-6">
     
-    <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+    <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
       <div class="border-b border-neutral-800 pb-4">
         <h3 class="text-lg font-bold text-white flex items-center gap-2">
           <i class="ti ti-headset text-[#c9a96e]"></i> Direct Support
@@ -1232,7 +1224,7 @@
       </div>
 
       <div class="space-y-3">
-        <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 flex items-center justify-between hover:border-neutral-700 transition-all duration-300">
+        <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 flex items-center justify-between hover:border-neutral-700 transition-colors">
           <div>
             <h4 class="text-sm font-bold text-white">Email Support</h4>
             <p class="text-xs text-neutral-500 mt-1">Drop us an email for detailed queries</p>
@@ -1240,7 +1232,7 @@
           <a href="mailto:help@sakkhi.co.in" class="px-4 py-2 bg-neutral-900 hover:bg-neutral-800 text-white border border-neutral-700 text-xs font-bold rounded-lg transition">Email Us</a>
         </div>
         
-        <div class="bg-neutral-950/50 border border-neutral-800 rounded-xl p-4 flex items-center justify-between hover:border-emerald-900/50 transition-all duration-300">
+        <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3.5 flex items-center justify-between hover:border-emerald-900/50 transition-colors">
           <div>
             <h4 class="text-sm font-bold text-white">WhatsApp Support</h4>
             <p class="text-xs text-neutral-500 mt-1">Chat with our support team instantly</p>
@@ -1250,7 +1242,7 @@
       </div>
     </div>
 
-    <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+    <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
       <div class="border-b border-neutral-800 pb-4">
         <h3 class="text-lg font-bold text-white flex items-center gap-2">
           <i class="ti ti-book text-[#c9a96e]"></i> Feature Guide & FAQ
@@ -1259,7 +1251,7 @@
       </div>
 
       <div class="space-y-2">
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-brand-whatsapp text-emerald-500 text-lg"></i> How to send 1-Click WhatsApp Reminders?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1270,7 +1262,7 @@
           </div>
         </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-eye-off text-amber-500 text-lg"></i> What is Financial Privacy Mode?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1281,7 +1273,7 @@
           </div>
         </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-link text-blue-400 text-lg"></i> How do I create Magic Booking Links?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1292,7 +1284,7 @@
           </div>
         </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
   <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
     <div class="flex items-center gap-3"><i class="ti ti-wallet text-indigo-400 text-lg"></i> How do I share Client Ledger Links?</div>
     <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1303,7 +1295,7 @@
   </div>
 </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-calendar-cancel text-red-400 text-lg"></i> How do I block unavailable dates?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1313,7 +1305,7 @@
           </div>
         </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-file-type-pdf text-purple-400 text-lg"></i> How do I generate PDF reports?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1324,7 +1316,7 @@
           </div>
         </details>
 
-        <details class="group bg-neutral-950 border border-neutral-800 rounded-xl cursor-pointer [&_summary::-webkit-details-marker]:hidden hover:border-neutral-700 transition-colors">
+        <details class="group bg-neutral-950 border border-neutral-800 rounded-lg cursor-pointer [&_summary::-webkit-details-marker]:hidden">
           <summary class="flex items-center justify-between p-4 font-semibold text-white text-sm hover:text-[#c9a96e] transition-colors">
             <div class="flex items-center gap-3"><i class="ti ti-chart-bar text-[#c9a96e] text-lg"></i> How do the Analytics charts work?</div>
             <i class="ti ti-chevron-down transition-transform group-open:rotate-180 text-neutral-500"></i>
@@ -1340,7 +1332,7 @@
 </div>
 
 <div id="account-devices" class="account-content-section">
-  <div class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-6 space-y-5 shadow-lg">
+  <div class="bg-[#0d0d0d] border border-white/8 rounded-xl p-5 space-y-4">
     <div class="border-b border-neutral-800 pb-4">
       <h3 class="text-lg font-bold text-white flex items-center gap-2">
         <i class="ti ti-devices text-[#c9a96e]"></i> Logged In Devices
@@ -1362,7 +1354,7 @@
     </div>
 
     <div class="border-t border-neutral-800 pt-5 mt-2">
-      <button onclick="logoutAllOtherDevices()" class="flex items-center justify-center gap-2 w-full bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-xl py-2.5 text-xs font-semibold transition-all duration-300">
+      <button onclick="logoutAllOtherDevices()" class="flex items-center justify-center gap-2 w-full bg-red-950/20 border border-red-900/50 text-red-400 hover:bg-red-900 hover:text-white rounded-lg py-2.5 text-xs font-semibold transition-colors">
         <i class="ti ti-logout"></i> Sign Out of All Other Devices
       </button>
     </div>
