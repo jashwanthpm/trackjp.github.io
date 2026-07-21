@@ -86,7 +86,7 @@
     .modal-content-enter { animation: slideUp 0.3s ease forwards; }
   </style>
 </head>
-<body class="min-h-screen flex flex-col items-center justify-start p-4 pt-8 relative overflow-x-hidden">
+<body class="min-h-screen flex flex-col items-center justify-start p-3 pt-5 sm:p-4 sm:pt-8 relative overflow-x-hidden">
 
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
@@ -114,21 +114,21 @@
   <div id="main-layout" class="hidden w-full max-w-6xl mx-auto relative z-10 opacity-0 transition-opacity duration-700">
     
     <div id="ledger-col" class="w-full shrink-0">
-      <div class="premium-card p-6 sm:p-10">
+      <div class="premium-card p-5 sm:p-10">
         
         <div class="text-center mb-8 relative">
           <div class="absolute inset-0 bg-[#c9a96e] opacity-10 blur-2xl rounded-full w-20 h-20 mx-auto"></div>
           <div class="w-14 h-14 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-gold/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(201,169,110,0.1)] relative z-10">
             <i class="ti ti-wallet text-2xl text-gold"></i>
           </div>
-          <h2 id="client-name" class="text-2xl font-bold text-white tracking-tight"></h2>
+          <h2 id="client-name" class="text-xl sm:text-2xl font-bold text-white tracking-tight"></h2>
           <span id="studio-badge" class="text-[10px] text-gold mt-2 font-bold tracking-widest uppercase bg-gold/10 inline-block px-3 py-1 rounded-full border border-gold/20"></span>
         </div>
 
-        <div class="bg-surface rounded-2xl p-6 mb-6">
+        <div class="bg-surface rounded-2xl p-4 sm:p-6 mb-6">
           <div class="text-center mb-6">
             <p class="text-[10px] uppercase tracking-widest font-bold text-neutral-500 mb-1.5">Pending Balance</p>
-            <div id="pending-balance" class="text-4xl font-bold text-gold tracking-tight"></div>
+            <div id="pending-balance" class="text-3xl sm:text-4xl font-bold text-gold tracking-tight"></div>
           </div>
           
           <div class="h-px bg-white/5 w-full mb-4"></div>
@@ -235,7 +235,7 @@
           <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Detailed Shoot History</h3>
           <div class="h-px bg-white/10 flex-1"></div>
         </div>
-        <p class="text-center text-[10px] text-neutral-600 italic mb-4">Showing active & past 6 months</p>
+        <p class="text-center text-[10px] text-neutral-600 italic mb-4">Pending items first, then active &amp; past 6 months</p>
         <div id="history-list" class="space-y-3 mt-6"></div>
       </div>
 
@@ -517,7 +517,7 @@ The studio's total liability shall not exceed the total amount paid by the clien
       const historyList = document.getElementById('history-list');
       
       let upcomingHtml = '';
-      let historyHtml = '';
+      let historyItems = []; // collected as {isUnsettled, html}, then reordered below
       
       const todayObj = new Date();
       todayObj.setHours(0,0,0,0);
@@ -534,8 +534,8 @@ The studio's total liability shall not exceed the total amount paid by the clien
 
         if (shootDate >= todayObj) {
           upcomingHtml += `
-            <div class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl p-3 flex gap-4 items-center">
-              <div class="w-12 h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
+            <div class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl p-2.5 sm:p-3 flex gap-3 sm:gap-4 items-center">
+              <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
                 <span class="text-sm font-bold text-gold leading-none mb-0.5">${d}</span>
                 <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">${moStr}</span>
               </div>
@@ -584,11 +584,13 @@ The studio's total liability shall not exceed the total amount paid by the clien
             lowerHtml += `</div>`;
           }
 
-          historyHtml += `
-            <div class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl p-4">
-              <div class="flex justify-between items-start gap-4">
+          historyItems.push({
+            isUnsettled,
+            html: `
+            <div class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl p-3 sm:p-4">
+              <div class="flex justify-between items-start gap-3 sm:gap-4">
                 
-                <div class="w-12 h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
+                <div class="w-10 h-10 sm:w-12 sm:h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
                   <span class="text-sm font-bold text-gold leading-none mb-0.5">${d}</span>
                   <span class="text-[8px] uppercase tracking-wider text-neutral-500 font-bold">${moStr}</span>
                 </div>
@@ -607,9 +609,15 @@ The studio's total liability shall not exceed the total amount paid by the clien
               </div>
               ${lowerHtml}
             </div>
-          `;
+          `
+          });
         }
       });
+
+      // Pending payments & pending expenses float to the top; everything else keeps
+      // the same relative (date-wise) order it already had, just pushed below them.
+      historyItems.sort((a, b) => (b.isUnsettled === true) - (a.isUnsettled === true));
+      const historyHtml = historyItems.map(item => item.html).join('');
 
       if (upcomingHtml) {
         document.getElementById('upcoming-container').classList.remove('hidden');
