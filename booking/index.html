@@ -89,7 +89,7 @@
             <input type="hidden" id="event-date" required />
           </div>
 
-          <!-- Session Input (Word 'Session' Removed) -->
+          <!-- Session Input -->
           <div class="flex flex-col gap-2">
             <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Session *</label>
             <select id="event-session" required class="premium-input rounded-xl px-4 py-3 text-sm text-white">
@@ -239,11 +239,10 @@
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
 
-    // Strips the word "Session" dynamically so it always strictly reads "Morning", "Evening", or "Full Day"
-    // even if old data in Supabase currently holds "Morning Session".
+    // Dynamically strips out the word "Session" so it always strictly reads "Morning", "Evening", or "Full Day"
     function formatSessionLabel(session) {
       if (!session) return '';
-      return session.replace(/\s?session/i, '').trim(); 
+      return String(session).replace(/\s?session/i, '').trim(); 
     }
 
     const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
@@ -423,11 +422,12 @@ By ticking the box and submitting this booking request, you confirm that you hav
       try {
         (portal.allShoots || []).forEach(s => {
           if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
-          if (!s.session || s.session === 'Full Day') {
+          
+          const rawSession = s.session || s.Session || s.p_session || null;
+          if (!rawSession || rawSession === 'Full Day') {
             dateStatusMap[s.date].push('Morning', 'Evening', 'Afternoon');
           } else {
-            // Standardize historical entries in memory so the calendar accurately filters them
-            dateStatusMap[s.date].push(s.session.replace(/\s?session/i, '').trim());
+            dateStatusMap[s.date].push(String(rawSession).replace(/\s?session/i, '').trim());
           }
         });
 
@@ -458,8 +458,12 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const bStatus = s.booking_status || s.bookingStatus;
         const isApproved = bStatus === 'confirmed';
         
-        // strictly rely on database value — no forced full day default
-        const sessionText = s.session && s.session.trim() !== '' ? `${formatSessionLabel(s.session)} • ` : '';
+        // This is bulletproof: it dynamically checks for any capitalization/alias of session
+        const rawSessionData = s.session || s.Session || s.p_session || null;
+        let sessionText = '';
+        if (rawSessionData && String(rawSessionData).trim() !== '') {
+          sessionText = `${formatSessionLabel(rawSessionData)} • `;
+        }
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
