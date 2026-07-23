@@ -2259,8 +2259,8 @@ This agreement is governed by the laws of India, and any disputes shall be subje
 
 By ticking the box and submitting this booking request, you confirm that you have read, understood, and agreed to the above Terms & Conditions and Payment Policy.`;
 
-    const DEFAULT_WA_TEMPLATE = 'Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏';
-    const DEFAULT_WA_TEMPLATE_PAYMENT = 'Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏';
+    const DEFAULT_WA_TEMPLATE = 'Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed.\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you!';
+    const DEFAULT_WA_TEMPLATE_PAYMENT = 'Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you!';
 
     let _profile = { 
       bizName: '', 
@@ -6335,6 +6335,7 @@ async function toggleBlockDate(dateStr) {
       // shoots tied to a company/referral partner (that's whose portal it is).
       let bookingLink = '';
       let ledgerLink = '';
+      let linkSyncFailed = false;
       try {
         if (msgTemplate.includes('[Booking Link]') && s.company) {
           setSyncStatus('syncing', 'Syncing Booking Link...');
@@ -6347,12 +6348,36 @@ async function toggleBlockDate(dateStr) {
         if (bookingLink || ledgerLink) setSyncStatus('synced', 'Synced');
       } catch (err) {
         console.error(err);
+        linkSyncFailed = true;
         setSyncStatus('error', 'Link Sync Failed');
       }
 
-      let msg = msgTemplate
-        .replace(/\[Client Name\]/gi, s.name)
-        .replace(/\[Event\]/gi, s.event)
+      // A link is "needed" if the template asks for it. If it's needed but came back
+      // empty, tell the studio owner why (no company on the shoot, or the sync failed)
+      // instead of silently sending the client a message with a missing link.
+      const needsBookingLink = msgTemplate.includes('[Booking Link]');
+      const needsLedgerLink = msgTemplate.includes('[Ledger Link]');
+      if ((needsBookingLink && !bookingLink) || (needsLedgerLink && !ledgerLink)) {
+        if (!s.company) {
+          showToast('This shoot has no company/referral partner set, so no portal link exists for it. Add one in the shoot details, or edit the WhatsApp template to remove the link placeholder.', 'error');
+        } else if (linkSyncFailed) {
+          showToast('Could not sync the portal link right now — please check your connection and try again.', 'error');
+        }
+      }
+
+      // Only drop the exact line holding a placeholder that came back empty — leave
+      // every other line (including intentional blank spacer lines) untouched.
+      let templateLines = msgTemplate.split('\n');
+      if (needsBookingLink && !bookingLink) {
+        templateLines = templateLines.filter(line => line.trim() !== '[Booking Link]');
+      }
+      if (needsLedgerLink && !ledgerLink) {
+        templateLines = templateLines.filter(line => line.trim() !== '[Ledger Link]');
+      }
+
+      let msg = templateLines.join('\n')
+        .replace(/\[Client Name\]/gi, s.name || '')
+        .replace(/\[Event\]/gi, s.event || '')
         .replace(/\[Date\]/gi, dateFormatted)
         .replace(/\[Location\]/gi, s.location || 'TBA')
         .replace(/\[Total Amount\]/gi, fmtAmt(totalAmt))
@@ -6360,14 +6385,12 @@ async function toggleBlockDate(dateStr) {
         .replace(/\[Pending Balance\]/gi, fmtAmt(pendingBal))
         .replace(/\[Payment Details\]/gi, paymentDetailsStr)
         .replace(/\[Booking Link\]/gi, bookingLink)
-        .replace(/\[Ledger Link\]/gi, ledgerLink);
+        .replace(/\[Ledger Link\]/gi, ledgerLink)
+        // Strip any stray replacement characters (garbled/unsupported symbols, e.g.
+        // from a pasted emoji that didn't survive copy-paste) so clients never see
+        // a broken "�" glyph in their message.
+        .replace(/\uFFFD/g, '');
 
-      // If there was no company on this shoot (so no link was generated), drop the
-      // now-empty link line instead of leaving a blank gap in the message.
-      if (!bookingLink && !ledgerLink) {
-        msg = msg.split('\n').filter(line => line.trim() !== '').join('\n');
-      }
-        
       const encoded = encodeURIComponent(msg);
       window.open(`https://wa.me/?text=${encoded}`, '_blank');
     }
