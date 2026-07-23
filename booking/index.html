@@ -123,7 +123,7 @@
         <div class="grid grid-cols-2 gap-4">
           <div class="flex flex-col gap-2">
             <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Event *</label>
-            <select id="event-type" required class="premium-input rounded-xl px-4 py-3 text-sm text-white">
+            <select id="event-type" required onchange="toggleCustomEvent()" class="premium-input rounded-xl px-4 py-3 text-sm text-white">
               <option value="Wedding">Wedding</option>
               <option value="Reception">Reception</option>
               <option value="Pre-Wedding">Pre-Wedding</option>
@@ -135,6 +135,12 @@
             <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Location *</label>
             <input type="text" id="event-location" required placeholder="City or Venue" class="premium-input rounded-xl px-4 py-3 text-sm text-white"/>
           </div>
+        </div>
+
+        <!-- Custom Event Name (shown only when "Other" is selected) -->
+        <div id="custom-event-wrap" class="hidden flex-col gap-2">
+          <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Please Specify Event *</label>
+          <input type="text" id="event-type-custom" placeholder="e.g., Birthday Shoot, Baby Shower" class="premium-input rounded-xl px-4 py-3 text-sm text-white"/>
         </div>
 
         <div class="flex flex-col gap-2">
@@ -243,6 +249,25 @@
     function formatSessionLabel(session) {
       if (!session) return '';
       return String(session).replace(/\s?session/i, '').trim(); 
+    }
+
+    // Shows a free-text field when "Other" is picked as the Event type,
+    // so the client can type in whatever event it actually is.
+    function toggleCustomEvent() {
+      const eventTypeSelect = document.getElementById('event-type');
+      const wrap = document.getElementById('custom-event-wrap');
+      const customInput = document.getElementById('event-type-custom');
+      if (eventTypeSelect.value === 'Other') {
+        wrap.classList.remove('hidden');
+        wrap.classList.add('flex');
+        customInput.required = true;
+        customInput.focus();
+      } else {
+        wrap.classList.add('hidden');
+        wrap.classList.remove('flex');
+        customInput.required = false;
+        customInput.value = '';
+      }
     }
 
     const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
@@ -460,11 +485,19 @@ By ticking the box and submitting this booking request, you confirm that you hav
         
         // This is bulletproof: it dynamically checks for any capitalization/alias of session
         const rawSessionData = s.session || s.Session || s.p_session || null;
-        let sessionText = '';
-        if (rawSessionData && String(rawSessionData).trim() !== '') {
-          sessionText = `${formatSessionLabel(rawSessionData)} • `;
+        const sessionLabel = formatSessionLabel(rawSessionData) || 'Full Day';
+
+        // Colour + icon per session so it reads at a glance
+        let sessionIcon = 'ti-sun-high';
+        let sessionColorClasses = 'text-amber-400 bg-amber-950/30 border-amber-900/40';
+        if (sessionLabel === 'Evening' || sessionLabel === 'Afternoon') {
+          sessionIcon = 'ti-moon-stars';
+          sessionColorClasses = 'text-indigo-300 bg-indigo-950/30 border-indigo-900/40';
+        } else if (sessionLabel === 'Full Day') {
+          sessionIcon = 'ti-clock-hour-9';
+          sessionColorClasses = 'text-[#c9a96e] bg-[#c9a96e]/10 border-[#c9a96e]/30';
         }
-        
+
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
             <div class="w-12 h-12 bg-[#0f0f0f] border border-white/5 rounded-lg flex flex-col items-center justify-center shrink-0">
@@ -473,11 +506,14 @@ By ticking the box and submitting this booking request, you confirm that you hav
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-sm font-bold text-white truncate">${s.name}</div>
-              <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate">
-                ${s.event} • ${sessionText}${s.location || 'TBA'}
+              <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate mb-1.5">
+                ${s.event} • ${s.location || 'TBA'}
               </div>
+              <span class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${sessionColorClasses}">
+                <i class="ti ${sessionIcon} text-[10px]"></i> ${sessionLabel}
+              </span>
             </div>
-            <div class="flex flex-col items-end gap-1">
+            <div class="flex flex-col items-end gap-1 self-start">
               <div class="text-[9px] font-bold uppercase tracking-widest ${isApproved ? 'text-neutral-600 opacity-60' : 'text-neutral-400'}">
                 ${isApproved ? 'Blocked' : 'Pending'}
               </div>
@@ -637,7 +673,19 @@ By ticking the box and submitting this booking request, you confirm that you hav
 
       const clientName = document.getElementById('client-name').value.trim();
       const eventDate = document.getElementById('event-date').value;
-      const eventType = document.getElementById('event-type').value;
+      const eventTypeRaw = document.getElementById('event-type').value;
+      const customEventName = document.getElementById('event-type-custom').value.trim();
+
+      if (eventTypeRaw === 'Other' && !customEventName) {
+        alert('Please specify the event type.');
+        btn.innerHTML = 'Submit Booking Request';
+        btn.disabled = false;
+        btn.classList.remove('opacity-80', 'cursor-not-allowed');
+        document.getElementById('event-type-custom').focus();
+        return;
+      }
+      const eventType = eventTypeRaw === 'Other' ? customEventName : eventTypeRaw;
+
       const eventSession = document.getElementById('event-session').value;
       const eventLocation = document.getElementById('event-location').value.trim();
       const rawNotes = document.getElementById('event-notes').value.trim();
@@ -758,7 +806,14 @@ By ticking the box and submitting this booking request, you confirm that you hav
       document.getElementById('success-details').textContent = '';
 
       document.getElementById('booking-form').reset();
-      
+
+      const customWrap = document.getElementById('custom-event-wrap');
+      customWrap.classList.add('hidden');
+      customWrap.classList.remove('flex');
+      const customInput = document.getElementById('event-type-custom');
+      customInput.required = false;
+      customInput.value = '';
+
       const dateDisplay = document.getElementById('selected-date-display');
       dateDisplay.textContent = 'Select date';
       dateDisplay.classList.remove('text-white');
