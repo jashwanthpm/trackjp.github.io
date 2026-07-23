@@ -952,8 +952,9 @@
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Pending Balance]</span>
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Payment Details]</span>
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Booking Link]</span>
+                    <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Ledger Link]</span>
                   </div>
-                  <p class="text-[10px] text-neutral-600">[Booking Link] auto-fills with that client's own portal link — synced live from Supabase for the shoot's company/referral partner.</p>
+                  <p class="text-[10px] text-neutral-600">[Booking Link] and [Ledger Link] auto-fill with that client's own portal links — synced live from Supabase for the shoot's company/referral partner.</p>
                 </div>
 
                 <div class="flex flex-col gap-1.5">
@@ -2256,7 +2257,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
       bank: '',
       theme: 'midnight',
       waTemplate: 'Hi [Client Name],\n\nYour [Event] shoot on [Date] has been confirmed! ✅\n\nYou can check your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you!',
-      waTemplatePayment: 'Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!',
+      waTemplatePayment: 'Hi [Client Name],\n\nThis is a friendly reminder regarding the pending balance for your [Event] shoot on [Date].\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you!',
       terms: DEFAULT_TERMS_TEMPLATE,
       requireTerms: true,
       showDeepAnalysis: true
@@ -2281,30 +2282,46 @@ By ticking the box and submitting this booking request, you confirm that you hav
 // ==========================================
     // COMPANY LEDGER MAGIC LINKS
     // ==========================================
+    // Deterministic short code per (studio, company) — same pair always reuses the
+    // same ledger link instead of minting a fresh Supabase row every time.
+    async function getOrCreateLedgerLink(companyName) {
+      if (!currentUser || !currentUser.id || !companyName) return null;
+
+      let hash = 0;
+      const str = currentUser.id + companyName + '_ledger';
+      for (let i = 0; i < str.length; i++) {
+        hash = ((hash << 5) - hash) + str.charCodeAt(i);
+        hash |= 0;
+      }
+      const shortCode = Math.abs(hash).toString(36);
+      const dbKey = 'ledger_' + shortCode;
+      const payload = { u: currentUser.id, c: companyName };
+
+      const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
+      if (checkExisting && checkExisting.length > 0) {
+        await sbFetch(`settings?key=eq.${dbKey}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ value: payload, user_id: currentUser.id })
+        });
+      } else {
+        await sbFetch('settings', {
+          method: 'POST',
+          body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
+        });
+      }
+
+      return window.location.origin + '/ledger?ref=' + shortCode;
+    }
+
     async function copyCompanyLedgerLink(companyName) {
       if (!currentUser || !currentUser.id) return;
 
       setSyncStatus('syncing', 'Generating Ledger...');
 
       try {
-        const shortCode = Math.random().toString(36).substr(2, 6);
-        const dbKey = 'ledger_' + shortCode;
-        
-        const payload = { 
-          u: currentUser.id, 
-          c: companyName 
-        };
-
-        await sbFetch('settings', {
-          method: 'POST',
-          body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
-        });
-
+        const magicLink = await getOrCreateLedgerLink(companyName);
         setSyncStatus('synced', 'Link Ready');
 
-        // Added .html to the path to ensure it works properly on GitHub Pages
-        const magicLink = window.location.origin + '/ledger?ref=' + shortCode;
-        
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Ledger Portal link for ${companyName} copied!`, 'success');
         });
@@ -6268,7 +6285,7 @@ async function toggleBlockDate(dateStr) {
       
       let msgTemplate = '';
       if (mode === 'payment') {
-        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\nThis is a friendly reminder regarding the pending balance of [Pending Balance] for your [Event] shoot on [Date].\nTotal Amount: [Total Amount]\nAmount Paid: [Amount Paid]\n\nPlease process the payment to the following details:\n[Payment Details]\n\nThank you!";
+        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\n\nThis is a friendly reminder regarding the pending balance for your [Event] shoot on [Date].\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you!";
       } else {
         msgTemplate = _profile.waTemplate || "Hi [Client Name],\n\nYour [Event] shoot on [Date] has been confirmed! ✅\n\nYou can check your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you!";
       }
@@ -6285,18 +6302,23 @@ async function toggleBlockDate(dateStr) {
         paymentDetailsStr += `\nBank Details:\n${_profile.bank}`;
       }
 
-      // Only fetch/sync a booking link if the message actually needs one, and only
-      // for shoots tied to a company/referral partner (that's whose portal it is).
+      // Only fetch/sync a link if the message actually needs one, and only for
+      // shoots tied to a company/referral partner (that's whose portal it is).
       let bookingLink = '';
-      if (msgTemplate.includes('[Booking Link]') && s.company) {
-        try {
+      let ledgerLink = '';
+      try {
+        if (msgTemplate.includes('[Booking Link]') && s.company) {
           setSyncStatus('syncing', 'Syncing Booking Link...');
           bookingLink = await getOrCreateBookingLink(s.company) || '';
-          setSyncStatus('synced', 'Synced');
-        } catch (err) {
-          console.error(err);
-          setSyncStatus('error', 'Link Sync Failed');
         }
+        if (msgTemplate.includes('[Ledger Link]') && s.company) {
+          setSyncStatus('syncing', 'Syncing Ledger Link...');
+          ledgerLink = await getOrCreateLedgerLink(s.company) || '';
+        }
+        if (bookingLink || ledgerLink) setSyncStatus('synced', 'Synced');
+      } catch (err) {
+        console.error(err);
+        setSyncStatus('error', 'Link Sync Failed');
       }
 
       let msg = msgTemplate
@@ -6308,11 +6330,12 @@ async function toggleBlockDate(dateStr) {
         .replace(/\[Amount Paid\]/gi, fmtAmt(amtPaid))
         .replace(/\[Pending Balance\]/gi, fmtAmt(pendingBal))
         .replace(/\[Payment Details\]/gi, paymentDetailsStr)
-        .replace(/\[Booking Link\]/gi, bookingLink);
+        .replace(/\[Booking Link\]/gi, bookingLink)
+        .replace(/\[Ledger Link\]/gi, ledgerLink);
 
       // If there was no company on this shoot (so no link was generated), drop the
-      // now-empty booking-link line instead of leaving a blank gap in the message.
-      if (!bookingLink) {
+      // now-empty link line instead of leaving a blank gap in the message.
+      if (!bookingLink && !ledgerLink) {
         msg = msg.split('\n').filter(line => line.trim() !== '').join('\n');
       }
         
