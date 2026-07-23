@@ -485,17 +485,9 @@ By ticking the box and submitting this booking request, you confirm that you hav
         
         // This is bulletproof: it dynamically checks for any capitalization/alias of session
         const rawSessionData = s.session || s.Session || s.p_session || null;
-        const sessionLabel = formatSessionLabel(rawSessionData) || 'Full Day';
-
-        // Colour + icon per session so it reads at a glance
-        let sessionIcon = 'ti-sun-high';
-        let sessionColorClasses = 'text-amber-400 bg-amber-950/30 border-amber-900/40';
-        if (sessionLabel === 'Evening' || sessionLabel === 'Afternoon') {
-          sessionIcon = 'ti-moon-stars';
-          sessionColorClasses = 'text-indigo-300 bg-indigo-950/30 border-indigo-900/40';
-        } else if (sessionLabel === 'Full Day') {
-          sessionIcon = 'ti-clock-hour-9';
-          sessionColorClasses = 'text-[#c9a96e] bg-[#c9a96e]/10 border-[#c9a96e]/30';
+        let sessionText = '';
+        if (rawSessionData && String(rawSessionData).trim() !== '') {
+          sessionText = `${formatSessionLabel(rawSessionData)} • `;
         }
 
         html += `
@@ -506,14 +498,11 @@ By ticking the box and submitting this booking request, you confirm that you hav
             </div>
             <div class="min-w-0 flex-1">
               <div class="text-sm font-bold text-white truncate">${s.name}</div>
-              <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate mb-1.5">
-                ${s.event} • ${s.location || 'TBA'}
+              <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate">
+                ${s.event} • ${sessionText}${s.location || 'TBA'}
               </div>
-              <span class="inline-flex items-center gap-1 text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${sessionColorClasses}">
-                <i class="ti ${sessionIcon} text-[10px]"></i> ${sessionLabel}
-              </span>
             </div>
-            <div class="flex flex-col items-end gap-1 self-start">
+            <div class="flex flex-col items-end gap-1">
               <div class="text-[9px] font-bold uppercase tracking-widest ${isApproved ? 'text-neutral-600 opacity-60' : 'text-neutral-400'}">
                 ${isApproved ? 'Blocked' : 'Pending'}
               </div>
