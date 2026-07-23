@@ -89,10 +89,11 @@
             <input type="hidden" id="event-date" required />
           </div>
 
+          <!-- Session Input (Fully Unlocked Now) -->
           <div class="flex flex-col gap-2">
             <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Session *</label>
-            <select id="event-session" required disabled class="premium-input rounded-xl px-4 py-3 text-sm text-white disabled:opacity-40 disabled:cursor-not-allowed">
-              <option value="" disabled selected>Pick a date first</option>
+            <select id="event-session" required class="premium-input rounded-xl px-4 py-3 text-sm text-white">
+              <option value="" disabled selected>Select Session</option>
               <option value="Morning Session">Morning Session</option>
               <option value="Evening Session">Evening Session</option>
               <option value="Full Day">Full Day</option>
@@ -230,27 +231,20 @@
     let whatsappLink = '';
     let studioDisplayName = '';
     let studioPhoneDigits = '';
-    let termsRequired = true; // safe default: require agreement unless the studio explicitly turns it off
+    let termsRequired = true;
 
-    // Calendar & Booking State
     let dateStatusMap = {}; 
-    let currentStudioShoots = []; // Used to track dynamically added shoots client-side without full reload
+    let currentStudioShoots = [];
     let blockedDatesMap = [];
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
 
-    // Turns a stored session value into a short, readable label wherever
-    // it's shown to the client (WhatsApp text, success screen, pending screen).
     function formatSessionLabel(session) {
       if (!session) return '';
       if (session === 'Full Day') return 'Full Day Session';
-      return session; // already "Morning Session" / "Evening Session"
+      return session; 
     }
 
-    // Shown whenever the studio hasn't set (or the portal hasn't yet been
-    // wired to return) their own custom Terms & Conditions text. Mirrors the
-    // default template in the studio dashboard's Account > Terms tab, so an
-    // studio editing their terms there will override this automatically.
     const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
 Your date is held tentatively upon submitting this request and is confirmed only once the studio approves it and the advance/booking amount (as communicated separately) is received.
 
@@ -311,9 +305,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
       if (refCode) {
         try {
           currentRefCode = refCode;
-          // Single secure call — resolves the link code, business name,
-          // subscription status, and availability server-side, without
-          // exposing raw table access to the anon key.
           const portal = await sbRpc('get_booking_portal', { p_ref: refCode });
 
           if (portal) {
@@ -324,7 +315,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
             let displayBizName = portal.bizName || targetUserName;
             const isSubActive = !!portal.isSubActive;
 
-            // ENFORCE SUBSCRIPTION BLOCK (If inactive, show lock screen)
             if (!isSubActive) {
               const errContainer = document.getElementById('error-container');
               errContainer.innerHTML = `
@@ -333,14 +323,12 @@ By ticking the box and submitting this booking request, you confirm that you hav
                 <p class="text-sm text-neutral-500 font-light">Currently not accepting automated bookings. Please contact them directly.</p>
               `;
               errContainer.classList.remove('hidden');
-              return; // Stop loading the booking form completely
+              return; 
             }
 
-            // Update UI with the dynamic business name
             document.getElementById('photographer-name').textContent = `Book with ${displayBizName}`;
             document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
 
-            // WhatsApp quick-message link (used on both success and pending states).
             studioDisplayName = displayBizName;
             if (portal.phone) {
               studioPhoneDigits = String(portal.phone).replace(/[^0-9]/g, '');
@@ -348,7 +336,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
               whatsappLink = `https://wa.me/${studioPhoneDigits}?text=${waText}`;
             }
 
-            // Terms & Conditions setup
             const termsBox = document.getElementById('terms-box');
             if (termsBox) termsBox.textContent = portal.terms || DEFAULT_TERMS;
             termsRequired = portal.requireTerms !== false;
@@ -359,7 +346,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
               if (submitBtn) submitBtn.disabled = false;
             }
 
-            // If this browser already submitted a request for this link
             const pendingRaw = localStorage.getItem(`sakkhi_booking_${refCode}`);
             if (pendingRaw) {
               const pending = JSON.parse(pendingRaw);
@@ -400,7 +386,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
               return;
             }
 
-            // Reveal the form smoothly
             const container = document.getElementById('booking-container');
             container.classList.remove('hidden');
             container.style.opacity = '0';
@@ -421,7 +406,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
         document.getElementById('error-container').classList.remove('hidden');
       }
       
-      // Hide calendar if clicked outside
       document.addEventListener('click', (e) => {
         const cal = document.getElementById('calendar-dropdown');
         const trigger = document.getElementById('calendar-trigger');
@@ -436,7 +420,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
     // ==========================================
     function applyPortalAvailability(portal) {
       try {
-        // Build the date/session availability map from the shoots the RPC returned
         (portal.allShoots || []).forEach(s => {
           if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
           if (!s.session || s.session === 'Full Day') {
@@ -446,12 +429,10 @@ By ticking the box and submitting this booking request, you confirm that you hav
           }
         });
 
-        // Manually blocked dates
         blockedDatesMap = portal.blockedDates || [];
 
         renderCalendarGrid();
 
-        // Update local state for rendering upcoming shoots
         currentStudioShoots = portal.studioShoots || [];
         renderStudioShoots(currentStudioShoots);
 
@@ -472,12 +453,11 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const [y, m, d] = s.date.split('-');
         const monthName = MONTHS[parseInt(m)-1].substring(0,3);
         
-        // Strict check: Database now reliably tells us if it is pending or confirmed
         const bStatus = s.booking_status || s.bookingStatus;
         const isApproved = bStatus === 'confirmed';
         
-        // Format the session string specifically for the upcoming shoots list
-        const sessionString = s.session ? `${formatSessionLabel(s.session)} • ` : '';
+        // Ensure session ALWAYS shows, defaulting to 'Full Day Session' if missing from old data
+        const sessionText = s.session ? formatSessionLabel(s.session) : 'Full Day Session';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
@@ -488,7 +468,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             <div class="min-w-0 flex-1">
               <div class="text-sm font-bold text-white truncate">${s.name}</div>
               <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate">
-                ${s.event} • ${sessionString}${s.location || 'TBA'}
+                ${s.event} • ${sessionText} • ${s.location || 'TBA'}
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
@@ -561,14 +541,12 @@ By ticking the box and submitting this booking request, you confirm that you hav
         let isEveningBooked = bookedSessions.includes('Evening Session') || bookedSessions.includes('Afternoon Session');
         let isFullyBooked = isMorningBooked && isEveningBooked;
 
-        // Apply glows to the dots
         let dotColor = 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'; 
         if (isFullyBooked || isBlocked) dotColor = 'bg-red-500 shadow-[0_0_6px_rgba(239,68,68,0.5)]';
         else if (isMorningBooked || isEveningBooked) dotColor = 'bg-amber-500 shadow-[0_0_6px_rgba(245,158,11,0.5)]';
 
         let buttonClasses = `w-10 h-10 rounded-full flex flex-col items-center justify-center transition-all duration-300 mx-auto group `;
         
-        // Disable the button if past, fully booked, OR manually blocked
         if (isPast || isFullyBooked || isBlocked) {
           buttonClasses += `text-neutral-600 bg-neutral-900/40 cursor-not-allowed ${(isFullyBooked || isBlocked) ? 'opacity-50' : ''}`;
           
@@ -597,17 +575,34 @@ By ticking the box and submitting this booking request, you confirm that you hav
       document.getElementById('selected-date-display').classList.add('text-white');
       
       const sessionSelect = document.getElementById('event-session');
-      sessionSelect.disabled = false;
-      sessionSelect.innerHTML = ''; 
+      const currentSelection = sessionSelect.value; // Store their selection if they made one
       
+      sessionSelect.innerHTML = '<option value="" disabled>Select Session</option>'; 
+      
+      let hasFullDay = false, hasMorning = false, hasEvening = false;
+
       if (!morningBooked && !eveningBooked) {
         sessionSelect.innerHTML += `<option value="Full Day">Full Day</option>`;
+        hasFullDay = true;
       }
       if (!morningBooked) {
         sessionSelect.innerHTML += `<option value="Morning Session">Morning Session</option>`;
+        hasMorning = true;
       }
       if (!eveningBooked) {
         sessionSelect.innerHTML += `<option value="Evening Session">Evening Session</option>`;
+        hasEvening = true;
+      }
+
+      // Restore their selection if it remains valid for this newly selected date
+      if (currentSelection === 'Full Day' && hasFullDay) {
+        sessionSelect.value = 'Full Day';
+      } else if (currentSelection === 'Morning Session' && hasMorning) {
+        sessionSelect.value = 'Morning Session';
+      } else if (currentSelection === 'Evening Session' && hasEvening) {
+        sessionSelect.value = 'Evening Session';
+      } else {
+        sessionSelect.value = ''; // Force pick if their previous choice is booked
       }
 
       document.getElementById('calendar-dropdown').classList.add('hidden');
@@ -624,7 +619,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
     async function submitBooking(e) {
       e.preventDefault();
 
-      // Safety net
       const termsChecked = document.getElementById('terms-agree-checkbox').checked;
       if (termsRequired && !termsChecked) {
         alert('Please tick the box to confirm you agree to the Terms & Conditions before submitting.');
@@ -666,24 +660,20 @@ By ticking the box and submitting this booking request, you confirm that you hav
           throw new Error("Database rejection");
         }
 
-        // Remember locally
         localStorage.setItem(`sakkhi_booking_${currentRefCode}`, JSON.stringify({
           id: result.id, event: eventType, session: eventSession, date: eventDate, sentAt: Date.now()
         }));
 
-        // ADD INSTANT VISUAL UPDATE CLIENT-SIDE
-        // Push the newly successful request to our local shoots list so it renders on the "Submit Another" screen instantly
         currentStudioShoots.push({
-          id: result.id || Date.now(), // Fallback ID if missing
+          id: result.id || Date.now(), 
           name: clientName,
           event: eventType,
           date: eventDate,
           session: eventSession,
           location: eventLocation,
-          booking_status: 'pending' // New submissions are always pending
+          booking_status: 'pending' 
         });
 
-        // Update the calendar state so the session is visibly blocked off next time they open the calendar
         if (!dateStatusMap[eventDate]) dateStatusMap[eventDate] = [];
         if (!eventSession || eventSession === 'Full Day') {
           dateStatusMap[eventDate].push('Morning Session', 'Evening Session', 'Afternoon Session');
@@ -691,17 +681,14 @@ By ticking the box and submitting this booking request, you confirm that you hav
           dateStatusMap[eventDate].push(eventSession);
         }
 
-        // Re-render UI segments seamlessly
         renderCalendarGrid();
         renderStudioShoots(currentStudioShoots);
 
-        // Show summary
         const [sy, sm, sd] = eventDate.split('-');
         const prettyDate = `${sd} ${MONTHS[parseInt(sm) - 1]} ${sy}`;
         document.getElementById('success-details').textContent =
           `${eventType} • ${formatSessionLabel(eventSession)} • ${prettyDate}`;
 
-        // Rebuild WhatsApp link
         const waBtn = document.getElementById('success-whatsapp-btn');
         if (studioPhoneDigits) {
           const detailedWaText = encodeURIComponent(
@@ -721,7 +708,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
           waBtn.classList.add('flex');
         }
 
-        // Smooth transition
         const container = document.getElementById('booking-container');
         const shootsContainer = document.getElementById('company-shoots-container');
         const successContainer = document.getElementById('success-container');
@@ -759,7 +745,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
 
       pendingC.classList.add('hidden');
 
-      // Reset success container
       successC.classList.add('hidden');
       successC.style.transition = 'none';
       successC.style.opacity = '0';
@@ -767,7 +752,6 @@ By ticking the box and submitting this booking request, you confirm that you hav
       document.getElementById('success-whatsapp-btn').classList.add('hidden');
       document.getElementById('success-details').textContent = '';
 
-      // Reset form and visually revert date / session
       document.getElementById('booking-form').reset();
       
       const dateDisplay = document.getElementById('selected-date-display');
@@ -775,9 +759,9 @@ By ticking the box and submitting this booking request, you confirm that you hav
       dateDisplay.classList.remove('text-white');
       
       const sessionSelect = document.getElementById('event-session');
-      sessionSelect.disabled = true;
+      // Completely restore the unlocked initial dropdown
       sessionSelect.innerHTML = `
-        <option value="" disabled selected>Pick a date first</option>
+        <option value="" disabled selected>Select Session</option>
         <option value="Morning Session">Morning Session</option>
         <option value="Evening Session">Evening Session</option>
         <option value="Full Day">Full Day</option>
