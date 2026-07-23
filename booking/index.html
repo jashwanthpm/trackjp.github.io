@@ -89,13 +89,13 @@
             <input type="hidden" id="event-date" required />
           </div>
 
-          <!-- Session Input (Fully Unlocked Now) -->
+          <!-- Session Input (Word 'Session' Removed) -->
           <div class="flex flex-col gap-2">
             <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider ml-1">Session *</label>
             <select id="event-session" required class="premium-input rounded-xl px-4 py-3 text-sm text-white">
-              <option value="" disabled selected>Select Session</option>
-              <option value="Morning Session">Morning Session</option>
-              <option value="Evening Session">Evening Session</option>
+              <option value="" disabled selected>Select</option>
+              <option value="Morning">Morning</option>
+              <option value="Evening">Evening</option>
               <option value="Full Day">Full Day</option>
             </select>
           </div>
@@ -239,10 +239,11 @@
     let calMonth = new Date().getMonth();
     let calYear = new Date().getFullYear();
 
+    // Strips the word "Session" dynamically so it always strictly reads "Morning", "Evening", or "Full Day"
+    // even if old data in Supabase currently holds "Morning Session".
     function formatSessionLabel(session) {
       if (!session) return '';
-      if (session === 'Full Day') return 'Full Day Session';
-      return session; 
+      return session.replace(/\s?session/i, '').trim(); 
     }
 
     const DEFAULT_TERMS = `1. BOOKING CONFIRMATION & ADVANCE
@@ -423,9 +424,10 @@ By ticking the box and submitting this booking request, you confirm that you hav
         (portal.allShoots || []).forEach(s => {
           if (!dateStatusMap[s.date]) dateStatusMap[s.date] = [];
           if (!s.session || s.session === 'Full Day') {
-            dateStatusMap[s.date].push('Morning Session', 'Evening Session', 'Afternoon Session');
+            dateStatusMap[s.date].push('Morning', 'Evening', 'Afternoon');
           } else {
-            dateStatusMap[s.date].push(s.session);
+            // Standardize historical entries in memory so the calendar accurately filters them
+            dateStatusMap[s.date].push(s.session.replace(/\s?session/i, '').trim());
           }
         });
 
@@ -456,8 +458,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const bStatus = s.booking_status || s.bookingStatus;
         const isApproved = bStatus === 'confirmed';
         
-        // Ensure session ALWAYS shows, defaulting to 'Full Day Session' if missing from old data
-        const sessionText = s.session ? formatSessionLabel(s.session) : 'Full Day Session';
+        // strictly rely on database value — no forced full day default
+        const sessionText = s.session ? `${formatSessionLabel(s.session)} • ` : '';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
@@ -468,7 +470,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             <div class="min-w-0 flex-1">
               <div class="text-sm font-bold text-white truncate">${s.name}</div>
               <div class="text-[10px] text-neutral-400 font-medium flex items-center gap-1.5 truncate">
-                ${s.event} • ${sessionText} • ${s.location || 'TBA'}
+                ${s.event} • ${sessionText}${s.location || 'TBA'}
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
@@ -537,8 +539,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const isBlocked = blockedDatesMap.includes(dateStr);
         const bookedSessions = dateStatusMap[dateStr] || [];
         
-        let isMorningBooked = bookedSessions.includes('Morning Session');
-        let isEveningBooked = bookedSessions.includes('Evening Session') || bookedSessions.includes('Afternoon Session');
+        let isMorningBooked = bookedSessions.includes('Morning');
+        let isEveningBooked = bookedSessions.includes('Evening') || bookedSessions.includes('Afternoon');
         let isFullyBooked = isMorningBooked && isEveningBooked;
 
         let dotColor = 'bg-emerald-500 shadow-[0_0_6px_rgba(16,185,129,0.5)]'; 
@@ -575,9 +577,9 @@ By ticking the box and submitting this booking request, you confirm that you hav
       document.getElementById('selected-date-display').classList.add('text-white');
       
       const sessionSelect = document.getElementById('event-session');
-      const currentSelection = sessionSelect.value; // Store their selection if they made one
+      const currentSelection = sessionSelect.value; 
       
-      sessionSelect.innerHTML = '<option value="" disabled>Select Session</option>'; 
+      sessionSelect.innerHTML = '<option value="" disabled>Select</option>'; 
       
       let hasFullDay = false, hasMorning = false, hasEvening = false;
 
@@ -586,23 +588,22 @@ By ticking the box and submitting this booking request, you confirm that you hav
         hasFullDay = true;
       }
       if (!morningBooked) {
-        sessionSelect.innerHTML += `<option value="Morning Session">Morning Session</option>`;
+        sessionSelect.innerHTML += `<option value="Morning">Morning</option>`;
         hasMorning = true;
       }
       if (!eveningBooked) {
-        sessionSelect.innerHTML += `<option value="Evening Session">Evening Session</option>`;
+        sessionSelect.innerHTML += `<option value="Evening">Evening</option>`;
         hasEvening = true;
       }
 
-      // Restore their selection if it remains valid for this newly selected date
       if (currentSelection === 'Full Day' && hasFullDay) {
         sessionSelect.value = 'Full Day';
-      } else if (currentSelection === 'Morning Session' && hasMorning) {
-        sessionSelect.value = 'Morning Session';
-      } else if (currentSelection === 'Evening Session' && hasEvening) {
-        sessionSelect.value = 'Evening Session';
+      } else if (currentSelection === 'Morning' && hasMorning) {
+        sessionSelect.value = 'Morning';
+      } else if (currentSelection === 'Evening' && hasEvening) {
+        sessionSelect.value = 'Evening';
       } else {
-        sessionSelect.value = ''; // Force pick if their previous choice is booked
+        sessionSelect.value = ''; 
       }
 
       document.getElementById('calendar-dropdown').classList.add('hidden');
@@ -648,7 +649,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
           p_client_name: clientName,
           p_date: eventDate,
           p_event: eventType,
-          p_session: eventSession,
+          p_session: eventSession, // Now strictly sends "Morning", "Evening", or "Full Day" to Supabase
           p_location: eventLocation,
           p_notes: notesWithProof
         });
@@ -676,7 +677,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
 
         if (!dateStatusMap[eventDate]) dateStatusMap[eventDate] = [];
         if (!eventSession || eventSession === 'Full Day') {
-          dateStatusMap[eventDate].push('Morning Session', 'Evening Session', 'Afternoon Session');
+          dateStatusMap[eventDate].push('Morning', 'Evening', 'Afternoon');
         } else {
           dateStatusMap[eventDate].push(eventSession);
         }
@@ -759,11 +760,10 @@ By ticking the box and submitting this booking request, you confirm that you hav
       dateDisplay.classList.remove('text-white');
       
       const sessionSelect = document.getElementById('event-session');
-      // Completely restore the unlocked initial dropdown
       sessionSelect.innerHTML = `
-        <option value="" disabled selected>Select Session</option>
-        <option value="Morning Session">Morning Session</option>
-        <option value="Evening Session">Evening Session</option>
+        <option value="" disabled selected>Select</option>
+        <option value="Morning">Morning</option>
+        <option value="Evening">Evening</option>
         <option value="Full Day">Full Day</option>
       `;
 
