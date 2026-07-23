@@ -958,12 +958,22 @@
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Shoot Reminder Template (Before Shoot)</label>
+                    <button onclick="restoreDefaultWaTemplate()" class="text-[10px] font-bold text-neutral-500 hover:text-[#c9a96e] transition flex items-center gap-1">
+                      <i class="ti ti-refresh text-xs"></i> Restore Default
+                    </button>
+                  </div>
                   <textarea id="acc-wa-template" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                 </div>
 
                 <div class="flex flex-col gap-1.5">
-                  <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
+                  <div class="flex items-center justify-between">
+                    <label class="text-[10px] uppercase font-bold text-neutral-400 tracking-wider">Payment Request Template (Pending Balances)</label>
+                    <button onclick="restoreDefaultWaTemplatePayment()" class="text-[10px] font-bold text-neutral-500 hover:text-[#c9a96e] transition flex items-center gap-1">
+                      <i class="ti ti-refresh text-xs"></i> Restore Default
+                    </button>
+                  </div>
                   <textarea id="acc-wa-template-payment" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition h-24 resize-none"></textarea>
                 </div>
 
@@ -2249,6 +2259,9 @@ This agreement is governed by the laws of India, and any disputes shall be subje
 
 By ticking the box and submitting this booking request, you confirm that you have read, understood, and agreed to the above Terms & Conditions and Payment Policy.`;
 
+    const DEFAULT_WA_TEMPLATE = 'Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏';
+    const DEFAULT_WA_TEMPLATE_PAYMENT = 'Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏';
+
     let _profile = { 
       bizName: '', 
       phone: '',
@@ -2256,8 +2269,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
       upi: '',
       bank: '',
       theme: 'midnight',
-      waTemplate: 'Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏',
-      waTemplatePayment: 'Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏',
+      waTemplate: DEFAULT_WA_TEMPLATE,
+      waTemplatePayment: DEFAULT_WA_TEMPLATE_PAYMENT,
       terms: DEFAULT_TERMS_TEMPLATE,
       requireTerms: true,
       showDeepAnalysis: true
@@ -4879,6 +4892,22 @@ async function toggleBlockDate(dateStr) {
       box.value = DEFAULT_TERMS_TEMPLATE;
     }
 
+    function restoreDefaultWaTemplate() {
+      const box = document.getElementById('acc-wa-template');
+      if (box.value.trim() && box.value.trim() !== DEFAULT_WA_TEMPLATE.trim()) {
+        if (!confirm('This will replace your current Shoot Reminder template with the default (including the [Booking Link] placeholder). Continue?')) return;
+      }
+      box.value = DEFAULT_WA_TEMPLATE;
+    }
+
+    function restoreDefaultWaTemplatePayment() {
+      const box = document.getElementById('acc-wa-template-payment');
+      if (box.value.trim() && box.value.trim() !== DEFAULT_WA_TEMPLATE_PAYMENT.trim()) {
+        if (!confirm('This will replace your current Payment Request template with the default (including the [Ledger Link] placeholder). Continue?')) return;
+      }
+      box.value = DEFAULT_WA_TEMPLATE_PAYMENT;
+    }
+
     async function saveTermsSettings() {
       _profile.terms = document.getElementById('acc-terms').value.trim() || DEFAULT_TERMS_TEMPLATE;
       _profile.requireTerms = document.getElementById('acc-require-terms').checked;
@@ -6285,9 +6314,9 @@ async function toggleBlockDate(dateStr) {
       
       let msgTemplate = '';
       if (mode === 'payment') {
-        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏";
+        msgTemplate = _profile.waTemplatePayment || DEFAULT_WA_TEMPLATE_PAYMENT;
       } else {
-        msgTemplate = _profile.waTemplate || "Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏";
+        msgTemplate = _profile.waTemplate || DEFAULT_WA_TEMPLATE;
       }
       
       const dateObj = new Date(s.date + 'T00:00:00');
