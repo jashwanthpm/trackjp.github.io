@@ -2309,21 +2309,28 @@ By ticking the box and submitting this booking request, you confirm that you hav
       const shortCode = Math.abs(hash).toString(36);
       const dbKey = 'ledger_' + shortCode;
       const payload = { u: currentUser.id, c: companyName };
+      const magicLink = window.location.origin + '/ledger?ref=' + shortCode;
 
-      const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
-      if (checkExisting && checkExisting.length > 0) {
-        await sbFetch(`settings?key=eq.${dbKey}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ value: payload, user_id: currentUser.id })
-        });
-      } else {
-        await sbFetch('settings', {
-          method: 'POST',
-          body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
-        });
+      // Same as the booking link: the URL is deterministic and doesn't depend on
+      // this write succeeding, so a flaky sync should never block sharing the link.
+      try {
+        const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
+        if (checkExisting && checkExisting.length > 0) {
+          await sbFetch(`settings?key=eq.${dbKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value: payload, user_id: currentUser.id })
+          });
+        } else {
+          await sbFetch('settings', {
+            method: 'POST',
+            body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
+          });
+        }
+      } catch (err) {
+        console.error('Ledger link background sync failed (link is still shareable, will retry sync next time):', err);
       }
 
-      return window.location.origin + '/ledger?ref=' + shortCode;
+      return magicLink;
     }
 
     async function copyCompanyLedgerLink(companyName) {
@@ -6865,21 +6872,29 @@ async function executeDeleteAll() {
       }
       const shortCode = Math.abs(hash).toString(36);
       const dbKey = 'link_' + shortCode;
+      const magicLink = window.location.origin + '/booking?ref=' + shortCode;
 
-      const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
-      if (checkExisting && checkExisting.length > 0) {
-        await sbFetch(`settings?key=eq.${dbKey}`, {
-          method: 'PATCH',
-          body: JSON.stringify({ value: payload, user_id: currentUser.id })
-        });
-      } else {
-        await sbFetch('settings', {
-          method: 'POST',
-          body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
-        });
+      // The link itself is fully deterministic from (studio, company) and doesn't
+      // depend on this write succeeding — so a flaky connection or a slow response
+      // here should never stop the link from being shared. Sync best-effort only.
+      try {
+        const checkExisting = await sbFetch(`settings?key=eq.${dbKey}&select=key`);
+        if (checkExisting && checkExisting.length > 0) {
+          await sbFetch(`settings?key=eq.${dbKey}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ value: payload, user_id: currentUser.id })
+          });
+        } else {
+          await sbFetch('settings', {
+            method: 'POST',
+            body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
+          });
+        }
+      } catch (err) {
+        console.error('Booking link background sync failed (link is still shareable, will retry sync next time):', err);
       }
 
-      return window.location.origin + '/booking?ref=' + shortCode;
+      return magicLink;
     }
 
     async function copyBookingLink(companyName) {
