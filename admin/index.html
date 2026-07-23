@@ -315,8 +315,66 @@
 
       </div>
 
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
+
+        <!-- Database Storage Usage -->
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden shadow-lg">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500">
+              <i class="ti ti-database text-[#c9a96e] text-sm"></i> Supabase Storage Used
+            </div>
+            <span id="db-storage-badge" class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-neutral-900 text-neutral-500 border border-neutral-800">Checking...</span>
+          </div>
+
+          <div id="db-storage-loaded" class="hidden">
+            <div class="flex items-end justify-between mb-2">
+              <div>
+                <span id="db-storage-used" class="text-2xl font-bold text-white tabular-nums">--</span>
+                <span class="text-sm text-neutral-500"> / 500 MB</span>
+              </div>
+              <span id="db-storage-pct" class="text-sm font-bold text-[#c9a96e] tabular-nums">--%</span>
+            </div>
+            <div class="w-full h-2.5 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800">
+              <div id="db-storage-bar" class="h-full rounded-full bg-[#c9a96e] transition-all duration-500" style="width: 0%;"></div>
+            </div>
+            <p id="db-storage-note" class="text-[10px] text-neutral-600 mt-2">Free tier limit is 500 MB. Upgrade before this fills up.</p>
+          </div>
+
+          <div id="db-storage-setup" class="hidden text-xs text-neutral-500 leading-relaxed">
+            <p class="mb-2">Storage tracking needs a one-time SQL function in Supabase. Run this once in the <span class="text-neutral-300 font-medium">SQL Editor</span>, then reload this page:</p>
+            <pre class="bg-[#050505] border border-neutral-800 rounded-lg p-3 text-[10px] text-emerald-400 overflow-x-auto whitespace-pre-wrap">create or replace function public.get_database_size_mb()
+returns numeric language sql security definer
+set search_path = public as $$
+  select round(pg_database_size(current_database()) / 1048576.0, 2);
+$$;
+grant execute on function public.get_database_size_mb() to authenticated;</pre>
+          </div>
+        </div>
+
+        <!-- Platform Inactivity Tracker -->
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-5 relative overflow-hidden shadow-lg">
+          <div class="flex items-center justify-between mb-4">
+            <div class="flex items-center gap-2 text-[10px] uppercase font-bold tracking-widest text-neutral-500">
+              <i class="ti ti-activity text-blue-400 text-sm"></i> Platform Activity
+            </div>
+            <span id="db-activity-badge" class="px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-neutral-900 text-neutral-500 border border-neutral-800">--</span>
+          </div>
+
+          <div>
+            <span id="db-activity-days" class="text-2xl font-bold text-white tabular-nums">--</span>
+            <p id="db-activity-detail" class="text-xs text-neutral-500 mt-1">Last recorded shoot activity across all studios.</p>
+          </div>
+
+          <div class="w-full h-2.5 bg-neutral-900 rounded-full overflow-hidden border border-neutral-800 mt-4">
+            <div id="db-activity-bar" class="h-full rounded-full bg-blue-500 transition-all duration-500" style="width: 0%;"></div>
+          </div>
+          <p class="text-[10px] text-neutral-600 mt-2">Free-tier Supabase projects can pause around 6-7 days without any activity. Opening this dashboard also counts as activity.</p>
+        </div>
+
+      </div>
+
       <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl shadow-xl overflow-hidden flex flex-col">
-        
+
         <div class="p-5 border-b border-neutral-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0a0a0a]">
           <div>
             <h2 class="text-lg font-bold text-white tracking-wide">Client Database</h2>
@@ -463,6 +521,104 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
     function loadDashboard() {
       document.getElementById('admin-dashboard').classList.remove('hidden');
       fetchAdminData();
+      fetchDatabaseSize();
+    }
+
+    // --- DATABASE STORAGE (Supabase 500MB free-tier tracker) ---
+    async function fetchDatabaseSize() {
+      const badge = document.getElementById('db-storage-badge');
+      const loadedEl = document.getElementById('db-storage-loaded');
+      const setupEl = document.getElementById('db-storage-setup');
+      const STORAGE_LIMIT_MB = 500;
+
+      try {
+        const { data, error } = await supabaseClient.rpc('get_database_size_mb');
+        if (error) throw error;
+
+        const usedMb = Number(data) || 0;
+        const pct = Math.min(100, (usedMb / STORAGE_LIMIT_MB) * 100);
+
+        document.getElementById('db-storage-used').innerText = usedMb.toFixed(1) + ' MB';
+        document.getElementById('db-storage-pct').innerText = pct.toFixed(1) + '%';
+        document.getElementById('db-storage-bar').style.width = pct.toFixed(1) + '%';
+
+        const bar = document.getElementById('db-storage-bar');
+        const note = document.getElementById('db-storage-note');
+        if (pct >= 85) {
+          bar.className = 'h-full rounded-full bg-red-500 transition-all duration-500';
+          badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-red-950/30 text-red-400 border border-red-900/50';
+          badge.innerText = 'Nearly Full';
+          note.innerText = 'Getting close to the 500 MB limit — clean up old data or upgrade your Supabase plan soon.';
+        } else if (pct >= 60) {
+          bar.className = 'h-full rounded-full bg-amber-500 transition-all duration-500';
+          badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-amber-950/30 text-amber-400 border border-amber-900/50';
+          badge.innerText = 'Filling Up';
+          note.innerText = 'Free tier limit is 500 MB. Keep an eye on this as it grows.';
+        } else {
+          bar.className = 'h-full rounded-full bg-[#c9a96e] transition-all duration-500';
+          badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-emerald-950/30 text-emerald-400 border border-emerald-900/50';
+          badge.innerText = 'Healthy';
+          note.innerText = 'Free tier limit is 500 MB. Plenty of headroom right now.';
+        }
+
+        loadedEl.classList.remove('hidden');
+        setupEl.classList.add('hidden');
+      } catch (err) {
+        console.warn('Database size RPC not available yet:', err.message);
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-yellow-950/30 text-yellow-500 border border-yellow-900/50';
+        badge.innerText = 'Setup Needed';
+        loadedEl.classList.add('hidden');
+        setupEl.classList.remove('hidden');
+      }
+    }
+
+    // --- PLATFORM INACTIVITY TRACKER (Supabase free-tier auto-pause guard) ---
+    function renderPlatformActivity(users) {
+      const INACTIVITY_LIMIT_DAYS = 6; // Supabase free tier can pause around this window
+
+      let lastActivity = null;
+      users.forEach(u => {
+        if (u.last_active_shoot) {
+          const d = new Date(u.last_active_shoot);
+          if (!lastActivity || d > lastActivity) lastActivity = d;
+        }
+      });
+
+      const daysEl = document.getElementById('db-activity-days');
+      const detailEl = document.getElementById('db-activity-detail');
+      const badge = document.getElementById('db-activity-badge');
+      const bar = document.getElementById('db-activity-bar');
+
+      if (!lastActivity) {
+        daysEl.innerText = 'No data yet';
+        detailEl.innerText = 'No shoot activity has been recorded across any studio.';
+        badge.innerText = 'Unknown';
+        bar.style.width = '0%';
+        return;
+      }
+
+      const diffDays = Math.floor((Date.now() - lastActivity.getTime()) / (1000 * 60 * 60 * 24));
+      const formatted = lastActivity.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+
+      daysEl.innerText = diffDays === 0 ? 'Today' : diffDays + (diffDays === 1 ? ' day ago' : ' days ago');
+      detailEl.innerText = `Most recent shoot activity: ${formatted}`;
+
+      const pct = Math.min(100, (diffDays / INACTIVITY_LIMIT_DAYS) * 100);
+      bar.style.width = pct + '%';
+
+      if (diffDays >= INACTIVITY_LIMIT_DAYS) {
+        bar.className = 'h-full rounded-full bg-red-500 transition-all duration-500';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-red-950/30 text-red-400 border border-red-900/50';
+        badge.innerText = 'Pause Risk';
+      } else if (diffDays >= INACTIVITY_LIMIT_DAYS - 2) {
+        bar.className = 'h-full rounded-full bg-amber-500 transition-all duration-500';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-amber-950/30 text-amber-400 border border-amber-900/50';
+        badge.innerText = 'Watch Closely';
+      } else {
+        bar.className = 'h-full rounded-full bg-blue-500 transition-all duration-500';
+        badge.className = 'px-2 py-0.5 rounded-md text-[9px] font-bold uppercase tracking-widest bg-emerald-950/30 text-emerald-400 border border-emerald-900/50';
+        badge.innerText = 'Active';
+      }
     }
 
     // --- DATA FETCHING (NEW SECURE VERSION) ---
@@ -529,6 +685,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
       document.getElementById('stat-shoots').innerText = totalShoots.toLocaleString();
       document.getElementById('stat-revenue').innerText = '₹' + totalRev.toLocaleString('en-IN');
 
+      renderPlatformActivity(allUsers);
       renderTable(allUsers);
     }
 
