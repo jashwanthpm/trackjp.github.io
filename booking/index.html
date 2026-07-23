@@ -181,9 +181,11 @@
     <div class="w-20 h-20 bg-emerald-950/40 border border-emerald-900/50 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)]"><i class="ti ti-circle-check"></i></div>
     <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Request Sent!</h2>
     <p class="text-sm text-neutral-400 font-light leading-relaxed">Your booking request has been securely delivered to the studio. You will receive a confirmation shortly.</p>
+    <p id="success-details" class="text-xs text-[#c9a96e] font-semibold tracking-wide mt-3"></p>
     <a id="success-whatsapp-btn" href="#" target="_blank" rel="noopener" class="hidden mt-6 items-center justify-center gap-2 bg-emerald-950/30 border border-emerald-900/40 hover:bg-emerald-950/50 text-emerald-400 font-bold py-3 rounded-xl text-xs transition-all">
       <i class="ti ti-brand-whatsapp text-base"></i> Message on WhatsApp
     </a>
+    <button onclick="startNewBooking()" class="mt-3 w-full bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold py-3 rounded-xl text-xs transition-all">Submit Another Request</button>
   </div>
 
   <!-- Pending Request Container (shown on a repeat visit to this same link) -->
@@ -223,7 +225,17 @@
     let targetUserName = '';
     let currentRefCode = '';
     let whatsappLink = '';
+    let studioDisplayName = '';
+    let studioPhoneDigits = '';
     let termsRequired = true; // safe default: require agreement unless the studio explicitly turns it off
+
+    // Turns a stored session value into a short, readable label wherever
+    // it's shown to the client (WhatsApp text, success screen, pending screen).
+    function formatSessionLabel(session) {
+      if (!session) return '';
+      if (session === 'Full Day') return 'Full Day Session';
+      return session; // already "Morning Session" / "Evening Session"
+    }
 
     // Shown whenever the studio hasn't set (or the portal hasn't yet been
     // wired to return) their own custom Terms & Conditions text. Mirrors the
@@ -324,11 +336,14 @@ By ticking the box and submitting this booking request, you confirm that you hav
             document.getElementById('photographer-name').textContent = `Book with ${displayBizName}`;
             document.getElementById('studio-welcome').textContent = `Exclusive link for ${activeStudio}`;
 
-            // WhatsApp quick-message link (used on both success and pending states)
+            // WhatsApp quick-message link (used on both success and pending states).
+            // A generic fallback is set now; submitBooking() overwrites it with the
+            // actual client name, event, session, and date once the form is sent.
+            studioDisplayName = displayBizName;
             if (portal.phone) {
-              const digitsOnly = String(portal.phone).replace(/[^0-9]/g, '');
+              studioPhoneDigits = String(portal.phone).replace(/[^0-9]/g, '');
               const waText = encodeURIComponent(`Hi ${displayBizName}! I just sent a booking request via ${activeStudio} — looking forward to hearing back from you.`);
-              whatsappLink = `https://wa.me/${digitsOnly}?text=${waText}`;
+              whatsappLink = `https://wa.me/${studioPhoneDigits}?text=${waText}`;
             }
 
             // Terms & Conditions — uses the studio's own custom text once
@@ -365,13 +380,13 @@ By ticking the box and submitting this booking request, you confirm that you hav
                       titleEl.textContent = 'Request Approved';
                       iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
-                      statusTextEl.textContent = `${displayBizName} has approved your ${pending.event} shoot request.`;
+                      statusTextEl.textContent = `${displayBizName} has approved your ${pending.event} shoot request${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''}.`;
                     } else {
                       // This covers both 'pending' and cases where you added it manually in the app
                       titleEl.textContent = 'Pending Approval';
                       iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
-                      statusTextEl.textContent = `Your ${pending.event} request for ${pending.date} is currently being reviewed by ${displayBizName}.`;
+                      statusTextEl.textContent = `Your ${pending.event} request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently being reviewed by ${displayBizName}.`;
                     }
                   // Inside the pendingRaw status check block
             } else {
@@ -379,7 +394,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
               titleEl.textContent = 'Request Pending';
               iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
               iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
-              statusTextEl.textContent = `Your request for ${pending.date} is currently awaiting approval.`;
+              statusTextEl.textContent = `Your request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently awaiting approval.`;
             }
                 } catch (e) { console.error(e); }
               }
@@ -626,6 +641,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
       const clientName = document.getElementById('client-name').value.trim();
       const eventDate = document.getElementById('event-date').value;
       const eventType = document.getElementById('event-type').value;
+      const eventSession = document.getElementById('event-session').value;
+      const eventLocation = document.getElementById('event-location').value.trim();
       const rawNotes = document.getElementById('event-notes').value.trim();
 
       // Record clear, on-record proof of Terms & Conditions agreement, since
@@ -642,8 +659,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
           p_client_name: clientName,
           p_date: eventDate,
           p_event: eventType,
-          p_session: document.getElementById('event-session').value,
-          p_location: document.getElementById('event-location').value.trim(),
+          p_session: eventSession,
+          p_location: eventLocation,
           p_notes: notesWithProof
         });
 
@@ -656,11 +673,32 @@ By ticking the box and submitting this booking request, you confirm that you hav
 
         // Remember this locally so a repeat visit shows status, not a blank form
         localStorage.setItem(`sakkhi_booking_${currentRefCode}`, JSON.stringify({
-          id: result.id, event: eventType, date: eventDate, sentAt: Date.now()
+          id: result.id, event: eventType, session: eventSession, date: eventDate, sentAt: Date.now()
         }));
 
-        // Wire the WhatsApp button for this success screen
+        // Show a quick summary of what was actually submitted, so the client
+        // can double-check it at a glance without digging through the form again.
+        const [sy, sm, sd] = eventDate.split('-');
+        const prettyDate = `${sd} ${MONTHS[parseInt(sm) - 1]} ${sy}`;
+        document.getElementById('success-details').textContent =
+          `${eventType} • ${formatSessionLabel(eventSession)} • ${prettyDate}`;
+
+        // Rebuild the WhatsApp message with the real booking details, so the
+        // studio gets the full picture (client, event, session, date, location)
+        // instead of the generic placeholder text set on page load.
         const waBtn = document.getElementById('success-whatsapp-btn');
+        if (studioPhoneDigits) {
+          const detailedWaText = encodeURIComponent(
+            `Hi ${studioDisplayName}! I just sent a booking request via ${activeStudio}:\n` +
+            `• Name: ${clientName}\n` +
+            `• Event: ${eventType}\n` +
+            `• Session: ${formatSessionLabel(eventSession)}\n` +
+            `• Date: ${prettyDate}\n` +
+            `• Location: ${eventLocation}\n` +
+            `Looking forward to hearing back from you.`
+          );
+          whatsappLink = `https://wa.me/${studioPhoneDigits}?text=${detailedWaText}`;
+        }
         if (whatsappLink) {
           waBtn.href = whatsappLink;
           waBtn.classList.remove('hidden');
@@ -714,6 +752,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
       successC.style.opacity = '0';
       successC.style.transform = 'scale(0.95)';
       document.getElementById('success-whatsapp-btn').classList.add('hidden');
+      document.getElementById('success-details').textContent = '';
 
       document.getElementById('booking-form').reset();
       const btn = document.getElementById('submit-btn');
