@@ -459,7 +459,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const isApproved = bStatus === 'confirmed';
         
         // strictly rely on database value — no forced full day default
-        const sessionText = s.session ? `${formatSessionLabel(s.session)} • ` : '';
+        const sessionText = s.session && s.session.trim() !== '' ? `${formatSessionLabel(s.session)} • ` : '';
         
         html += `
           <div class="bg-[#0a0a0a]/80 border border-white/5 rounded-xl p-3 flex items-center gap-4">
