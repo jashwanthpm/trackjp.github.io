@@ -954,7 +954,7 @@
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Booking Link]</span>
                     <span class="text-[10px] bg-neutral-900 border border-neutral-800 px-2 py-1 rounded-md text-neutral-300">[Ledger Link]</span>
                   </div>
-                  <p class="text-[10px] text-neutral-600">[Booking Link] and [Ledger Link] auto-fill with that client's own portal links — synced live from Supabase for the shoot's company/referral partner.</p>
+                  <p class="text-[10px] text-neutral-600">[Booking Link] and [Ledger Link] auto-fill with that client's own portal link, kept in sync automatically for the shoot's company/referral partner.</p>
                 </div>
 
                 <div class="flex flex-col gap-1.5">
@@ -1908,7 +1908,7 @@ setTimeout(() => {
 
       } catch (error) {
         console.error('Google Auth Error:', error);
-        showToast('Auth error: Please check Supabase Google provider settings.', 'error');
+        showToast('Auth error: Please check your Google sign-in provider settings.', 'error');
       }
     }
     // ==========================================
@@ -2256,8 +2256,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
       upi: '',
       bank: '',
       theme: 'midnight',
-      waTemplate: 'Hi [Client Name],\n\nYour [Event] shoot on [Date] has been confirmed! ✅\n\nYou can check your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you!',
-      waTemplatePayment: 'Hi [Client Name],\n\nThis is a friendly reminder regarding the pending balance for your [Event] shoot on [Date].\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you!',
+      waTemplate: 'Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏',
+      waTemplatePayment: 'Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏',
       terms: DEFAULT_TERMS_TEMPLATE,
       requireTerms: true,
       showDeepAnalysis: true
@@ -6285,9 +6285,9 @@ async function toggleBlockDate(dateStr) {
       
       let msgTemplate = '';
       if (mode === 'payment') {
-        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\n\nThis is a friendly reminder regarding the pending balance for your [Event] shoot on [Date].\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you!";
+        msgTemplate = _profile.waTemplatePayment || "Hi [Client Name],\n\nJust a friendly reminder about the pending balance for your *[Event]* shoot on *[Date]*.\n\nYou can view your full payment details and ledger here:\n[Ledger Link]\n\nThank you! 🙏";
       } else {
-        msgTemplate = _profile.waTemplate || "Hi [Client Name],\n\nYour [Event] shoot on [Date] has been confirmed! ✅\n\nYou can check your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you!";
+        msgTemplate = _profile.waTemplate || "Hi [Client Name],\n\nYour *[Event]* shoot on *[Date]* has been confirmed. ✅\n\nYou can view your booking details and upcoming shoots here:\n[Booking Link]\n\nThank you! 🙏";
       }
       
       const dateObj = new Date(s.date + 'T00:00:00');
