@@ -6318,6 +6318,16 @@ async function toggleBlockDate(dateStr) {
       if (event && event.stopPropagation) event.stopPropagation();
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
+
+      // Open the tab immediately, synchronously, right in response to the tap —
+      // before any awaits. Mobile browsers (iOS Safari especially) only allow
+      // window.open() to succeed as part of the original user gesture; if it
+      // happens after an async network call, it gets silently blocked or opens
+      // blank. We open a blank tab now and redirect it once the message is ready.
+      const waWindow = window.open('', '_blank');
+      if (waWindow) {
+        waWindow.document.write('<!DOCTYPE html><html><head><title>Preparing message…</title><style>body{background:#0a0a0a;color:#c9a96e;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;font-size:14px;}</style></head><body>Preparing your WhatsApp message…</body></html>');
+      }
       
       let msgTemplate = '';
       if (mode === 'payment') {
@@ -6399,7 +6409,13 @@ async function toggleBlockDate(dateStr) {
         .replace(/\uFFFD/g, '');
 
       const encoded = encodeURIComponent(msg);
-      window.open(`https://wa.me/?text=${encoded}`, '_blank');
+      const waUrl = `https://wa.me/?text=${encoded}`;
+      if (waWindow) {
+        waWindow.location.href = waUrl;
+      } else {
+        // Popup was blocked outright — fall back to navigating in the same tab.
+        window.location.href = waUrl;
+      }
     }
 
     async function triggerModalWhatsApp() {
