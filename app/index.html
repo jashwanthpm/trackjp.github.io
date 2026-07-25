@@ -1663,6 +1663,61 @@
     const SUPABASE_URL = 'https://smyupcjfusgduaoxqfvu.supabase.co';
     const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
     
+    // ==========================================
+    // LAUNCH PROMO — "2 MONTHS FREE TRIAL" LINK
+    // ==========================================
+    // Anyone who lands here with ?trial=LAUNCH60 in the URL gets the code
+    // stashed in localStorage (survives the login modal, Google redirect,
+    // and the "check your email to verify" round-trip). The moment they
+    // finish signing in for the first time, redeemTrialPromoIfPending()
+    // calls a server-side Supabase function that validates the code and
+    // grants exactly one 60-day trial per account — see the SQL function
+    // `redeem_trial_promo` for the actual eligibility + one-time check.
+    const TRIAL_PROMO_STORAGE_KEY = 'sakkhi_pending_trial';
+
+    (function captureTrialPromoFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const trialCode = params.get('trial');
+      if (trialCode) {
+        localStorage.setItem(TRIAL_PROMO_STORAGE_KEY, trialCode);
+        // Scrub it from the address bar so it doesn't linger/get re-shared
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState(null, '', cleanUrl);
+      }
+    })();
+
+    async function redeemTrialPromoIfPending() {
+      const code = localStorage.getItem(TRIAL_PROMO_STORAGE_KEY);
+      if (!code || !currentUser || !currentUser.token) return;
+
+      // Always clear it after one attempt — a promo code should never be
+      // retried silently in the background on every future page load.
+      localStorage.removeItem(TRIAL_PROMO_STORAGE_KEY);
+
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/redeem_trial_promo`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'apikey': SUPABASE_KEY,
+            'Authorization': 'Bearer ' + currentUser.token
+          },
+          body: JSON.stringify({ promo_code: code })
+        });
+        const data = await res.json().catch(() => null);
+
+        if (data && data.success) {
+          showToast('🎉 2 months free trial activated! Enjoy Sakkhi.', 'success');
+        } else if (data && data.message) {
+          // Quietly log — e.g. "already has a subscription" for a returning
+          // user isn't an error worth alarming them with.
+          console.info('Trial promo not applied:', data.message);
+        }
+      } catch (e) {
+        console.warn('Trial promo redeem failed', e);
+      }
+    }
+
     const HEADERS = {
       'Content-Type': 'application/json',
       'apikey': SUPABASE_KEY,
@@ -1914,6 +1969,7 @@ setTimeout(() => {
         document.getElementById('main-app').style.display = 'block';
         document.getElementById('loading-screen').classList.remove('hidden');
         
+        await redeemTrialPromoIfPending();
         loadAll();
 
       } catch (error) {
@@ -2035,6 +2091,7 @@ setTimeout(() => {
         document.getElementById('main-app').style.display = 'block';
         document.getElementById('loading-screen').classList.remove('hidden');
         
+        await redeemTrialPromoIfPending();
         loadAll();
 
       } catch (error) {
@@ -2109,7 +2166,7 @@ setTimeout(() => {
     }
     
     // Initialize Auth Logic on page load
-    document.addEventListener('DOMContentLoaded', () => {
+    document.addEventListener('DOMContentLoaded', async () => {
       
       // --- ADMIN OVERRIDE CHECK ---
       const urlParams = new URLSearchParams(window.location.search);
@@ -2176,6 +2233,7 @@ setTimeout(() => {
         // -----------------------------------
 
         document.getElementById('main-app').style.display = 'block';
+        await redeemTrialPromoIfPending();
         loadAll(); 
       } else {
         document.getElementById('loading-screen').classList.add('hidden');
