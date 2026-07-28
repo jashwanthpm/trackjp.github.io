@@ -4212,7 +4212,7 @@ if (daCard) {
         
         <div class="min-w-0 flex-1">
           <div class="text-sm font-semibold text-white truncate">${escapeHtml(s.name)}</div>
-          <div class="text-xs text-neutral-500 truncate mt-0.5">${escapeHtml(s.event)} • ${escapeHtml(s.location) || 'TBA'}</div>
+          <div class="text-xs text-neutral-500 truncate mt-0.5">${escapeHtml(s.event)} • ${escapeHtml(s.location) || 'TBA'}${s.company && s.company.trim() ? ' • ' + escapeHtml(s.company) : ''}</div>
           ${!isApproved ? '<div class="text-[9px] font-bold uppercase tracking-wider text-amber-400 mt-1">Needs Approval</div>' : ''}
         </div>
       </div>
