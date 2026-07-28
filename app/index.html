@@ -4273,6 +4273,29 @@ async function toggleBlockDate(dateStr) {
       showToast(_blockedDates.includes(dateStr) ? 'Date marked as unavailable.' : 'Date is now unblocked.');
     }
     
+    const SHOOT_CHIP_PALETTE = [
+      'bg-blue-500/20 text-blue-300 border-blue-500/40',
+      'bg-purple-500/20 text-purple-300 border-purple-500/40',
+      'bg-emerald-500/20 text-emerald-300 border-emerald-500/40',
+      'bg-amber-500/20 text-amber-300 border-amber-500/40',
+      'bg-pink-500/20 text-pink-300 border-pink-500/40',
+      'bg-cyan-500/20 text-cyan-300 border-cyan-500/40',
+      'bg-red-500/20 text-red-300 border-red-500/40',
+      'bg-indigo-500/20 text-indigo-300 border-indigo-500/40',
+      'bg-lime-500/20 text-lime-300 border-lime-500/40',
+      'bg-orange-500/20 text-orange-300 border-orange-500/40'
+    ];
+
+    function getShootChipColor(label) {
+      const str = String(label || '');
+      let hash = 0;
+      for (let i = 0; i < str.length; i++) {
+        hash = (hash * 31 + str.charCodeAt(i)) | 0;
+      }
+      const idx = Math.abs(hash) % SHOOT_CHIP_PALETTE.length;
+      return SHOOT_CHIP_PALETTE[idx];
+    }
+
     function renderCalendar() {
       const monthLabel = MONTHS[calMonth] + ' ' + calYear;
       document.getElementById('cal-month-label').textContent = monthLabel;
@@ -4350,7 +4373,8 @@ async function toggleBlockDate(dateStr) {
 
       for (let d = 1; d <= daysInMonth; d++) {
         const dateStr = calYear + '-' + String(calMonth + 1).padStart(2, '0') + '-' + String(d).padStart(2, '0');
-        const shootsOnDay = _shoots.filter(s => s.date === dateStr).length;
+        const dayShoots = _shoots.filter(s => s.date === dateStr);
+        const shootsOnDay = dayShoots.length;
         
         // Blocked UI Logic
         const isBlocked = _blockedDates.includes(dateStr);
@@ -4364,14 +4388,28 @@ async function toggleBlockDate(dateStr) {
            isSelectedClass = 'bg-neutral-900 text-neutral-300 hover:bg-neutral-800';
         }
 
-        let innerContent = `<span>${d}</span>`;
+        let innerContent = `<span class="text-[11px] sm:text-sm">${d}</span>`;
         if (isBlocked) {
           innerContent += `<div class="text-[10px] text-red-500/70 mt-0.5 flex justify-center"><i class="ti ti-lock"></i></div>`;
         } else if (shootsOnDay > 0) {
-          innerContent += `<div class="text-[8px] text-neutral-400 mt-0.5">${shootsOnDay}</div>`;
+          const isSelectedDay = dateStr === calSelected;
+          const maxVisible = 2;
+          const visibleShoots = dayShoots.slice(0, maxVisible);
+          const extraCount = shootsOnDay - visibleShoots.length;
+          let chipsHtml = '<div class="mt-0.5 w-full flex flex-col gap-0.5">';
+          visibleShoots.forEach(s => {
+            const label = (s.company && s.company.trim()) ? s.company : s.name;
+            const chipColor = isSelectedDay ? 'bg-black/15 text-black border-black/20' : getShootChipColor(label);
+            chipsHtml += `<div class="w-full truncate text-left text-[8px] sm:text-[9px] leading-tight px-1 py-[1px] rounded border ${chipColor}" title="${escapeHtml(label)}">${escapeHtml(label)}</div>`;
+          });
+          if (extraCount > 0) {
+            chipsHtml += `<div class="w-full truncate text-left text-[8px] sm:text-[9px] leading-tight px-1 ${isSelectedDay ? 'text-black/70' : 'text-neutral-500'}">+${extraCount} more</div>`;
+          }
+          chipsHtml += '</div>';
+          innerContent += chipsHtml;
         }
 
-        html += `<div data-date="${dateStr}" class="p-2 rounded text-sm text-center cursor-pointer transition ${isSelectedClass} ${shootsOnDay > 0 && !isBlocked ? 'border border-[#c9a96e]/50' : 'border border-transparent'}">${innerContent}</div>`;
+        html += `<div data-date="${dateStr}" class="p-1 sm:p-2 rounded text-sm text-left flex flex-col items-start min-h-[52px] sm:min-h-[72px] cursor-pointer transition ${isSelectedClass} ${shootsOnDay > 0 && !isBlocked ? 'border border-[#c9a96e]/50' : 'border border-transparent'}">${innerContent}</div>`;
       }
 
       grid.innerHTML = html;
