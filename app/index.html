@@ -6415,16 +6415,18 @@ async function toggleBlockDate(dateStr) {
       const s = _shoots.find(x => x.id === id);
       if (!s) return;
 
-      // Open the tab immediately, synchronously, right in response to the tap —
-      // before any awaits. Mobile browsers (iOS Safari especially) only allow
-      // window.open() to succeed as part of the original user gesture; if it
-      // happens after an async network call, it gets silently blocked or opens
-      // blank. We open a blank tab now and redirect it once the message is ready.
-      const waWindow = window.open('', '_blank');
-      if (waWindow) {
-        waWindow.document.write('<!DOCTYPE html><html><head><title>Preparing message…</title><style>body{background:#0a0a0a;color:#c9a96e;display:flex;align-items:center;justify-content:center;height:100vh;margin:0;font-family:sans-serif;font-size:14px;}</style></head><body>Preparing your WhatsApp message…</body></html>');
-      }
-      
+      // We navigate the CURRENT tab directly to WhatsApp once the message is
+      // ready — no pre-opened blank tab, no "Preparing…" placeholder screen.
+      // Two reasons:
+      // 1. On mobile, window.open()-based popups sometimes hand off to the
+      //    WhatsApp app without carrying the full text (only the link shows
+      //    up in the chat). A normal top-level navigation to
+      //    api.whatsapp.com/send is what iOS/Android app-link handoff is
+      //    built around, so the full pre-filled text comes through reliably.
+      // 2. Inside an installed PWA (added to home screen), window.open()
+      //    frequently just shows a blank/stuck window instead of a real tab.
+      //    A plain location change avoids that entirely.
+
       let msgTemplate = '';
       if (mode === 'payment') {
         msgTemplate = _profile.waTemplatePayment || DEFAULT_WA_TEMPLATE_PAYMENT;
@@ -6505,13 +6507,8 @@ async function toggleBlockDate(dateStr) {
         .replace(/\uFFFD/g, '');
 
       const encoded = encodeURIComponent(msg);
-      const waUrl = `https://wa.me/?text=${encoded}`;
-      if (waWindow) {
-        waWindow.location.href = waUrl;
-      } else {
-        // Popup was blocked outright — fall back to navigating in the same tab.
-        window.location.href = waUrl;
-      }
+      const waUrl = `https://api.whatsapp.com/send?text=${encoded}`;
+      window.location.href = waUrl;
     }
 
     async function triggerModalWhatsApp() {
