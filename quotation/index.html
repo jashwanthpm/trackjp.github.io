@@ -189,8 +189,8 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 .thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:28px; margin-top:44px; }
 
 @media print{
-  /* This completely removes browser headers/footers (dates, page numbers, URLs) by stripping the margin */
-  @page { size: auto; margin: 0mm; }
+  /* Removes browser headers/footers (dates, page numbers, URLs) */
+  @page { margin: 0mm; }
   
   /* Forces the browser to print colors and background graphics */
   * {
@@ -199,10 +199,42 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
     color-adjust: exact !important;
   }
   
-  body{ background:var(--pv-bg) !important; margin: 0; }
-  .topbar,.left-panel{ display:none !important; }
-  .right-panel{ padding:0; background:var(--pv-bg) !important; display:block; }
-  .page{ box-shadow:none; margin:0 auto; max-width:100%; padding: 40px 30px !important; border-radius:0; }
+  /* Force the entire printed document to use the tan background, fixing the black bottom bleed */
+  html, body { 
+    background: var(--pv-bg) !important; 
+    height: 100%;
+  }
+  
+  .topbar, .left-panel { display: none !important; }
+  
+  .workspace, .right-panel { 
+    background: var(--pv-bg) !important; 
+    padding: 0 !important; 
+    display: block; 
+  }
+  
+  .page { 
+    box-shadow: none; 
+    margin: 0 auto; 
+    max-width: 100%; 
+    padding: 40px 30px !important; 
+    border-radius: 0; 
+    background: transparent !important;
+  }
+
+  /* Prevent blocks from being sliced in half across pages */
+  .card, .event-row, .payments-block, .account-box, .logo-block, .term-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Prevent section titles from sitting at the very bottom of a page */
+  h2.section-title {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
 }
 
 @media (max-width:980px){
