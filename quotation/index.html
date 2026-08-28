@@ -185,19 +185,13 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 .term-item::before{ content:"•"; font-size:19px; line-height:1.3; }
 .term-item span{ flex:1; white-space:pre-wrap; }
 
-.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:24px; margin-top:150px; }
+.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:24px; margin-top:36px; }
 
 @media print{
-  *{
-    -webkit-print-color-adjust:exact !important;
-    print-color-adjust:exact !important;
-    color-adjust:exact !important;
-  }
-  html,body{ background:var(--pv-bg) !important; margin:0; padding:0; }
+  body{ background:#fff; }
   .topbar,.left-panel{ display:none !important; }
-  .workspace{ display:block !important; }
-  .right-panel{ padding:0 !important; margin:0 !important; background:var(--pv-bg) !important; display:block !important; min-height:0 !important; }
-  .page{ box-shadow:none !important; margin:0 !important; max-width:100% !important; width:100% !important; border-radius:0 !important; }
+  .right-panel{ padding:0; background:#fff; display:block; }
+  .page{ box-shadow:none; margin:0 auto; max-width:100%; }
 }
 @media (max-width:980px){
   .workspace{ flex-direction:column; }
@@ -211,9 +205,9 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 
 <div class="topbar">
   <div class="title">Sakkhi — Quotation Builder</div>
-  <button class="primary" onclick="exportAsPDF()">🖨️ Export / Save as PDF</button>
+  <button class="primary" onclick="window.print()">🖨️ Export / Save as PDF</button>
   <button onclick="resetAll()">↺ Reset to sample</button>
-  <div class="hint">Left = edit everything (text, icons, colors, logo). Right = exactly what the client sees. When the print dialog opens, make sure <b>Background graphics</b> is turned on and <b>Paper size</b> is set to <b>Default</b> — that keeps the colors and gives you one continuous page.</div>
+  <div class="hint">Left = edit everything (text, icons, colors, logo). Right = exactly what the client sees. Nothing is typed directly on the preview anymore — edit on the left and watch it update.</div>
 </div>
 
 <div class="workspace">
@@ -381,40 +375,57 @@ function renderPreview(){
   document.documentElement.style.setProperty('--pv-accent', state.theme.accent);
   const page = document.getElementById('previewPage');
   page.innerHTML = `
-    <div class="logo-block">
+    <div id="pv-logo" class="logo-block">
       ${renderLogo()}
       ${renderDivider()}
     </div>
-    <div class="greeting">Dear ${esc(state.clientName)},</div>
-    <div class="intro">${esc(state.intro)}</div>
-
-    <h2 class="section-title">Here is our customised proposal</h2>
-    ${renderCards(state.highlights)}
-    ${renderCards(state.notes)}
-
-    <h2 class="section-title">List of events</h2>
-    <div class="events-list">${renderEvents()}</div>
-
-    <h2 class="section-title">Payments</h2>
-    <div class="payments-block">
-      <div class="lead">Our total charges for all events will amount to</div>
-      <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
-      <div class="terms-note">${esc(state.paymentNote)}</div>
+    <div id="pv-intro">
+      <div class="greeting">Dear ${esc(state.clientName)},</div>
+      <div class="intro">${esc(state.intro)}</div>
     </div>
 
-    <h2 class="section-title">Account details</h2>
-    <div class="account-box">
-      <div><b>Name : </b>${esc(state.account.name)}</div>
-      <div><b>Account No: </b>${esc(state.account.accNo)}</div>
-      <div><b>IFSC code : </b>${esc(state.account.ifsc)}</div>
-      <div><b>Bank name : </b>${esc(state.account.bank)}</div>
+    <div id="pv-highlights">
+      <h2 class="section-title">Here is our customised proposal</h2>
+      ${renderCards(state.highlights)}
+    </div>
+    
+    <div id="pv-notes">
+      ${renderCards(state.notes)}
     </div>
 
-    <h2 class="section-title">Deliverables</h2>
-    ${renderCards(state.deliverables)}
+    <div id="pv-events">
+      <h2 class="section-title">List of events</h2>
+      <div class="events-list">${renderEvents()}</div>
+    </div>
 
-    <h2 class="section-title">Terms and Conditions</h2>
-    <ul class="terms-list">${renderTerms()}</ul>
+    <div id="pv-payments">
+      <h2 class="section-title">Payments</h2>
+      <div class="payments-block">
+        <div class="lead">Our total charges for all events will amount to</div>
+        <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
+        <div class="terms-note">${esc(state.paymentNote)}</div>
+      </div>
+    </div>
+
+    <div id="pv-account">
+      <h2 class="section-title">Account details</h2>
+      <div class="account-box">
+        <div><b>Name : </b>${esc(state.account.name)}</div>
+        <div><b>Account No: </b>${esc(state.account.accNo)}</div>
+        <div><b>IFSC code : </b>${esc(state.account.ifsc)}</div>
+        <div><b>Bank name : </b>${esc(state.account.bank)}</div>
+      </div>
+    </div>
+
+    <div id="pv-deliverables">
+      <h2 class="section-title">Deliverables</h2>
+      ${renderCards(state.deliverables)}
+    </div>
+
+    <div id="pv-terms">
+      <h2 class="section-title">Terms and Conditions</h2>
+      <ul class="terms-list">${renderTerms()}</ul>
+    </div>
 
     <div class="thankyou">THANK YOU</div>
   `;
@@ -441,26 +452,6 @@ function autoGrowAll(scope){
   (scope||document).querySelectorAll('textarea').forEach(autoGrow);
 }
 
-/* ================= PDF EXPORT (single continuous page) ================= */
-function setPrintPageSize(){
-  const page = document.getElementById('previewPage');
-  if(!page) return;
-  const w = Math.ceil(page.getBoundingClientRect().width) || 800;
-  const h = Math.ceil(page.scrollHeight) + 20;
-  let styleEl = document.getElementById('dynamicPrintPage');
-  if(!styleEl){
-    styleEl = document.createElement('style');
-    styleEl.id = 'dynamicPrintPage';
-    document.head.appendChild(styleEl);
-  }
-  styleEl.textContent = `@page{ size:${w}px ${h}px; margin:0; }`;
-}
-function exportAsPDF(){
-  setPrintPageSize();
-  window.print();
-}
-window.addEventListener('beforeprint', setPrintPageSize);
-
 function sectionIcon(key){
   return `<span class="hicon">${ICONS[key]||''}</span>`;
 }
@@ -469,7 +460,7 @@ function sectionIcon(key){
 function renderLeftPanel(){
   const lp = document.getElementById('leftPanel');
   lp.innerHTML = `
-    <div class="lp-section">
+    <div class="lp-section" id="lp-theme">
       <h3>${sectionIcon('gallery')}Theme &amp; Colors</h3>
       <div class="swatch-row">
         <div class="field"><label>Background</label><input type="color" value="${state.theme.bg}" onchange="state.theme.bg=this.value;renderPreview()"></div>
@@ -477,7 +468,7 @@ function renderLeftPanel(){
         <div class="field"><label>Accent</label><input type="color" value="${state.theme.accent}" onchange="state.theme.accent=this.value;renderPreview()"></div>
       </div>
       <div class="field">
-        <label>Divider style (the line under the logo)</label>
+        <label>Divider style</label>
         <select onchange="state.divider=this.value;renderPreview()">
           <option value="dots" ${state.divider==='dots'?'selected':''}>Dots + line (original)</option>
           <option value="simple" ${state.divider==='simple'?'selected':''}>Simple line</option>
@@ -487,7 +478,7 @@ function renderLeftPanel(){
       </div>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-logo">
       <h3>${sectionIcon('camera')}Logo</h3>
       <div class="field">
         <div class="row-inline" style="margin-bottom:10px;">
@@ -496,45 +487,45 @@ function renderLeftPanel(){
         </div>
         ${state.logo.mode==='image' ? `
           <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
-          <div class="subhint">A transparent-background PNG works best — it sits directly on the page color with no box behind it.${state.logo.image ? ' ✓ Logo uploaded.' : ''}</div>
+          <div class="subhint">A transparent-background PNG works best.${state.logo.image ? ' ✓ Logo uploaded.' : ''}</div>
         ` : `
           <input type="text" value="${esc(state.logo.text)}" oninput="state.logo.text=this.value;renderPreview()" placeholder="Sakkhi.">
-          <div class="subhint">Shown in a single color on a flat background — no box or second color behind it.</div>
+          <div class="subhint">Shown in a single color on a flat background.</div>
         `}
       </div>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-intro">
       <h3>${sectionIcon('info')}Greeting &amp; Intro</h3>
       <div class="field"><label>Client name</label><input type="text" value="${esc(state.clientName)}" oninput="state.clientName=this.value;renderPreview()"></div>
       <div class="field"><label>Intro paragraph</label><textarea oninput="state.intro=this.value;renderPreview();autoGrow(this)">${esc(state.intro)}</textarea></div>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-highlights">
       <h3>${sectionIcon('gallery')}Proposal Highlights</h3>
       <div id="highlightsList"></div>
       <button class="add-btn-full" onclick="addListItem('highlights','camera','New highlight — describe what\\'s included.')">+ Add highlight</button>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-notes">
       <h3>${sectionIcon('info')}Additional Notes</h3>
       <div id="notesList"></div>
       <button class="add-btn-full" onclick="addListItem('notes','info','New note for the client.')">+ Add note</button>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-events">
       <h3>${sectionIcon('calendar')}Events</h3>
       <div id="eventsListLeft"></div>
       <button class="add-btn-full" onclick="addEvent()">+ Add event</button>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-payments">
       <h3>${sectionIcon('package')}Payments</h3>
       <div class="field"><label>Total amount (₹)</label><input type="text" value="${esc(state.amount)}" oninput="state.amount=this.value;renderPreview()"></div>
       <div class="field"><label>Payment terms</label><textarea oninput="state.paymentNote=this.value;renderPreview();autoGrow(this)">${esc(state.paymentNote)}</textarea></div>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-account">
       <h3>${sectionIcon('server')}Account Details</h3>
       <div class="field"><label>Name</label><input type="text" value="${esc(state.account.name)}" oninput="state.account.name=this.value;renderPreview()"></div>
       <div class="field"><label>Account No.</label><input type="text" value="${esc(state.account.accNo)}" oninput="state.account.accNo=this.value;renderPreview()"></div>
@@ -542,13 +533,13 @@ function renderLeftPanel(){
       <div class="field"><label>Bank name</label><input type="text" value="${esc(state.account.bank)}" oninput="state.account.bank=this.value;renderPreview()"></div>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-deliverables">
       <h3>${sectionIcon('package')}Deliverables</h3>
       <div id="deliverablesList"></div>
       <button class="add-btn-full" onclick="addListItem('deliverables','package','New deliverable — what and when.')">+ Add deliverable</button>
     </div>
 
-    <div class="lp-section">
+    <div class="lp-section" id="lp-terms">
       <h3>${sectionIcon('info')}Terms &amp; Conditions</h3>
       <div id="termsListLeft"></div>
       <button class="add-btn-full" onclick="addTerm('New term or condition.')">+ Add term</button>
@@ -660,6 +651,42 @@ function resetAll(){
 state = sampleState();
 renderPreview();
 renderLeftPanel();
+
+/* ================= SCROLL SYNC ================= */
+let syncTimeout;
+document.getElementById('leftPanel').addEventListener('scroll', function() {
+  clearTimeout(syncTimeout);
+  
+  // Wait a fraction of a second after you stop scrolling to snap the right panel
+  // This prevents the page from jumping frantically while you are mid-scroll
+  syncTimeout = setTimeout(() => {
+    let closestSection = 'logo';
+    let minDistance = Infinity;
+    const sections = ['theme', 'logo', 'intro', 'highlights', 'notes', 'events', 'payments', 'account', 'deliverables', 'terms'];
+    
+    sections.forEach(sec => {
+      const el = document.getElementById('lp-' + sec);
+      if (el) {
+        // Measure how close each left-panel section is to the top of the screen
+        const distance = Math.abs(el.getBoundingClientRect().top - 54);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestSection = sec;
+        }
+      }
+    });
+    
+    // Theme and Logo on the left both map to the Logo block on the right
+    const previewId = closestSection === 'theme' ? 'logo' : closestSection;
+    const targetElement = document.getElementById('pv-' + previewId);
+    
+    if (targetElement) {
+      // Calculate smooth scroll destination with an 80px offset for the top toolbar
+      const targetY = targetElement.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({top: targetY, behavior: 'smooth'});
+    }
+  }, 150); 
+});
 </script>
 
 </body>
