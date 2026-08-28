@@ -216,8 +216,14 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 
 <div class="topbar">
   <div class="title">Sakkhi — Quotation Builder</div>
-  <button class="primary" onclick="window.print()">🖨️ Export / Save as PDF</button>
-  <button onclick="resetAll()">↺ Reset to sample</button>
+  <button class="primary" onclick="window.print()">🖨️ Export PDF</button>
+  <button onclick="saveProject()">💾 Save Draft</button>
+  <button onclick="document.getElementById('fileInput').click()">📂 Load Draft</button>
+  <button onclick="resetAll()">↺ Reset</button>
+  
+  <!-- Hidden file input for loading drafts -->
+  <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadProject(this)">
+  
   <div class="hint">Left = edit everything. Right = preview. <b>To remove the top/bottom URLs when exporting:</b> uncheck "Headers and footers" in the print dialog.</div>
 </div>
 
@@ -229,7 +235,7 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 </div>
 
 <script>
-/* ================= ICONS (black, monochrome, line-friendly) ================= */
+/* ================= ICONS ================= */
 const ICONS = {
   camera: `<svg viewBox="0 0 24 24"><path d="M9 3l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.5L15 3H9zm3 6.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>`,
   gallery: `<svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1.5 13h13l-4-5.5-3 3.8-2-2.3L5.5 17zM8 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>`,
@@ -328,7 +334,7 @@ function sampleState(){
   };
 }
 
-/* ================= RENDER: PREVIEW (right side) ================= */
+/* ================= RENDER: PREVIEW ================= */
 function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
 
 function renderDivider(){
@@ -442,18 +448,6 @@ function renderPreview(){
   `;
 }
 
-function lighten(hex, amt){
-  try{
-    let c = hex.replace('#','');
-    if(c.length===3) c = c.split('').map(x=>x+x).join('');
-    const num = parseInt(c,16);
-    let r = (num>>16)+amt, g=((num>>8)&0xff)+amt, b=(num&0xff)+amt;
-    r=Math.min(255,Math.max(0,r)); g=Math.min(255,Math.max(0,g)); b=Math.min(255,Math.max(0,b));
-    return `rgb(${r},${g},${b})`;
-  }catch(e){ return hex; }
-}
-
-/* ================= AUTO-GROW TEXTAREAS ================= */
 function autoGrow(el){
   if(!el) return;
   el.style.height = 'auto';
@@ -462,7 +456,6 @@ function autoGrow(el){
 function autoGrowAll(scope){
   (scope||document).querySelectorAll('textarea').forEach(autoGrow);
 }
-
 function sectionIcon(key){
   return `<span class="hicon">${ICONS[key]||''}</span>`;
 }
@@ -572,7 +565,6 @@ function handleLogoUpload(input){
   reader.readAsDataURL(file);
 }
 
-/* ---- icon+text list editor (highlights / notes / deliverables) ---- */
 function renderListEditor(key, containerId){
   const container = document.getElementById(containerId);
   container.innerHTML = state[key].map((item, i) => `
@@ -592,7 +584,6 @@ function addListItem(key, icon, text){
   renderLeftPanel();
 }
 
-/* ---- terms editor ---- */
 function renderTermsEditor(){
   const container = document.getElementById('termsListLeft');
   container.innerHTML = state.terms.map((t,i) => `
@@ -609,7 +600,6 @@ function addTerm(text){
   renderTermsEditor();
 }
 
-/* ---- events editor ---- */
 function renderEventsEditor(){
   const container = document.getElementById('eventsListLeft');
   container.innerHTML = state.events.map((ev, ei) => `
@@ -650,7 +640,42 @@ function addEvent(){
   renderEventsEditor();
 }
 
-/* ================= INIT / RESET ================= */
+/* ================= SAVE / LOAD SYSTEM ================= */
+function saveProject() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  
+  // Names the file based on the client name automatically
+  let fileName = state.clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  if(!fileName) fileName = "quotation";
+  
+  dlAnchorElem.setAttribute("download", fileName + "_draft.json");
+  dlAnchorElem.click();
+}
+
+function loadProject(input) {
+  const file = input.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const loadedState = JSON.parse(e.target.result);
+      if (loadedState && loadedState.theme) {
+        state = loadedState;
+        renderPreview();
+        renderLeftPanel();
+      } else {
+        alert("This doesn't look like a valid quotation draft file.");
+      }
+    } catch (err) {
+      alert("Error reading file.");
+    }
+  };
+  reader.readAsText(file);
+  input.value = ""; // reset so you can load the same file again if needed
+}
+
 function resetAll(){
   if(confirm('Reset everything back to the original sample quotation? Your edits will be lost.')){
     state = sampleState();
@@ -667,8 +692,6 @@ renderLeftPanel();
 let syncTimeout;
 document.getElementById('leftPanel').addEventListener('scroll', function() {
   clearTimeout(syncTimeout);
-  
-  // Wait a fraction of a second after you stop scrolling to snap the right panel
   syncTimeout = setTimeout(() => {
     let closestSection = 'logo';
     let minDistance = Infinity;
@@ -677,7 +700,6 @@ document.getElementById('leftPanel').addEventListener('scroll', function() {
     sections.forEach(sec => {
       const el = document.getElementById('lp-' + sec);
       if (el) {
-        // Measure how close each left-panel section is to the top of the screen
         const distance = Math.abs(el.getBoundingClientRect().top - 54);
         if (distance < minDistance) {
           minDistance = distance;
@@ -686,12 +708,10 @@ document.getElementById('leftPanel').addEventListener('scroll', function() {
       }
     });
     
-    // Theme and Logo on the left both map to the Logo block on the right
     const previewId = closestSection === 'theme' ? 'logo' : closestSection;
     const targetElement = document.getElementById('pv-' + previewId);
     
     if (targetElement) {
-      // Calculate smooth scroll destination with an 80px offset for the top toolbar
       const targetY = targetElement.getBoundingClientRect().top + window.scrollY - 80;
       window.scrollTo({top: targetY, behavior: 'smooth'});
     }
