@@ -188,11 +188,22 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 .thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:28px; margin-top:44px; }
 
 @media print{
-  body{ background:#fff; }
+  /* This removes the browser's default header/footer (date, website URL) */
+  @page { margin: 0; }
+  
+  /* Forces the browser to print colors and background graphics */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  body{ background:var(--pv-bg) !important; }
   .topbar,.left-panel{ display:none !important; }
-  .right-panel{ padding:0; background:#fff; display:block; }
-  .page{ box-shadow:none; margin:0 auto; max-width:100%; padding: 25px 20px 40px !important; }
+  .right-panel{ padding:0; background:var(--pv-bg) !important; display:block; }
+  .page{ box-shadow:none; margin:0 auto; max-width:100%; padding: 40px 30px !important; }
 }
+
 @media (max-width:980px){
   .workspace{ flex-direction:column; }
   .left-panel{ width:100%; max-width:100%; height:auto; position:relative; top:0; max-height:60vh; }
