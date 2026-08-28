@@ -42,6 +42,7 @@ html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0
 .topbar button.primary{ background:var(--pv-accent); border-color:var(--pv-accent); }
 .topbar button.primary:hover{ background:#921d2b; }
 .topbar .hint{ width:100%; font-size:12.5px; color:#b8ab8c; }
+.toolbar-group { display:flex; gap:10px; border-right: 1px solid var(--panel-line); padding-right:15px; margin-right:5px; }
 
 /* ---------------- Layout ---------------- */
 .workspace{ display:flex; align-items:flex-start; min-height:calc(100vh - 54px); }
@@ -216,15 +217,19 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 
 <div class="topbar">
   <div class="title">Sakkhi — Quotation Builder</div>
-  <button class="primary" onclick="window.print()">🖨️ Export PDF</button>
-  <button onclick="saveProject()">💾 Save Draft</button>
-  <button onclick="document.getElementById('fileInput').click()">📂 Load Draft</button>
+  
+  <div class="toolbar-group">
+    <button onclick="document.getElementById('fileInput').click()">📂 Load Working Draft</button>
+    <button onclick="saveProject()">💾 Save Working Draft</button>
+  </div>
+  
+  <button class="primary" onclick="window.print()">🖨️ Export Final PDF</button>
   <button onclick="resetAll()">↺ Reset</button>
   
   <!-- Hidden file input for loading drafts -->
   <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadProject(this)">
   
-  <div class="hint">Left = edit everything. Right = preview. <b>To remove the top/bottom URLs when exporting:</b> uncheck "Headers and footers" in the print dialog.</div>
+  <div class="hint"><b>Workspace Files (.json):</b> Save your progress and load it back later to make quick edits. <b>Client Export (.pdf):</b> Generates the final un-editable design to send to your clients.</div>
 </div>
 
 <div class="workspace">
@@ -650,13 +655,21 @@ function saveProject() {
   let fileName = state.clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
   if(!fileName) fileName = "quotation";
   
-  dlAnchorElem.setAttribute("download", fileName + "_draft.json");
+  dlAnchorElem.setAttribute("download", fileName + "_workspace.json");
   dlAnchorElem.click();
 }
 
 function loadProject(input) {
   const file = input.files[0];
   if (!file) return;
+  
+  // Safeguard: Check if user accidentally uploaded a PDF
+  if (file.name.toLowerCase().endsWith('.pdf')) {
+    alert("Please select a Workspace file (.json) instead of a PDF.\\n\\nPDFs are for sending to clients. The .json files are your saved editable drafts.");
+    input.value = "";
+    return;
+  }
+  
   const reader = new FileReader();
   reader.onload = function(e) {
     try {
@@ -666,10 +679,10 @@ function loadProject(input) {
         renderPreview();
         renderLeftPanel();
       } else {
-        alert("This doesn't look like a valid quotation draft file.");
+        alert("This doesn't look like a valid workspace file.");
       }
     } catch (err) {
-      alert("Error reading file.");
+      alert("Error reading file. Ensure you uploaded a .json file.");
     }
   };
   reader.readAsText(file);
