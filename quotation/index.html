@@ -1,0 +1,640 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sakkhi — Quotation Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --panel-bg:#1a1815;
+  --panel-bg-raised:#242018;
+  --panel-bg-input:#2b261d;
+  --panel-ink:#eee3cd;
+  --panel-ink-dim:#a89d84;
+  --panel-line:#3c352a;
+  --panel-gold:#c9a15a;
+  --panel-accent:#b5673a;
+  --pv-bg:#cdb89d;
+  --pv-header:#d9c7ac;
+  --pv-card:#e9decb;
+  --pv-ink:#2c2822;
+  --pv-ink-soft:#4a4339;
+  --pv-accent:#7d1f2b;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0d0b; color:var(--panel-ink); }
+
+/* ---------------- Top bar ---------------- */
+.topbar{
+  position:sticky; top:0; z-index:60;
+  background:var(--panel-bg); color:#eee3cd;
+  padding:11px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  border-bottom:1px solid var(--panel-line);
+}
+.topbar .title{ font-family:'Playfair Display',serif; font-weight:700; font-size:15px; margin-right:auto; }
+.topbar button{
+  background:#2a251e; color:#f2e8d5; border:1px solid #453e32; padding:8px 14px;
+  border-radius:6px; font-family:'EB Garamond',serif; font-size:14px; cursor:pointer;
+}
+.topbar button:hover{ background:#3a3226; }
+.topbar button.primary{ background:var(--pv-accent); border-color:var(--pv-accent); }
+.topbar button.primary:hover{ background:#921d2b; }
+.topbar .hint{ width:100%; font-size:12.5px; color:#b8ab8c; }
+
+/* ---------------- Layout ---------------- */
+.workspace{ display:flex; align-items:flex-start; min-height:calc(100vh - 54px); }
+
+.left-panel{
+  width:400px; min-width:340px; max-width:440px;
+  background:var(--panel-bg); color:var(--panel-ink);
+  height:calc(100vh - 54px); overflow-y:auto; position:sticky; top:54px;
+  padding:18px 18px 60px;
+  border-right:1px solid var(--panel-line);
+}
+.right-panel{ flex:1; padding:28px 20px 60px; display:flex; justify-content:center; background:#100e0b; min-height:calc(100vh - 54px); }
+
+.lp-section{ margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--panel-line); }
+.lp-section:last-child{ border-bottom:none; margin-bottom:6px; }
+.lp-section h3{
+  display:flex; align-items:center; gap:8px;
+  font-family:'EB Garamond',serif; font-weight:600;
+  margin:0 0 14px; text-transform:uppercase; font-size:12px; letter-spacing:.12em; color:var(--panel-gold);
+}
+.lp-section h3 .hicon{ width:15px; height:15px; flex-shrink:0; opacity:.9; }
+.lp-section h3 .hicon svg{ width:15px; height:15px; fill:var(--panel-gold); display:block; }
+.lp-section h3::after{ content:""; flex:1; height:1px; background:linear-gradient(to right, var(--panel-line), transparent); }
+
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:12px; color:var(--panel-ink-dim); margin-bottom:5px; letter-spacing:.01em; }
+.subhint{ font-size:11.5px; color:#7d715a; line-height:1.5; margin:2px 0 8px; }
+
+/* Uniform dark styling for every form control anywhere in the left panel */
+.left-panel input[type=text],
+.left-panel input[type=number],
+.left-panel textarea,
+.left-panel select{
+  width:100%; background:var(--panel-bg-input); border:1px solid #4a4231; color:var(--panel-ink);
+  padding:8px 10px; border-radius:6px; font-family:'EB Garamond',serif; font-size:14.5px;
+  appearance:none; -webkit-appearance:none;
+}
+.left-panel select{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23c9a15a' d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat:no-repeat; background-position:right 8px center; background-size:16px; padding-right:30px;
+}
+.left-panel input:focus, .left-panel textarea:focus, .left-panel select:focus{
+  outline:none; border-color:var(--panel-gold); box-shadow:0 0 0 3px rgba(201,161,90,.15);
+}
+.left-panel textarea{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
+
+.field input[type=color]{
+  width:100%; height:36px; border:1px solid #4a4231; background:var(--panel-bg-input);
+  padding:3px; cursor:pointer; border-radius:6px;
+}
+.row-inline{ display:flex; gap:10px; align-items:flex-end; }
+.row-inline > div{ flex:1; }
+.row-inline .grow{ flex:1; }
+.swatch-row{ display:flex; gap:10px; }
+.swatch-row .field{ flex:1; margin-bottom:0; }
+
+.mini-btn{
+  background:var(--panel-bg-raised); border:1px solid #4a4231; color:#e7dcc4; font-size:12px;
+  padding:6px 10px; border-radius:5px; cursor:pointer; font-family:'EB Garamond',serif;
+}
+.mini-btn:hover{ background:#332c20; border-color:var(--panel-gold); color:var(--panel-gold); }
+.mini-btn.danger{ color:#d98e88; }
+.mini-btn.danger:hover{ background:#332119; border-color:#a85c56; color:#e9a29c; }
+.add-btn-full{
+  width:100%; margin-top:4px; padding:9px; border-radius:7px; border:1.5px dashed #5c5138;
+  background:transparent; color:var(--panel-gold); font-family:'EB Garamond',serif; font-size:13.5px; cursor:pointer;
+  letter-spacing:.01em;
+}
+.add-btn-full:hover{ background:rgba(201,161,90,.08); border-color:var(--panel-gold); }
+
+.item-card{
+  background:var(--panel-bg-raised); border:1px solid var(--panel-line); border-left:2.5px solid var(--panel-gold);
+  border-radius:0 8px 8px 0; padding:11px 12px; margin-bottom:10px;
+}
+.item-card .item-top{ display:flex; gap:8px; margin-bottom:8px; }
+.item-card .item-top select{ width:auto; flex:1; }
+.item-card .item-top .remove{ flex-shrink:0; width:auto; }
+
+.event-card{
+  background:var(--panel-bg-raised); border:1px solid var(--panel-line); border-left:2.5px solid var(--pv-accent);
+  border-radius:0 8px 8px 0; padding:13px; margin-bottom:14px;
+}
+.event-card .ev-top{ display:flex; gap:8px; margin-bottom:10px; }
+.role-block{ background:#1f1b14; border:1px solid #342c1f; border-radius:7px; padding:9px; margin-bottom:9px; }
+.role-block .rb-head{ display:flex; gap:6px; margin-bottom:7px; align-items:center; }
+.role-block .rb-head input{ flex:1; }
+.style-edit{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.style-edit input[type=number]{ width:52px; flex-shrink:0; }
+.style-edit input[type=text]{ flex:1; }
+
+/* ---------------- Preview (the actual design) ---------------- */
+.page{
+  width:100%; max-width:760px; background:var(--pv-bg); padding:52px 54px 64px;
+  border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,.4); color:var(--pv-ink);
+  font-family:'EB Garamond',serif;
+}
+.logo-block{ padding:30px 20px 20px; text-align:center; margin-bottom:6px; }
+.logo-block img{ max-height:72px; max-width:80%; }
+.logo-text{ font-family:'Playfair Display',serif; font-weight:800; font-size:50px; margin:0 0 14px; }
+
+.divider-wrap{ padding:14px 0 4px; }
+.divider-dots{ display:flex; align-items:center; justify-content:center; }
+.divider-dots::before,.divider-dots::after{ content:""; height:2px; background:#6b6560; flex:1; max-width:230px; }
+.divider-dots .dot{ width:9px; height:9px; border-radius:50%; background:#6b6560; margin:0 -2px; }
+.divider-simple{ height:1.5px; background:#6b6560; width:70%; margin:0 auto; }
+.divider-diamond{ display:flex; align-items:center; justify-content:center; gap:10px; }
+.divider-diamond::before,.divider-diamond::after{ content:""; height:1.5px; background:#6b6560; flex:1; max-width:220px; }
+.divider-diamond .diamond{ width:9px; height:9px; background:var(--pv-accent); transform:rotate(45deg); }
+.divider-none{ height:0; }
+
+.greeting{ text-align:center; font-style:italic; font-size:27px; margin:26px 0 16px; }
+.intro{ text-align:center; font-size:16.5px; line-height:1.65; max-width:620px; margin:0 auto 36px; color:var(--pv-ink-soft); }
+h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-size:25px; margin:40px 0 20px; }
+
+.card{ background:var(--pv-card); border-radius:16px; padding:19px 22px; margin-bottom:13px; display:flex; align-items:flex-start; gap:15px; }
+.card .icon-wrap{ flex-shrink:0; width:24px; height:24px; margin-top:2px; }
+.card .icon-wrap svg{ width:24px; height:24px; fill:#1c1a17; display:block; }
+.card .text{ font-size:15.5px; line-height:1.55; flex:1; white-space:pre-wrap; }
+
+.events-list{ display:flex; flex-direction:column; gap:13px; }
+.event-row{ background:var(--pv-card); border-radius:16px; padding:18px 22px; }
+.event-row .ev-name{ font-size:18px; font-weight:600; margin-bottom:10px; }
+.roles-wrap{ display:flex; flex-wrap:wrap; gap:16px 28px; }
+.role-view{ min-width:170px; }
+.role-view .rlabel{ font-size:14px; font-weight:600; color:var(--pv-ink-soft); margin-bottom:6px; }
+.style-view{ display:flex; align-items:center; gap:6px; font-size:15px; margin-bottom:4px; }
+.style-view .ppl{ display:inline-flex; }
+.style-view .ppl svg{ width:14px; height:14px; fill:#1c1a17; margin-right:-3px; }
+
+.payments-block{ text-align:center; margin-bottom:34px; }
+.payments-block .lead{ font-size:16.5px; color:var(--pv-ink-soft); margin-bottom:6px; }
+.amount{ font-weight:600; font-size:42px; margin:6px 0 16px; }
+.amount .currency{ font-size:30px; margin-right:2px; }
+.terms-note{ font-size:15.5px; line-height:1.6; max-width:580px; margin:0 auto; color:var(--pv-ink-soft); white-space:pre-wrap; }
+
+.account-box{ text-align:center; font-size:15.5px; line-height:1.9; margin-bottom:6px; }
+.account-box b{ font-weight:600; }
+
+.terms-list{ list-style:none; padding:0; margin:0; }
+.term-item{ display:flex; gap:9px; font-size:15.5px; line-height:1.6; margin-bottom:14px; }
+.term-item::before{ content:"•"; font-size:19px; line-height:1.3; }
+.term-item span{ flex:1; white-space:pre-wrap; }
+
+.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:24px; margin-top:36px; }
+
+@media print{
+  body{ background:#fff; }
+  .topbar,.left-panel{ display:none !important; }
+  .right-panel{ padding:0; background:#fff; display:block; }
+  .page{ box-shadow:none; margin:0 auto; max-width:100%; }
+}
+@media (max-width:980px){
+  .workspace{ flex-direction:column; }
+  .left-panel{ width:100%; max-width:100%; height:auto; position:relative; top:0; max-height:60vh; }
+  .right-panel{ width:100%; padding:20px 12px; }
+  .page{ padding:34px 20px; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title">Sakkhi — Quotation Builder</div>
+  <button class="primary" onclick="window.print()">🖨️ Export / Save as PDF</button>
+  <button onclick="resetAll()">↺ Reset to sample</button>
+  <div class="hint">Left = edit everything (text, icons, colors, logo). Right = exactly what the client sees. Nothing is typed directly on the preview anymore — edit on the left and watch it update.</div>
+</div>
+
+<div class="workspace">
+  <div class="left-panel" id="leftPanel"></div>
+  <div class="right-panel">
+    <div class="page" id="previewPage"></div>
+  </div>
+</div>
+
+<script>
+/* ================= ICONS (black, monochrome, line-friendly) ================= */
+const ICONS = {
+  camera: `<svg viewBox="0 0 24 24"><path d="M9 3l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.5L15 3H9zm3 6.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>`,
+  gallery: `<svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1.5 13h13l-4-5.5-3 3.8-2-2.3L5.5 17zM8 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>`,
+  film: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9v6l5-3-5-3z" fill="#e9decb"/></svg>`,
+  harddrive: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect x="6" y="7" width="12" height="6" fill="#e9decb"/><circle cx="8" cy="17" r="1" fill="#e9decb"/><circle cx="12" cy="17" r="1" fill="#e9decb"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.4-8.98A5.5 5.5 0 0 1 17.2 8.1 4 4 0 0 1 17 16H7z"/></svg>`,
+  server: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="1" fill="#e9decb"/><circle cx="7" cy="15" r="1" fill="#e9decb"/></svg>`,
+  drone: `<svg viewBox="0 0 24 24"><circle cx="5" cy="5" r="2.4"/><circle cx="19" cy="5" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/><path d="M8 8h8v8H8z"/><path d="M6.5 6.5l3 3m5-3l-3 3m-5 5l3-3m5 3l-3-3" stroke="#1c1a17" stroke-width="1"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><rect x="3" y="5" width="18" height="4" fill="#0e0c0a"/><rect x="6" y="12" width="3" height="3" fill="#e9decb"/><rect x="11" y="12" width="3" height="3" fill="#e9decb"/><rect x="16" y="12" width="3" height="3" fill="#e9decb"/></svg>`,
+  location: `<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>`,
+  package: `<svg viewBox="0 0 24 24"><path d="M12 2 3 6v12l9 4 9-4V6l-9-4zm0 2.2 6.3 2.8L12 9.8 5.7 7 12 4.2zM5 8.5l6 2.7v8.6l-6-2.7V8.5zm8 11.3v-8.6l6-2.7v8.6l-6 2.7z"/></svg>`,
+  disc: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#e9decb"/><circle cx="12" cy="12" r="1.1"/></svg>`,
+  info: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><rect x="11" y="10" width="2" height="7" fill="#e9decb"/><rect x="11" y="6.5" width="2" height="2" fill="#e9decb"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l4 2.3" stroke="#e9decb" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`
+};
+const ICON_LABELS = {
+  camera:'Camera (shoot coverage)', gallery:'Gallery (photos)', film:'Film reel (video)',
+  harddrive:'Hard drive / RAW', cloud:'Cloud storage', server:'Server / backup',
+  drone:'Drone', calendar:'Calendar / schedule', location:'Location', package:'Package / delivery',
+  disc:'Disc', info:'Info note', clock:'Timeline / duration'
+};
+const PERSON_SVG = `<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>`;
+
+function iconSelectHTML(selected, onchangeAttr){
+  let opts = Object.keys(ICONS).map(k=>`<option value="${k}" ${k===selected?'selected':''}>${ICON_LABELS[k]}</option>`).join('');
+  return `<select ${onchangeAttr}>${opts}</select>`;
+}
+
+/* ================= STATE ================= */
+let state = null;
+
+function sampleState(){
+  return {
+    theme:{ bg:'#cdb89d', card:'#e9decb', accent:'#7d1f2b' },
+    logo:{ mode:'text', text:'Sakkhi.', image:null },
+    divider:'dots',
+    clientName:'Ashika',
+    intro:"Congratulations on your upcoming Engagement! Wishing you all the best as you prepare for this beautiful and joyous occasion. We truly appreciate your trust in us and looking forward to making beautiful memories for you. As per your requirements we curated a proposal for you.",
+    highlights:[
+      {icon:'camera', text:'In accordance with your requirements, we will be covering Five events and a pre-wedding shoot.'},
+      {icon:'gallery', text:'~800-1200 Curated and professionally edited photographs will be provided from the events.'},
+      {icon:'film', text:'A cinematic film of 5-8 min featuring the finest visuals from each of your events will be crafted.'},
+      {icon:'harddrive', text:'All RAW files from your shoots will be delivered via external hard drives which will be delivered at end of project completion.'}
+    ],
+    notes:[
+      {icon:'cloud', text:'You will receive free one year of access to a cloud gallery, where all the edited photos will be stored for easy download and sharing.'},
+      {icon:'server', text:'You are required to provide us with two 6TB hard drives to facilitate the secure backup and preservation of your data.'}
+    ],
+    events:[
+      {name:'Engagement', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Bride Haldi, Mehndi, Bangle ceremony', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Groom Haldi, Bangle ceremony', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Rituals', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Reception', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Wedding', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Pre-Wedding shoot', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'}]}
+      ]}
+    ],
+    amount:'4,40,000',
+    paymentNote:'A 50% deposit is required in advance to secure the dates. The remaining 50% must be paid at the beginning of the events. Full payment is necessary to initiate the post-production process.',
+    account:{ name:'Mr. Jashwanth P M', accNo:'92030100010938', ifsc:'BARB0DBCHOL', bank:'Bank of Baroda' },
+    deliverables:[
+      {icon:'gallery', text:'~800-1200 Curated and professionally edited photographs will be provided within 45 days of payment clearance.'},
+      {icon:'film', text:'A cinematic film featuring the finest highlights from each of your events will be delivered within 60 days of payment clearance.'},
+      {icon:'disc', text:'An edited long traditional videos of all events will be delivered along with hard drive deliveries.'},
+      {icon:'package', text:'Once all the work is complete, we will provide your hard drives containing edited pictures, films and all the raw files.'}
+    ],
+    terms:[
+      "Kindly allocate a dedicated 45 to 60 minute slot for couple & family portraits during each event. We recommend scheduling this session before the event begins. If that is not feasible, portraits can be captured afterward. Please be aware that we cannot be held responsible for a reduced number of portraits if adequate time is not provided.",
+      "If you cancel the project after making the advance payment and reserving the team's schedule, a cancellation fee of 25% of the total order value will be charged. It may take up to 60 days to process the refund of the remaining amount.",
+      "For each deliverable, you may request valid changes in it; however, please provide all your revisions at once within 15 days of delivery. Additional charges will apply for further re-edits.",
+      "Once all the photos and videos have been delivered, we will consider the project complete and will be unable to accommodate any additional work requests.",
+      "Once your data is delivered via hard drives, we will not retain any ownership of your information. You will be considered as sole owner of your data, and all responsibility for it will rest with you.",
+      "You are responsible for arranging travel and accommodation for our shooting crew for all occurring events outside of Bangalore."
+    ]
+  };
+}
+
+/* ================= RENDER: PREVIEW (right side) ================= */
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderDivider(){
+  if(state.divider==='dots') return `<div class="divider-wrap"><div class="divider-dots"><span class="dot"></span></div></div>`;
+  if(state.divider==='simple') return `<div class="divider-wrap"><div class="divider-simple"></div></div>`;
+  if(state.divider==='diamond') return `<div class="divider-wrap"><div class="divider-diamond"><span class="diamond"></span></div></div>`;
+  return `<div class="divider-wrap"><div class="divider-none"></div></div>`;
+}
+
+function renderLogo(){
+  if(state.logo.mode==='image' && state.logo.image){
+    return `<img src="${state.logo.image}" alt="logo">`;
+  }
+  return `<div class="logo-text">${esc(state.logo.text)}</div>`;
+}
+
+function renderCards(list){
+  return list.map(item => `
+    <div class="card">
+      <div class="icon-wrap">${ICONS[item.icon]||ICONS.info}</div>
+      <div class="text">${esc(item.text)}</div>
+    </div>`).join('');
+}
+
+function renderPeople(n){
+  n = Math.max(0, parseInt(n)||0);
+  let s='<span class="ppl">';
+  for(let i=0;i<n;i++) s += PERSON_SVG;
+  return s + '</span>';
+}
+
+function renderEvents(){
+  return state.events.map(ev => `
+    <div class="event-row">
+      <div class="ev-name">${esc(ev.name)}</div>
+      <div class="roles-wrap">
+        ${ev.roles.map(r => `
+          <div class="role-view">
+            <div class="rlabel">${esc(r.roleName)}</div>
+            ${r.styles.map(s => `<div class="style-view">${renderPeople(s.count)}<span>${esc(s.label)}</span></div>`).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTerms(){
+  return state.terms.map(t => `<li class="term-item"><span>${esc(t)}</span></li>`).join('');
+}
+
+function renderPreview(){
+  document.documentElement.style.setProperty('--pv-bg', state.theme.bg);
+  document.documentElement.style.setProperty('--pv-card', state.theme.card);
+  document.documentElement.style.setProperty('--pv-accent', state.theme.accent);
+  const page = document.getElementById('previewPage');
+  page.innerHTML = `
+    <div class="logo-block">
+      ${renderLogo()}
+      ${renderDivider()}
+    </div>
+    <div class="greeting">Dear ${esc(state.clientName)},</div>
+    <div class="intro">${esc(state.intro)}</div>
+
+    <h2 class="section-title">Here is our customised proposal</h2>
+    ${renderCards(state.highlights)}
+    ${renderCards(state.notes)}
+
+    <h2 class="section-title">List of events</h2>
+    <div class="events-list">${renderEvents()}</div>
+
+    <h2 class="section-title">Payments</h2>
+    <div class="payments-block">
+      <div class="lead">Our total charges for all events will amount to</div>
+      <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
+      <div class="terms-note">${esc(state.paymentNote)}</div>
+    </div>
+
+    <h2 class="section-title">Account details</h2>
+    <div class="account-box">
+      <div><b>Name : </b>${esc(state.account.name)}</div>
+      <div><b>Account No: </b>${esc(state.account.accNo)}</div>
+      <div><b>IFSC code : </b>${esc(state.account.ifsc)}</div>
+      <div><b>Bank name : </b>${esc(state.account.bank)}</div>
+    </div>
+
+    <h2 class="section-title">Deliverables</h2>
+    ${renderCards(state.deliverables)}
+
+    <h2 class="section-title">Terms and Conditions</h2>
+    <ul class="terms-list">${renderTerms()}</ul>
+
+    <div class="thankyou">THANK YOU</div>
+  `;
+}
+
+function lighten(hex, amt){
+  try{
+    let c = hex.replace('#','');
+    if(c.length===3) c = c.split('').map(x=>x+x).join('');
+    const num = parseInt(c,16);
+    let r = (num>>16)+amt, g=((num>>8)&0xff)+amt, b=(num&0xff)+amt;
+    r=Math.min(255,Math.max(0,r)); g=Math.min(255,Math.max(0,g)); b=Math.min(255,Math.max(0,b));
+    return `rgb(${r},${g},${b})`;
+  }catch(e){ return hex; }
+}
+
+/* ================= AUTO-GROW TEXTAREAS ================= */
+function autoGrow(el){
+  if(!el) return;
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+function autoGrowAll(scope){
+  (scope||document).querySelectorAll('textarea').forEach(autoGrow);
+}
+
+function sectionIcon(key){
+  return `<span class="hicon">${ICONS[key]||''}</span>`;
+}
+
+/* ================= RENDER: LEFT PANEL ================= */
+function renderLeftPanel(){
+  const lp = document.getElementById('leftPanel');
+  lp.innerHTML = `
+    <div class="lp-section">
+      <h3>${sectionIcon('gallery')}Theme &amp; Colors</h3>
+      <div class="swatch-row">
+        <div class="field"><label>Background</label><input type="color" value="${state.theme.bg}" onchange="state.theme.bg=this.value;renderPreview()"></div>
+        <div class="field"><label>Cards</label><input type="color" value="${state.theme.card}" onchange="state.theme.card=this.value;renderPreview()"></div>
+        <div class="field"><label>Accent</label><input type="color" value="${state.theme.accent}" onchange="state.theme.accent=this.value;renderPreview()"></div>
+      </div>
+      <div class="field">
+        <label>Divider style (the line under the logo)</label>
+        <select onchange="state.divider=this.value;renderPreview()">
+          <option value="dots" ${state.divider==='dots'?'selected':''}>Dots + line (original)</option>
+          <option value="simple" ${state.divider==='simple'?'selected':''}>Simple line</option>
+          <option value="diamond" ${state.divider==='diamond'?'selected':''}>Line + diamond accent</option>
+          <option value="none" ${state.divider==='none'?'selected':''}>No divider</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('camera')}Logo</h3>
+      <div class="field">
+        <div class="row-inline" style="margin-bottom:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex:none;"><input type="radio" name="logomode" style="width:auto;" ${state.logo.mode==='image'?'checked':''} onchange="state.logo.mode='image';renderPreview();renderLeftPanel()"> Upload PNG</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex:none;"><input type="radio" name="logomode" style="width:auto;" ${state.logo.mode==='text'?'checked':''} onchange="state.logo.mode='text';renderPreview();renderLeftPanel()"> Text only</label>
+        </div>
+        ${state.logo.mode==='image' ? `
+          <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
+          <div class="subhint">A transparent-background PNG works best — it sits directly on the page color with no box behind it.${state.logo.image ? ' ✓ Logo uploaded.' : ''}</div>
+        ` : `
+          <input type="text" value="${esc(state.logo.text)}" oninput="state.logo.text=this.value;renderPreview()" placeholder="Sakkhi.">
+          <div class="subhint">Shown in a single color on a flat background — no box or second color behind it.</div>
+        `}
+      </div>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('info')}Greeting &amp; Intro</h3>
+      <div class="field"><label>Client name</label><input type="text" value="${esc(state.clientName)}" oninput="state.clientName=this.value;renderPreview()"></div>
+      <div class="field"><label>Intro paragraph</label><textarea oninput="state.intro=this.value;renderPreview();autoGrow(this)">${esc(state.intro)}</textarea></div>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('gallery')}Proposal Highlights</h3>
+      <div id="highlightsList"></div>
+      <button class="add-btn-full" onclick="addListItem('highlights','camera','New highlight — describe what\\'s included.')">+ Add highlight</button>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('info')}Additional Notes</h3>
+      <div id="notesList"></div>
+      <button class="add-btn-full" onclick="addListItem('notes','info','New note for the client.')">+ Add note</button>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('calendar')}Events</h3>
+      <div id="eventsListLeft"></div>
+      <button class="add-btn-full" onclick="addEvent()">+ Add event</button>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('package')}Payments</h3>
+      <div class="field"><label>Total amount (₹)</label><input type="text" value="${esc(state.amount)}" oninput="state.amount=this.value;renderPreview()"></div>
+      <div class="field"><label>Payment terms</label><textarea oninput="state.paymentNote=this.value;renderPreview();autoGrow(this)">${esc(state.paymentNote)}</textarea></div>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('server')}Account Details</h3>
+      <div class="field"><label>Name</label><input type="text" value="${esc(state.account.name)}" oninput="state.account.name=this.value;renderPreview()"></div>
+      <div class="field"><label>Account No.</label><input type="text" value="${esc(state.account.accNo)}" oninput="state.account.accNo=this.value;renderPreview()"></div>
+      <div class="field"><label>IFSC code</label><input type="text" value="${esc(state.account.ifsc)}" oninput="state.account.ifsc=this.value;renderPreview()"></div>
+      <div class="field"><label>Bank name</label><input type="text" value="${esc(state.account.bank)}" oninput="state.account.bank=this.value;renderPreview()"></div>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('package')}Deliverables</h3>
+      <div id="deliverablesList"></div>
+      <button class="add-btn-full" onclick="addListItem('deliverables','package','New deliverable — what and when.')">+ Add deliverable</button>
+    </div>
+
+    <div class="lp-section">
+      <h3>${sectionIcon('info')}Terms &amp; Conditions</h3>
+      <div id="termsListLeft"></div>
+      <button class="add-btn-full" onclick="addTerm('New term or condition.')">+ Add term</button>
+    </div>
+  `;
+  renderListEditor('highlights','highlightsList');
+  renderListEditor('notes','notesList');
+  renderListEditor('deliverables','deliverablesList');
+  renderTermsEditor();
+  renderEventsEditor();
+  autoGrowAll(lp);
+}
+
+function handleLogoUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { state.logo.image = e.target.result; renderPreview(); };
+  reader.readAsDataURL(file);
+}
+
+/* ---- icon+text list editor (highlights / notes / deliverables) ---- */
+function renderListEditor(key, containerId){
+  const container = document.getElementById(containerId);
+  container.innerHTML = state[key].map((item, i) => `
+    <div class="item-card">
+      <div class="item-top">
+        ${iconSelectHTML(item.icon, `onchange="state['${key}'][${i}].icon=this.value;renderPreview();renderListEditor('${key}','${containerId}')"`)}
+        <button class="mini-btn danger remove" onclick="state['${key}'].splice(${i},1);renderPreview();renderListEditor('${key}','${containerId}')">Remove</button>
+      </div>
+      <textarea oninput="state['${key}'][${i}].text=this.value;renderPreview();autoGrow(this)">${esc(item.text)}</textarea>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No items yet.</div>`;
+  autoGrowAll(container);
+}
+function addListItem(key, icon, text){
+  state[key].push({icon, text});
+  renderPreview();
+  renderLeftPanel();
+}
+
+/* ---- terms editor ---- */
+function renderTermsEditor(){
+  const container = document.getElementById('termsListLeft');
+  container.innerHTML = state.terms.map((t,i) => `
+    <div class="item-card">
+      <textarea oninput="state.terms[${i}]=this.value;renderPreview();autoGrow(this)">${esc(t)}</textarea>
+      <div class="item-top" style="margin-top:8px;"><button class="mini-btn danger remove" onclick="state.terms.splice(${i},1);renderPreview();renderTermsEditor()">Remove</button></div>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No terms yet.</div>`;
+  autoGrowAll(container);
+}
+function addTerm(text){
+  state.terms.push(text);
+  renderPreview();
+  renderTermsEditor();
+}
+
+/* ---- events editor ---- */
+function renderEventsEditor(){
+  const container = document.getElementById('eventsListLeft');
+  container.innerHTML = state.events.map((ev, ei) => `
+    <div class="event-card">
+      <div class="ev-top">
+        <input type="text" class="grow" value="${esc(ev.name)}" oninput="state.events[${ei}].name=this.value;renderPreview()" placeholder="Event name">
+        <button class="mini-btn danger" onclick="state.events.splice(${ei},1);renderPreview();renderEventsEditor()">Remove event</button>
+      </div>
+      ${ev.roles.map((r, ri) => `
+        <div class="role-block">
+          <div class="rb-head">
+            <input type="text" value="${esc(r.roleName)}" oninput="state.events[${ei}].roles[${ri}].roleName=this.value;renderPreview()" placeholder="Role name (e.g. Drone)">
+            <button class="mini-btn danger" onclick="state.events[${ei}].roles.splice(${ri},1);renderPreview();renderEventsEditor()">✕</button>
+          </div>
+          ${r.styles.map((s, si) => `
+            <div class="style-edit">
+              <input type="number" min="0" max="9" value="${s.count}" oninput="state.events[${ei}].roles[${ri}].styles[${si}].count=this.value;renderPreview()">
+              <input type="text" value="${esc(s.label)}" oninput="state.events[${ei}].roles[${ri}].styles[${si}].label=this.value;renderPreview()" placeholder="Candid / Traditional">
+              <button class="mini-btn danger" onclick="state.events[${ei}].roles[${ri}].styles.splice(${si},1);renderPreview();renderEventsEditor()">✕</button>
+            </div>
+          `).join('')}
+          <button class="mini-btn" onclick="state.events[${ei}].roles[${ri}].styles.push({count:1,label:'Candid'});renderPreview();renderEventsEditor()">+ Add style row</button>
+        </div>
+      `).join('')}
+      <button class="mini-btn" onclick="state.events[${ei}].roles.push({roleName:'Drone',styles:[{count:1,label:'Aerial'}]});renderPreview();renderEventsEditor()">+ Add role (e.g. Drone)</button>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No events yet.</div>`;
+}
+function addEvent(){
+  state.events.push({
+    name:'New Event',
+    roles:[
+      {roleName:'Photographers', styles:[{count:1,label:'Candid'}]},
+      {roleName:'Cinematographers', styles:[{count:1,label:'Candid'}]}
+    ]
+  });
+  renderPreview();
+  renderEventsEditor();
+}
+
+/* ================= INIT / RESET ================= */
+function resetAll(){
+  if(confirm('Reset everything back to the original sample quotation? Your edits will be lost.')){
+    state = sampleState();
+    renderPreview();
+    renderLeftPanel();
+  }
+}
+
+state = sampleState();
+renderPreview();
+renderLeftPanel();
+</script>
+
+</body>
+</html>
