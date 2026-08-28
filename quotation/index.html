@@ -185,13 +185,19 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 .term-item::before{ content:"•"; font-size:19px; line-height:1.3; }
 .term-item span{ flex:1; white-space:pre-wrap; }
 
-.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:24px; margin-top:36px; }
+.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:24px; margin-top:150px; }
 
 @media print{
-  body{ background:#fff; }
+  *{
+    -webkit-print-color-adjust:exact !important;
+    print-color-adjust:exact !important;
+    color-adjust:exact !important;
+  }
+  html,body{ background:var(--pv-bg) !important; margin:0; padding:0; }
   .topbar,.left-panel{ display:none !important; }
-  .right-panel{ padding:0; background:#fff; display:block; }
-  .page{ box-shadow:none; margin:0 auto; max-width:100%; }
+  .workspace{ display:block !important; }
+  .right-panel{ padding:0 !important; margin:0 !important; background:var(--pv-bg) !important; display:block !important; min-height:0 !important; }
+  .page{ box-shadow:none !important; margin:0 !important; max-width:100% !important; width:100% !important; border-radius:0 !important; }
 }
 @media (max-width:980px){
   .workspace{ flex-direction:column; }
@@ -205,9 +211,9 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
 
 <div class="topbar">
   <div class="title">Sakkhi — Quotation Builder</div>
-  <button class="primary" onclick="window.print()">🖨️ Export / Save as PDF</button>
+  <button class="primary" onclick="exportAsPDF()">🖨️ Export / Save as PDF</button>
   <button onclick="resetAll()">↺ Reset to sample</button>
-  <div class="hint">Left = edit everything (text, icons, colors, logo). Right = exactly what the client sees. Nothing is typed directly on the preview anymore — edit on the left and watch it update.</div>
+  <div class="hint">Left = edit everything (text, icons, colors, logo). Right = exactly what the client sees. When the print dialog opens, make sure <b>Background graphics</b> is turned on and <b>Paper size</b> is set to <b>Default</b> — that keeps the colors and gives you one continuous page.</div>
 </div>
 
 <div class="workspace">
@@ -434,6 +440,26 @@ function autoGrow(el){
 function autoGrowAll(scope){
   (scope||document).querySelectorAll('textarea').forEach(autoGrow);
 }
+
+/* ================= PDF EXPORT (single continuous page) ================= */
+function setPrintPageSize(){
+  const page = document.getElementById('previewPage');
+  if(!page) return;
+  const w = Math.ceil(page.getBoundingClientRect().width) || 800;
+  const h = Math.ceil(page.scrollHeight) + 20;
+  let styleEl = document.getElementById('dynamicPrintPage');
+  if(!styleEl){
+    styleEl = document.createElement('style');
+    styleEl.id = 'dynamicPrintPage';
+    document.head.appendChild(styleEl);
+  }
+  styleEl.textContent = `@page{ size:${w}px ${h}px; margin:0; }`;
+}
+function exportAsPDF(){
+  setPrintPageSize();
+  window.print();
+}
+window.addEventListener('beforeprint', setPrintPageSize);
 
 function sectionIcon(key){
   return `<span class="hicon">${ICONS[key]||''}</span>`;
