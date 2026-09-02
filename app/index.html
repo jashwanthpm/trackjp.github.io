@@ -3502,10 +3502,85 @@ const ACTIVITY_TYPES = {
   subscription_change:{ icon: 'ti-crown',        color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'subscription',label: 'Subscription Updated' },
   settings_payment: { icon: 'ti-credit-card',    color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'settings',    label: 'Payment Info Updated' },
   settings_general: { icon: 'ti-settings',       color: '#9ca3af', bg: 'rgba(156,163,175,0.1)', group: 'settings',    label: 'Settings Changed' },
+  payment_update:   { icon: 'ti-cash',           color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'payments',    label: 'Payment Updated' },
   data_import:      { icon: 'ti-upload',         color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'data',        label: 'Data Imported' },
   data_export:      { icon: 'ti-download',       color: '#38bdf8', bg: 'rgba(56,189,248,0.1)',  group: 'data',        label: 'Data Exported' },
   data_erase:       { icon: 'ti-alert-triangle', color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'data',        label: 'Data Erased' },
 };
+
+// Compares old vs new shoot/edit-job records and returns plain-language
+// change descriptions, split into "payment-related" vs "booking-detail"
+// buckets, so a payment/amount edit always logs under Payments — even if
+// it happened from the Calendar, Shoots list, or anywhere else — while a
+// date/location/name edit logs under Bookings.
+function describeShootPaymentChanges(prev, curr) {
+  const parts = [];
+  const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+  if (Number(prev.amount) !== Number(curr.amount)) {
+    parts.push(`Amount ${fmt(prev.amount)} → ${fmt(curr.amount)}`);
+  }
+  if (prev.payStatus !== curr.payStatus || Number(prev.partPaid) !== Number(curr.partPaid)) {
+    if (curr.payStatus === 'done') {
+      parts.push(`Marked as fully paid — ${fmt(curr.amount)} received`);
+    } else if (curr.payStatus === 'part') {
+      const wasNote = (prev.payStatus === 'part' && Number(prev.partPaid) !== Number(curr.partPaid)) ? ` (was ${fmt(prev.partPaid)})` : '';
+      parts.push(`Part payment: ${fmt(curr.partPaid)} received of ${fmt(curr.amount)}${wasNote}`);
+    } else {
+      parts.push(`Payment status set to Pending`);
+    }
+  }
+  if (Number(prev.expense) !== Number(curr.expense)) {
+    parts.push(`Expense ${fmt(prev.expense)} → ${fmt(curr.expense)}`);
+  }
+  if (prev.expenseStatus !== curr.expenseStatus) {
+    parts.push(`Expense marked as ${curr.expenseStatus === 'settled' ? 'Settled' : 'Pending'}`);
+  }
+  return parts;
+}
+
+function describeShootBookingChanges(prev, curr) {
+  const parts = [];
+  const dash = (v) => (v && String(v).trim()) ? v : '—';
+  if (prev.name !== curr.name) parts.push(`Name: ${dash(prev.name)} → ${dash(curr.name)}`);
+  if (prev.date !== curr.date) parts.push(`Date: ${dash(prev.date)} → ${dash(curr.date)}`);
+  if (prev.event !== curr.event) parts.push(`Event: ${dash(prev.event)} → ${dash(curr.event)}`);
+  if (prev.session !== curr.session) parts.push(`Session: ${dash(prev.session)} → ${dash(curr.session)}`);
+  if (prev.location !== curr.location) parts.push(`Location: ${dash(prev.location)} → ${dash(curr.location)}`);
+  if (prev.company !== curr.company) parts.push(`Company: ${dash(prev.company)} → ${dash(curr.company)}`);
+  if (prev.notes !== curr.notes) parts.push('Notes updated');
+  return parts;
+}
+
+function describeEditJobPaymentChanges(prev, curr) {
+  const parts = [];
+  const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+  if (Number(prev.amount) !== Number(curr.amount)) {
+    parts.push(`Amount ${fmt(prev.amount)} → ${fmt(curr.amount)}`);
+  }
+  if (prev.pay_status !== curr.pay_status || Number(prev.part_paid) !== Number(curr.part_paid)) {
+    if (curr.pay_status === 'done') {
+      parts.push(`Marked as fully paid — ${fmt(curr.amount)} received`);
+    } else if (curr.pay_status === 'part') {
+      const wasNote = (prev.pay_status === 'part' && Number(prev.part_paid) !== Number(curr.part_paid)) ? ` (was ${fmt(prev.part_paid)})` : '';
+      parts.push(`Part payment: ${fmt(curr.part_paid)} received of ${fmt(curr.amount)}${wasNote}`);
+    } else {
+      parts.push(`Payment status set to Pending`);
+    }
+  }
+  return parts;
+}
+
+function describeEditJobDetailChanges(prev, curr) {
+  const parts = [];
+  const dash = (v) => (v && String(v).trim()) ? v : '—';
+  if (prev.client_name !== curr.client_name) parts.push(`Client: ${dash(prev.client_name)} → ${dash(curr.client_name)}`);
+  if (prev.date !== curr.date) parts.push(`Date: ${dash(prev.date)} → ${dash(curr.date)}`);
+  if (prev.job_type !== curr.job_type) parts.push(`Job Type: ${dash(prev.job_type)} → ${dash(curr.job_type)}`);
+  if (prev.event_name !== curr.event_name) parts.push(`Event: ${dash(prev.event_name)} → ${dash(curr.event_name)}`);
+  if (prev.company_name !== curr.company_name) parts.push(`Company: ${dash(prev.company_name)} → ${dash(curr.company_name)}`);
+  if (prev.work_status !== curr.work_status) parts.push(`Status: ${dash(prev.work_status)} → ${dash(curr.work_status)}`);
+  return parts;
+}
 
 function logActivity(type, title, detail = '') {
   try {
@@ -4012,6 +4087,7 @@ async function saveEditJob() {
   try {
     const existingIdx = _edits.findIndex(e => e.id === id);
     const isNewJob = existingIdx < 0;
+    const previousJob = existingIdx >= 0 ? { ..._edits[existingIdx] } : null;
     if (existingIdx >= 0) {
       await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, {
         method: 'PATCH',
@@ -4028,8 +4104,19 @@ async function saveEditJob() {
 
     if (isNewJob) {
       logActivity('edit_add', `Editing job added: ${job.client_name}`, `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim());
-    } else {
-      logActivity('edit_update', `Editing job updated: ${job.client_name}`, `${job.job_type || 'Edit'} · status: ${job.work_status}, payment: ${job.pay_status}`);
+    } else if (previousJob) {
+      const detailChanges = describeEditJobDetailChanges(previousJob, job);
+      const paymentChanges = describeEditJobPaymentChanges(previousJob, job);
+
+      if (detailChanges.length) {
+        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · '));
+      }
+      if (paymentChanges.length) {
+        const title = (previousJob.pay_status !== 'done' && job.pay_status === 'done')
+          ? `Payment settled: ${job.client_name}`
+          : `Payment updated: ${job.client_name}`;
+        logActivity('payment_update', title, paymentChanges.join(' · '));
+      }
     }
 
     setSyncStatus('synced', 'Saved Successfully');
@@ -6672,17 +6759,18 @@ async function toggleBlockDate(dateStr) {
 
         if (!editId) {
           logActivity('booking_add', `Booking added: ${record.name}`, `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`);
-        } else {
-          logActivity('booking_update', `Booking updated: ${record.name}`, `${record.event || 'Shoot'} on ${record.date}`);
-          if (previousRecord) {
-            if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') {
-              logActivity('payment_settled', `Payment settled: ${record.name}`, `Full amount of ₹${record.amount} marked as received`);
-            } else if (record.payStatus === 'part' && previousRecord.partPaid !== record.partPaid) {
-              logActivity('payment_partial', `Partial payment recorded: ${record.name}`, `₹${record.partPaid} received of ₹${record.amount}`);
-            }
-            if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') {
-              logActivity('expense_settled', `Expense settled: ${record.name}`, `Expense of ₹${record.expense} marked as settled`);
-            }
+        } else if (previousRecord) {
+          const bookingChanges = describeShootBookingChanges(previousRecord, record);
+          const paymentChanges = describeShootPaymentChanges(previousRecord, record);
+
+          if (bookingChanges.length) {
+            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · '));
+          }
+          if (paymentChanges.length) {
+            let title = `Payment updated: ${record.name}`;
+            if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') title = `Payment settled: ${record.name}`;
+            else if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') title = `Expense settled: ${record.name}`;
+            logActivity('payment_update', title, paymentChanges.join(' · '));
           }
         }
 
