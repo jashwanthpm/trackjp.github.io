@@ -727,6 +727,10 @@
                 <i class="ti ti-database text-lg"></i>
                 <span>Data</span>
               </button>
+              <button onclick="switchAccountTab('activity')" class="account-sidebar-item" data-tab="activity">
+                <i class="ti ti-history text-lg"></i>
+                <span>Activity Log</span>
+              </button>
               <button onclick="switchAccountTab('support')" class="account-sidebar-item" data-tab="support">
   <i class="ti ti-help text-lg"></i>
   <span>Support</span>
@@ -1225,6 +1229,48 @@
                 </div>
               </div>
             </div>
+<div id="account-activity" class="account-content-section">
+              <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 space-y-4">
+                <div class="border-b border-neutral-800 pb-4 flex items-start justify-between gap-3 flex-wrap">
+                  <div>
+                    <h3 class="text-lg font-bold text-white flex items-center gap-2">
+                      <i class="ti ti-history text-[#c9a96e]"></i> Activity Log
+                    </h3>
+                    <p class="text-xs text-neutral-500 mt-1">A running record of when bookings, editing jobs, payments, and settings were added or changed on your account.</p>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <button onclick="exportActivityLogToCSV()" class="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg px-3 py-2 text-[11px] font-semibold transition-colors">
+                      <i class="ti ti-file-spreadsheet text-sm"></i> CSV
+                    </button>
+                    <button onclick="exportActivityLogToPDF()" class="flex items-center gap-1.5 bg-neutral-950 border border-neutral-800 text-[#c9a96e] hover:border-[#c9a96e]/50 hover:bg-[#c9a96e]/5 rounded-lg px-3 py-2 text-[11px] font-semibold transition-colors">
+                      <i class="ti ti-file-type-pdf text-sm"></i> PDF
+                    </button>
+                  </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-2.5">
+                  <div class="relative flex-1">
+                    <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-600 text-sm"></i>
+                    <input type="text" id="activity-search" oninput="renderActivityLog()" placeholder="Search logs (client, job, keyword)..." class="w-full bg-neutral-950 border border-neutral-900 rounded-lg pl-9 pr-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition"/>
+                  </div>
+                  <select id="activity-filter" onchange="renderActivityLog()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition">
+                    <option value="all">All Activity</option>
+                    <option value="booking">Bookings</option>
+                    <option value="payment">Payments &amp; Settlements</option>
+                    <option value="editing">Editing Jobs</option>
+                    <option value="settings">Settings &amp; Payment Info</option>
+                  </select>
+                </div>
+
+                <div id="activity-log-list" class="space-y-0 max-h-[65vh] overflow-y-auto pr-1">
+                  <div class="text-center py-10 text-neutral-600 text-xs">
+                    <i class="ti ti-history text-3xl block mb-2 opacity-40"></i>
+                    Loading activity...
+                  </div>
+                </div>
+              </div>
+            </div>
+
 <div id="account-support" class="account-content-section">
   <div class="space-y-6">
     
@@ -2930,6 +2976,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     const blockRow = configurations.find(r => r.key === 'blocked_dates');
     if (blockRow) _blockedDates = blockRow.value || [];
+
+    const activityRow = configurations.find(r => r.key === 'activity_log');
+    if (activityRow) _activityLog = activityRow.value || [];
     
     const pinRow = configurations.find(r => r.key === 'app_pin');
     if (pinRow) _appPin = pinRow.value;
@@ -3407,6 +3456,205 @@ function getCurrentDeviceDetails() {
 
 let _edits = [];
 let _jobTypes = ['Photo Edit', 'Video Edit', 'Album Design'];
+let _activityLog = [];
+
+// ==========================================
+// ACTIVITY LOG — records when bookings, editing jobs, payments/settlements,
+// and account settings (like payment/UPI details) were added or changed.
+// ==========================================
+const ACTIVITY_TYPES = {
+  booking_add:      { icon: 'ti-calendar-plus',  color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',  group: 'booking',  label: 'Booking Added' },
+  booking_update:   { icon: 'ti-calendar-event', color: '#38bdf8', bg: 'rgba(56,189,248,0.1)',  group: 'booking',  label: 'Booking Updated' },
+  booking_confirm:  { icon: 'ti-calendar-check', color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'booking',  label: 'Booking Confirmed' },
+  booking_delete:   { icon: 'ti-calendar-x',     color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'booking',  label: 'Booking Deleted' },
+  payment_settled:  { icon: 'ti-cash',           color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'payment',  label: 'Payment Settled' },
+  payment_partial:  { icon: 'ti-cash-banknote',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  group: 'payment',  label: 'Partial Payment' },
+  expense_settled:  { icon: 'ti-receipt',        color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', group: 'payment',  label: 'Expense Settled' },
+  edit_add:         { icon: 'ti-photo-edit',     color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',  label: 'Editing Job Added' },
+  edit_update:      { icon: 'ti-edit',           color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',  label: 'Editing Job Updated' },
+  edit_delete:      { icon: 'ti-trash',          color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'editing',  label: 'Editing Job Deleted' },
+  settings_payment: { icon: 'ti-credit-card',    color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'settings', label: 'Payment Info Updated' },
+  settings_general: { icon: 'ti-settings',       color: '#9ca3af', bg: 'rgba(156,163,175,0.1)', group: 'settings', label: 'Settings Changed' },
+};
+
+function logActivity(type, title, detail = '') {
+  try {
+    const entry = { id: uid(), type, title, detail, timestamp: new Date().toISOString() };
+    _activityLog.unshift(entry);
+    if (_activityLog.length > 500) _activityLog = _activityLog.slice(0, 500);
+    saveSettingToDB('activity_log', _activityLog).catch(() => {});
+    if (_currentAccountTab === 'activity') renderActivityLog();
+  } catch (e) {
+    console.warn('Activity log error:', e);
+  }
+}
+
+function renderActivityLog() {
+  const list = document.getElementById('activity-log-list');
+  if (!list) return;
+
+  const filter = document.getElementById('activity-filter')?.value || 'all';
+  const query = (document.getElementById('activity-search')?.value || '').trim().toLowerCase();
+
+  let entries = [..._activityLog];
+  if (filter !== 'all') {
+    entries = entries.filter(e => (ACTIVITY_TYPES[e.type]?.group || 'settings') === filter);
+  }
+  if (query) {
+    entries = entries.filter(e =>
+      (e.title || '').toLowerCase().includes(query) ||
+      (e.detail || '').toLowerCase().includes(query)
+    );
+  }
+
+  if (!entries.length) {
+    list.innerHTML = `
+      <div class="text-center py-10 text-neutral-600 text-xs">
+        <i class="ti ti-history text-3xl block mb-2 opacity-40"></i>
+        ${_activityLog.length ? 'No activity matches your filters.' : 'No activity recorded yet. Actions like adding a booking, settling a payment, or updating your payment details will show up here.'}
+      </div>`;
+    return;
+  }
+
+  // Group by calendar day for readability
+  const groups = [];
+  let lastDay = null;
+  entries.forEach(e => {
+    const d = new Date(e.timestamp);
+    const dayKey = d.toDateString();
+    if (dayKey !== lastDay) {
+      groups.push({ dayKey, dayLabel: formatActivityDayLabel(d), items: [] });
+      lastDay = dayKey;
+    }
+    groups[groups.length - 1].items.push(e);
+  });
+
+  list.innerHTML = groups.map(g => `
+    <div class="mb-4">
+      <div class="text-[10px] uppercase font-bold tracking-wider text-neutral-600 px-1 mb-2 sticky top-0 bg-[#0d0d0d] py-1">${g.dayLabel}</div>
+      <div class="space-y-0.5">
+        ${g.items.map(e => {
+          const meta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
+          const time = new Date(e.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          return `
+          <div class="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-neutral-900/40 transition-colors">
+            <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:${meta.bg}; color:${meta.color}; border:1px solid ${meta.color}33;">
+              <i class="ti ${meta.icon} text-sm"></i>
+            </div>
+            <div class="flex-1 min-w-0">
+              <p class="text-xs font-semibold text-white leading-snug">${escapeHtml(e.title)}</p>
+              ${e.detail ? `<p class="text-[11px] text-neutral-500 mt-0.5 leading-snug">${escapeHtml(e.detail)}</p>` : ''}
+            </div>
+            <div class="text-[10px] text-neutral-600 flex-shrink-0 mt-1 whitespace-nowrap">${time}</div>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function formatActivityDayLabel(d) {
+  const today = new Date();
+  const yesterday = new Date(); yesterday.setDate(today.getDate() - 1);
+  if (d.toDateString() === today.toDateString()) return 'Today';
+  if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
+  return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+function exportActivityLogToCSV() {
+  if (!_activityLog.length) { showToast('No activity to export yet.', 'error'); return; }
+  const headers = ['Date', 'Time', 'Category', 'Event', 'Details'];
+  const escapeCSV = (str) => {
+    if (str === null || str === undefined) return '';
+    let s = String(str).replace(/"/g, '""');
+    if (s.includes(',') || s.includes('\n') || s.includes('"')) s = `"${s}"`;
+    return s;
+  };
+  const rows = [headers.join(',')];
+  [..._activityLog].forEach(e => {
+    const d = new Date(e.timestamp);
+    const meta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
+    rows.push([
+      escapeCSV(d.toLocaleDateString('en-IN')),
+      escapeCSV(d.toLocaleTimeString('en-IN')),
+      escapeCSV(meta.label),
+      escapeCSV(e.title),
+      escapeCSV(e.detail)
+    ].join(','));
+  });
+  const csvString = rows.join('\n');
+  const blob = new Blob([csvString], { type: 'text/csv;charset=utf-8;' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.setAttribute('href', url);
+  link.setAttribute('download', `Sakkhi_Activity_Log_${new Date().toISOString().split('T')[0]}.csv`);
+  link.style.visibility = 'hidden';
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+  showToast('Activity log exported as CSV.', 'success');
+}
+
+function exportActivityLogToPDF() {
+  if (!_activityLog.length) { showToast('No activity to export yet.', 'error'); return; }
+  try {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+    const pageWidth = doc.internal.pageSize.getWidth();
+    let y = 20;
+
+    doc.setFont('helvetica', 'bold');
+    doc.setFontSize(16);
+    doc.setTextColor(20, 20, 20);
+    doc.text(`${_profile.bizName || 'Sakkhi'} — Activity Log`, 14, y);
+    y += 6;
+    doc.setFont('helvetica', 'normal');
+    doc.setFontSize(9);
+    doc.setTextColor(120, 120, 120);
+    doc.text(`Generated on ${new Date().toLocaleString('en-IN')}`, 14, y);
+    y += 8;
+    doc.setDrawColor(220, 220, 220);
+    doc.line(14, y, pageWidth - 14, y);
+    y += 8;
+
+    [..._activityLog].forEach(e => {
+      const meta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
+      const d = new Date(e.timestamp);
+      const stamp = d.toLocaleDateString('en-IN') + '  ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+
+      if (y > 275) { doc.addPage(); y = 20; }
+
+      doc.setFont('helvetica', 'bold');
+      doc.setFontSize(10);
+      doc.setTextColor(30, 30, 30);
+      doc.text(e.title, 14, y);
+
+      doc.setFont('helvetica', 'normal');
+      doc.setFontSize(8);
+      doc.setTextColor(150, 120, 60);
+      doc.text(meta.label, pageWidth - 14, y, { align: 'right' });
+      y += 5;
+
+      if (e.detail) {
+        doc.setFontSize(8.5);
+        doc.setTextColor(100, 100, 100);
+        const lines = doc.splitTextToSize(e.detail, pageWidth - 28);
+        doc.text(lines, 14, y);
+        y += lines.length * 4;
+      }
+
+      doc.setFontSize(7.5);
+      doc.setTextColor(160, 160, 160);
+      doc.text(stamp, 14, y);
+      y += 7;
+    });
+
+    doc.save(`Sakkhi_Activity_Log_${new Date().toISOString().split('T')[0]}.pdf`);
+    showToast('Activity log exported as PDF.', 'success');
+  } catch (e) {
+    showToast('PDF export failed: ' + e.message, 'error');
+  }
+}
 
 function handleEditJobTypeOther() {
   const wrap = document.getElementById('f-edit-job-other-wrap');
@@ -3733,6 +3981,7 @@ async function saveEditJob() {
   setSyncStatus('syncing', 'Saving Edit Job...');
   try {
     const existingIdx = _edits.findIndex(e => e.id === id);
+    const isNewJob = existingIdx < 0;
     if (existingIdx >= 0) {
       await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, {
         method: 'PATCH',
@@ -3746,7 +3995,13 @@ async function saveEditJob() {
       });
       _edits.push(job);
     }
-    
+
+    if (isNewJob) {
+      logActivity('edit_add', `Editing job added: ${job.client_name}`, `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim());
+    } else {
+      logActivity('edit_update', `Editing job updated: ${job.client_name}`, `${job.job_type || 'Edit'} · status: ${job.work_status}, payment: ${job.pay_status}`);
+    }
+
     setSyncStatus('synced', 'Saved Successfully');
     showToast('Editing job saved!');
     closeModal('edit-job-modal-backdrop');
@@ -3763,8 +4018,10 @@ async function deleteEditJob() {
   
   setSyncStatus('syncing', 'Deleting Job...');
   try {
+    const deletedJob = _edits.find(e => e.id === id);
     await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, { method: 'DELETE' });
     _edits = _edits.filter(e => e.id !== id);
+    logActivity('edit_delete', `Editing job deleted: ${deletedJob ? deletedJob.client_name : 'Unnamed job'}`);
     setSyncStatus('synced', 'Deleted');
     showToast('Editing job removed.');
     closeModal('edit-job-modal-backdrop');
@@ -3829,6 +4086,10 @@ async function deleteEditJob() {
       // Load the devices list when the devices tab is opened
       if (tab === 'devices') {
         renderDevicesList();
+      }
+
+      if (tab === 'activity') {
+        renderActivityLog();
       }
     } // <--- THIS is the closing brace that was likely missing
 
@@ -4239,6 +4500,7 @@ if (daCard) {
         await sbFetch(`shoots?id=eq.${shootId}`, { method: 'PATCH', body: JSON.stringify({ booking_status: 'confirmed' }) });
         const s = _shoots.find(x => x.id === shootId);
         if (s) s.bookingStatus = 'confirmed';
+        logActivity('booking_confirm', `Booking request confirmed: ${s ? s.name : ''}`, s ? `${s.event || 'Shoot'} on ${s.date}` : '');
         refreshCurrentView();
         showToast('Booking approved — added to your schedule!');
       } catch (e) {
@@ -4933,6 +5195,10 @@ async function toggleBlockDate(dateStr) {
     }
 
     async function saveProfileSettings() {
+      const prevUpi = _profile.upi || '';
+      const prevBank = _profile.bank || '';
+      const hadPaymentInfoBefore = !!(prevUpi || prevBank);
+
       _profile.bizName = document.getElementById('acc-biz-name').value.trim();
       _profile.phone = document.getElementById('acc-phone').value.trim();
       _profile.instagram = document.getElementById('acc-instagram').value.trim();
@@ -4944,6 +5210,15 @@ async function toggleBlockDate(dateStr) {
       }
       
       await saveSettingToDB('profile', _profile);
+
+      if (prevUpi !== _profile.upi || prevBank !== _profile.bank) {
+        logActivity(
+          'settings_payment',
+          hadPaymentInfoBefore ? 'Payment details updated' : 'Payment details added',
+          [_profile.upi ? `UPI: ${_profile.upi}` : null, _profile.bank ? 'Bank details on file' : null].filter(Boolean).join(' · ')
+        );
+      }
+
       showToast('Profile configuration records updated successfully.');
     }
 
@@ -6345,6 +6620,7 @@ async function toggleBlockDate(dateStr) {
       const partPaid = payStatus === 'part' ? (parseFloat(document.getElementById('f-shoot-part-paid').value) || 0) : (payStatus === 'done' ? amount : 0);
 
       const editId = document.getElementById('edit-shoot-id').value;
+      const previousRecord = editId ? _shoots.find(x => x.id === editId) : null;
       const record = {
         id: editId || uid(),
         name, date, event,
@@ -6359,6 +6635,23 @@ async function toggleBlockDate(dateStr) {
 
       try {
         await saveShootToDB(record);
+
+        if (!editId) {
+          logActivity('booking_add', `Booking added: ${record.name}`, `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`);
+        } else {
+          logActivity('booking_update', `Booking updated: ${record.name}`, `${record.event || 'Shoot'} on ${record.date}`);
+          if (previousRecord) {
+            if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') {
+              logActivity('payment_settled', `Payment settled: ${record.name}`, `Full amount of ₹${record.amount} marked as received`);
+            } else if (record.payStatus === 'part' && previousRecord.partPaid !== record.partPaid) {
+              logActivity('payment_partial', `Partial payment recorded: ${record.name}`, `₹${record.partPaid} received of ₹${record.amount}`);
+            }
+            if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') {
+              logActivity('expense_settled', `Expense settled: ${record.name}`, `Expense of ₹${record.expense} marked as settled`);
+            }
+          }
+        }
+
         closeShootModal();
         refreshCurrentView();
       } catch (e) {}
@@ -6370,6 +6663,7 @@ async function toggleBlockDate(dateStr) {
     }
 
     let _pendingDropTargetId = null;
+    let _pendingDropTargetName = '';
     function askDeletePrompt(id) {
       if (!_isSubActive && !isDemoMode) {
     showToast('Subscription expired. Cannot delete records.', 'error');
@@ -6377,6 +6671,7 @@ async function toggleBlockDate(dateStr) {
   }
       const s = _shoots.find(x => x.id === id); if (!s) return;
       _pendingDropTargetId = id;
+      _pendingDropTargetName = s.name;
       document.getElementById('confirm-title').textContent = 'Delete Shoot?';
       document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
@@ -6387,8 +6682,10 @@ async function toggleBlockDate(dateStr) {
     async function executeConfirmedRecordDrop() {
       if (!_pendingDropTargetId) return;
       try {
+        const deletedName = _pendingDropTargetName;
         await deleteShootFromDB(_pendingDropTargetId);
-        _pendingDropTargetId = null; closeConfirmModal(); refreshCurrentView();
+        logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`);
+        _pendingDropTargetId = null; _pendingDropTargetName = ''; closeConfirmModal(); refreshCurrentView();
       } catch (e) {}
     }
 
@@ -6906,6 +7203,10 @@ function updateAccountDisplay() {
 
       if (tab === 'security') {
         refreshBiometricUI();
+      }
+
+      if (tab === 'activity') {
+        renderActivityLog();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
