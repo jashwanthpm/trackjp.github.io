@@ -1255,10 +1255,14 @@
                   </div>
                   <select id="activity-filter" onchange="renderActivityLog()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition">
                     <option value="all">All Activity</option>
-                    <option value="booking">Bookings</option>
-                    <option value="payment">Payments &amp; Settlements</option>
+                    <option value="shoots">Bookings / Shoots</option>
+                    <option value="payments">Payments &amp; Settlements</option>
                     <option value="editing">Editing Jobs</option>
+                    <option value="online">Online Bookings</option>
+                    <option value="ledger">Ledger Links</option>
+                    <option value="subscription">Subscription</option>
                     <option value="settings">Settings &amp; Payment Info</option>
+                    <option value="data">Data (Import/Export)</option>
                   </select>
                 </div>
 
@@ -2429,6 +2433,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             method: 'POST',
             body: JSON.stringify({ key: dbKey, value: payload, user_id: currentUser.id })
           });
+          logActivity('ledger_created', `Ledger link created: ${companyName}`, 'Client-facing ledger portal generated for this company');
         }
       } catch (err) {
         console.error('Ledger link background sync failed (link is still shareable, will retry sync next time):', err);
@@ -2449,6 +2454,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Ledger Portal link for ${companyName} copied!`, 'success');
         });
+        logActivity('ledger_shared', `Ledger link shared: ${companyName}`);
         
       } catch (err) {
         setSyncStatus('error', 'Link Failed');
@@ -2637,6 +2643,7 @@ async function pollForUpdates() {
 
     if (brandNew.length > 0) {
       brandNew.forEach(booking => {
+        logActivity('booking_received', `Online booking received: ${booking.name || 'A client'}`, `${booking.event || 'Shoot'} on ${booking.date}`);
         addNotification(
           'New Booking Request! 🎉',
           `${booking.name || 'A client'} just requested a shoot.`,
@@ -3025,6 +3032,19 @@ try {
         }
         // ONLY grant access if the admin has explicitly marked it active
         _isSubActive = _subscription.status === 'active';
+
+        // Detect changes to plan/status since we last saw it on this device,
+        // so plan upgrades/downgrades/renewals made on the backend show up
+        // in the Activity Log too.
+        try {
+          const subStateKey = 'sakkhi_last_sub_state_' + userId;
+          const prevSubRaw = localStorage.getItem(subStateKey);
+          const prevSub = prevSubRaw ? JSON.parse(prevSubRaw) : null;
+          if (prevSub && (prevSub.plan !== _subscription.plan || prevSub.status !== _subscription.status)) {
+            logActivity('subscription_change', `Subscription updated: ${_subscription.plan || 'plan'} (${_subscription.status})`, prevSub.plan !== _subscription.plan ? `Plan changed from ${prevSub.plan} to ${_subscription.plan}` : `Status changed from ${prevSub.status} to ${_subscription.status}`);
+          }
+          localStorage.setItem(subStateKey, JSON.stringify({ plan: _subscription.plan, status: _subscription.status }));
+        } catch (e) {}
       } else {
         // No plan assigned by admin yet = Locked Out
         _isSubActive = false; 
@@ -3103,6 +3123,7 @@ try {
 if (newBookings.length > 0 && !isDemoMode) {
   setTimeout(() => {
     newBookings.forEach(booking => {
+      logActivity('booking_received', `Online booking received: ${booking.name || 'A client'}`, `${booking.event || 'Shoot'} on ${booking.date}`);
       addNotification(
         'New Booking Request! 🎉', 
         `${booking.name || 'A client'} just requested a shoot.`, 
@@ -3463,18 +3484,27 @@ let _activityLog = [];
 // and account settings (like payment/UPI details) were added or changed.
 // ==========================================
 const ACTIVITY_TYPES = {
-  booking_add:      { icon: 'ti-calendar-plus',  color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',  group: 'booking',  label: 'Booking Added' },
-  booking_update:   { icon: 'ti-calendar-event', color: '#38bdf8', bg: 'rgba(56,189,248,0.1)',  group: 'booking',  label: 'Booking Updated' },
-  booking_confirm:  { icon: 'ti-calendar-check', color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'booking',  label: 'Booking Confirmed' },
-  booking_delete:   { icon: 'ti-calendar-x',     color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'booking',  label: 'Booking Deleted' },
-  payment_settled:  { icon: 'ti-cash',           color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'payment',  label: 'Payment Settled' },
-  payment_partial:  { icon: 'ti-cash-banknote',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  group: 'payment',  label: 'Partial Payment' },
-  expense_settled:  { icon: 'ti-receipt',        color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', group: 'payment',  label: 'Expense Settled' },
-  edit_add:         { icon: 'ti-photo-edit',     color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',  label: 'Editing Job Added' },
-  edit_update:      { icon: 'ti-edit',           color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',  label: 'Editing Job Updated' },
-  edit_delete:      { icon: 'ti-trash',          color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'editing',  label: 'Editing Job Deleted' },
-  settings_payment: { icon: 'ti-credit-card',    color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'settings', label: 'Payment Info Updated' },
-  settings_general: { icon: 'ti-settings',       color: '#9ca3af', bg: 'rgba(156,163,175,0.1)', group: 'settings', label: 'Settings Changed' },
+  booking_add:      { icon: 'ti-calendar-plus',  color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',  group: 'shoots',      label: 'Booking Added' },
+  booking_update:   { icon: 'ti-calendar-event', color: '#38bdf8', bg: 'rgba(56,189,248,0.1)',  group: 'shoots',      label: 'Booking Updated' },
+  booking_delete:   { icon: 'ti-calendar-x',     color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'shoots',      label: 'Booking Deleted' },
+  payment_settled:  { icon: 'ti-cash',           color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'payments',    label: 'Payment Settled' },
+  payment_partial:  { icon: 'ti-cash-banknote',  color: '#fbbf24', bg: 'rgba(251,191,36,0.1)',  group: 'payments',    label: 'Partial Payment' },
+  expense_settled:  { icon: 'ti-receipt',        color: '#a78bfa', bg: 'rgba(167,139,250,0.1)', group: 'payments',    label: 'Expense Settled' },
+  edit_add:         { icon: 'ti-photo-edit',     color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',     label: 'Editing Job Added' },
+  edit_update:      { icon: 'ti-edit',           color: '#c084fc', bg: 'rgba(192,132,252,0.1)', group: 'editing',     label: 'Editing Job Updated' },
+  edit_delete:      { icon: 'ti-trash',          color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'editing',     label: 'Editing Job Deleted' },
+  booking_received: { icon: 'ti-inbox',          color: '#60a5fa', bg: 'rgba(96,165,250,0.1)',  group: 'online',      label: 'Online Booking Received' },
+  booking_confirm:  { icon: 'ti-calendar-check', color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'online',      label: 'Online Booking Confirmed' },
+  booking_reject:   { icon: 'ti-calendar-x',     color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'online',      label: 'Online Booking Rejected' },
+  online_link_shared:{ icon: 'ti-link',          color: '#818cf8', bg: 'rgba(129,140,248,0.1)', group: 'online',      label: 'Booking Link Shared' },
+  ledger_created:   { icon: 'ti-link',           color: '#22d3ee', bg: 'rgba(34,211,238,0.1)',  group: 'ledger',      label: 'Ledger Link Created' },
+  ledger_shared:    { icon: 'ti-share',          color: '#22d3ee', bg: 'rgba(34,211,238,0.1)',  group: 'ledger',      label: 'Ledger Link Shared' },
+  subscription_change:{ icon: 'ti-crown',        color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'subscription',label: 'Subscription Updated' },
+  settings_payment: { icon: 'ti-credit-card',    color: '#c9a96e', bg: 'rgba(201,169,110,0.12)',group: 'settings',    label: 'Payment Info Updated' },
+  settings_general: { icon: 'ti-settings',       color: '#9ca3af', bg: 'rgba(156,163,175,0.1)', group: 'settings',    label: 'Settings Changed' },
+  data_import:      { icon: 'ti-upload',         color: '#34d399', bg: 'rgba(52,211,153,0.1)',  group: 'data',        label: 'Data Imported' },
+  data_export:      { icon: 'ti-download',       color: '#38bdf8', bg: 'rgba(56,189,248,0.1)',  group: 'data',        label: 'Data Exported' },
+  data_erase:       { icon: 'ti-alert-triangle', color: '#f87171', bg: 'rgba(248,113,113,0.1)', group: 'data',        label: 'Data Erased' },
 };
 
 function logActivity(type, title, detail = '') {
@@ -4512,6 +4542,8 @@ if (daCard) {
       if (event && event.stopPropagation) event.stopPropagation();
       const s = _shoots.find(x => x.id === shootId); if (!s) return;
       _pendingDropTargetId = shootId;
+      _pendingDropTargetName = s.name;
+      _pendingDropIsReject = true;
       document.getElementById('confirm-title').textContent = 'Reject Booking Request?';
       document.getElementById('confirm-sub-text').textContent = `This will permanently delete the request from "${s.name}".`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
@@ -5661,6 +5693,7 @@ async function toggleBlockDate(dateStr) {
       
       doc.save(`Sakkhi_Data_Export_${new Date().toISOString().split('T')[0]}.pdf`);
       showToast('Database report successfully generated as a PDF file.', 'success');
+      logActivity('data_export', 'Full database exported (PDF)');
     }
 
     function downloadCompanyViewPDF() {
@@ -6339,6 +6372,7 @@ async function toggleBlockDate(dateStr) {
       link.click();
       document.body.removeChild(link);
       showToast('Database logs successfully compiled and saved as a CSV asset.', 'success');
+      logActivity('data_export', 'Full database exported (CSV)');
     }
 
     async function addCompany() {
@@ -6664,6 +6698,7 @@ async function toggleBlockDate(dateStr) {
 
     let _pendingDropTargetId = null;
     let _pendingDropTargetName = '';
+    let _pendingDropIsReject = false;
     function askDeletePrompt(id) {
       if (!_isSubActive && !isDemoMode) {
     showToast('Subscription expired. Cannot delete records.', 'error');
@@ -6672,6 +6707,7 @@ async function toggleBlockDate(dateStr) {
       const s = _shoots.find(x => x.id === id); if (!s) return;
       _pendingDropTargetId = id;
       _pendingDropTargetName = s.name;
+      _pendingDropIsReject = false;
       document.getElementById('confirm-title').textContent = 'Delete Shoot?';
       document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
@@ -6683,9 +6719,14 @@ async function toggleBlockDate(dateStr) {
       if (!_pendingDropTargetId) return;
       try {
         const deletedName = _pendingDropTargetName;
+        const wasReject = _pendingDropIsReject;
         await deleteShootFromDB(_pendingDropTargetId);
-        logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`);
-        _pendingDropTargetId = null; _pendingDropTargetName = ''; closeConfirmModal(); refreshCurrentView();
+        if (wasReject) {
+          logActivity('booking_reject', `Online booking rejected: ${deletedName || 'Unnamed request'}`);
+        } else {
+          logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`);
+        }
+        _pendingDropTargetId = null; _pendingDropTargetName = ''; _pendingDropIsReject = false; closeConfirmModal(); refreshCurrentView();
       } catch (e) {}
     }
 
@@ -7140,6 +7181,7 @@ function updateAccountDisplay() {
               
               statusDiv.innerHTML = `<span class="text-emerald-400">✅ Successfully imported & saved ${imported} records${skipped > 0 ? ` (${skipped} skipped)` : ''}</span>`;
               showToast(`Imported and saved ${imported} shoot records successfully!`, 'success');
+              logActivity('data_import', `Imported ${imported} shoot record${imported > 1 ? 's' : ''} from CSV`, skipped > 0 ? `${skipped} row(s) skipped` : '');
               
               // Clear input and trigger UI updates
               fileInput.value = '';
@@ -7264,6 +7306,7 @@ async function executeDeleteAll() {
     
     setSyncStatus('synced', 'Database Cleared');
     showToast('All shoot records have been permanently deleted.', 'success');
+    logActivity('data_erase', 'All shoot records erased', 'Triggered from Account > Data > Danger Zone');
     
     closeDeleteAllModal();
     refreshCurrentView();
@@ -7330,6 +7373,7 @@ async function executeDeleteAll() {
         navigator.clipboard.writeText(magicLink).then(() => {
           showToast(`Short link for ${companyName} copied!`, 'success');
         });
+        logActivity('online_link_shared', `Online booking link shared: ${companyName}`, 'Client-facing booking request form link shared');
       } catch(err) {
         setSyncStatus('error', 'Link Failed');
         showToast('Database error generating link.', 'error');
