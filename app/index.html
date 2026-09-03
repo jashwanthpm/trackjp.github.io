@@ -3616,7 +3616,7 @@ function buildShootSnapshot(r) {
   const amount = Number(r.amount || 0);
   const paid = r.payStatus === 'done' ? amount : (r.payStatus === 'part' ? Number(r.partPaid || 0) : 0);
   return {
-    kind: 'shoot',
+    kind: 'shoot', refId: r.id,
     name: r.name, company: r.company || '', event: r.event || '', date: r.date || '',
     location: r.location || '', session: r.session || '',
     amount, paid, balance: Math.max(amount - paid, 0), payStatus: r.payStatus,
@@ -3628,7 +3628,7 @@ function buildEditSnapshot(j) {
   const amount = Number(j.amount || 0);
   const paid = j.pay_status === 'done' ? amount : (j.pay_status === 'part' ? Number(j.part_paid || 0) : 0);
   return {
-    kind: 'edit',
+    kind: 'edit', refId: j.id,
     name: j.client_name, company: j.company_name || '', event: j.event_name || '', jobType: j.job_type || '',
     date: j.date || '', amount, paid, balance: Math.max(amount - paid, 0), payStatus: j.pay_status,
     workStatus: j.work_status || ''
@@ -3648,6 +3648,38 @@ function computeReceivedDelta(prevRecord, currRecord, isEdit) {
 // company is always visible in the list — not just inside the click-through detail.
 function companyTag(name) {
   return (name && String(name).trim()) ? ` · ${name}` : '';
+}
+
+// Sums up everything currently owed by / to a company across ALL of their
+// shoots and editing jobs — used to show "as of this entry" vs "today"
+// totals in the Activity Log detail card, not just the single record's balance.
+function computeCompanySnapshot(companyName) {
+  const norm = (v) => (v || '').toString().trim().toLowerCase();
+  const target = norm(companyName);
+  if (!target) return null;
+
+  let pendingPayment = 0, pendingExpense = 0, totalBooked = 0, totalPaid = 0;
+
+  (_shoots || []).forEach(s => {
+    if (norm(s.company) !== target) return;
+    const amount = Number(s.amount || 0);
+    const paid = s.payStatus === 'done' ? amount : (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
+    totalBooked += amount;
+    totalPaid += paid;
+    pendingPayment += Math.max(amount - paid, 0);
+    if (s.expenseStatus !== 'settled') pendingExpense += Number(s.expense || 0);
+  });
+
+  (_edits || []).forEach(j => {
+    if (norm(j.company_name) !== target) return;
+    const amount = Number(j.amount || 0);
+    const paid = j.pay_status === 'done' ? amount : (j.pay_status === 'part' ? Number(j.part_paid || 0) : 0);
+    totalBooked += amount;
+    totalPaid += paid;
+    pendingPayment += Math.max(amount - paid, 0);
+  });
+
+  return { company: companyName, pendingPayment, pendingExpense, totalBooked, totalPaid };
 }
 
 function renderActivityLog() {
@@ -3827,29 +3859,33 @@ function openActivityDetail(logId) {
     `;
 
     if (s.company) {
-      const totals = computeCompanyTotals(s.company, s.kind);
-      if (totals) {
-        html += `
-          <div class="border-t border-neutral-900 pt-4">
-            <p class="text-[10px] uppercase tracking-wider text-[#c9a96e] font-bold mb-1.5">${escapeHtml(s.company)} — Totals Today</p>
-            <p class="text-[10px] text-neutral-600 mb-2">Across ${totals.count} ${s.kind === 'edit' ? 'editing job' : 'shoot'}${totals.count > 1 ? 's' : ''} for this company right now</p>
-            <div class="grid ${totals.pendingExpense !== null ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
-              <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
-                <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Pending Payment</p>
-                <p class="text-sm font-bold ${totals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(totals.pendingPayment)}</p>
-              </div>
-              ${totals.pendingExpense !== null ? `
-              <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
-                <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Pending Expense</p>
-                <p class="text-sm font-bold ${totals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(totals.pendingExpense)}</p>
-              </div>` : ''}
+      const todayTotals = computeCompanySnapshot(s.company);
+      const asOfTotals = e.companySnapshot;
+      html += `
+        <div class="border-t border-neutral-900 pt-4">
+          <p class="text-[10px] uppercase tracking-wider text-[#c9a96e] font-bold mb-2">${escapeHtml(s.company)} — Company Balance</p>
+          <div class="grid grid-cols-2 gap-2">
+            <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3">
+              <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-2">As of ${new Date(e.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+              <p class="text-[10px] text-neutral-500 mb-0.5">Pending Payment</p>
+              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'} mb-2">${fmt(asOfTotals ? asOfTotals.pendingPayment : 0)}</p>
+              <p class="text-[10px] text-neutral-500 mb-0.5">Pending Expense</p>
+              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(asOfTotals ? asOfTotals.pendingExpense : 0)}</p>
+            </div>
+            <div class="bg-neutral-950 border border-[#c9a96e]/25 rounded-lg p-3">
+              <p class="text-[9px] uppercase text-[#c9a96e] font-bold tracking-wide mb-2">Today</p>
+              <p class="text-[10px] text-neutral-500 mb-0.5">Pending Payment</p>
+              <p class="text-sm font-bold ${todayTotals && todayTotals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'} mb-2">${fmt(todayTotals ? todayTotals.pendingPayment : 0)}</p>
+              <p class="text-[10px] text-neutral-500 mb-0.5">Pending Expense</p>
+              <p class="text-sm font-bold ${todayTotals && todayTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(todayTotals ? todayTotals.pendingExpense : 0)}</p>
             </div>
           </div>
-        `;
-      }
+          ${!asOfTotals ? `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">This entry was logged before company-wide totals were tracked, so the "as of" column isn't available here — only "Today" is live.</p>` : ''}
+        </div>
+      `;
     }
 
-    html += `<p class="text-[11px] text-neutral-600 leading-relaxed">The "This entry" figures are frozen at the time of this log. The "Totals Today" figures update live. Open ${s.kind === 'shoot' ? 'Shoots or Calendar' : 'Editing'} to see full records.</p>`;
+    html += `<p class="text-[11px] text-neutral-600 leading-relaxed">The shoot/job figures above are frozen at the time of this log entry. "Today" figures update live. Open ${s.kind === 'shoot' ? 'Shoots or Calendar' : 'Editing'} to see full records.</p>`;
   } else if (e.detail) {
     html += `<p class="text-xs text-neutral-400 leading-relaxed">${escapeHtml(e.detail)}</p>`;
   } else {
@@ -4299,12 +4335,13 @@ async function saveEditJob() {
     if (isNewJob) {
       const initialPaid = job.pay_status === 'done' ? job.amount : (job.pay_status === 'part' ? job.part_paid : 0);
       const editSnap = buildEditSnapshot(job);
+      const companySnap = job.company_name ? computeCompanySnapshot(job.company_name) : null;
 
       logActivity(
         'edit_add',
         `Editing job added: ${job.client_name}`,
         `${job.job_type || 'Edit'} · ${job.event_name || 'Job'} on ${job.date}${companyTag(job.company_name)}`,
-        { snapshot: editSnap }
+        { snapshot: editSnap, companySnapshot: companySnap }
       );
 
       if (initialPaid > 0) {
@@ -4312,21 +4349,23 @@ async function saveEditJob() {
         const payDetail = (job.pay_status === 'done'
           ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
           : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(job.amount || 0).toLocaleString('en-IN')} received`) + companyTag(job.company_name);
-        logActivity('payment_update', payTitle, payDetail, { snapshot: editSnap, delta: initialPaid });
+        logActivity('payment_update', payTitle, payDetail, { snapshot: editSnap, delta: initialPaid, companySnapshot: companySnap });
       }
     } else if (previousJob) {
       const detailChanges = describeEditJobDetailChanges(previousJob, job);
       const paymentChanges = describeEditJobPaymentChanges(previousJob, job);
+      const editSnap2 = buildEditSnapshot(job);
+      const companySnap2 = job.company_name ? computeCompanySnapshot(job.company_name) : null;
 
       if (detailChanges.length) {
-        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · ') + companyTag(job.company_name), { snapshot: buildEditSnapshot(job) });
+        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · ') + companyTag(job.company_name), { snapshot: editSnap2, companySnapshot: companySnap2 });
       }
       if (paymentChanges.length) {
         const title = (previousJob.pay_status !== 'done' && job.pay_status === 'done')
           ? `Payment settled: ${job.client_name}`
           : `Payment updated: ${job.client_name}`;
         const delta = computeReceivedDelta(previousJob, job, true);
-        logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(job.company_name), { snapshot: buildEditSnapshot(job), delta });
+        logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(job.company_name), { snapshot: editSnap2, delta, companySnapshot: companySnap2 });
       }
     }
 
@@ -4349,7 +4388,7 @@ async function deleteEditJob() {
     const deletedJob = _edits.find(e => e.id === id);
     await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, { method: 'DELETE' });
     _edits = _edits.filter(e => e.id !== id);
-    logActivity('edit_delete', `Editing job deleted: ${deletedJob ? deletedJob.client_name : 'Unnamed job'}`, '', { snapshot: deletedJob ? buildEditSnapshot(deletedJob) : null });
+    logActivity('edit_delete', `Editing job deleted: ${deletedJob ? deletedJob.client_name : 'Unnamed job'}`, deletedJob ? companyTag(deletedJob.company_name).replace(/^ · /, '') : '', { snapshot: deletedJob ? buildEditSnapshot(deletedJob) : null });
     setSyncStatus('synced', 'Deleted');
     showToast('Editing job removed.');
     closeModal('edit-job-modal-backdrop');
@@ -6972,12 +7011,13 @@ async function toggleBlockDate(dateStr) {
         if (!editId) {
           const initialPaid = record.payStatus === 'done' ? record.amount : (record.payStatus === 'part' ? record.partPaid : 0);
           const shootSnap = buildShootSnapshot(record);
+          const companySnap = record.company ? computeCompanySnapshot(record.company) : null;
 
           logActivity(
             'booking_add',
             `Booking added: ${record.name}`,
             `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`,
-            { snapshot: shootSnap }
+            { snapshot: shootSnap, companySnapshot: companySnap }
           );
 
           if (initialPaid > 0) {
@@ -6985,21 +7025,23 @@ async function toggleBlockDate(dateStr) {
             const payDetail = (record.payStatus === 'done'
               ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
               : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(record.amount || 0).toLocaleString('en-IN')} received`) + companyTag(record.company);
-            logActivity('payment_update', payTitle, payDetail, { snapshot: shootSnap, delta: initialPaid });
+            logActivity('payment_update', payTitle, payDetail, { snapshot: shootSnap, delta: initialPaid, companySnapshot: companySnap });
           }
         } else if (previousRecord) {
           const bookingChanges = describeShootBookingChanges(previousRecord, record);
           const paymentChanges = describeShootPaymentChanges(previousRecord, record);
+          const shootSnap2 = buildShootSnapshot(record);
+          const companySnap2 = record.company ? computeCompanySnapshot(record.company) : null;
 
           if (bookingChanges.length) {
-            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · ') + companyTag(record.company), { snapshot: buildShootSnapshot(record) });
+            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · ') + companyTag(record.company), { snapshot: shootSnap2, companySnapshot: companySnap2 });
           }
           if (paymentChanges.length) {
             let title = `Payment updated: ${record.name}`;
             if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') title = `Payment settled: ${record.name}`;
             else if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') title = `Expense settled: ${record.name}`;
             const delta = computeReceivedDelta(previousRecord, record, false);
-            logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(record.company), { snapshot: buildShootSnapshot(record), delta });
+            logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(record.company), { snapshot: shootSnap2, delta, companySnapshot: companySnap2 });
           }
         }
 
@@ -7041,10 +7083,11 @@ async function toggleBlockDate(dateStr) {
         const wasReject = _pendingDropIsReject;
         const snapshot = _pendingDropSnapshot;
         await deleteShootFromDB(_pendingDropTargetId);
+        const companyDetail = snapshot ? companyTag(snapshot.company).replace(/^ · /, '') : '';
         if (wasReject) {
-          logActivity('booking_reject', `Online booking rejected: ${deletedName || 'Unnamed request'}`, '', { snapshot });
+          logActivity('booking_reject', `Online booking rejected: ${deletedName || 'Unnamed request'}`, companyDetail, { snapshot });
         } else {
-          logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`, '', { snapshot });
+          logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`, companyDetail, { snapshot });
         }
         _pendingDropTargetId = null; _pendingDropTargetName = ''; _pendingDropIsReject = false; _pendingDropSnapshot = null; closeConfirmModal(); refreshCurrentView();
       } catch (e) {}
