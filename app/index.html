@@ -3706,6 +3706,39 @@ function computeCompanySnapshot(companyName) {
   return { company: companyName, pendingPayment, pendingExpense, totalBooked, totalPaid };
 }
 
+// Reconstructs what a company's total pending payment + pending expense looked
+// like at (or before) a given moment in time, using every shoot/job snapshot
+// this log has ever recorded for that company. For each shoot/job — grouped by
+// refId, or a name+date+kind fallback for older entries that predate refId —
+// we take its most recent known state at-or-before that moment, then sum the
+// outstanding balances across all of them. This is genuinely time-varying
+// (unlike a single value frozen once), so "as of" a past date and "today" can
+// correctly differ once anything has changed since.
+function computeCompanyTotalsAsOf(company, atTimestamp) {
+  if (!company) return null;
+  const norm = company.trim().toLowerCase();
+  const targetTime = new Date(atTimestamp).getTime();
+  const groups = {};
+  _activityLog.forEach(e => {
+    const s = e.snapshot;
+    if (!s || !s.company || s.company.trim().toLowerCase() !== norm) return;
+    const entryTime = new Date(e.timestamp).getTime();
+    if (entryTime > targetTime) return; // ignore anything that happened after our target moment
+    const key = s.refId || `${s.kind}|${s.name}|${s.date}|${s.event || s.jobType || ''}`;
+    if (!groups[key] || entryTime > groups[key]._t) {
+      groups[key] = Object.assign({}, s, { _t: entryTime });
+    }
+  });
+  const items = Object.values(groups);
+  if (!items.length) return null;
+  let pendingPayment = 0, pendingExpense = 0;
+  items.forEach(g => {
+    pendingPayment += Math.max(g.balance || 0, 0);
+    if (g.kind === 'shoot' && g.expenseStatus !== 'settled') pendingExpense += Number(g.expense || 0);
+  });
+  return { pendingPayment, pendingExpense, count: items.length };
+}
+
 function renderActivityLog() {
   const list = document.getElementById('activity-log-list');
   if (!list) return;
@@ -3884,7 +3917,7 @@ function openActivityDetail(logId) {
 
     if (s.company) {
       const todayTotals = computeCompanySnapshot(s.company);
-      const asOfTotals = e.companySnapshot;
+      const asOfTotals = computeCompanyTotalsAsOf(s.company, e.timestamp);
       const asOfCell = (val) => asOfTotals ? fmt(val) : '—';
       html += `
         <div class="border-t border-neutral-900 pt-4">
@@ -3905,7 +3938,7 @@ function openActivityDetail(logId) {
               <p class="text-sm font-bold ${todayTotals && todayTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(todayTotals ? todayTotals.pendingExpense : 0)}</p>
             </div>
           </div>
-          ${!asOfTotals ? `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">This entry doesn't have a saved "as of" figure for ${escapeHtml(s.company)}, so it shows as "—" rather than ₹0 — that's "not recorded," not "nothing was owed." Only "Today" is live and accurate here.</p>` : ''}
+          ${!asOfTotals ? `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">No earlier records found for ${escapeHtml(s.company)} to reconstruct an "as of" figure — showing "—" rather than ₹0, since that's "not enough data," not "nothing was owed." "Today" is live and accurate.</p>` : `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">"As of" is reconstructed from every booking/job snapshot recorded for ${escapeHtml(s.company)} up to this moment (across ${asOfTotals.count} record${asOfTotals.count === 1 ? '' : 's'}). "Today" is live.</p>`}
         </div>
       `;
     }
