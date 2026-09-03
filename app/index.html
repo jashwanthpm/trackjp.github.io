@@ -3644,6 +3644,11 @@ function paidAmountOf(r, isEdit) {
 function computeReceivedDelta(prevRecord, currRecord, isEdit) {
   return paidAmountOf(currRecord, isEdit) - paidAmountOf(prevRecord, isEdit);
 }
+// Small trailing " · Company Name" tag appended to log detail lines, so the
+// company is always visible in the list — not just inside the click-through detail.
+function companyTag(name) {
+  return (name && String(name).trim()) ? ` · ${name}` : '';
+}
 
 function renderActivityLog() {
   const list = document.getElementById('activity-log-list');
@@ -3731,6 +3736,34 @@ function formatActivityDayLabel(d) {
 // Opens a detail card for a single activity log entry. If the entry carries
 // a financial snapshot (bookings/edits do), shows the exact total/paid/
 // balance figures as they stood at the moment the entry was logged.
+// Live, current-day totals across every shoot/edit for a given company —
+// shown alongside the per-entry snapshot so the person can see both
+// "what it looked like at the time of this entry" and "where things stand today".
+function computeCompanyTotals(companyName, kind) {
+  if (!companyName) return null;
+  if (kind === 'edit') {
+    const items = _edits.filter(j => (j.company_name || '') === companyName);
+    if (!items.length) return null;
+    let pendingPayment = 0;
+    items.forEach(j => {
+      const amount = Number(j.amount || 0);
+      const paid = j.pay_status === 'done' ? amount : (j.pay_status === 'part' ? Number(j.part_paid || 0) : 0);
+      pendingPayment += Math.max(amount - paid, 0);
+    });
+    return { count: items.length, pendingPayment, pendingExpense: null };
+  }
+  const items = _shoots.filter(sh => (sh.company || '') === companyName);
+  if (!items.length) return null;
+  let pendingPayment = 0, pendingExpense = 0;
+  items.forEach(sh => {
+    const amount = Number(sh.amount || 0);
+    const paid = sh.payStatus === 'done' ? amount : (sh.payStatus === 'part' ? Number(sh.partPaid || 0) : 0);
+    pendingPayment += Math.max(amount - paid, 0);
+    if (sh.expenseStatus !== 'settled') pendingExpense += Number(sh.expense || 0);
+  });
+  return { count: items.length, pendingPayment, pendingExpense };
+}
+
 function openActivityDetail(logId) {
   const e = _activityLog.find(x => x.id === logId);
   if (!e) return;
@@ -3763,33 +3796,60 @@ function openActivityDetail(logId) {
         <p class="text-sm font-bold text-white">${escapeHtml(s.name || '—')}</p>
         <p class="text-xs text-neutral-500">${escapeHtml([s.kind === 'edit' ? s.jobType : s.event, s.date, s.company].filter(Boolean).join(' · '))}</p>
       </div>
-      <div class="grid grid-cols-3 gap-2">
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
-          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Total</p>
-          <p class="text-xs font-bold text-white">${fmt(s.amount)}</p>
+      <div>
+        <p class="text-[10px] uppercase tracking-wider text-neutral-600 font-bold mb-1.5">This entry — as of ${new Date(e.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
+        <div class="grid grid-cols-3 gap-2">
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Total</p>
+            <p class="text-xs font-bold text-white">${fmt(s.amount)}</p>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Paid</p>
+            <p class="text-xs font-bold text-emerald-400">${fmt(s.paid)}</p>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Balance</p>
+            <p class="text-xs font-bold ${s.balance > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(s.balance)}</p>
+          </div>
         </div>
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
-          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Paid</p>
-          <p class="text-xs font-bold text-emerald-400">${fmt(s.paid)}</p>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
-          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Balance</p>
-          <p class="text-xs font-bold ${s.balance > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(s.balance)}</p>
-        </div>
+        ${s.kind === 'shoot' ? `
+        <div class="grid grid-cols-2 gap-2 mt-2">
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense</p>
+            <p class="text-xs font-semibold text-white">${fmt(s.expense)}</p>
+          </div>
+          <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense Status</p>
+            <p class="text-xs font-semibold ${s.expenseStatus === 'settled' ? 'text-emerald-400' : 'text-amber-400'}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</p>
+          </div>
+        </div>` : ''}
       </div>
-      ${s.kind === 'shoot' ? `
-      <div class="grid grid-cols-2 gap-2">
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
-          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense</p>
-          <p class="text-xs font-semibold text-white">${fmt(s.expense)}</p>
-        </div>
-        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
-          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense Status</p>
-          <p class="text-xs font-semibold ${s.expenseStatus === 'settled' ? 'text-emerald-400' : 'text-amber-400'}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</p>
-        </div>
-      </div>` : ''}
-      <p class="text-[11px] text-neutral-600 leading-relaxed">This reflects the balance at the time of this log entry. Open ${s.kind === 'shoot' ? 'Shoots or Calendar' : 'Editing'} to see the latest figures.</p>
     `;
+
+    if (s.company) {
+      const totals = computeCompanyTotals(s.company, s.kind);
+      if (totals) {
+        html += `
+          <div class="border-t border-neutral-900 pt-4">
+            <p class="text-[10px] uppercase tracking-wider text-[#c9a96e] font-bold mb-1.5">${escapeHtml(s.company)} — Totals Today</p>
+            <p class="text-[10px] text-neutral-600 mb-2">Across ${totals.count} ${s.kind === 'edit' ? 'editing job' : 'shoot'}${totals.count > 1 ? 's' : ''} for this company right now</p>
+            <div class="grid ${totals.pendingExpense !== null ? 'grid-cols-2' : 'grid-cols-1'} gap-2">
+              <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+                <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Pending Payment</p>
+                <p class="text-sm font-bold ${totals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(totals.pendingPayment)}</p>
+              </div>
+              ${totals.pendingExpense !== null ? `
+              <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+                <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Pending Expense</p>
+                <p class="text-sm font-bold ${totals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(totals.pendingExpense)}</p>
+              </div>` : ''}
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    html += `<p class="text-[11px] text-neutral-600 leading-relaxed">The "This entry" figures are frozen at the time of this log. The "Totals Today" figures update live. Open ${s.kind === 'shoot' ? 'Shoots or Calendar' : 'Editing'} to see full records.</p>`;
   } else if (e.detail) {
     html += `<p class="text-xs text-neutral-400 leading-relaxed">${escapeHtml(e.detail)}</p>`;
   } else {
@@ -4243,15 +4303,15 @@ async function saveEditJob() {
       logActivity(
         'edit_add',
         `Editing job added: ${job.client_name}`,
-        `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim(),
+        `${job.job_type || 'Edit'} · ${job.event_name || 'Job'} on ${job.date}${companyTag(job.company_name)}`,
         { snapshot: editSnap }
       );
 
       if (initialPaid > 0) {
         const payTitle = job.pay_status === 'done' ? `Payment received: ${job.client_name}` : `Partial payment received: ${job.client_name}`;
-        const payDetail = job.pay_status === 'done'
+        const payDetail = (job.pay_status === 'done'
           ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
-          : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(job.amount || 0).toLocaleString('en-IN')} received`;
+          : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(job.amount || 0).toLocaleString('en-IN')} received`) + companyTag(job.company_name);
         logActivity('payment_update', payTitle, payDetail, { snapshot: editSnap, delta: initialPaid });
       }
     } else if (previousJob) {
@@ -4259,14 +4319,14 @@ async function saveEditJob() {
       const paymentChanges = describeEditJobPaymentChanges(previousJob, job);
 
       if (detailChanges.length) {
-        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · '), { snapshot: buildEditSnapshot(job) });
+        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · ') + companyTag(job.company_name), { snapshot: buildEditSnapshot(job) });
       }
       if (paymentChanges.length) {
         const title = (previousJob.pay_status !== 'done' && job.pay_status === 'done')
           ? `Payment settled: ${job.client_name}`
           : `Payment updated: ${job.client_name}`;
         const delta = computeReceivedDelta(previousJob, job, true);
-        logActivity('payment_update', title, paymentChanges.join(' · '), { snapshot: buildEditSnapshot(job), delta });
+        logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(job.company_name), { snapshot: buildEditSnapshot(job), delta });
       }
     }
 
@@ -6922,9 +6982,9 @@ async function toggleBlockDate(dateStr) {
 
           if (initialPaid > 0) {
             const payTitle = record.payStatus === 'done' ? `Payment received: ${record.name}` : `Partial payment received: ${record.name}`;
-            const payDetail = record.payStatus === 'done'
+            const payDetail = (record.payStatus === 'done'
               ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
-              : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(record.amount || 0).toLocaleString('en-IN')} received`;
+              : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(record.amount || 0).toLocaleString('en-IN')} received`) + companyTag(record.company);
             logActivity('payment_update', payTitle, payDetail, { snapshot: shootSnap, delta: initialPaid });
           }
         } else if (previousRecord) {
@@ -6932,14 +6992,14 @@ async function toggleBlockDate(dateStr) {
           const paymentChanges = describeShootPaymentChanges(previousRecord, record);
 
           if (bookingChanges.length) {
-            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · '), { snapshot: buildShootSnapshot(record) });
+            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · ') + companyTag(record.company), { snapshot: buildShootSnapshot(record) });
           }
           if (paymentChanges.length) {
             let title = `Payment updated: ${record.name}`;
             if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') title = `Payment settled: ${record.name}`;
             else if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') title = `Expense settled: ${record.name}`;
             const delta = computeReceivedDelta(previousRecord, record, false);
-            logActivity('payment_update', title, paymentChanges.join(' · '), { snapshot: buildShootSnapshot(record), delta });
+            logActivity('payment_update', title, paymentChanges.join(' · ') + companyTag(record.company), { snapshot: buildShootSnapshot(record), delta });
           }
         }
 
