@@ -3596,12 +3596,36 @@ function describeEditJobDetailChanges(prev, curr) {
   return parts;
 }
 
-function logActivity(type, title, detail = '', meta = {}) {
+async function logActivity(type, title, detail = '', meta = {}) {
   try {
     const entry = { id: uid(), type, title, detail, timestamp: new Date().toISOString(), ...meta };
+
+    // Show it immediately for a responsive UI.
     _activityLog.unshift(entry);
     if (_activityLog.length > 500) _activityLog = _activityLog.slice(0, 500);
-    saveSettingToDB('activity_log', _activityLog).catch(() => {});
+    if (_currentAccountTab === 'activity') renderActivityLog();
+
+    // Persist safely: pull the latest copy from the database right before
+    // writing, rather than trusting this tab's in-memory copy (which may be
+    // stale — from before another device wrote to it, or before a data fix
+    // was applied directly in the database). We merge our one new entry into
+    // that fresh copy instead of overwriting the whole array with a stale one.
+    if (isDemoMode) return;
+    const userId = currentUser?.id || currentUser?.email || 'default_user';
+    const dbKey = `${userId}_activity_log`;
+    let serverLog = null;
+    try {
+      const rows = await sbFetch(`settings?key=eq.${dbKey}&select=value`);
+      if (rows && rows[0] && Array.isArray(rows[0].value)) serverLog = rows[0].value;
+    } catch (fetchErr) { /* fall through to local copy below */ }
+
+    const base = serverLog !== null ? serverLog : _activityLog.filter(x => x.id !== entry.id);
+    const merged = [entry, ...base.filter(x => x.id !== entry.id)];
+    merged.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+    const trimmed = merged.slice(0, 500);
+
+    _activityLog = trimmed;
+    await saveSettingToDB('activity_log', trimmed);
     if (_currentAccountTab === 'activity') renderActivityLog();
   } catch (e) {
     console.warn('Activity log error:', e);
@@ -3861,16 +3885,17 @@ function openActivityDetail(logId) {
     if (s.company) {
       const todayTotals = computeCompanySnapshot(s.company);
       const asOfTotals = e.companySnapshot;
+      const asOfCell = (val) => asOfTotals ? fmt(val) : '—';
       html += `
         <div class="border-t border-neutral-900 pt-4">
           <p class="text-[10px] uppercase tracking-wider text-[#c9a96e] font-bold mb-2">${escapeHtml(s.company)} — Company Balance</p>
           <div class="grid grid-cols-2 gap-2">
-            <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3">
+            <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 ${!asOfTotals ? 'opacity-50' : ''}">
               <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-2">As of ${new Date(e.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}</p>
               <p class="text-[10px] text-neutral-500 mb-0.5">Pending Payment</p>
-              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'} mb-2">${fmt(asOfTotals ? asOfTotals.pendingPayment : 0)}</p>
+              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'} mb-2">${asOfCell(asOfTotals ? asOfTotals.pendingPayment : 0)}</p>
               <p class="text-[10px] text-neutral-500 mb-0.5">Pending Expense</p>
-              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(asOfTotals ? asOfTotals.pendingExpense : 0)}</p>
+              <p class="text-sm font-bold ${asOfTotals && asOfTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${asOfCell(asOfTotals ? asOfTotals.pendingExpense : 0)}</p>
             </div>
             <div class="bg-neutral-950 border border-[#c9a96e]/25 rounded-lg p-3">
               <p class="text-[9px] uppercase text-[#c9a96e] font-bold tracking-wide mb-2">Today</p>
@@ -3880,7 +3905,7 @@ function openActivityDetail(logId) {
               <p class="text-sm font-bold ${todayTotals && todayTotals.pendingExpense > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(todayTotals ? todayTotals.pendingExpense : 0)}</p>
             </div>
           </div>
-          ${!asOfTotals ? `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">This entry was logged before company-wide totals were tracked, so the "as of" column isn't available here — only "Today" is live.</p>` : ''}
+          ${!asOfTotals ? `<p class="text-[10px] text-neutral-600 mt-2 leading-relaxed">This entry doesn't have a saved "as of" figure for ${escapeHtml(s.company)}, so it shows as "—" rather than ₹0 — that's "not recorded," not "nothing was owed." Only "Today" is live and accurate here.</p>` : ''}
         </div>
       `;
     }
