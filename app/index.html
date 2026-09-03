@@ -2413,6 +2413,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
     // Create delayed versions of your search functions
     const debouncedShootSearch = debounce(renderShootsList, 300);
     const debouncedPaySearch = debounce(renderPaymentsList, 300);
+    const debouncedEditSearch = debounce(renderEditingList, 300);
 
 // ==========================================
     // COMPANY LEDGER MAGIC LINKS
@@ -4009,61 +4010,147 @@ function exportActivityLogToPDF() {
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF();
     const pageWidth = doc.internal.pageSize.getWidth();
-    let y = 20;
+    const pageHeight = doc.internal.pageSize.getHeight();
+    const margin = 14;
+    const GOLD = [201, 169, 110];
+    const BG = [5, 5, 5];
+    const HEADER_BG = [15, 15, 15];
+    let y = 0;
 
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(16);
-    doc.setTextColor(20, 20, 20);
-    doc.text(`${_profile.bizName || 'Sakkhi'} — Activity Log`, 14, y);
-    y += 6;
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(9);
-    doc.setTextColor(120, 120, 120);
-    doc.text(`Generated on ${new Date().toLocaleString('en-IN')}`, 14, y);
-    y += 8;
-    doc.setDrawColor(220, 220, 220);
-    doc.line(14, y, pageWidth - 14, y);
-    y += 8;
+    const drawHeader = () => {
+      doc.setFillColor(...BG);
+      doc.rect(0, 0, pageWidth, pageHeight, 'F');
+      doc.setFillColor(...HEADER_BG);
+      doc.rect(0, 0, pageWidth, 26, 'F');
+      doc.setDrawColor(...GOLD);
+      doc.setLineWidth(0.5);
+      doc.line(0, 26, pageWidth, 26);
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(18);
+      doc.setTextColor(...GOLD);
+      doc.text((_profile.bizName || 'SAKKHI').toUpperCase(), margin, 12);
+
+      doc.setFont(undefined, 'normal');
+      doc.setFontSize(8.5);
+      doc.setTextColor(230, 230, 230);
+      doc.text('Activity Log', pageWidth - margin, 10, { align: 'right' });
+      doc.setFontSize(7);
+      doc.setTextColor(150, 150, 150);
+      const dateStr = new Date().toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+      doc.text('Generated ' + dateStr, pageWidth - margin, 15, { align: 'right' });
+
+      return 34;
+    };
+
+    const drawFooter = (pageNum, pageCount) => {
+      doc.setFillColor(...HEADER_BG);
+      doc.rect(0, pageHeight - 8, pageWidth, 8, 'F');
+      doc.setDrawColor(50, 50, 50);
+      doc.line(0, pageHeight - 8, pageWidth, pageHeight - 8);
+      doc.setFontSize(7);
+      doc.setTextColor(100, 100, 100);
+      doc.text(`Activity Log · Page ${pageNum} of ${pageCount}`, margin, pageHeight - 3);
+      doc.setTextColor(...GOLD);
+      doc.text('powered by SAKKHI · sakkhi.co.in', pageWidth / 2, pageHeight - 3, { align: 'center' });
+      doc.link(pageWidth / 2 - 26, pageHeight - 6, 52, 5, { url: 'https://sakkhi.co.in' });
+    };
+
+    y = drawHeader();
+
+    // Summary strip
+    const totalCount = _activityLog.length;
+    const totalReceived = _activityLog.reduce((a, e) => a + (typeof e.delta === 'number' && e.delta > 0 ? e.delta : 0), 0);
+    const oldest = _activityLog[_activityLog.length - 1];
+    const newest = _activityLog[0];
+    doc.setFontSize(8);
+    doc.setTextColor(180, 180, 180);
+    doc.setFont(undefined, 'normal');
+    const rangeStr = oldest && newest ? `${new Date(oldest.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })} — ${new Date(newest.timestamp).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}` : '';
+    doc.text(`${totalCount} entries  ·  ${rangeStr}  ·  Total received in this log: Rs. ${totalReceived.toLocaleString('en-IN')}`, margin, y);
+    y += 7;
+    doc.setDrawColor(40, 40, 40);
+    doc.line(margin, y, pageWidth - margin, y);
+    y += 7;
+
+    let lastDayLabel = null;
 
     [..._activityLog].forEach(e => {
       const meta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
       const d = new Date(e.timestamp);
-      const stamp = d.toLocaleDateString('en-IN') + '  ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const dayLabel = d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+      const timeLabel = d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+      const hasDelta = typeof e.delta === 'number' && e.delta !== 0;
 
-      if (y > 275) { doc.addPage(); y = 20; }
+      if (y > pageHeight - 20) { doc.addPage(); y = drawHeader(); lastDayLabel = null; }
 
-      doc.setFont('helvetica', 'bold');
-      doc.setFontSize(10);
-      doc.setTextColor(30, 30, 30);
-      doc.text(e.title, 14, y);
-
-      doc.setFont('helvetica', 'normal');
-      doc.setFontSize(8);
-      doc.setTextColor(150, 120, 60);
-      doc.text(meta.label, pageWidth - 14, y, { align: 'right' });
-      y += 5;
-
-      if (e.detail) {
-        doc.setFontSize(8.5);
-        doc.setTextColor(100, 100, 100);
-        const lines = doc.splitTextToSize(e.detail, pageWidth - 28);
-        doc.text(lines, 14, y);
-        y += lines.length * 4;
+      if (dayLabel !== lastDayLabel) {
+        if (lastDayLabel !== null) y += 2;
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(7.5);
+        doc.setTextColor(...GOLD);
+        doc.text(dayLabel.toUpperCase(), margin, y);
+        y += 5;
+        lastDayLabel = dayLabel;
       }
 
-      doc.setFontSize(7.5);
-      doc.setTextColor(160, 160, 160);
-      doc.text(stamp, 14, y);
-      y += 7;
+      // Colored icon dot for this entry's category
+      doc.setFillColor(meta.color ? hexToRgb(meta.color).r : 150, meta.color ? hexToRgb(meta.color).g : 150, meta.color ? hexToRgb(meta.color).b : 150);
+      doc.circle(margin + 1.2, y - 1.3, 1.2, 'F');
+
+      doc.setFont(undefined, 'bold');
+      doc.setFontSize(9.5);
+      doc.setTextColor(240, 240, 240);
+      const titleMaxWidth = pageWidth - margin * 2 - 30;
+      doc.text(e.title, margin + 5, y);
+
+      if (hasDelta) {
+        doc.setFont(undefined, 'bold');
+        doc.setFontSize(9.5);
+        doc.setTextColor(...(e.delta > 0 ? [52, 211, 153] : [248, 113, 113]));
+        doc.text(`${e.delta > 0 ? '+' : '−'}Rs. ${Math.abs(e.delta).toLocaleString('en-IN')}`, pageWidth - margin, y, { align: 'right' });
+      } else {
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(7);
+        doc.setTextColor(120, 120, 120);
+        doc.text(meta.label, pageWidth - margin, y, { align: 'right' });
+      }
+      y += 4.5;
+
+      if (e.detail) {
+        doc.setFont(undefined, 'normal');
+        doc.setFontSize(8);
+        doc.setTextColor(160, 160, 160);
+        const lines = doc.splitTextToSize(e.detail, pageWidth - margin * 2 - 5);
+        doc.text(lines, margin + 5, y);
+        y += lines.length * 3.8;
+      }
+
+      doc.setFontSize(7);
+      doc.setTextColor(90, 90, 90);
+      doc.text(timeLabel, margin + 5, y);
+      y += 6;
     });
+
+    const pageCount = doc.internal.getNumberOfPages();
+    for (let i = 1; i <= pageCount; i++) {
+      doc.setPage(i);
+      drawFooter(i, pageCount);
+    }
 
     doc.save(`Sakkhi_Activity_Log_${new Date().toISOString().split('T')[0]}.pdf`);
     showToast('Activity log exported as PDF.', 'success');
+    logActivity('data_export', 'Activity log exported (PDF)');
   } catch (e) {
     showToast('PDF export failed: ' + e.message, 'error');
   }
 }
 
+function hexToRgb(hex) {
+  const clean = hex.replace('#', '');
+  const bigint = parseInt(clean, 16);
+  return { r: (bigint >> 16) & 255, g: (bigint >> 8) & 255, b: bigint & 255 };
+}
 function handleEditJobTypeOther() {
   const wrap = document.getElementById('f-edit-job-other-wrap');
   if (document.getElementById('f-edit-job-type').value === 'Other') wrap.classList.remove('hidden');
@@ -4126,33 +4213,49 @@ async function saveEditorToggle() {
 
 // Render the Editing View (Now grouped by Month)
 function renderEditingList() {
-  const totalAmount = _edits.reduce((a, b) => b.pay_status === 'done' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + Number(b.part_paid || 0) : a, 0);
-  const pendingAmount = _edits.reduce((a, b) => b.pay_status === 'pending' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + (Number(b.amount || 0) - Number(b.part_paid || 0)) : a, 0);
-  const activeJobs = _edits.filter(e => e.work_status !== 'completed').length;
+  // Read current filters FIRST — the 4 stat cards below reflect whatever is
+  // currently filtered/searched, not the entire job list.
+  const q = (document.getElementById('edit-search')?.value || '').toLowerCase();
+  const fw = document.getElementById('edit-filter-work')?.value || '';
+  const fp = document.getElementById('edit-filter-pay')?.value || '';
+  const fc = document.getElementById('edit-filter-company')?.value || '';
 
-  // This Month snapshot (e.g. "July: 5 jobs • ₹total")
+  let filtered = [..._edits];
+  if (q) filtered = filtered.filter(e => `${e.client_name || ''} ${e.company_name || ''} ${e.event_name || ''} ${e.job_type || ''}`.toLowerCase().includes(q));
+  if (fw === 'active') filtered = filtered.filter(e => e.work_status !== 'completed');
+  else if (fw) filtered = filtered.filter(e => e.work_status === fw);
+  if (fp) filtered = filtered.filter(e => e.pay_status === fp);
+  if (fc) filtered = filtered.filter(e => e.company_name === fc);
+
+  const hasActiveFilter = !!(q || fw || fp || fc);
+
+  const totalAmount = filtered.reduce((a, b) => b.pay_status === 'done' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + Number(b.part_paid || 0) : a, 0);
+  const pendingAmount = filtered.reduce((a, b) => b.pay_status === 'pending' ? a + Number(b.amount || 0) : b.pay_status === 'part' ? a + (Number(b.amount || 0) - Number(b.part_paid || 0)) : a, 0);
+  const activeJobs = filtered.filter(e => e.work_status !== 'completed').length;
+
+  // This Month snapshot (e.g. "July: 5 jobs • ₹total") — scoped to whatever is currently filtered
   const now = new Date();
   const curMonthKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
   const curMonthName = MONTHS[now.getMonth()];
-  const monthJobs = _edits.filter(e => (e.date || e.created || '').slice(0, 7) === curMonthKey);
+  const monthJobs = filtered.filter(e => (e.date || e.created || '').slice(0, 7) === curMonthKey);
   const monthCount = monthJobs.length;
   const monthTotal = monthJobs.reduce((a, b) => a + Number(b.amount || 0), 0);
 
   document.getElementById('editing-stats').innerHTML = `
-    <div onclick="document.getElementById('edit-filter-work').value='active';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-blue-950/10 transition cursor-pointer" title="Filter by Active Jobs">
+    <div onclick="document.getElementById('edit-filter-work').value='active';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border ${fw === 'active' ? 'border-blue-700' : 'border-neutral-800'} rounded-xl p-4 hover:border-neutral-700 hover:bg-blue-950/10 transition cursor-pointer" title="Filter by Active Jobs">
       <div class="text-xs text-blue-400 uppercase tracking-wider font-semibold">Active Jobs</div>
       <div class="text-2xl font-bold text-white mt-2">${activeJobs}</div>
     </div>
-    <div onclick="document.getElementById('edit-filter-work').value='';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition cursor-pointer" title="View All Jobs">
-      <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Received</div>
+    <div onclick="document.getElementById('edit-filter-work').value='';document.getElementById('edit-filter-pay').value='';document.getElementById('edit-search').value='';document.getElementById('edit-filter-company').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition cursor-pointer" title="Clear filters and view all jobs">
+      <div class="text-xs text-[#c9a96e] uppercase tracking-wider font-semibold">Total Received${hasActiveFilter ? ' (filtered)' : ''}</div>
       <div class="text-2xl font-bold text-[#c9a96e] mt-2 privacy-target">${fmtAmt(totalAmount)}</div>
     </div>
-    <div onclick="document.getElementById('edit-filter-pay').value='pending';document.getElementById('edit-filter-work').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/10 transition cursor-pointer" title="Filter by Pending Payments">
+    <div onclick="document.getElementById('edit-filter-pay').value='pending';document.getElementById('edit-filter-work').value='';document.getElementById('edit-search').value='';renderEditingList();" class="bg-neutral-950 border ${fp === 'pending' ? 'border-red-700' : 'border-neutral-800'} rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/10 transition cursor-pointer" title="Filter by Pending Payments">
       <div class="text-xs text-red-400 uppercase tracking-wider font-semibold">Pending Pay</div>
       <div class="text-2xl font-bold text-red-400 mt-2 privacy-target">${fmtAmt(pendingAmount)}</div>
     </div>
     <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
-      <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">${curMonthName}</div>
+      <div class="text-xs text-emerald-500 uppercase tracking-wider font-semibold">${curMonthName}${hasActiveFilter ? ' (filtered)' : ''}</div>
       <div class="text-2xl font-bold text-emerald-500 mt-2">${monthCount} <span class="text-xs font-semibold text-neutral-500">jobs</span></div>
       <div class="text-[11px] font-bold text-neutral-400 mt-0.5 privacy-target">${fmtAmt(monthTotal)} earned</div>
     </div>
@@ -4170,19 +4273,6 @@ function renderEditingList() {
     listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No editing jobs found.</div>';
     return;
   }
-
-  // Apply search + filters (list only — stats above always reflect totals)
-  const q = (document.getElementById('edit-search')?.value || '').toLowerCase();
-  const fw = document.getElementById('edit-filter-work')?.value || '';
-  const fp = document.getElementById('edit-filter-pay')?.value || '';
-  const fc = document.getElementById('edit-filter-company')?.value || '';
-
-  let filtered = [..._edits];
-  if (q) filtered = filtered.filter(e => `${e.client_name || ''} ${e.company_name || ''} ${e.event_name || ''} ${e.job_type || ''}`.toLowerCase().includes(q));
-  if (fw === 'active') filtered = filtered.filter(e => e.work_status !== 'completed');
-  else if (fw) filtered = filtered.filter(e => e.work_status === fw);
-  if (fp) filtered = filtered.filter(e => e.pay_status === fp);
-  if (fc) filtered = filtered.filter(e => e.company_name === fc);
 
   if (filtered.length === 0) {
     listEl.innerHTML = '<div class="text-center py-12 text-xs text-neutral-600 border border-neutral-900 border-dashed rounded-xl">No matching editing jobs found.</div>';
