@@ -4238,12 +4238,22 @@ async function saveEditJob() {
 
     if (isNewJob) {
       const initialPaid = job.pay_status === 'done' ? job.amount : (job.pay_status === 'part' ? job.part_paid : 0);
+      const editSnap = buildEditSnapshot(job);
+
       logActivity(
         'edit_add',
         `Editing job added: ${job.client_name}`,
         `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim(),
-        { snapshot: buildEditSnapshot(job), delta: initialPaid > 0 ? initialPaid : 0 }
+        { snapshot: editSnap }
       );
+
+      if (initialPaid > 0) {
+        const payTitle = job.pay_status === 'done' ? `Payment received: ${job.client_name}` : `Partial payment received: ${job.client_name}`;
+        const payDetail = job.pay_status === 'done'
+          ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
+          : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(job.amount || 0).toLocaleString('en-IN')} received`;
+        logActivity('payment_update', payTitle, payDetail, { snapshot: editSnap, delta: initialPaid });
+      }
     } else if (previousJob) {
       const detailChanges = describeEditJobDetailChanges(previousJob, job);
       const paymentChanges = describeEditJobPaymentChanges(previousJob, job);
@@ -6901,12 +6911,22 @@ async function toggleBlockDate(dateStr) {
 
         if (!editId) {
           const initialPaid = record.payStatus === 'done' ? record.amount : (record.payStatus === 'part' ? record.partPaid : 0);
+          const shootSnap = buildShootSnapshot(record);
+
           logActivity(
             'booking_add',
             `Booking added: ${record.name}`,
             `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`,
-            { snapshot: buildShootSnapshot(record), delta: initialPaid > 0 ? initialPaid : 0 }
+            { snapshot: shootSnap }
           );
+
+          if (initialPaid > 0) {
+            const payTitle = record.payStatus === 'done' ? `Payment received: ${record.name}` : `Partial payment received: ${record.name}`;
+            const payDetail = record.payStatus === 'done'
+              ? `Paid in full — ₹${initialPaid.toLocaleString('en-IN')}`
+              : `Part payment — ₹${initialPaid.toLocaleString('en-IN')} of ₹${Number(record.amount || 0).toLocaleString('en-IN')} received`;
+            logActivity('payment_update', payTitle, payDetail, { snapshot: shootSnap, delta: initialPaid });
+          }
         } else if (previousRecord) {
           const bookingChanges = describeShootBookingChanges(previousRecord, record);
           const paymentChanges = describeShootPaymentChanges(previousRecord, record);
