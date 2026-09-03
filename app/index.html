@@ -1585,6 +1585,20 @@
       </div>
     </div>
 
+    <div id="activity-detail-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'activity-detail-modal-backdrop')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 max-h-[85vh] flex flex-col">
+        <div class="p-5 border-b border-neutral-900 flex items-start gap-3">
+          <div id="activity-detail-icon" class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0"><i class="ti ti-history text-lg"></i></div>
+          <div class="flex-1 min-w-0">
+            <h4 id="activity-detail-title" class="text-white font-bold text-sm leading-snug">—</h4>
+            <p id="activity-detail-time" class="text-[11px] text-neutral-500 mt-0.5">—</p>
+          </div>
+          <button onclick="closeModal('activity-detail-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+        </div>
+        <div id="activity-detail-body" class="p-5 space-y-4 overflow-y-auto"></div>
+      </div>
+    </div>
+
     <div id="privacy-prompt-backdrop" class="fixed inset-0 bg-black/90 z-[100] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
       <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-sm p-6 space-y-4 shadow-2xl text-center">
         <div class="w-12 h-12 bg-amber-950/40 border border-amber-900/50 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-lock"></i></div>
@@ -3582,9 +3596,9 @@ function describeEditJobDetailChanges(prev, curr) {
   return parts;
 }
 
-function logActivity(type, title, detail = '') {
+function logActivity(type, title, detail = '', meta = {}) {
   try {
-    const entry = { id: uid(), type, title, detail, timestamp: new Date().toISOString() };
+    const entry = { id: uid(), type, title, detail, timestamp: new Date().toISOString(), ...meta };
     _activityLog.unshift(entry);
     if (_activityLog.length > 500) _activityLog = _activityLog.slice(0, 500);
     saveSettingToDB('activity_log', _activityLog).catch(() => {});
@@ -3592,6 +3606,43 @@ function logActivity(type, title, detail = '') {
   } catch (e) {
     console.warn('Activity log error:', e);
   }
+}
+
+// Builds a full financial + booking snapshot for a shoot/edit record at the
+// moment a log entry is written, so clicking that entry later still shows
+// exactly what the balance looked like at that point in time — even if the
+// record has since changed again or been deleted.
+function buildShootSnapshot(r) {
+  const amount = Number(r.amount || 0);
+  const paid = r.payStatus === 'done' ? amount : (r.payStatus === 'part' ? Number(r.partPaid || 0) : 0);
+  return {
+    kind: 'shoot',
+    name: r.name, company: r.company || '', event: r.event || '', date: r.date || '',
+    location: r.location || '', session: r.session || '',
+    amount, paid, balance: Math.max(amount - paid, 0), payStatus: r.payStatus,
+    expense: Number(r.expense || 0), expenseStatus: r.expenseStatus,
+    bookingStatus: r.bookingStatus || ''
+  };
+}
+function buildEditSnapshot(j) {
+  const amount = Number(j.amount || 0);
+  const paid = j.pay_status === 'done' ? amount : (j.pay_status === 'part' ? Number(j.part_paid || 0) : 0);
+  return {
+    kind: 'edit',
+    name: j.client_name, company: j.company_name || '', event: j.event_name || '', jobType: j.job_type || '',
+    date: j.date || '', amount, paid, balance: Math.max(amount - paid, 0), payStatus: j.pay_status,
+    workStatus: j.work_status || ''
+  };
+}
+// Money actually received/refunded in this specific update (the "+₹5,000" figure)
+function paidAmountOf(r, isEdit) {
+  const amount = Number(r.amount || 0);
+  const status = isEdit ? r.pay_status : r.payStatus;
+  const partPaid = isEdit ? r.part_paid : r.partPaid;
+  return status === 'done' ? amount : (status === 'part' ? Number(partPaid || 0) : 0);
+}
+function computeReceivedDelta(prevRecord, currRecord, isEdit) {
+  return paidAmountOf(currRecord, isEdit) - paidAmountOf(prevRecord, isEdit);
 }
 
 function renderActivityLog() {
@@ -3641,16 +3692,27 @@ function renderActivityLog() {
         ${g.items.map(e => {
           const meta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
           const time = new Date(e.timestamp).toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+          const delta = (typeof e.delta === 'number' && e.delta !== 0) ? e.delta : null;
+          const deltaBadge = delta !== null ? `
+            <span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md flex-shrink-0" style="${delta > 0 ? 'color:#34d399;background:rgba(52,211,153,0.12);' : 'color:#f87171;background:rgba(248,113,113,0.12);'}">
+              ${delta > 0 ? '+' : '−'}₹${Math.abs(delta).toLocaleString('en-IN')}
+            </span>` : '';
           return `
-          <div class="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-neutral-900/40 transition-colors">
+          <div onclick="openActivityDetail('${e.id}')" class="flex items-start gap-3 px-2 py-2.5 rounded-lg hover:bg-neutral-900/40 transition-colors cursor-pointer">
             <div class="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5" style="background:${meta.bg}; color:${meta.color}; border:1px solid ${meta.color}33;">
               <i class="ti ${meta.icon} text-sm"></i>
             </div>
             <div class="flex-1 min-w-0">
-              <p class="text-xs font-semibold text-white leading-snug">${escapeHtml(e.title)}</p>
+              <div class="flex items-center gap-2 flex-wrap">
+                <p class="text-xs font-semibold text-white leading-snug">${escapeHtml(e.title)}</p>
+                ${deltaBadge}
+              </div>
               ${e.detail ? `<p class="text-[11px] text-neutral-500 mt-0.5 leading-snug">${escapeHtml(e.detail)}</p>` : ''}
             </div>
-            <div class="text-[10px] text-neutral-600 flex-shrink-0 mt-1 whitespace-nowrap">${time}</div>
+            <div class="flex flex-col items-end gap-1 flex-shrink-0">
+              <div class="text-[10px] text-neutral-600 mt-1 whitespace-nowrap">${time}</div>
+              <i class="ti ti-chevron-right text-neutral-700 text-xs"></i>
+            </div>
           </div>`;
         }).join('')}
       </div>
@@ -3664,6 +3726,78 @@ function formatActivityDayLabel(d) {
   if (d.toDateString() === today.toDateString()) return 'Today';
   if (d.toDateString() === yesterday.toDateString()) return 'Yesterday';
   return d.toLocaleDateString('en-IN', { day: 'numeric', month: 'long', year: 'numeric' });
+}
+
+// Opens a detail card for a single activity log entry. If the entry carries
+// a financial snapshot (bookings/edits do), shows the exact total/paid/
+// balance figures as they stood at the moment the entry was logged.
+function openActivityDetail(logId) {
+  const e = _activityLog.find(x => x.id === logId);
+  if (!e) return;
+  const typeMeta = ACTIVITY_TYPES[e.type] || ACTIVITY_TYPES.settings_general;
+
+  const iconEl = document.getElementById('activity-detail-icon');
+  iconEl.style.background = typeMeta.bg;
+  iconEl.style.color = typeMeta.color;
+  iconEl.style.border = `1px solid ${typeMeta.color}33`;
+  iconEl.innerHTML = `<i class="ti ${typeMeta.icon} text-lg"></i>`;
+  document.getElementById('activity-detail-title').textContent = e.title;
+  document.getElementById('activity-detail-time').textContent = new Date(e.timestamp).toLocaleString('en-IN', { day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+
+  const body = document.getElementById('activity-detail-body');
+  const fmt = (n) => `₹${Number(n || 0).toLocaleString('en-IN')}`;
+  const s = e.snapshot;
+  let html = '';
+
+  if (typeof e.delta === 'number' && e.delta !== 0) {
+    html += `
+      <div class="rounded-xl p-4 text-center" style="background:${e.delta > 0 ? 'rgba(52,211,153,0.08)' : 'rgba(248,113,113,0.08)'}; border:1px solid ${e.delta > 0 ? 'rgba(52,211,153,0.25)' : 'rgba(248,113,113,0.25)'};">
+        <p class="text-[10px] uppercase tracking-wider text-neutral-500 font-bold mb-1">${e.delta > 0 ? 'Received in this update' : 'Reduced in this update'}</p>
+        <p class="text-2xl font-bold" style="color:${e.delta > 0 ? '#34d399' : '#f87171'}">${e.delta > 0 ? '+' : '−'}${fmt(Math.abs(e.delta))}</p>
+      </div>`;
+  }
+
+  if (s) {
+    html += `
+      <div class="space-y-1">
+        <p class="text-sm font-bold text-white">${escapeHtml(s.name || '—')}</p>
+        <p class="text-xs text-neutral-500">${escapeHtml([s.kind === 'edit' ? s.jobType : s.event, s.date, s.company].filter(Boolean).join(' · '))}</p>
+      </div>
+      <div class="grid grid-cols-3 gap-2">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Total</p>
+          <p class="text-xs font-bold text-white">${fmt(s.amount)}</p>
+        </div>
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Paid</p>
+          <p class="text-xs font-bold text-emerald-400">${fmt(s.paid)}</p>
+        </div>
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5 text-center">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Balance</p>
+          <p class="text-xs font-bold ${s.balance > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(s.balance)}</p>
+        </div>
+      </div>
+      ${s.kind === 'shoot' ? `
+      <div class="grid grid-cols-2 gap-2">
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense</p>
+          <p class="text-xs font-semibold text-white">${fmt(s.expense)}</p>
+        </div>
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-2.5">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Expense Status</p>
+          <p class="text-xs font-semibold ${s.expenseStatus === 'settled' ? 'text-emerald-400' : 'text-amber-400'}">${s.expenseStatus === 'settled' ? 'Settled' : 'Pending'}</p>
+        </div>
+      </div>` : ''}
+      <p class="text-[11px] text-neutral-600 leading-relaxed">This reflects the balance at the time of this log entry. Open ${s.kind === 'shoot' ? 'Shoots or Calendar' : 'Editing'} to see the latest figures.</p>
+    `;
+  } else if (e.detail) {
+    html += `<p class="text-xs text-neutral-400 leading-relaxed">${escapeHtml(e.detail)}</p>`;
+  } else {
+    html += `<p class="text-xs text-neutral-600">No further details available for this entry.</p>`;
+  }
+
+  body.innerHTML = html;
+  openModal('activity-detail-modal-backdrop');
 }
 
 function exportActivityLogToCSV() {
@@ -4103,19 +4237,26 @@ async function saveEditJob() {
     }
 
     if (isNewJob) {
-      logActivity('edit_add', `Editing job added: ${job.client_name}`, `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim());
+      const initialPaid = job.pay_status === 'done' ? job.amount : (job.pay_status === 'part' ? job.part_paid : 0);
+      logActivity(
+        'edit_add',
+        `Editing job added: ${job.client_name}`,
+        `${job.job_type || 'Edit'} · ${job.event_name || ''} on ${job.date}`.trim(),
+        { snapshot: buildEditSnapshot(job), delta: initialPaid > 0 ? initialPaid : 0 }
+      );
     } else if (previousJob) {
       const detailChanges = describeEditJobDetailChanges(previousJob, job);
       const paymentChanges = describeEditJobPaymentChanges(previousJob, job);
 
       if (detailChanges.length) {
-        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · '));
+        logActivity('edit_update', `Editing job updated: ${job.client_name}`, detailChanges.join(' · '), { snapshot: buildEditSnapshot(job) });
       }
       if (paymentChanges.length) {
         const title = (previousJob.pay_status !== 'done' && job.pay_status === 'done')
           ? `Payment settled: ${job.client_name}`
           : `Payment updated: ${job.client_name}`;
-        logActivity('payment_update', title, paymentChanges.join(' · '));
+        const delta = computeReceivedDelta(previousJob, job, true);
+        logActivity('payment_update', title, paymentChanges.join(' · '), { snapshot: buildEditSnapshot(job), delta });
       }
     }
 
@@ -4138,7 +4279,7 @@ async function deleteEditJob() {
     const deletedJob = _edits.find(e => e.id === id);
     await sbFetch(`edits?id=eq.${id}&user_id=eq.${currentUser.id}`, { method: 'DELETE' });
     _edits = _edits.filter(e => e.id !== id);
-    logActivity('edit_delete', `Editing job deleted: ${deletedJob ? deletedJob.client_name : 'Unnamed job'}`);
+    logActivity('edit_delete', `Editing job deleted: ${deletedJob ? deletedJob.client_name : 'Unnamed job'}`, '', { snapshot: deletedJob ? buildEditSnapshot(deletedJob) : null });
     setSyncStatus('synced', 'Deleted');
     showToast('Editing job removed.');
     closeModal('edit-job-modal-backdrop');
@@ -4631,6 +4772,7 @@ if (daCard) {
       _pendingDropTargetId = shootId;
       _pendingDropTargetName = s.name;
       _pendingDropIsReject = true;
+      _pendingDropSnapshot = buildShootSnapshot(s);
       document.getElementById('confirm-title').textContent = 'Reject Booking Request?';
       document.getElementById('confirm-sub-text').textContent = `This will permanently delete the request from "${s.name}".`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
@@ -6758,19 +6900,26 @@ async function toggleBlockDate(dateStr) {
         await saveShootToDB(record);
 
         if (!editId) {
-          logActivity('booking_add', `Booking added: ${record.name}`, `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`);
+          const initialPaid = record.payStatus === 'done' ? record.amount : (record.payStatus === 'part' ? record.partPaid : 0);
+          logActivity(
+            'booking_add',
+            `Booking added: ${record.name}`,
+            `${record.event || 'Shoot'} on ${record.date}${record.company ? ' · ' + record.company : ''}`,
+            { snapshot: buildShootSnapshot(record), delta: initialPaid > 0 ? initialPaid : 0 }
+          );
         } else if (previousRecord) {
           const bookingChanges = describeShootBookingChanges(previousRecord, record);
           const paymentChanges = describeShootPaymentChanges(previousRecord, record);
 
           if (bookingChanges.length) {
-            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · '));
+            logActivity('booking_update', `Booking updated: ${record.name}`, bookingChanges.join(' · '), { snapshot: buildShootSnapshot(record) });
           }
           if (paymentChanges.length) {
             let title = `Payment updated: ${record.name}`;
             if (previousRecord.payStatus !== 'done' && record.payStatus === 'done') title = `Payment settled: ${record.name}`;
             else if (previousRecord.expenseStatus !== 'settled' && record.expenseStatus === 'settled') title = `Expense settled: ${record.name}`;
-            logActivity('payment_update', title, paymentChanges.join(' · '));
+            const delta = computeReceivedDelta(previousRecord, record, false);
+            logActivity('payment_update', title, paymentChanges.join(' · '), { snapshot: buildShootSnapshot(record), delta });
           }
         }
 
@@ -6787,6 +6936,7 @@ async function toggleBlockDate(dateStr) {
     let _pendingDropTargetId = null;
     let _pendingDropTargetName = '';
     let _pendingDropIsReject = false;
+    let _pendingDropSnapshot = null;
     function askDeletePrompt(id) {
       if (!_isSubActive && !isDemoMode) {
     showToast('Subscription expired. Cannot delete records.', 'error');
@@ -6796,6 +6946,7 @@ async function toggleBlockDate(dateStr) {
       _pendingDropTargetId = id;
       _pendingDropTargetName = s.name;
       _pendingDropIsReject = false;
+      _pendingDropSnapshot = buildShootSnapshot(s);
       document.getElementById('confirm-title').textContent = 'Delete Shoot?';
       document.getElementById('confirm-sub-text').textContent = `Are you sure you want to delete the shoot for "${s.name}"?`;
       document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
@@ -6808,13 +6959,14 @@ async function toggleBlockDate(dateStr) {
       try {
         const deletedName = _pendingDropTargetName;
         const wasReject = _pendingDropIsReject;
+        const snapshot = _pendingDropSnapshot;
         await deleteShootFromDB(_pendingDropTargetId);
         if (wasReject) {
-          logActivity('booking_reject', `Online booking rejected: ${deletedName || 'Unnamed request'}`);
+          logActivity('booking_reject', `Online booking rejected: ${deletedName || 'Unnamed request'}`, '', { snapshot });
         } else {
-          logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`);
+          logActivity('booking_delete', `Booking deleted: ${deletedName || 'Unnamed shoot'}`, '', { snapshot });
         }
-        _pendingDropTargetId = null; _pendingDropTargetName = ''; _pendingDropIsReject = false; closeConfirmModal(); refreshCurrentView();
+        _pendingDropTargetId = null; _pendingDropTargetName = ''; _pendingDropIsReject = false; _pendingDropSnapshot = null; closeConfirmModal(); refreshCurrentView();
       } catch (e) {}
     }
 
