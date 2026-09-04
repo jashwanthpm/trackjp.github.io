@@ -3709,18 +3709,19 @@ function computeCompanySnapshot(companyName) {
 
 // For a given shoot/job (identified by refId + kind), sums up what's still
 // pending across every OTHER shoot and editing job the company has, live,
-// right now. Combined with that one record's own balance, this cleanly
-// explains what makes up the company's total pending amount today.
+// right now — split by source (shoots vs editing) so it's clear where the
+// money is actually coming from. Combined with that one record's own
+// balance, this cleanly explains what makes up the company's total.
 function otherCompanyPendingLive(company, refId, kind) {
-  if (!company) return { pendingPayment: 0, pendingExpense: 0 };
+  if (!company) return { pendingPaymentShoots: 0, pendingPaymentEdits: 0, pendingPayment: 0, pendingExpense: 0 };
   const norm = company.trim().toLowerCase();
-  let pendingPayment = 0, pendingExpense = 0;
+  let pendingPaymentShoots = 0, pendingPaymentEdits = 0, pendingExpense = 0;
   (_shoots || []).forEach(sh => {
     if ((sh.company || '').trim().toLowerCase() !== norm) return;
     if (kind === 'shoot' && refId && sh.id === refId) return;
     const amount = Number(sh.amount || 0);
     const paid = sh.payStatus === 'done' ? amount : (sh.payStatus === 'part' ? Number(sh.partPaid || 0) : 0);
-    pendingPayment += Math.max(amount - paid, 0);
+    pendingPaymentShoots += Math.max(amount - paid, 0);
     if (sh.expenseStatus !== 'settled') pendingExpense += Number(sh.expense || 0);
   });
   (_edits || []).forEach(j => {
@@ -3728,9 +3729,9 @@ function otherCompanyPendingLive(company, refId, kind) {
     if (kind === 'edit' && refId && j.id === refId) return;
     const amount = Number(j.amount || 0);
     const paid = j.pay_status === 'done' ? amount : (j.pay_status === 'part' ? Number(j.part_paid || 0) : 0);
-    pendingPayment += Math.max(amount - paid, 0);
+    pendingPaymentEdits += Math.max(amount - paid, 0);
   });
-  return { pendingPayment, pendingExpense };
+  return { pendingPaymentShoots, pendingPaymentEdits, pendingPayment: pendingPaymentShoots + pendingPaymentEdits, pendingExpense };
 }
 
 function renderActivityLog() {
@@ -3918,6 +3919,24 @@ function openActivityDetail(logId) {
       const companyBefore = others.pendingPayment + beforeBalance;
       const companyAfter = others.pendingPayment + afterBalance;
 
+      // Split before/after by source: shoots vs editing jobs — this one
+      // record's own balance counts toward whichever category it belongs to.
+      const beforeShoots = others.pendingPaymentShoots + (s.kind === 'shoot' ? beforeBalance : 0);
+      const beforeEdits = others.pendingPaymentEdits + (s.kind === 'edit' ? beforeBalance : 0);
+      const afterShoots = others.pendingPaymentShoots + (s.kind === 'shoot' ? afterBalance : 0);
+      const afterEdits = others.pendingPaymentEdits + (s.kind === 'edit' ? afterBalance : 0);
+
+      const sourceBreakdown = (shootsVal, editsVal) => `
+        <div class="flex items-center justify-between mt-2 pt-2 border-t border-neutral-900/80">
+          <span class="text-[9px] text-neutral-600">Shoots</span>
+          <span class="text-[10px] font-semibold text-neutral-400">${fmt(shootsVal)}</span>
+        </div>
+        <div class="flex items-center justify-between mt-0.5">
+          <span class="text-[9px] text-neutral-600">Editing</span>
+          <span class="text-[10px] font-semibold text-neutral-400">${fmt(editsVal)}</span>
+        </div>
+      `;
+
       html += `
         <div class="border-t border-neutral-900 pt-4 space-y-3">
           <p class="text-[10px] uppercase tracking-wider text-[#c9a96e] font-bold">${escapeHtml(s.company)} — Balance</p>
@@ -3928,11 +3947,13 @@ function openActivityDetail(logId) {
               <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Before This Payment</p>
               <p class="text-lg font-bold ${companyBefore > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(companyBefore)}</p>
               <p class="text-[9px] text-neutral-600 mt-0.5">total pending, ${escapeHtml(s.company)}</p>
+              ${sourceBreakdown(beforeShoots, beforeEdits)}
             </div>
             <div class="bg-neutral-950 border border-emerald-900/40 rounded-lg p-3 text-center">
               <p class="text-[9px] uppercase text-emerald-500 font-bold tracking-wide mb-1">After This Payment</p>
               <p class="text-lg font-bold ${companyAfter > 0 ? 'text-amber-400' : 'text-emerald-400'}">${fmt(companyAfter)}</p>
               <p class="text-[9px] text-neutral-600 mt-0.5">total pending, ${escapeHtml(s.company)}</p>
+              ${sourceBreakdown(afterShoots, afterEdits)}
             </div>
           </div>` : ''}
 
@@ -3943,8 +3964,12 @@ function openActivityDetail(logId) {
               <span class="text-xs font-semibold text-neutral-300">${fmt(afterBalance)}</span>
             </div>
             <div class="flex items-center justify-between mt-1.5">
-              <span class="text-[11px] text-neutral-500">Everything else with ${escapeHtml(s.company)}</span>
-              <span class="text-xs font-semibold text-neutral-300">${fmt(others.pendingPayment)}</span>
+              <span class="text-[11px] text-neutral-500">Other shoots with ${escapeHtml(s.company)}</span>
+              <span class="text-xs font-semibold text-neutral-300">${fmt(others.pendingPaymentShoots)}</span>
+            </div>
+            <div class="flex items-center justify-between mt-1.5">
+              <span class="text-[11px] text-neutral-500">Other editing jobs with ${escapeHtml(s.company)}</span>
+              <span class="text-xs font-semibold text-neutral-300">${fmt(others.pendingPaymentEdits)}</span>
             </div>
             <div class="flex items-center justify-between mt-2 pt-2 border-t border-neutral-900">
               <span class="text-[11px] font-semibold text-neutral-400">Total pending payment${hasDelta ? ' (= After This Payment)' : ''}</span>
@@ -3956,7 +3981,7 @@ function openActivityDetail(logId) {
             </div>
           </div>
 
-          <p class="text-[10px] text-neutral-600 leading-relaxed">${hasDelta ? `Before/After shows ${escapeHtml(s.company)}'s total pending payment across every booking and editing job, just before and just after this one payment.` : ''} Everything here except Before/After is live — right now, across every shoot and editing job with ${escapeHtml(s.company)}.</p>
+          <p class="text-[10px] text-neutral-600 leading-relaxed">${hasDelta ? `Before/After shows ${escapeHtml(s.company)}'s total pending payment — split by Shoots vs Editing — just before and just after this one payment.` : ''} Everything here except Before/After is live — right now, across every shoot and editing job with ${escapeHtml(s.company)}.</p>
         </div>
       `;
     }
