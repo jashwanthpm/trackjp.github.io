@@ -2313,6 +2313,25 @@ setTimeout(() => {
     const DEFAULT_EVENTS = ['Wedding','Reception'];
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
+    // Shared helpers for the collapsible month-group accordions used on the
+    // Shoots, Ledger, and Editing list pages: past/completed months start
+    // collapsed so you can scroll straight past them; click a month header
+    // to expand or collapse it.
+    function isPastMonthKey(monthKey) {
+      const now = new Date();
+      const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return !!monthKey && monthKey < curKey;
+    }
+    function toggleMonthGroup(headerEl) {
+      const wrap = headerEl.closest('[data-month-group]');
+      if (!wrap) return;
+      const body = wrap.querySelector('[data-month-body]');
+      const chevron = headerEl.querySelector('[data-chevron]');
+      if (!body) return;
+      body.classList.toggle('hidden');
+      if (chevron) chevron.classList.toggle('-rotate-90');
+    }
+
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
     let _locs = [];
@@ -4323,16 +4342,17 @@ function renderEditingList() {
     const [year, month] = monthKey.split('-');
     const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
     const monthTotal = jobs.reduce((a, b) => a + Number(b.amount || 0), 0);
-    
+    const isPast = isPastMonthKey(monthKey);
+
     html += `
-      <div class="mb-6">
-        <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+      <div class="mb-6" data-month-group>
+        <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg cursor-pointer select-none" onclick="toggleMonthGroup(this)">
           <div class="flex justify-between items-center">
-            <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
+            <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-1.5"><i class="ti ti-chevron-down text-xs transition-transform duration-200 ${isPast ? '-rotate-90' : ''}" data-chevron></i>${monthName} ${year}</h3>
             <span class="text-xs text-neutral-500 privacy-target">${jobs.length} jobs • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
           </div>
         </div>
-        <div class="space-y-2">
+        <div class="space-y-2 ${isPast ? 'hidden' : ''}" data-month-body>
           ${jobs.map(e => {
             const workStyles = {
               'pending': 'bg-neutral-900 text-neutral-400',
@@ -5403,22 +5423,23 @@ async function toggleBlockDate(dateStr) {
             </div>
           </div>`;
         }
-        const sortedMonths = Object.keys(grouped).sort();
+        const sortedMonths = Object.keys(grouped).sort().reverse();
         sortedMonths.forEach(monthKey => {
           const shoots = grouped[monthKey];
           const [year, month] = monthKey.split('-');
           const monthName = MONTHS[parseInt(month) - 1];
           const monthLabel = `${monthName} ${year}`;
           const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-          
-          html += `<div class="mb-6">
-            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+          const isPast = isPastMonthKey(monthKey);
+
+          html += `<div class="mb-6" data-month-group>
+            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg cursor-pointer select-none" onclick="toggleMonthGroup(this)">
               <div class="flex justify-between items-center">
-                <h3 class="text-sm font-bold text-[#c9a96e]">${monthLabel}</h3>
+                <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-1.5"><i class="ti ti-chevron-down text-xs transition-transform duration-200 ${isPast ? '-rotate-90' : ''}" data-chevron></i>${monthLabel}</h3>
                 <span class="text-xs text-neutral-500 privacy-target">${shoots.length} shoots • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 ${isPast ? 'hidden' : ''}" data-month-body>
               ${shoots.map(s => getShootRowHtmlTemplate(s, false)).join('')}
             </div>
           </div>`;
@@ -5555,21 +5576,22 @@ async function toggleBlockDate(dateStr) {
       Object.values(grouped).forEach(arr => arr.sort((a, b) => (a.payStatus === 'done' ? 0 : 1) - (b.payStatus === 'done' ? 0 : 1)));
 
       let html = '';
-      Object.keys(grouped).sort().forEach(monthKey => {
+      Object.keys(grouped).sort().reverse().forEach(monthKey => {
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        
+        const isPast = isPastMonthKey(monthKey);
+
         html += `
-          <div class="mb-6">
-            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg">
+          <div class="mb-6" data-month-group>
+            <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg cursor-pointer select-none" onclick="toggleMonthGroup(this)">
               <div class="flex justify-between items-center">
-                <h3 class="text-sm font-bold text-[#c9a96e]">${monthName} ${year}</h3>
+                <h3 class="text-sm font-bold text-[#c9a96e] flex items-center gap-1.5"><i class="ti ti-chevron-down text-xs transition-transform duration-200 ${isPast ? '-rotate-90' : ''}" data-chevron></i>${monthName} ${year}</h3>
                 <span class="text-xs text-neutral-500 privacy-target">${shoots.length} • Rs. ${monthTotal.toLocaleString('en-IN')}</span>
               </div>
             </div>
-            <div class="space-y-2">
+            <div class="space-y-2 ${isPast ? 'hidden' : ''}" data-month-body>
               ${shoots.map(s => {
                 const { dd, mmm } = ddMmm(s.date);
                 const paymentBadgeColor = s.payStatus === 'done' ? 'bg-emerald-950 text-emerald-400' : s.payStatus === 'part' ? 'bg-purple-950 text-purple-400' : 'bg-neutral-900 text-neutral-500';
