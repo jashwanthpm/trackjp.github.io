@@ -3915,6 +3915,8 @@ function openActivityDetail(logId) {
       const hasDelta = typeof e.delta === 'number' && e.delta !== 0;
       const beforeBalance = s.balance + (hasDelta ? e.delta : 0);
       const afterBalance = s.balance;
+      const companyBefore = others.pendingPayment + beforeBalance;
+      const companyAfter = others.pendingPayment + afterBalance;
 
       html += `
         <div class="border-t border-neutral-900 pt-4 space-y-3">
@@ -3924,18 +3926,18 @@ function openActivityDetail(logId) {
           <div class="grid grid-cols-2 gap-2">
             <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3 text-center">
               <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Before This Payment</p>
-              <p class="text-sm font-bold ${beforeBalance > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(beforeBalance)}</p>
-              <p class="text-[9px] text-neutral-600 mt-0.5">for this ${s.kind === 'edit' ? 'job' : 'booking'}</p>
+              <p class="text-lg font-bold ${companyBefore > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(companyBefore)}</p>
+              <p class="text-[9px] text-neutral-600 mt-0.5">total pending, ${escapeHtml(s.company)}</p>
             </div>
             <div class="bg-neutral-950 border border-emerald-900/40 rounded-lg p-3 text-center">
               <p class="text-[9px] uppercase text-emerald-500 font-bold tracking-wide mb-1">After This Payment</p>
-              <p class="text-sm font-bold ${afterBalance > 0 ? 'text-amber-400' : 'text-emerald-400'}">${fmt(afterBalance)}</p>
-              <p class="text-[9px] text-neutral-600 mt-0.5">for this ${s.kind === 'edit' ? 'job' : 'booking'}</p>
+              <p class="text-lg font-bold ${companyAfter > 0 ? 'text-amber-400' : 'text-emerald-400'}">${fmt(companyAfter)}</p>
+              <p class="text-[9px] text-neutral-600 mt-0.5">total pending, ${escapeHtml(s.company)}</p>
             </div>
           </div>` : ''}
 
           <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3">
-            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-2">All of ${escapeHtml(s.company)} — Today</p>
+            <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-2">Made up of (today)</p>
             <div class="flex items-center justify-between">
               <span class="text-[11px] text-neutral-500">This ${s.kind === 'edit' ? 'job' : 'booking'}</span>
               <span class="text-xs font-semibold text-neutral-300">${fmt(afterBalance)}</span>
@@ -3945,7 +3947,7 @@ function openActivityDetail(logId) {
               <span class="text-xs font-semibold text-neutral-300">${fmt(others.pendingPayment)}</span>
             </div>
             <div class="flex items-center justify-between mt-2 pt-2 border-t border-neutral-900">
-              <span class="text-[11px] font-semibold text-neutral-400">Total pending payment</span>
+              <span class="text-[11px] font-semibold text-neutral-400">Total pending payment${hasDelta ? ' (= After This Payment)' : ''}</span>
               <span class="text-sm font-bold ${todayTotals && todayTotals.pendingPayment > 0 ? 'text-amber-400' : 'text-neutral-500'}">${fmt(todayTotals ? todayTotals.pendingPayment : 0)}</span>
             </div>
             <div class="flex items-center justify-between mt-1.5">
@@ -3954,7 +3956,7 @@ function openActivityDetail(logId) {
             </div>
           </div>
 
-          <p class="text-[10px] text-neutral-600 leading-relaxed">${hasDelta ? 'Before/After reflects just this one payment.' : ''} The company totals below are live — right now, across every shoot and editing job with ${escapeHtml(s.company)}.</p>
+          <p class="text-[10px] text-neutral-600 leading-relaxed">${hasDelta ? `Before/After shows ${escapeHtml(s.company)}'s total pending payment across every booking and editing job, just before and just after this one payment.` : ''} Everything here except Before/After is live — right now, across every shoot and editing job with ${escapeHtml(s.company)}.</p>
         </div>
       `;
     }
