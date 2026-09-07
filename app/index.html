@@ -5504,11 +5504,24 @@ async function toggleBlockDate(dateStr) {
       // 2. Calculate stats
       const gross = filtered.reduce((a, s) => a + Number(s.amount || 0), 0);
       const captured = filtered.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
-      const outstanding = gross - captured;
 
       const expenses = filtered.reduce((a, s) => a + Number(s.expense || 0), 0);
       const expensesSettled = filtered.reduce((a, s) => s.expenseStatus === 'settled' ? a + Number(s.expense || 0) : a, 0);
-      const expensesPending = expenses - expensesSettled;
+
+      // Pending money doesn't expire when a financial year ends, so the
+      // headline "Amount Pending" / "Pending" expense figures are always
+      // computed across ALL TIME (still respecting company/search filters,
+      // just never the FY/date range) — a due from 2 years ago should never
+      // silently vanish just because you're viewing a newer FY.
+      let pendingBase = _shoots.filter(s => s.amount);
+      if (q) pendingBase = pendingBase.filter(s => (s.name || '').toLowerCase().includes(q));
+      if (fc) pendingBase = pendingBase.filter(s => s.company === fc);
+      const outstanding = pendingBase.reduce((a, s) => {
+        if (s.payStatus === 'pending') return a + Number(s.amount || 0);
+        if (s.payStatus === 'part') return a + (Number(s.amount || 0) - Number(s.partPaid || 0));
+        return a;
+      }, 0);
+      const expensesPending = pendingBase.reduce((a, s) => (Number(s.expense || 0) > 0 && s.expenseStatus !== 'settled') ? a + Number(s.expense || 0) : a, 0);
 
       // 3. Render Stats Cards
       const payStatsContainer = document.getElementById('pay-stats');
@@ -5524,10 +5537,10 @@ async function toggleBlockDate(dateStr) {
             <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-1 privacy-target">${fmtAmt(captured)}</div>
             <div class="text-[10px] text-emerald-600/60 mt-auto pt-2">Settled payments</div>
           </div>
-          <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; renderPaymentsList();" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Filter by Pending">
+          <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Filter by Pending — across all time">
             <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
             <div class="text-2xl font-bold tracking-tight text-red-400 mt-1 privacy-target">${fmtAmt(outstanding)}</div>
-            <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues</div>
+            <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues • all time</div>
           </div>
           <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col cursor-pointer" onclick="document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" title="View All Expenses">
             <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
@@ -5537,7 +5550,7 @@ async function toggleBlockDate(dateStr) {
                  <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Settled:</span>
                  <span class="text-[10px] font-bold text-emerald-400 ml-0.5 privacy-target">${fmtAmt(expensesSettled)}</span>
               </div>
-              <div onclick="event.stopPropagation(); document.getElementById('pay-filter-expenses').value='pending'; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" class="hover:bg-neutral-800 px-1 -mr-1 rounded transition" title="Filter by Pending Expenses">
+              <div onclick="event.stopPropagation(); document.getElementById('pay-filter-expenses').value='pending'; document.getElementById('pay-filter-status').value=''; document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="hover:bg-neutral-800 px-1 -mr-1 rounded transition" title="Filter by Pending Expenses — across all time">
                  <span class="text-[9px] text-neutral-500 uppercase tracking-wider">Pending:</span>
                  <span class="text-[10px] font-bold text-orange-400 ml-0.5 privacy-target">${fmtAmt(expensesPending)}</span>
               </div>
