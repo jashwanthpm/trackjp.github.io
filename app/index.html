@@ -5573,7 +5573,7 @@ async function toggleBlockDate(dateStr) {
         if (!grouped[monthKey]) grouped[monthKey] = [];
         grouped[monthKey].push(s);
       });
-      Object.values(grouped).forEach(arr => arr.sort((a, b) => (a.payStatus === 'done' ? 0 : 1) - (b.payStatus === 'done' ? 0 : 1)));
+      Object.values(grouped).forEach(arr => arr.sort((a, b) => (a.date || '').localeCompare(b.date || '')));
 
       let html = '';
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
