@@ -448,6 +448,7 @@
         <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
           <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
           <div class="flex items-center gap-1">
+            <button onclick="openCalendarSyncModal()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-[#c9a96e]/50 hover:text-[#c9a96e] text-neutral-400 transition mr-1" title="Sync to Google/Apple Calendar"><i class="ti ti-calendar-share"></i></button>
             <button onclick="calPrev()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-left"></i></button>
             <button onclick="calToday()" class="px-3 py-2 text-xs font-medium border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition">Today</button>
             <button onclick="calNext()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-neutral-700 text-neutral-400 hover:text-white transition"><i class="ti ti-chevron-right"></i></button>
@@ -456,6 +457,22 @@
         <div class="grid grid-cols-7 gap-1 bg-neutral-950 p-2 border border-neutral-900 rounded-xl shadow-inner" id="cal-grid"></div>
         <div id="cal-day-panel" class="hidden transition-all duration-300"></div>
       </section>
+
+      <div id="calendar-sync-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'calendar-sync-modal-backdrop')">
+        <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 max-h-[88vh] flex flex-col">
+          <div class="p-5 border-b border-neutral-900 flex items-start gap-3">
+            <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e]"><i class="ti ti-calendar-share text-lg"></i></div>
+            <div class="flex-1 min-w-0">
+              <h4 class="text-white font-bold text-sm leading-snug">Sync to Google / Apple Calendar</h4>
+              <p class="text-[11px] text-neutral-500 mt-0.5">Your confirmed shoots, kept up to date automatically</p>
+            </div>
+            <button onclick="closeModal('calendar-sync-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+          </div>
+          <div id="calendar-sync-body" class="p-5 space-y-4 overflow-y-auto text-sm text-neutral-300">
+            <div class="text-center py-8 text-xs text-neutral-600">Setting up your link…</div>
+          </div>
+        </div>
+      </div>
 
       <!-- THIS IS THE MISSING LINE -->
       <section id="section-shoots" class="app-section hidden space-y-4">
@@ -5315,6 +5332,118 @@ async function toggleBlockDate(dateStr) {
     function calPrev() { calMonth--; if (calMonth < 0) { calMonth = 11; calYear--; } renderCalendar(); }
     function calNext() { calMonth++; if (calMonth > 11) { calMonth = 0; calYear++; } renderCalendar(); }
     function calToday() { calYear = new Date().getFullYear(); calMonth = new Date().getMonth(); calSelected = today(); renderCalendar(); }
+
+    // ==========================================
+    // CALENDAR SYNC (Google / Apple Calendar) — publishes a live, read-only
+    // .ics feed of this user's confirmed shoots via a Supabase Edge Function.
+    // Access is controlled by an opaque token (not the real user id), stored
+    // in settings under `${userId}_calendar_feed_token`. Subscribing to the
+    // link (rather than a one-time import) means new/changed shoots show up
+    // automatically the next time Google/Apple refreshes the calendar.
+    // ==========================================
+    const CALENDAR_FEED_BASE = `${SUPABASE_URL}/functions/v1/calendar-feed`;
+
+    async function ensureCalendarFeedToken() {
+      if (!currentUser || !currentUser.id) return null;
+      const dbKey = `${currentUser.id}_calendar_feed_token`;
+      try {
+        const rows = await sbFetch(`settings?key=eq.${dbKey}&select=value`);
+        if (rows && rows[0] && rows[0].value) return rows[0].value;
+      } catch (e) { /* fall through to create one */ }
+
+      const newToken = (crypto.randomUUID ? crypto.randomUUID() : uid() + uid() + uid()).replace(/-/g, '');
+      try {
+        await saveSettingToDB('calendar_feed_token', newToken);
+      } catch (e) {
+        console.warn('Could not save calendar feed token', e);
+      }
+      return newToken;
+    }
+
+    function calendarSyncLinks(token) {
+      const httpsUrl = `${CALENDAR_FEED_BASE}?token=${token}`;
+      const webcalUrl = httpsUrl.replace(/^https?:\/\//, 'webcal://');
+      return { httpsUrl, webcalUrl };
+    }
+
+    async function openCalendarSyncModal() {
+      openModal('calendar-sync-modal-backdrop');
+      const body = document.getElementById('calendar-sync-body');
+      body.innerHTML = `<div class="text-center py-8 text-xs text-neutral-600">Setting up your link…</div>`;
+
+      const token = await ensureCalendarFeedToken();
+      if (!token) {
+        body.innerHTML = `<div class="text-center py-8 text-xs text-red-400">Couldn't set up your sync link. Please try again.</div>`;
+        return;
+      }
+      renderCalendarSyncBody(token);
+    }
+
+    function renderCalendarSyncBody(token) {
+      const body = document.getElementById('calendar-sync-body');
+      const { httpsUrl, webcalUrl } = calendarSyncLinks(token);
+
+      body.innerHTML = `
+        <p class="text-xs text-neutral-400 leading-relaxed">Subscribe once with the link below and your confirmed shoots will keep appearing on Google Calendar or Apple Calendar automatically — no need to add them by hand. Calendars usually refresh this every few hours.</p>
+
+        <div class="bg-neutral-950 border border-neutral-900 rounded-lg p-3">
+          <p class="text-[9px] uppercase text-neutral-600 font-bold tracking-wide mb-2">Your sync link</p>
+          <div class="flex items-center gap-2">
+            <input readonly id="calendar-sync-url-input" value="${httpsUrl}" class="flex-1 bg-neutral-900 border border-neutral-800 rounded-lg px-2.5 py-2 text-[11px] text-neutral-300 outline-none truncate"/>
+            <button onclick="copyCalendarSyncLink()" class="flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e] hover:bg-[#c9a96e]/20 rounded-lg px-3 py-2 text-[11px] font-semibold transition">Copy</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-2">
+          <a href="${webcalUrl}" class="flex items-center justify-center gap-1.5 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 rounded-lg px-3 py-2.5 text-xs font-semibold text-neutral-200 transition">
+            <i class="ti ti-brand-apple text-sm"></i> Open in Apple Calendar
+          </a>
+          <a href="https://calendar.google.com/calendar/r?cid=${encodeURIComponent(httpsUrl)}" target="_blank" rel="noopener" class="flex items-center justify-center gap-1.5 bg-neutral-950 border border-neutral-800 hover:border-neutral-700 rounded-lg px-3 py-2.5 text-xs font-semibold text-neutral-200 transition">
+            <i class="ti ti-brand-google text-sm"></i> Open in Google Calendar
+          </a>
+        </div>
+
+        <div class="border-t border-neutral-900 pt-3 space-y-2">
+          <p class="text-[10px] uppercase text-neutral-600 font-bold tracking-wide">Manual setup</p>
+          <p class="text-[11px] text-neutral-500 leading-relaxed"><span class="text-neutral-300 font-semibold">Google Calendar (web):</span> Settings → Add calendar → From URL → paste the link above.</p>
+          <p class="text-[11px] text-neutral-500 leading-relaxed"><span class="text-neutral-300 font-semibold">Apple Calendar (Mac):</span> File → New Calendar Subscription → paste the link above.</p>
+          <p class="text-[11px] text-neutral-500 leading-relaxed"><span class="text-neutral-300 font-semibold">iPhone/iPad:</span> Settings → Calendar → Accounts → Add Account → Other → Add Subscribed Calendar → paste the link above.</p>
+        </div>
+
+        <div class="flex items-center justify-between border-t border-neutral-900 pt-3">
+          <p class="text-[10px] text-neutral-600 leading-relaxed max-w-[70%]">This is a one-way sync — shoots flow from Sakkhi to your calendar, not the other way around. If this link ever leaks, regenerate it.</p>
+          <button onclick="regenerateCalendarFeedToken()" class="flex-shrink-0 text-[11px] font-semibold text-red-400 hover:text-red-300 transition">Regenerate</button>
+        </div>
+      `;
+    }
+
+    function copyCalendarSyncLink() {
+      const input = document.getElementById('calendar-sync-url-input');
+      if (!input) return;
+      navigator.clipboard.writeText(input.value).then(() => {
+        showToast('Sync link copied!', 'success');
+      }).catch(() => {
+        input.select();
+        showToast('Select and copy the link manually.', 'info');
+      });
+    }
+
+    async function regenerateCalendarFeedToken() {
+      if (!currentUser || !currentUser.id) return;
+      const body = document.getElementById('calendar-sync-body');
+      body.innerHTML = `<div class="text-center py-8 text-xs text-neutral-600">Generating a new link…</div>`;
+      const newToken = (crypto.randomUUID ? crypto.randomUUID() : uid() + uid() + uid()).replace(/-/g, '');
+      try {
+        await saveSettingToDB('calendar_feed_token', newToken);
+        showToast('New sync link generated — old link is now invalid.', 'success');
+        logActivity('settings_general', 'Calendar sync link regenerated', 'Previous link was invalidated for security.');
+        renderCalendarSyncBody(newToken);
+      } catch (e) {
+        showToast('Could not regenerate the link. Try again.', 'error');
+        renderCalendarSyncBody(await ensureCalendarFeedToken());
+      }
+    }
+
 
     function renderShootsList() {
       // ---> NEW FILTER APPLY <---
