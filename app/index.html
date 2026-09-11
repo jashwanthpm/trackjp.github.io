@@ -451,7 +451,7 @@
             <div class="relative">
               <button id="calendar-sync-btn" onclick="dismissCalendarSyncHint(); openCalendarSyncModal()" class="p-2 border border-neutral-800 bg-neutral-900/50 rounded-lg hover:border-[#c9a96e]/50 hover:text-[#c9a96e] text-neutral-400 transition mr-1" title="Sync to Google/Apple Calendar"><i class="ti ti-calendar-share"></i></button>
               <span id="calendar-sync-dot" class="hidden absolute -top-1 -right-0.5 w-2.5 h-2.5 bg-[#c9a96e] rounded-full animate-pulse"></span>
-              <div id="calendar-sync-hint" class="hidden absolute right-0 top-full mt-2 w-60 bg-[#0f0f0f] border border-[#c9a96e]/40 rounded-xl shadow-2xl p-3 z-30 text-left">
+              <div id="calendar-sync-hint" class="hidden fixed w-60 max-w-[calc(100vw-1.5rem)] bg-[#0f0f0f] border border-[#c9a96e]/40 rounded-xl shadow-2xl p-3 z-[70] text-left">
                 <div class="flex items-start gap-2">
                   <i class="ti ti-calendar-share text-[#c9a96e] text-base mt-0.5"></i>
                   <div class="flex-1">
@@ -5352,6 +5352,21 @@ async function toggleBlockDate(dateStr) {
     // (tracked in localStorage), the first time the person opens the
     // Calendar tab after this feature existed.
     let _calendarSyncHintShownThisSession = false;
+    function positionCalendarSyncHint() {
+      const btn = document.getElementById('calendar-sync-btn');
+      const hint = document.getElementById('calendar-sync-hint');
+      if (!btn || !hint || hint.classList.contains('hidden')) return;
+      const margin = 12;
+      const btnRect = btn.getBoundingClientRect();
+      const hintWidth = hint.offsetWidth || 240;
+      // Anchor just under the button, then clamp so it never runs off
+      // either edge of the viewport — this is what was overflowing on mobile.
+      let left = btnRect.right - hintWidth;
+      left = Math.max(margin, Math.min(left, window.innerWidth - hintWidth - margin));
+      const top = btnRect.bottom + 8;
+      hint.style.left = left + 'px';
+      hint.style.top = top + 'px';
+    }
     function maybeShowCalendarSyncHint() {
       if (_calendarSyncHintShownThisSession) return;
       if (localStorage.getItem('sakkhi_seen_calendar_sync_hint')) return;
@@ -5361,6 +5376,9 @@ async function toggleBlockDate(dateStr) {
         const dot = document.getElementById('calendar-sync-dot');
         if (hint) hint.classList.remove('hidden');
         if (dot) dot.classList.remove('hidden');
+        positionCalendarSyncHint();
+        window.addEventListener('resize', positionCalendarSyncHint);
+        window.addEventListener('scroll', positionCalendarSyncHint, true);
       }, 600);
     }
     function dismissCalendarSyncHint() {
@@ -5369,6 +5387,8 @@ async function toggleBlockDate(dateStr) {
       const dot = document.getElementById('calendar-sync-dot');
       if (hint) hint.classList.add('hidden');
       if (dot) dot.classList.add('hidden');
+      window.removeEventListener('resize', positionCalendarSyncHint);
+      window.removeEventListener('scroll', positionCalendarSyncHint, true);
     }
     document.addEventListener('click', (e) => {
       const hint = document.getElementById('calendar-sync-hint');
