@@ -235,7 +235,7 @@
           <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Detailed Shoot History</h3>
           <div class="h-px bg-white/10 flex-1"></div>
         </div>
-        <p class="text-center text-[10px] text-neutral-600 italic mb-4">Pending items first, then active &amp; past 6 months</p>
+        <p id="history-caption" class="text-center text-[10px] text-neutral-600 italic mb-4">Pending items first, then active &amp; past 6 months</p>
         <div id="history-list" class="space-y-3 mt-6"></div>
       </div>
 
@@ -305,6 +305,7 @@
 
     let ledgerData = null;
     let currentRef = '';
+    let companySettings = null; // per-company overrides pulled from the studio's "Company Settings" (app.html)
     let totals = { billed: 0, paid: 0, expenses: 0, balance: 0 };
     let notifyType = 'full';
 
@@ -356,6 +357,39 @@ The studio's total liability shall not exceed the total amount paid by the clien
       return text ? JSON.parse(text) : null;
     }
 
+    // ==========================================
+    // PER-COMPANY BOOKING/LEDGER SETTINGS
+    // ----------------------------------------
+    // The main app (app.html) stores each company's booking/ledger
+    // preferences inside the studio owner's settings row (key "<userId>_companies").
+    // The ledger link itself is saved under key "ledger_<ref>" with the
+    // owner's user id in it, so we look that up first, then pull the matching
+    // company's settings by name. Fails silently to the safe defaults
+    // (6-month cutoff, all history included) if anything is missing.
+    // ==========================================
+    async function loadCompanySettings(companyName) {
+      try {
+        const linkRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.ledger_${currentRef}&select=value,user_id`, { headers: HEADERS });
+        if (!linkRes.ok) return null;
+        const linkRows = await linkRes.json();
+        const row = linkRows && linkRows[0];
+        const ownerId = row && (row.user_id || (row.value && row.value.u));
+        if (!ownerId) return null;
+
+        const compRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${ownerId}_companies&select=value`, { headers: HEADERS });
+        if (!compRes.ok) return null;
+        const compRows = await compRes.json();
+        const list = (compRows && compRows[0] && Array.isArray(compRows[0].value)) ? compRows[0].value : [];
+
+        const target = (companyName || '').trim().toLowerCase();
+        const found = list.find(c => (typeof c === 'string' ? c : (c.name || '')).trim().toLowerCase() === target);
+        return (found && typeof found === 'object') ? found : null;
+      } catch (e) {
+        console.warn('Per-company ledger settings unavailable, using defaults:', e);
+        return null;
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       let refCode = urlParams.get('ref');
@@ -381,6 +415,7 @@ The studio's total liability shall not exceed the total amount paid by the clien
         }
         
         ledgerData = payload;
+        companySettings = await loadCompanySettings(payload.companyName);
         calculateTotals();
         renderLedger();
         checkClaimStatus();
@@ -524,6 +559,17 @@ The studio's total liability shall not exceed the total amount paid by the clien
       const sixMonthsAgo = new Date();
       sixMonthsAgo.setMonth(todayObj.getMonth() - 6);
 
+      // Per-company overrides (falls back to the safe defaults if not set)
+      const only6mo = !companySettings || companySettings.ledgerLast6Only !== false;
+      const pendingOnly = !!(companySettings && companySettings.ledgerPendingOnly);
+
+      const captionEl = document.getElementById('history-caption');
+      if (captionEl) {
+        captionEl.textContent = pendingOnly
+          ? 'Showing pending payments only'
+          : (only6mo ? 'Pending items first, then active & past 6 months' : 'Pending items first, then full history');
+      }
+
       allItems.forEach(s => {
         if (!s.date) return;
         const shootDate = new Date(s.date);
@@ -550,7 +596,14 @@ The studio's total liability shall not exceed the total amount paid by the clien
           `;
         }
 
-        if (isUnsettled || shootDate >= sixMonthsAgo) {
+        // pendingOnly: hide anything fully settled, regardless of age.
+        // only6mo: keep unsettled items always, plus settled items from the last 6 months.
+        // neither: full history, nothing hidden.
+        const includeInHistory = pendingOnly
+          ? isUnsettled
+          : (only6mo ? (isUnsettled || shootDate >= sixMonthsAgo) : true);
+
+        if (includeInHistory) {
           let statusLabel = '';
           if (s.pay_status === 'done') statusLabel = `<span class="text-success text-[10px] uppercase font-bold tracking-widest">Settled</span>`;
           else if (s.pay_status === 'part') statusLabel = `<span class="text-warning text-[10px] uppercase font-bold tracking-widest">Partial (${fmtMoney(s.part_paid || 0)})</span>`;
