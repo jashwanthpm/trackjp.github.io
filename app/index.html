@@ -494,8 +494,8 @@
           <div class="p-5 border-b border-neutral-900 flex items-start gap-3">
             <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e]"><i class="ti ti-building text-lg"></i></div>
             <div class="flex-1 min-w-0">
-              <h4 class="text-white font-bold text-sm leading-snug">Company Settings</h4>
-              <p class="text-[11px] text-neutral-500 mt-0.5">Contact details and booking rules for this company</p>
+              <h4 id="cs-modal-title" class="text-white font-bold text-sm leading-snug">Company Settings</h4>
+              <p id="cs-modal-subtitle" class="text-[11px] text-neutral-500 mt-0.5">Contact details and booking rules for this company</p>
             </div>
             <button onclick="closeCompanySettingsModal()" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
           </div>
@@ -547,6 +547,14 @@
                 </label>
               </div>
 
+              <div class="bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <label class="flex items-center gap-2 text-[11px] font-semibold text-neutral-300 cursor-pointer">
+                  <input type="checkbox" id="cs-custom-terms-toggle" class="accent-[#c9a96e] w-3.5 h-3.5" onchange="toggleCustomTermsBox()">
+                  <i class="ti ti-pencil-plus text-neutral-500 text-sm"></i> Use different terms text for this company
+                </label>
+                <textarea id="cs-custom-terms" rows="4" placeholder="Overrides your global Terms & Conditions text just for this company's booking page." class="hidden mt-2.5 w-full bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-xs text-white outline-none focus:border-[#c9a96e] transition resize-y leading-relaxed"></textarea>
+              </div>
+
               <p class="text-[10px] uppercase text-neutral-600 font-bold tracking-wide pt-1">Client Ledger Portal</p>
 
               <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
@@ -582,7 +590,7 @@
           </div>
           <div class="p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
             <button onclick="closeCompanySettingsModal()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Cancel</button>
-            <button onclick="saveCompanySettingsModal()" class="flex-1 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition">Save</button>
+            <button id="cs-save-btn" onclick="saveCompanySettingsModal()" class="flex-1 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition">Save</button>
           </div>
         </div>
       </div>
@@ -2481,6 +2489,7 @@ setTimeout(() => {
         phone: '',
         notes: '',
         requireTerms: true,          // must tick "I agree to Terms" before booking
+        customTerms: '',             // non-empty = overrides the global T&Cs text for this company
         bookingMode: 'confirmation', // 'confirmation' = Needs Approval, 'direct' = auto-confirmed
         ledgerLast6Only: true,       // hide settled shoots older than 6 months in the client ledger
         ledgerPendingOnly: false     // only list shoots that still have money due
@@ -6098,7 +6107,7 @@ async function toggleBlockDate(dateStr) {
                <div class="min-w-0 flex items-center gap-1.5">
                  <i class="ti ${directMode ? 'ti-bolt text-[#c9a96e]' : 'ti-clock-check text-neutral-600'} text-sm flex-shrink-0" title="${directMode ? 'Direct Booking — auto-confirmed' : 'Confirmation Needed before booking'}"></i>
                  <span class="text-neutral-300 font-medium text-xs truncate">${escapeHtml(n)}</span>
-                 ${co.requireTerms === false ? '<i class="ti ti-file-off text-neutral-600 text-xs flex-shrink-0" title="Terms & Conditions agreement not required"></i>' : ''}
+                 ${co.requireTerms === false ? '<i class="ti ti-file-off text-neutral-600 text-xs flex-shrink-0" title="Terms & Conditions agreement not required"></i>' : (co.customTerms ? '<i class="ti ti-pencil-plus text-neutral-600 text-xs flex-shrink-0" title="Uses custom Terms & Conditions text"></i>' : '')}
                  ${co.phone ? `<span class="text-[10px] text-neutral-600 truncate">${escapeHtml(co.phone)}</span>` : ''}
                </div>
                <div class="flex items-center gap-2 flex-shrink-0">
@@ -7369,11 +7378,12 @@ async function toggleBlockDate(dateStr) {
       logActivity('data_export', 'Full database exported (CSV)');
     }
 
-    async function addCompany() {
+    function addCompany() {
       const el = document.getElementById('new-company-input');
       const val = el.value.trim(); if (!val) return;
-      _companies.push(makeCompanyProfile(val)); await saveSettingToDB('companies', _companies);
-      el.value = ''; renderSettings();
+      if (getCompanyByName(val)) { showToast(`"${val}" is already in your list.`, 'error'); return; }
+      el.value = '';
+      openCompanySettingsModal(-1, val); // -1 = new company, opens the same modal so mobile number, booking mode, T&Cs etc. are set up right away
     }
     async function deleteCompany(i) {
       if (!confirm(`Delete "${companyName(_companies[i])}"? Its booking/ledger links will stop working.`)) return;
@@ -7390,20 +7400,34 @@ async function toggleBlockDate(dateStr) {
     // ==========================================
     let _editingCompanyIndex = null;
 
-    function openCompanySettingsModal(i) {
-      const raw = _companies[i];
+    function toggleCustomTermsBox() {
+      const on = document.getElementById('cs-custom-terms-toggle').checked;
+      document.getElementById('cs-custom-terms').classList.toggle('hidden', !on);
+    }
+
+    function openCompanySettingsModal(i, prefillName) {
+      const isNew = i === -1;
+      const raw = isNew ? makeCompanyProfile(prefillName || '') : _companies[i];
       const co = (typeof raw === 'string') ? makeCompanyProfile(raw) : Object.assign(makeCompanyProfile(raw.name), raw);
       _editingCompanyIndex = i;
+
+      document.getElementById('cs-modal-title').textContent = isNew ? 'Add Company' : 'Company Settings';
+      document.getElementById('cs-modal-subtitle').textContent = isNew ? 'Set up contact details and booking rules' : 'Contact details and booking rules for this company';
+      document.getElementById('cs-save-btn').textContent = isNew ? 'Add Company' : 'Save';
 
       document.getElementById('cs-name').value = co.name;
       document.getElementById('cs-phone').value = co.phone || '';
       document.getElementById('cs-notes').value = co.notes || '';
       document.getElementById('cs-confirmation-needed').checked = co.bookingMode !== 'direct';
       document.getElementById('cs-require-terms').checked = co.requireTerms !== false;
+      document.getElementById('cs-custom-terms-toggle').checked = !!co.customTerms;
+      document.getElementById('cs-custom-terms').value = co.customTerms || '';
+      toggleCustomTermsBox();
       document.getElementById('cs-ledger-6mo').checked = co.ledgerLast6Only !== false;
       document.getElementById('cs-ledger-pending').checked = !!co.ledgerPendingOnly;
 
       openModal('company-settings-modal-backdrop');
+      if (isNew) setTimeout(() => document.getElementById('cs-phone').focus(), 250);
     }
 
     function closeCompanySettingsModal() {
@@ -7413,20 +7437,29 @@ async function toggleBlockDate(dateStr) {
 
     async function saveCompanySettingsModal() {
       if (_editingCompanyIndex === null) return;
+      const isNew = _editingCompanyIndex === -1;
       const name = document.getElementById('cs-name').value.trim();
       if (!name) { showToast('Company name is required.', 'error'); return; }
+      if (isNew && getCompanyByName(name)) { showToast(`"${name}" is already in your list.`, 'error'); return; }
 
-      const oldName = companyName(_companies[_editingCompanyIndex]);
+      const oldName = isNew ? null : companyName(_companies[_editingCompanyIndex]);
       const updated = {
         name,
         phone: document.getElementById('cs-phone').value.trim(),
         notes: document.getElementById('cs-notes').value.trim(),
         bookingMode: document.getElementById('cs-confirmation-needed').checked ? 'confirmation' : 'direct',
         requireTerms: document.getElementById('cs-require-terms').checked,
+        customTerms: document.getElementById('cs-custom-terms-toggle').checked ? document.getElementById('cs-custom-terms').value.trim() : '',
         ledgerLast6Only: document.getElementById('cs-ledger-6mo').checked,
         ledgerPendingOnly: document.getElementById('cs-ledger-pending').checked
       };
-      _companies[_editingCompanyIndex] = updated;
+
+      if (isNew) {
+        _companies.push(updated);
+        logActivity('settings_general', `Company added: ${name}`, updated.bookingMode === 'direct' ? 'Direct Booking enabled' : 'Confirmation Needed before booking');
+      } else {
+        _companies[_editingCompanyIndex] = updated;
+      }
       await saveSettingToDB('companies', _companies);
 
       // If the name changed, keep every shoot/edit that referenced the old
@@ -7440,7 +7473,7 @@ async function toggleBlockDate(dateStr) {
       closeCompanySettingsModal();
       renderSettings(); renderShootsList(); renderPayments();
       if (typeof renderEditingList === 'function') renderEditingList();
-      showToast('Company settings saved.', 'success');
+      showToast(isNew ? `${name} added.` : 'Company settings saved.', 'success');
     }
 
     async function addLocation() {
@@ -8762,7 +8795,8 @@ async function executeDeleteAll() {
           'confirm-modal-backdrop', 
           'privacy-prompt-backdrop', 
           'delete-all-modal-backdrop', 
-          'password-pin-modal-backdrop'
+          'password-pin-modal-backdrop',
+          'company-settings-modal-backdrop'
         ];
         
         activeModals.forEach(id => {
@@ -8823,6 +8857,12 @@ async function executeDeleteAll() {
           else if (event.target.closest('#account-profile') || event.target.closest('#account-payment')) {
             event.preventDefault();
             saveProfileSettings();
+          }
+
+          // 6b. Company Settings Modal (Add/Edit)
+          else if (event.target.closest('#company-settings-modal-backdrop')) {
+            event.preventDefault();
+            saveCompanySettingsModal();
           }
           
           // 7. Small Inline Inputs (Adding Companies, Locations, Events)
