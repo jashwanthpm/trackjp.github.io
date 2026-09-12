@@ -516,21 +516,30 @@
               <textarea id="cs-notes" rows="2" placeholder="Contact person, address, referral %, anything else you want on file" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition resize-none"></textarea>
             </div>
 
-            <div class="border-t border-neutral-900 pt-4 space-y-3">
-              <p class="text-[10px] uppercase text-neutral-600 font-bold tracking-wide">Booking Settings</p>
+            <div class="border-t border-neutral-900 pt-4 space-y-2.5">
+              <p class="text-[10px] uppercase text-neutral-600 font-bold tracking-wide mb-1">Booking Settings</p>
 
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-neutral-300">When this company's booking link is used</label>
-                <select id="cs-booking-mode" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-                  <option value="confirmation">Confirmation Needed — goes to "Needs Approval" until you approve it</option>
-                  <option value="direct">Direct Booking — auto-confirmed the moment it's submitted</option>
-                </select>
+              <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="ti ti-clock-check text-neutral-400 text-base flex-shrink-0"></i>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-200">Confirmation Needed</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5 leading-snug">Off = Direct Booking, auto-confirmed instantly.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input type="checkbox" id="cs-confirmation-needed" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                </label>
               </div>
 
-              <div class="flex items-center justify-between bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
-                <div class="pr-3">
-                  <h4 class="text-xs font-bold text-neutral-200">Require Terms & Conditions agreement</h4>
-                  <p class="text-[10px] text-neutral-500 mt-0.5">Client must tick "I agree" before this company can book. Uses your global T&Cs text.</p>
+              <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="ti ti-file-text text-neutral-400 text-base flex-shrink-0"></i>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-200">Require Terms & Conditions</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5 leading-snug">Client must tick "I agree" before booking.</p>
+                  </div>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
                   <input type="checkbox" id="cs-require-terms" class="sr-only peer" checked>
@@ -538,17 +547,38 @@
                 </label>
               </div>
 
-              <div class="flex flex-col gap-1.5">
-                <label class="text-xs font-semibold text-neutral-300">Client Ledger Portal shows</label>
-                <select id="cs-ledger-view" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition">
-                  <option value="default">Last 6 months (settled shoots older than that hidden)</option>
-                  <option value="all">Full history — everything, no cutoff</option>
-                  <option value="pending_only">Pending payments only</option>
-                </select>
+              <p class="text-[10px] uppercase text-neutral-600 font-bold tracking-wide pt-1">Client Ledger Portal</p>
+
+              <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="ti ti-calendar-due text-neutral-400 text-base flex-shrink-0"></i>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-200">Show last 6 months only</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5 leading-snug">Off shows full history, no cutoff.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input type="checkbox" id="cs-ledger-6mo" class="sr-only peer" checked>
+                  <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                </label>
+              </div>
+
+              <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="ti ti-wallet text-neutral-400 text-base flex-shrink-0"></i>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-200">Show pending payments only</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5 leading-snug">Hide fully settled shoots entirely.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input type="checkbox" id="cs-ledger-pending" class="sr-only peer">
+                  <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                </label>
               </div>
             </div>
 
-            <p class="text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-900 pt-3">Defaults are the safe/strict option for every new company — agreement required and confirmation needed. Direct Booking is auto-confirmed as soon as the dashboard detects the request (near-instant while the app is open).</p>
+            <p class="text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-900 pt-3">Defaults are the safe option — agreement required, confirmation needed, 6-month ledger cutoff. Flip any toggle off to loosen it just for this company.</p>
           </div>
           <div class="p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
             <button onclick="closeCompanySettingsModal()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Cancel</button>
@@ -2450,13 +2480,25 @@ setTimeout(() => {
         name: (name || '').trim(),
         phone: '',
         notes: '',
-        requireTerms: true,        // must tick "I agree to Terms" before booking
+        requireTerms: true,          // must tick "I agree to Terms" before booking
         bookingMode: 'confirmation', // 'confirmation' = Needs Approval, 'direct' = auto-confirmed
-        ledgerView: 'default'      // 'default' (hide settled >6mo), 'all', 'pending_only'
+        ledgerLast6Only: true,       // hide settled shoots older than 6 months in the client ledger
+        ledgerPendingOnly: false     // only list shoots that still have money due
       };
     }
     function normalizeCompanies(list) {
-      return (list || []).map(c => (typeof c === 'string') ? makeCompanyProfile(c) : Object.assign(makeCompanyProfile(c.name), c));
+      return (list || []).map(c => {
+        if (typeof c === 'string') return makeCompanyProfile(c);
+        const co = Object.assign(makeCompanyProfile(c.name), c);
+        // Migrate the old single-select ledgerView field (if present) to the
+        // two simple toggles now used in the UI.
+        if (co.ledgerView) {
+          co.ledgerLast6Only = co.ledgerView !== 'all';
+          co.ledgerPendingOnly = co.ledgerView === 'pending_only';
+          delete co.ledgerView;
+        }
+        return co;
+      });
     }
     function companyName(c) { return typeof c === 'string' ? c : (c && c.name) || ''; }
     function getCompanyByName(name) {
@@ -6053,13 +6095,11 @@ async function toggleBlockDate(dateStr) {
              const directMode = co.bookingMode === 'direct';
              return `
              <div class="flex flex-col sm:flex-row sm:items-center justify-between py-2.5 gap-2 border-b border-neutral-900/50 last:border-0">
-               <div class="min-w-0">
-                 <span class="text-neutral-300 font-medium text-xs truncate block">${escapeHtml(n)}</span>
-                 <div class="flex items-center gap-1.5 mt-0.5">
-                   <span class="text-[9px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded ${directMode ? 'bg-emerald-950/40 text-emerald-400' : 'bg-amber-950/40 text-amber-400'}">${directMode ? 'Direct Booking' : 'Confirmation Needed'}</span>
-                   ${co.requireTerms === false ? '<span class="text-[9px] uppercase font-bold tracking-wide px-1.5 py-0.5 rounded bg-neutral-800 text-neutral-400">T&Cs Optional</span>' : ''}
-                   ${co.phone ? `<span class="text-[10px] text-neutral-600">${escapeHtml(co.phone)}</span>` : ''}
-                 </div>
+               <div class="min-w-0 flex items-center gap-1.5">
+                 <i class="ti ${directMode ? 'ti-bolt text-[#c9a96e]' : 'ti-clock-check text-neutral-600'} text-sm flex-shrink-0" title="${directMode ? 'Direct Booking — auto-confirmed' : 'Confirmation Needed before booking'}"></i>
+                 <span class="text-neutral-300 font-medium text-xs truncate">${escapeHtml(n)}</span>
+                 ${co.requireTerms === false ? '<i class="ti ti-file-off text-neutral-600 text-xs flex-shrink-0" title="Terms & Conditions agreement not required"></i>' : ''}
+                 ${co.phone ? `<span class="text-[10px] text-neutral-600 truncate">${escapeHtml(co.phone)}</span>` : ''}
                </div>
                <div class="flex items-center gap-2 flex-shrink-0">
                  
@@ -7358,9 +7398,10 @@ async function toggleBlockDate(dateStr) {
       document.getElementById('cs-name').value = co.name;
       document.getElementById('cs-phone').value = co.phone || '';
       document.getElementById('cs-notes').value = co.notes || '';
-      document.getElementById('cs-booking-mode').value = co.bookingMode || 'confirmation';
+      document.getElementById('cs-confirmation-needed').checked = co.bookingMode !== 'direct';
       document.getElementById('cs-require-terms').checked = co.requireTerms !== false;
-      document.getElementById('cs-ledger-view').value = co.ledgerView || 'default';
+      document.getElementById('cs-ledger-6mo').checked = co.ledgerLast6Only !== false;
+      document.getElementById('cs-ledger-pending').checked = !!co.ledgerPendingOnly;
 
       openModal('company-settings-modal-backdrop');
     }
@@ -7380,9 +7421,10 @@ async function toggleBlockDate(dateStr) {
         name,
         phone: document.getElementById('cs-phone').value.trim(),
         notes: document.getElementById('cs-notes').value.trim(),
-        bookingMode: document.getElementById('cs-booking-mode').value,
+        bookingMode: document.getElementById('cs-confirmation-needed').checked ? 'confirmation' : 'direct',
         requireTerms: document.getElementById('cs-require-terms').checked,
-        ledgerView: document.getElementById('cs-ledger-view').value
+        ledgerLast6Only: document.getElementById('cs-ledger-6mo').checked,
+        ledgerPendingOnly: document.getElementById('cs-ledger-pending').checked
       };
       _companies[_editingCompanyIndex] = updated;
       await saveSettingToDB('companies', _companies);
