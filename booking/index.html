@@ -164,6 +164,7 @@
         <button type="submit" id="submit-btn" disabled class="w-full mt-4 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm py-4 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.15)] hover:shadow-[0_0_30px_rgba(201,169,110,0.3)] hover:-translate-y-0.5 transition-all duration-300 disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:translate-y-0 disabled:shadow-none">
           Submit Booking Request
         </button>
+        <p id="booking-mode-note" class="text-[10px] text-neutral-500 text-center -mt-2"></p>
       </form>
     </div>
 
@@ -238,6 +239,7 @@
     let studioDisplayName = '';
     let studioPhoneDigits = '';
     let termsRequired = true;
+    let companyProfile = null; // per-company overrides from the studio's "Company Settings"
 
     let dateStatusMap = {}; 
     let currentStudioShoots = [];
@@ -298,6 +300,31 @@ The studio is not liable for delays due to circumstances beyond reasonable contr
 The studio's total liability shall not exceed the total amount paid by the client for this specific shoot.
 
 By ticking the box and submitting this booking request, you confirm that you have read, understood, and agreed to the above Terms & Conditions and Payment Policy.`;
+
+    // ==========================================
+    // PER-COMPANY BOOKING SETTINGS
+    // ----------------------------------------
+    // app.html stores each company's booking rules (confirmation vs direct,
+    // T&Cs requirement, custom terms text) inside the studio owner's settings
+    // row under key "<userId>_companies". We already have targetUserId from
+    // get_booking_portal, so we just look up the matching company by name and
+    // let its settings override the studio-wide defaults. Fails quietly to
+    // those studio-wide defaults if anything's missing.
+    // ==========================================
+    async function loadCompanyProfile(userId, companyName) {
+      try {
+        const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${userId}_companies&select=value`, { headers: HEADERS });
+        if (!res.ok) return null;
+        const rows = await res.json();
+        const list = (rows && rows[0] && Array.isArray(rows[0].value)) ? rows[0].value : [];
+        const target = (companyName || '').trim().toLowerCase();
+        const found = list.find(c => (typeof c === 'string' ? c : (c.name || '')).trim().toLowerCase() === target);
+        return (found && typeof found === 'object') ? found : null;
+      } catch (e) {
+        console.warn('Per-company booking settings unavailable, using studio defaults:', e);
+        return null;
+      }
+    }
 
     async function sbRpc(fn, args) {
       const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
@@ -362,8 +389,19 @@ By ticking the box and submitting this booking request, you confirm that you hav
             }
 
             const termsBox = document.getElementById('terms-box');
-            if (termsBox) termsBox.textContent = portal.terms || DEFAULT_TERMS;
-            termsRequired = portal.requireTerms !== false;
+            companyProfile = await loadCompanyProfile(targetUserId, activeStudio);
+
+            termsRequired = companyProfile ? (companyProfile.requireTerms !== false) : (portal.requireTerms !== false);
+            const termsText = (companyProfile && companyProfile.customTerms) ? companyProfile.customTerms : (portal.terms || DEFAULT_TERMS);
+            if (termsBox) termsBox.textContent = termsText;
+
+            const noteEl = document.getElementById('booking-mode-note');
+            if (noteEl) {
+              noteEl.textContent = (companyProfile && companyProfile.bookingMode === 'direct')
+                ? 'This date will be confirmed automatically once submitted.'
+                : 'Your request will be reviewed and confirmed by the studio.';
+            }
+
             const checkboxRow = document.getElementById('terms-checkbox-row');
             const submitBtn = document.getElementById('submit-btn');
             if (!termsRequired) {
