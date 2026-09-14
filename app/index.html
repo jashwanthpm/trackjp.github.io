@@ -2877,16 +2877,21 @@ async function notifyNewBooking(booking, wasAuto) {
 
   try {
     const userId = currentUser?.id || currentUser?.email || 'default_user';
-    // Look at recent notifications rather than an exact action_url match —
-    // the database's own booking alert doesn't necessarily store the link
-    // in the same format our client-side code uses, so an exact match can
-    // silently miss it. Match loosely instead: any "booking" notification
-    // from the last few minutes that mentions this client's name.
-    const rows = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc&limit=15`);
-    const cutoff = Date.now() - 10 * 60 * 1000; // created in the last 10 minutes
+    // Look at recent notifications and match on whichever signal is
+    // available — the database's own booking alert is created in the same
+    // instant as the booking itself, so timestamp proximity is the most
+    // reliable signal; name-in-message and action_url are backups in case
+    // the timestamps don't line up exactly.
+    const rows = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc&limit=25`);
+    const bookingCreatedMs = booking.created ? new Date(booking.created).getTime() : null;
+    const windowCutoff = Date.now() - 10 * 60 * 1000; // last 10 minutes, as a broader backstop
     const clientName = (booking.name || '').trim().toLowerCase();
+
     const match = (rows || []).find(r => {
-      if (!r.created_at || new Date(r.created_at).getTime() < cutoff) return false;
+      if (!r.created_at) return false;
+      const t = new Date(r.created_at).getTime();
+      if (bookingCreatedMs !== null && Math.abs(t - bookingCreatedMs) <= 2 * 60 * 1000) return true;
+      if (t < windowCutoff) return false;
       if (!(r.title || '').toLowerCase().includes('booking')) return false;
       if (r.action_url === actionUrl) return true;
       return clientName && (r.message || '').toLowerCase().includes(clientName);
