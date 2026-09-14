@@ -360,29 +360,17 @@ The studio's total liability shall not exceed the total amount paid by the clien
     // ==========================================
     // PER-COMPANY BOOKING/LEDGER SETTINGS
     // ----------------------------------------
-    // The main app (app.html) stores each company's booking/ledger
-    // preferences inside the studio owner's settings row (key "<userId>_companies").
-    // The ledger link itself is saved under key "ledger_<ref>" with the
-    // owner's user id in it, so we look that up first, then pull the matching
-    // company's settings by name. Fails silently to the safe defaults
-    // (6-month cutoff, all history included) if anything is missing.
+    // app.html stores each company's ledger preferences inside the studio
+    // owner's settings row. That table is protected by Row Level Security,
+    // so this anonymous page can't read it directly (the exact reason
+    // get_ledger_portal below is an RPC instead of a plain table query) — we
+    // go through a matching RPC, get_company_ledger_settings(p_ref), that
+    // does the lookup server-side. Falls back to the safe defaults (6-month
+    // cutoff, no pending-only filter) if anything's missing.
     // ==========================================
-    async function loadCompanySettings(companyName) {
+    async function loadCompanySettings() {
       try {
-        const linkRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.ledger_${currentRef}&select=value,user_id`, { headers: HEADERS });
-        if (!linkRes.ok) return null;
-        const linkRows = await linkRes.json();
-        const row = linkRows && linkRows[0];
-        const ownerId = row && (row.user_id || (row.value && row.value.u));
-        if (!ownerId) return null;
-
-        const compRes = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${ownerId}_companies&select=value`, { headers: HEADERS });
-        if (!compRes.ok) return null;
-        const compRows = await compRes.json();
-        const list = (compRows && compRows[0] && Array.isArray(compRows[0].value)) ? compRows[0].value : [];
-
-        const target = (companyName || '').trim().toLowerCase();
-        const found = list.find(c => (typeof c === 'string' ? c : (c.name || '')).trim().toLowerCase() === target);
+        const found = await sbRpc('get_company_ledger_settings', { p_ref: currentRef });
         return (found && typeof found === 'object') ? found : null;
       } catch (e) {
         console.warn('Per-company ledger settings unavailable, using defaults:', e);
@@ -415,7 +403,7 @@ The studio's total liability shall not exceed the total amount paid by the clien
         }
         
         ledgerData = payload;
-        companySettings = await loadCompanySettings(payload.companyName);
+        companySettings = await loadCompanySettings();
         calculateTotals();
         renderLedger();
         checkClaimStatus();
