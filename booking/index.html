@@ -190,8 +190,8 @@
   <!-- Success Container -->
   <div id="success-container" class="text-center hidden relative z-10 w-full max-w-md p-10 bg-[#0a0a0a]/90 backdrop-blur-xl border border-[#c9a96e]/20 rounded-[2rem] shadow-[0_0_50px_rgba(201,169,110,0.1)]">
     <div class="w-20 h-20 bg-emerald-950/40 border border-emerald-900/50 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6 shadow-[0_0_30px_rgba(16,185,129,0.15)]"><i class="ti ti-circle-check"></i></div>
-    <h2 class="text-2xl font-bold text-white mb-2 tracking-tight">Request Sent!</h2>
-    <p class="text-sm text-neutral-400 font-light leading-relaxed">Your booking request has been securely delivered to the studio. You will receive a confirmation shortly.</p>
+    <h2 id="success-title" class="text-2xl font-bold text-white mb-2 tracking-tight">Request Sent!</h2>
+    <p id="success-desc" class="text-sm text-neutral-400 font-light leading-relaxed">Your booking request has been securely delivered to the studio. You will receive a confirmation shortly.</p>
     <p id="success-details" class="text-xs text-[#c9a96e] font-semibold tracking-wide mt-3"></p>
     <a id="success-whatsapp-btn" href="#" target="_blank" rel="noopener" class="hidden mt-6 items-center justify-center gap-2 bg-emerald-950/30 border border-emerald-900/40 hover:bg-emerald-950/50 text-emerald-400 font-bold py-3 rounded-xl text-xs transition-all">
       <i class="ti ti-brand-whatsapp text-base"></i> Message on WhatsApp
@@ -419,12 +419,15 @@ By ticking the box and submitting this booking request, you confirm that you hav
                   
                   if (statusRes && statusRes.length > 0) {
                     const status = statusRes[0].booking_status;
+                    const directNote = (companyProfile && companyProfile.bookingMode === 'direct');
                     
                     if (status === 'confirmed') {
-                      titleEl.textContent = 'Request Approved';
+                      titleEl.textContent = directNote ? 'Booking Confirmed' : 'Request Approved';
                       iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
-                      statusTextEl.textContent = `${displayBizName} has approved your ${pending.event} shoot request${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''}.`;
+                      statusTextEl.textContent = directNote
+                        ? `Your ${pending.event} shoot${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is booked and confirmed with ${displayBizName}.`
+                        : `${displayBizName} has approved your ${pending.event} shoot request${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''}.`;
                     } else {
                       titleEl.textContent = 'Pending Approval';
                       iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
@@ -537,8 +540,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
               </div>
             </div>
             <div class="flex flex-col items-end gap-1">
-              <div class="text-[9px] font-bold uppercase tracking-widest ${isApproved ? 'text-neutral-600 opacity-60' : 'text-neutral-400'}">
-                ${isApproved ? 'Blocked' : 'Pending'}
+              <div class="text-[9px] font-bold uppercase tracking-widest ${isApproved ? 'text-emerald-500' : 'text-neutral-400'}">
+                ${isApproved ? 'Booked' : 'Pending'}
               </div>
             </div>
           </div>
@@ -740,6 +743,8 @@ By ticking the box and submitting this booking request, you confirm that you hav
           id: result.id, event: eventType, session: eventSession, date: eventDate, sentAt: Date.now()
         }));
 
+        const isDirectBooking = !!(companyProfile && companyProfile.bookingMode === 'direct');
+
         currentStudioShoots.push({
           id: result.id || Date.now(), 
           name: clientName,
@@ -747,7 +752,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
           date: eventDate,
           session: eventSession,
           location: eventLocation,
-          booking_status: 'pending' 
+          booking_status: isDirectBooking ? 'confirmed' : 'pending' 
         });
 
         if (!dateStatusMap[eventDate]) dateStatusMap[eventDate] = [];
@@ -764,6 +769,16 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const prettyDate = `${sd} ${MONTHS[parseInt(sm) - 1]} ${sy}`;
         document.getElementById('success-details').textContent =
           `${eventType} • ${formatSessionLabel(eventSession)} • ${prettyDate}`;
+
+        const successTitleEl = document.getElementById('success-title');
+        const successDescEl = document.getElementById('success-desc');
+        if (isDirectBooking) {
+          successTitleEl.textContent = 'Booking Confirmed!';
+          successDescEl.textContent = `You're all set — this date is booked and confirmed with ${studioDisplayName}. No further action is needed.`;
+        } else {
+          successTitleEl.textContent = 'Request Sent!';
+          successDescEl.textContent = 'Your booking request has been securely delivered to the studio. You will receive a confirmation shortly.';
+        }
 
         const waBtn = document.getElementById('success-whatsapp-btn');
         if (studioPhoneDigits) {
