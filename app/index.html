@@ -2859,6 +2859,51 @@ async function autoConfirmDirectBookings(bookingsList) {
   return autoConfirmed;
 }
 
+// The submit_booking_request database function already creates a "New
+// Booking Request" notification server-side the moment someone books — so
+// if we also add our own client-side one, every booking shows up twice
+// (once with the server's generic wording, once with ours). Instead, we
+// find that existing notification by its shoot link and correct its
+// wording in place — one entry per booking, always accurate to what
+// actually happened. Only adds a fresh local one if no server entry is
+// found at all (e.g. an older booking, or the lookup failed).
+async function notifyNewBooking(booking, wasAuto) {
+  const title = wasAuto ? 'New Booking Arrived ✅' : 'New Booking Request! 🎉';
+  const message = wasAuto
+    ? `${booking.name || 'A client'}'s shoot is booked and confirmed — no action needed.`
+    : `${booking.name || 'A client'} just requested a shoot — review and confirm.`;
+  const actionLabel = wasAuto ? 'View Shoot' : 'View Request';
+  const actionUrl = `shoot:${booking.id}`;
+
+  try {
+    const userId = currentUser?.id || currentUser?.email || 'default_user';
+    const rows = await sbFetch(`notifications?user_id=eq.${userId}&action_url=eq.${actionUrl}&order=created_at.desc&limit=1`);
+    if (rows && rows.length > 0) {
+      const row = rows[0];
+      if (row.title !== title || row.message !== message) {
+        await sbFetch(`notifications?id=eq.${row.id}`, {
+          method: 'PATCH',
+          body: JSON.stringify({ title, message })
+        });
+      }
+      const local = _notifications.find(n => n.id === row.id);
+      if (local) {
+        local.title = title;
+        local.message = message;
+      } else {
+        _notifications.unshift({ id: row.id, targetId: booking.id, title, message, timestamp: row.created_at || new Date().toISOString(), actionUrl, actionLabel, isRead: !!row.is_read });
+      }
+      saveNotifications();
+      updateNotificationUI();
+      return;
+    }
+  } catch (e) {
+    console.warn('Could not reconcile booking notification, adding locally instead:', e);
+  }
+
+  addNotification(title, message, booking.id, actionUrl, actionLabel);
+}
+
 async function pollForUpdates() {
   if (!currentUser || isDemoMode) return;
   try {
@@ -2882,19 +2927,11 @@ async function pollForUpdates() {
 
     if (brandNew.length > 0) {
       const autoConfirmedIds = await autoConfirmDirectBookings(brandNew);
-      brandNew.forEach(booking => {
+      for (const booking of brandNew) {
         const wasAuto = autoConfirmedIds.includes(booking.id);
         logActivity('booking_received', `Online booking received: ${booking.name || 'A client'}`, `${booking.event || 'Shoot'} on ${booking.date}`);
-        addNotification(
-          wasAuto ? 'New Booking Arrived ✅' : 'New Booking Request! 🎉',
-          wasAuto
-            ? `${booking.name || 'A client'}'s shoot is booked and confirmed — no action needed.`
-            : `${booking.name || 'A client'} just requested a shoot — review and confirm.`,
-          booking.id,
-          `shoot:${booking.id}`,
-          wasAuto ? 'View Shoot' : 'View Request'
-        );
-      });
+        await notifyNewBooking(booking, wasAuto);
+      }
       // Match the toast to what actually happened instead of a generic
       // "received" for everything — avoids it reading like a second,
       // differently-worded notification for the same booking.
@@ -3377,19 +3414,11 @@ try {
 if (newBookings.length > 0 && !isDemoMode) {
   setTimeout(async () => {
     const autoConfirmedIds = await autoConfirmDirectBookings(newBookings);
-    newBookings.forEach(booking => {
+    for (const booking of newBookings) {
       const wasAuto = autoConfirmedIds.includes(booking.id);
       logActivity('booking_received', `Online booking received: ${booking.name || 'A client'}`, `${booking.event || 'Shoot'} on ${booking.date}`);
-      addNotification(
-        wasAuto ? 'New Booking Arrived ✅' : 'New Booking Request! 🎉',
-        wasAuto
-          ? `${booking.name || 'A client'}'s shoot is booked and confirmed — no action needed.`
-          : `${booking.name || 'A client'} just requested a shoot — review and confirm.`,
-        booking.id,
-        `shoot:${booking.id}`,
-        wasAuto ? 'View Shoot' : 'View Request'
-      );
-    });
+      await notifyNewBooking(booking, wasAuto);
+    }
     const allAuto = autoConfirmedIds.length === newBookings.length;
     const noneAuto = autoConfirmedIds.length === 0;
     const plural = newBookings.length > 1 ? 's' : '';
