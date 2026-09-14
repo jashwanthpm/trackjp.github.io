@@ -306,6 +306,25 @@
     let ledgerData = null;
     let currentRef = '';
     let companySettings = null; // per-company overrides pulled from the studio's "Company Settings" (app.html)
+    let ledgerOnly6mo = true;
+    let ledgerPendingOnly = false;
+
+    // Single source of truth for "does this shoot/edit belong in this
+    // company's ledger view" — used by both the summary totals (Pending
+    // Balance, Payments Received, Total Billed) and the Detailed Shoot
+    // History list below, so the two always agree with each other.
+    function includeInLedgerView(s) {
+      const isUnsettled = (s.pay_status !== 'done') || (Number(s.expense) > 0 && s.expense_status !== 'settled');
+      if (ledgerPendingOnly) return isUnsettled;
+      if (ledgerOnly6mo) {
+        if (!s.date) return true;
+        const shootDate = new Date(s.date);
+        const sixMonthsAgo = new Date();
+        sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+        return isUnsettled || shootDate >= sixMonthsAgo;
+      }
+      return true;
+    }
     let totals = { billed: 0, paid: 0, expenses: 0, balance: 0 };
     let notifyType = 'full';
 
@@ -404,6 +423,10 @@ The studio's total liability shall not exceed the total amount paid by the clien
         
         ledgerData = payload;
         companySettings = await loadCompanySettings();
+        // Cache these once so both the summary totals and the history list
+        // below apply the exact same rule — no drift between the two.
+        ledgerOnly6mo = !companySettings || companySettings.ledgerLast6Only !== false;
+        ledgerPendingOnly = !!(companySettings && companySettings.ledgerPendingOnly);
         calculateTotals();
         renderLedger();
         checkClaimStatus();
@@ -452,7 +475,7 @@ The studio's total liability shall not exceed the total amount paid by the clien
       const edits = (ledgerData.profile && ledgerData.profile.ledgerEdits && ledgerData.edits) ? ledgerData.edits : [];
       const allItems = [...shoots, ...edits];
 
-      allItems.forEach(s => {
+      allItems.filter(includeInLedgerView).forEach(s => {
         // Core shoot amount
         totals.billed += (Number(s.amount) || 0);
         if (s.pay_status === 'done') totals.paid += (Number(s.amount) || 0);
@@ -544,18 +567,12 @@ The studio's total liability shall not exceed the total amount paid by the clien
       
       const todayObj = new Date();
       todayObj.setHours(0,0,0,0);
-      const sixMonthsAgo = new Date();
-      sixMonthsAgo.setMonth(todayObj.getMonth() - 6);
-
-      // Per-company overrides (falls back to the safe defaults if not set)
-      const only6mo = !companySettings || companySettings.ledgerLast6Only !== false;
-      const pendingOnly = !!(companySettings && companySettings.ledgerPendingOnly);
 
       const captionEl = document.getElementById('history-caption');
       if (captionEl) {
-        captionEl.textContent = pendingOnly
+        captionEl.textContent = ledgerPendingOnly
           ? 'Showing pending payments only'
-          : (only6mo ? 'Pending items first, then active & past 6 months' : 'Pending items first, then full history');
+          : (ledgerOnly6mo ? 'Pending items first, then active & past 6 months' : 'Pending items first, then full history');
       }
 
       allItems.forEach(s => {
@@ -584,12 +601,11 @@ The studio's total liability shall not exceed the total amount paid by the clien
           `;
         }
 
-        // pendingOnly: hide anything fully settled, regardless of age.
+        // Same rule used for the summary totals above (includeInLedgerView),
+        // so the numbers and this list can never disagree.
         // only6mo: keep unsettled items always, plus settled items from the last 6 months.
         // neither: full history, nothing hidden.
-        const includeInHistory = pendingOnly
-          ? isUnsettled
-          : (only6mo ? (isUnsettled || shootDate >= sixMonthsAgo) : true);
+        const includeInHistory = includeInLedgerView(s);
 
         if (includeInHistory) {
           let statusLabel = '';
