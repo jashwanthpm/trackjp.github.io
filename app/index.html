@@ -2877,21 +2877,35 @@ async function notifyNewBooking(booking, wasAuto) {
 
   try {
     const userId = currentUser?.id || currentUser?.email || 'default_user';
-    const rows = await sbFetch(`notifications?user_id=eq.${userId}&action_url=eq.${actionUrl}&order=created_at.desc&limit=1`);
-    if (rows && rows.length > 0) {
-      const row = rows[0];
-      if (row.title !== title || row.message !== message) {
-        await sbFetch(`notifications?id=eq.${row.id}`, {
+    // Look at recent notifications rather than an exact action_url match —
+    // the database's own booking alert doesn't necessarily store the link
+    // in the same format our client-side code uses, so an exact match can
+    // silently miss it. Match loosely instead: any "booking" notification
+    // from the last few minutes that mentions this client's name.
+    const rows = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc&limit=15`);
+    const cutoff = Date.now() - 10 * 60 * 1000; // created in the last 10 minutes
+    const clientName = (booking.name || '').trim().toLowerCase();
+    const match = (rows || []).find(r => {
+      if (!r.created_at || new Date(r.created_at).getTime() < cutoff) return false;
+      if (!(r.title || '').toLowerCase().includes('booking')) return false;
+      if (r.action_url === actionUrl) return true;
+      return clientName && (r.message || '').toLowerCase().includes(clientName);
+    });
+
+    if (match) {
+      if (match.title !== title || match.message !== message || match.action_url !== actionUrl) {
+        await sbFetch(`notifications?id=eq.${match.id}`, {
           method: 'PATCH',
-          body: JSON.stringify({ title, message })
+          body: JSON.stringify({ title, message, action_url: actionUrl })
         });
       }
-      const local = _notifications.find(n => n.id === row.id);
+      const local = _notifications.find(n => n.id === match.id);
       if (local) {
         local.title = title;
         local.message = message;
+        local.actionUrl = actionUrl;
       } else {
-        _notifications.unshift({ id: row.id, targetId: booking.id, title, message, timestamp: row.created_at || new Date().toISOString(), actionUrl, actionLabel, isRead: !!row.is_read });
+        _notifications.unshift({ id: match.id, targetId: booking.id, title, message, timestamp: match.created_at || new Date().toISOString(), actionUrl, actionLabel, isRead: !!match.is_read });
       }
       saveNotifications();
       updateNotificationUI();
@@ -2899,6 +2913,24 @@ async function notifyNewBooking(booking, wasAuto) {
     }
   } catch (e) {
     console.warn('Could not reconcile booking notification, adding locally instead:', e);
+  }
+
+  // Last-resort safety net: if something already added a matching alert
+  // locally this session (e.g. a near-simultaneous poll), don't pile on
+  // a second one — just leave the existing entry as-is.
+  const recentLocalDupe = _notifications.find(n => {
+    if (!n.timestamp || Date.now() - new Date(n.timestamp).getTime() > 10 * 60 * 1000) return false;
+    if (!(n.title || '').toLowerCase().includes('booking')) return false;
+    const clientName = (booking.name || '').trim().toLowerCase();
+    return clientName && (n.message || '').toLowerCase().includes(clientName);
+  });
+  if (recentLocalDupe) {
+    recentLocalDupe.title = title;
+    recentLocalDupe.message = message;
+    recentLocalDupe.actionUrl = actionUrl;
+    saveNotifications();
+    updateNotificationUI();
+    return;
   }
 
   addNotification(title, message, booking.id, actionUrl, actionLabel);
