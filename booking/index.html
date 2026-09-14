@@ -413,34 +413,45 @@ By ticking the box and submitting this booking request, you confirm that you hav
               const statusTextEl = document.getElementById('pending-details');
 
               if (pending.id) {
-                try {
-                  const res = await fetch(`${SUPABASE_URL}/rest/v1/shoots?id=eq.${pending.id}&select=booking_status`, { headers: HEADERS });
-                  const statusRes = await res.json();
-                  
-                  if (statusRes && statusRes.length > 0) {
-                    const status = statusRes[0].booking_status;
-                    const directNote = (companyProfile && companyProfile.bookingMode === 'direct');
-                    
-                    if (status === 'confirmed') {
-                      titleEl.textContent = directNote ? 'Booking Confirmed' : 'Request Approved';
-                      iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
-                      iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
-                      statusTextEl.textContent = directNote
-                        ? `Your ${pending.event} shoot${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is booked and confirmed with ${displayBizName}.`
-                        : `${displayBizName} has approved your ${pending.event} shoot request${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''}.`;
+                const directNote = (companyProfile && companyProfile.bookingMode === 'direct');
+
+                if (directNote) {
+                  // Direct Booking companies are confirmed the instant they're
+                  // submitted — no need to check the database at all here,
+                  // and no reason to ever show "pending" for one of these.
+                  titleEl.textContent = 'Booking Confirmed';
+                  iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
+                  iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
+                  statusTextEl.textContent = `Your ${pending.event} shoot${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is booked and confirmed with ${displayBizName}.`;
+                } else {
+                  try {
+                    // A plain table read here would be blocked by Row Level
+                    // Security for this anonymous page (same reason
+                    // get_booking_portal is an RPC), so this goes through a
+                    // matching RPC instead of querying "shoots" directly.
+                    const statusRes = await sbRpc('get_booking_status_by_id', { p_shoot_id: String(pending.id), p_ref: currentRefCode });
+
+                    if (statusRes && statusRes.booking_status) {
+                      const status = statusRes.booking_status;
+                      if (status === 'confirmed') {
+                        titleEl.textContent = 'Request Approved';
+                        iconEl.className = 'w-20 h-20 bg-emerald-950/30 border border-emerald-900/40 rounded-2xl flex items-center justify-center text-emerald-400 text-4xl mx-auto mb-6';
+                        iconEl.innerHTML = '<i class="ti ti-circle-check"></i>';
+                        statusTextEl.textContent = `${displayBizName} has approved your ${pending.event} shoot request${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''}.`;
+                      } else {
+                        titleEl.textContent = 'Pending Approval';
+                        iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
+                        iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
+                        statusTextEl.textContent = `Your ${pending.event} request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently being reviewed by ${displayBizName}.`;
+                      }
                     } else {
-                      titleEl.textContent = 'Pending Approval';
+                      titleEl.textContent = 'Request Pending';
                       iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
                       iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
-                      statusTextEl.textContent = `Your ${pending.event} request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently being reviewed by ${displayBizName}.`;
+                      statusTextEl.textContent = `Your request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently awaiting approval.`;
                     }
-                  } else {
-                    titleEl.textContent = 'Request Pending';
-                    iconEl.className = 'w-20 h-20 bg-amber-950/30 border border-amber-900/40 rounded-2xl flex items-center justify-center text-amber-400 text-4xl mx-auto mb-6';
-                    iconEl.innerHTML = '<i class="ti ti-clock-hour-4"></i>';
-                    statusTextEl.textContent = `Your request for ${pending.date}${pending.session ? ' (' + formatSessionLabel(pending.session) + ')' : ''} is currently awaiting approval.`;
-                  }
-                } catch (e) { console.error(e); }
+                  } catch (e) { console.error(e); }
+                }
               }
 
               document.getElementById('pending-container').classList.remove('hidden');
