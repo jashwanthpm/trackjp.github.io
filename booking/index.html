@@ -306,19 +306,15 @@ By ticking the box and submitting this booking request, you confirm that you hav
     // ----------------------------------------
     // app.html stores each company's booking rules (confirmation vs direct,
     // T&Cs requirement, custom terms text) inside the studio owner's settings
-    // row under key "<userId>_companies". We already have targetUserId from
-    // get_booking_portal, so we just look up the matching company by name and
-    // let its settings override the studio-wide defaults. Fails quietly to
-    // those studio-wide defaults if anything's missing.
+    // row. That table is protected by Row Level Security, so this anonymous
+    // page can't read it directly (same reason get_booking_portal below is
+    // an RPC instead of a plain table query) — we go through a matching RPC,
+    // get_company_booking_settings(p_ref), that does the lookup server-side.
+    // Falls back to the studio-wide defaults if anything's missing.
     // ==========================================
-    async function loadCompanyProfile(userId, companyName) {
+    async function loadCompanyProfile() {
       try {
-        const res = await fetch(`${SUPABASE_URL}/rest/v1/settings?key=eq.${userId}_companies&select=value`, { headers: HEADERS });
-        if (!res.ok) return null;
-        const rows = await res.json();
-        const list = (rows && rows[0] && Array.isArray(rows[0].value)) ? rows[0].value : [];
-        const target = (companyName || '').trim().toLowerCase();
-        const found = list.find(c => (typeof c === 'string' ? c : (c.name || '')).trim().toLowerCase() === target);
+        const found = await sbRpc('get_company_booking_settings', { p_ref: currentRefCode });
         return (found && typeof found === 'object') ? found : null;
       } catch (e) {
         console.warn('Per-company booking settings unavailable, using studio defaults:', e);
@@ -389,7 +385,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             }
 
             const termsBox = document.getElementById('terms-box');
-            companyProfile = await loadCompanyProfile(targetUserId, activeStudio);
+            companyProfile = await loadCompanyProfile();
 
             termsRequired = companyProfile ? (companyProfile.requireTerms !== false) : (portal.requireTerms !== false);
             const termsText = (companyProfile && companyProfile.customTerms) ? companyProfile.customTerms : (portal.terms || DEFAULT_TERMS);
