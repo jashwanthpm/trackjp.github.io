@@ -240,11 +240,12 @@
       </div>
 
       <div id="payment-logs-section" class="hidden mt-8">
-        <div class="flex items-center gap-3 mb-4">
+        <div class="flex items-center gap-3 mb-1.5">
           <div class="h-px bg-white/10 flex-1"></div>
           <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Payment Logs</h3>
           <div class="h-px bg-white/10 flex-1"></div>
         </div>
+        <p class="text-center text-[10px] text-neutral-600 italic mb-4">A history of payments recorded against your bookings</p>
         <div id="payment-logs-list" class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl px-4"></div>
       </div>
 
@@ -410,6 +411,27 @@ The studio's total liability shall not exceed the total amount paid by the clien
     // company in app.html's Company Settings). When on, this pulls a
     // read-only history of payment activity for this company only — never
     // shown unless the studio has explicitly enabled it.
+    // Parses "Payment received: Pavan" style titles into a clean client
+    // name + a short type label + an icon/color, so the client name is the
+    // headline instead of being buried mid-sentence.
+    function parsePaymentLogTitle(title) {
+      const t = title || 'Payment update';
+      const m = t.match(/^(Payment received|Partial payment received|Payment settled|Payment updated):\s*(.+)$/i);
+      if (!m) return { client: t, kind: 'update' };
+      const verb = m[1].toLowerCase();
+      const client = m[2].trim();
+      if (verb.startsWith('partial')) return { client, kind: 'partial' };
+      if (verb === 'payment settled') return { client, kind: 'settled' };
+      if (verb === 'payment received') return { client, kind: 'received' };
+      return { client, kind: 'update' };
+    }
+    const PAYMENT_LOG_STYLES = {
+      received: { icon: 'ti-circle-check', color: 'text-emerald-400', bg: 'bg-emerald-950/40 border-emerald-900/50', label: 'Paid in Full' },
+      settled:  { icon: 'ti-circle-check', color: 'text-emerald-400', bg: 'bg-emerald-950/40 border-emerald-900/50', label: 'Settled' },
+      partial:  { icon: 'ti-clock-hour-4', color: 'text-amber-400',   bg: 'bg-amber-950/40 border-amber-900/50',   label: 'Partial Payment' },
+      update:   { icon: 'ti-refresh',      color: 'text-neutral-400', bg: 'bg-neutral-800/50 border-neutral-800',  label: 'Updated' }
+    };
+
     async function loadAndRenderPaymentLogs() {
       const section = document.getElementById('payment-logs-section');
       const listEl = document.getElementById('payment-logs-list');
@@ -418,16 +440,46 @@ The studio's total liability shall not exceed the total amount paid by the clien
         const logs = await sbRpc('get_company_payment_logs', { p_ref: currentRef });
         if (!Array.isArray(logs) || logs.length === 0) return;
 
-        listEl.innerHTML = logs.map(entry => {
+        // This page already belongs to one company, so repeating its name
+        // on every single line is just noise — strip that trailing tag.
+        const companyName = (ledgerData && ledgerData.companyName) || '';
+        const stripCompanyTag = (text) => companyName
+          ? (text || '').replace(new RegExp(` · ${companyName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}$`), '')
+          : (text || '');
+
+        // Collapse exact repeats (same headline + same detail) — these are
+        // almost always the same action logged more than once, not
+        // separate real payments, and they were the main source of clutter.
+        const seen = new Set();
+        const deduped = logs.filter(entry => {
+          const key = `${entry.title || ''}|${entry.detail || ''}`;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return true;
+        });
+
+        listEl.innerHTML = deduped.map(entry => {
+          const { client, kind } = parsePaymentLogTitle(entry.title);
+          const style = PAYMENT_LOG_STYLES[kind] || PAYMENT_LOG_STYLES.update;
+          const detail = stripCompanyTag(entry.detail);
+          const amountMatch = detail.match(/₹[\d,]+/);
           const d = entry.timestamp ? new Date(entry.timestamp) : null;
           const dateStr = d ? d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+
           return `
-            <div class="flex items-start justify-between gap-3 py-3 border-b border-white/5 last:border-0">
-              <div class="min-w-0">
-                <p class="text-xs font-bold text-white truncate">${entry.title || 'Payment update'}</p>
-                ${entry.detail ? `<p class="text-[11px] text-neutral-500 mt-0.5">${entry.detail}</p>` : ''}
+            <div class="flex items-start gap-3 py-3.5 border-b border-white/5 last:border-0">
+              <div class="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0 border ${style.bg}">
+                <i class="ti ${style.icon} ${style.color} text-base"></i>
               </div>
-              <span class="text-[10px] text-neutral-600 whitespace-nowrap flex-shrink-0">${dateStr}</span>
+              <div class="min-w-0 flex-1">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <p class="text-sm font-bold text-white">${client}</p>
+                  <span class="text-[9px] font-bold uppercase tracking-wide px-1.5 py-0.5 rounded ${style.bg} ${style.color}">${style.label}</span>
+                </div>
+                ${detail ? `<p class="text-[11px] text-neutral-500 mt-1">${detail}</p>` : ''}
+                <p class="text-[10px] text-neutral-600 mt-1">${dateStr}</p>
+              </div>
+              ${amountMatch ? `<div class="text-sm font-bold ${style.color} flex-shrink-0">${amountMatch[0]}</div>` : ''}
             </div>
           `;
         }).join('');
