@@ -239,6 +239,15 @@
         <div id="history-list" class="space-y-3 mt-6"></div>
       </div>
 
+      <div id="payment-logs-section" class="hidden mt-8">
+        <div class="flex items-center gap-3 mb-4">
+          <div class="h-px bg-white/10 flex-1"></div>
+          <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Payment Logs</h3>
+          <div class="h-px bg-white/10 flex-1"></div>
+        </div>
+        <div id="payment-logs-list" class="bg-[#0a0a0a]/80 backdrop-blur-sm border border-white/5 rounded-xl px-4"></div>
+      </div>
+
     </div>
   </div>
 
@@ -397,6 +406,37 @@ The studio's total liability shall not exceed the total amount paid by the clien
       }
     }
 
+    // Payment Logs is an opt-in extra (off by default, turned on per
+    // company in app.html's Company Settings). When on, this pulls a
+    // read-only history of payment activity for this company only — never
+    // shown unless the studio has explicitly enabled it.
+    async function loadAndRenderPaymentLogs() {
+      const section = document.getElementById('payment-logs-section');
+      const listEl = document.getElementById('payment-logs-list');
+      if (!section || !listEl) return;
+      try {
+        const logs = await sbRpc('get_company_payment_logs', { p_ref: currentRef });
+        if (!Array.isArray(logs) || logs.length === 0) return;
+
+        listEl.innerHTML = logs.map(entry => {
+          const d = entry.timestamp ? new Date(entry.timestamp) : null;
+          const dateStr = d ? d.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }) : '';
+          return `
+            <div class="flex items-start justify-between gap-3 py-3 border-b border-white/5 last:border-0">
+              <div class="min-w-0">
+                <p class="text-xs font-bold text-white truncate">${entry.title || 'Payment update'}</p>
+                ${entry.detail ? `<p class="text-[11px] text-neutral-500 mt-0.5">${entry.detail}</p>` : ''}
+              </div>
+              <span class="text-[10px] text-neutral-600 whitespace-nowrap flex-shrink-0">${dateStr}</span>
+            </div>
+          `;
+        }).join('');
+        section.classList.remove('hidden');
+      } catch (e) {
+        console.warn('Payment logs unavailable:', e);
+      }
+    }
+
     document.addEventListener('DOMContentLoaded', async () => {
       const urlParams = new URLSearchParams(window.location.search);
       let refCode = urlParams.get('ref');
@@ -430,6 +470,9 @@ The studio's total liability shall not exceed the total amount paid by the clien
         calculateTotals();
         renderLedger();
         checkClaimStatus();
+        if (companySettings && companySettings.showPaymentLogs) {
+          loadAndRenderPaymentLogs();
+        }
 
         document.getElementById('loading-state').classList.add('hidden');
         const layout = document.getElementById('main-layout');
