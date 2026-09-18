@@ -584,6 +584,20 @@
                   <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
                 </label>
               </div>
+
+              <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-800 rounded-lg p-3">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <i class="ti ti-receipt text-neutral-400 text-base flex-shrink-0"></i>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-bold text-neutral-200">Show payment logs</h4>
+                    <p class="text-[10px] text-neutral-500 mt-0.5 leading-snug">A running history of payments received — off by default.</p>
+                  </div>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer flex-shrink-0">
+                  <input type="checkbox" id="cs-payment-logs" class="sr-only peer">
+                  <div class="w-11 h-6 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#c9a96e]"></div>
+                </label>
+              </div>
             </div>
 
             <p class="text-[10px] text-neutral-600 leading-relaxed border-t border-neutral-900 pt-3">Defaults are the safe option — agreement required, confirmation needed, 6-month ledger cutoff. Flip any toggle off to loosen it just for this company.</p>
@@ -2452,13 +2466,19 @@ setTimeout(() => {
     const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
 
     // Shared helpers for the collapsible month-group accordions used on the
-    // Shoots, Ledger, and Editing list pages: past/completed months start
-    // collapsed so you can scroll straight past them; click a month header
-    // to expand or collapse it.
+    // Shoots, Ledger, and Editing list pages: only the current month starts
+    // expanded — every other group (past OR future) starts collapsed, so
+    // filtering down to a spread of months doesn't dump everything open at
+    // once. Click a month header to expand or collapse it.
     function isPastMonthKey(monthKey) {
       const now = new Date();
       const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
       return !!monthKey && monthKey < curKey;
+    }
+    function isCurrentMonthKey(monthKey) {
+      const now = new Date();
+      const curKey = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      return monthKey === curKey;
     }
     function toggleMonthGroup(headerEl) {
       const wrap = headerEl.closest('[data-month-group]');
@@ -2492,7 +2512,8 @@ setTimeout(() => {
         customTerms: '',             // non-empty = overrides the global T&Cs text for this company
         bookingMode: 'confirmation', // 'confirmation' = Needs Approval, 'direct' = auto-confirmed
         ledgerLast6Only: true,       // hide settled shoots older than 6 months in the client ledger
-        ledgerPendingOnly: false     // only list shoots that still have money due
+        ledgerPendingOnly: false,    // only list shoots that still have money due
+        showPaymentLogs: false       // show a payment activity log on the client ledger portal — off by default
       };
     }
     function normalizeCompanies(list) {
@@ -2687,14 +2708,14 @@ By ticking the box and submitting this booking request, you confirm that you hav
       if (lbl) lbl.textContent = label;
     }
 
-    function showToast(msg, type = 'success') {
+    function showToast(msg, type = 'success', duration = 3000) {
       const c = document.getElementById('toast-container');
       if (!c) return;
       const t = document.createElement('div');
       t.className = `p-3 text-xs font-semibold rounded-xl flex items-center gap-2 shadow-xl border backdrop-blur-md transition-all duration-300 translate-y-2 pointer-events-auto ${type === 'success' || type === 'info' ? 'bg-emerald-950/90 border-emerald-900 text-emerald-300' : 'bg-red-950/90 border-red-900 text-red-300'}`;
       t.innerHTML = `<i class="ti ${type === 'success' ? 'ti-circle-check' : type === 'info' ? 'ti-info-circle' : 'ti-alert-circle'} text-base"></i><span>${msg}</span>`;
       c.appendChild(t);
-      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, 3000);
+      setTimeout(() => { t.style.opacity = '0'; setTimeout(() => t.remove(), 300); }, duration);
     }
 
 // ==========================================
@@ -4640,7 +4661,7 @@ function renderEditingList() {
     const [year, month] = monthKey.split('-');
     const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
     const monthTotal = jobs.reduce((a, b) => a + Number(b.amount || 0), 0);
-    const isPast = isPastMonthKey(monthKey);
+    const isPast = !isCurrentMonthKey(monthKey);
 
     html += `
       <div class="mb-6" data-month-group>
@@ -5790,15 +5811,15 @@ async function toggleBlockDate(dateStr) {
     }
 
     function addToGoogleCalendar(httpsUrl) {
-      // Google quietly broke the old "?cid=" auto-add trick for most accounts —
-      // it now just opens Google Calendar without actually subscribing, or shows
-      // "Oops, we couldn't add this calendar." The only reliable path left is
-      // Google's own "Add by URL" settings screen, so we copy the link for the
-      // user and drop them straight there with clear instructions.
+      // Google doesn't support prefilling the "From URL" field on this page
+      // from a link — their own Calendar Help community confirms there's no
+      // supported way to do that. The closest thing to one-click is:
+      // copy the link for them, land them straight on the right screen,
+      // and leave two actions — paste, then Add calendar.
       navigator.clipboard.writeText(httpsUrl).then(() => {
-        showToast('Link copied! Paste it into the box that opens on Google Calendar.', 'success');
+        showToast('Link copied ✓ — on the new tab: paste it, then click "Add calendar."', 'success', 6000);
       }).catch(() => {
-        showToast('Copy the link above, then paste it on the page that opens.', 'info');
+        showToast('Copy the link above, then paste it on the page that opens.', 'info', 6000);
       });
       window.open('https://calendar.google.com/calendar/u/0/r/settings/addbyurl', '_blank', 'noopener');
     }
@@ -5945,7 +5966,7 @@ async function toggleBlockDate(dateStr) {
           const monthName = MONTHS[parseInt(month) - 1];
           const monthLabel = `${monthName} ${year}`;
           const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-          const isPast = isPastMonthKey(monthKey);
+          const isPast = !isCurrentMonthKey(monthKey);
 
           html += `<div class="mb-6" data-month-group>
             <div class="px-3 py-2 bg-neutral-950 border-b border-neutral-800 mb-3 rounded-t-lg cursor-pointer select-none" onclick="toggleMonthGroup(this)">
@@ -6109,7 +6130,7 @@ async function toggleBlockDate(dateStr) {
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        const isPast = isPastMonthKey(monthKey);
+        const isPast = !isCurrentMonthKey(monthKey);
 
         html += `
           <div class="mb-6" data-month-group>
@@ -7510,6 +7531,7 @@ async function toggleBlockDate(dateStr) {
       toggleCustomTermsBox();
       document.getElementById('cs-ledger-6mo').checked = co.ledgerLast6Only !== false;
       document.getElementById('cs-ledger-pending').checked = !!co.ledgerPendingOnly;
+      document.getElementById('cs-payment-logs').checked = !!co.showPaymentLogs;
 
       openModal('company-settings-modal-backdrop');
       if (isNew) setTimeout(() => document.getElementById('cs-phone').focus(), 250);
@@ -7536,7 +7558,8 @@ async function toggleBlockDate(dateStr) {
         requireTerms: document.getElementById('cs-require-terms').checked,
         customTerms: document.getElementById('cs-custom-terms-toggle').checked ? document.getElementById('cs-custom-terms').value.trim() : '',
         ledgerLast6Only: document.getElementById('cs-ledger-6mo').checked,
-        ledgerPendingOnly: document.getElementById('cs-ledger-pending').checked
+        ledgerPendingOnly: document.getElementById('cs-ledger-pending').checked,
+        showPaymentLogs: document.getElementById('cs-payment-logs').checked
       };
 
       if (isNew) {
