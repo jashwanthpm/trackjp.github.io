@@ -437,8 +437,24 @@ The studio's total liability shall not exceed the total amount paid by the clien
       const listEl = document.getElementById('payment-logs-list');
       if (!section || !listEl) return;
       try {
-        const logs = await sbRpc('get_company_payment_logs', { p_ref: currentRef });
+        let logs = await sbRpc('get_company_payment_logs', { p_ref: currentRef });
         if (!Array.isArray(logs) || logs.length === 0) return;
+
+        // Keep this section consistent with whatever the shoot history
+        // above is already showing, instead of it being a separate,
+        // unbounded feed that feels out of sync with everything else on
+        // the page. "Pending payments only" is about hiding settled stuff,
+        // and every payment log entry is inherently a settled/completed
+        // action — so in that mode there's nothing honest to show here.
+        if (ledgerPendingOnly) {
+          return;
+        }
+        if (ledgerOnly6mo) {
+          const sixMonthsAgo = new Date();
+          sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+          logs = logs.filter(entry => entry.timestamp && new Date(entry.timestamp) >= sixMonthsAgo);
+          if (logs.length === 0) return;
+        }
 
         // This page already belongs to one company, so repeating its name
         // on every single line is just noise — strip that trailing tag.
