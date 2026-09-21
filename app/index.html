@@ -1566,7 +1566,7 @@
     <div id="inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
     <div id="inventory-empty" class="hidden text-center py-10 text-neutral-600 text-xs">
       <i class="ti ti-package text-3xl mb-2 block"></i>
-      No equipment added yet. Tap "Add Equipment" to get started.
+      No equipment yet. Tap "Add Equipment", or print a QR sheet, stick the tags on your gear and scan each one to assign it.
     </div>
   </div>
 </div>
@@ -1578,7 +1578,7 @@
       <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e]"><i class="ti ti-package text-lg"></i></div>
       <div class="flex-1 min-w-0">
         <h4 id="inv-modal-title" class="text-white font-bold text-sm leading-snug">Add Equipment</h4>
-        <p id="inv-modal-subtitle" class="text-[11px] text-neutral-500 mt-0.5">Give it a name, an emoji, and a serial number</p>
+        <p id="inv-modal-subtitle" class="text-[11px] text-neutral-500 mt-0.5">Pick an icon, name it, and link it to a QR sticker</p>
       </div>
       <button onclick="closeInventoryModal()" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
     </div>
@@ -1586,15 +1586,19 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Icon</label>
-        <div class="flex items-center gap-2">
-          <input type="text" id="inv-emoji" maxlength="4" placeholder="📷" class="w-16 text-center text-2xl bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-2 text-white outline-none focus:border-[#c9a96e] transition"/>
-          <div id="inv-emoji-presets" class="flex flex-wrap gap-1.5 flex-1"></div>
-        </div>
+        <div id="inv-icon-picker" class="grid grid-cols-8 gap-1.5"></div>
       </div>
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name</label>
         <input type="text" id="inv-name" placeholder="e.g. Canon 5D Mark IV" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">QR Sticker Code <span class="normal-case text-neutral-600">(optional)</span></label>
+        <input type="text" id="inv-tag" list="inv-tag-list" maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-character code printed under the QR" oninput="checkInvTag()" onblur="this.value = parseTagCodeInput(this.value); checkInvTag()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white tracking-widest font-semibold outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-normal read-only:cursor-not-allowed"/>
+        <datalist id="inv-tag-list"></datalist>
+        <p id="inv-tag-status" class="text-[11px]"></p>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -1643,14 +1647,38 @@
   <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 max-h-[88vh] flex flex-col">
     <div class="p-5 border-b border-neutral-900 flex items-center justify-between flex-shrink-0">
       <div>
-        <h4 class="text-white font-bold text-sm">QR Sheet</h4>
-        <p class="text-[11px] text-neutral-500 mt-0.5">Print, cut, stick on your gear — scan later to assign each one</p>
+        <h4 class="text-white font-bold text-sm">Print QR Sheet</h4>
+        <p class="text-[11px] text-neutral-500 mt-0.5">Small stickers on one sheet. Cut, stick on your gear, then scan each one to assign it.</p>
       </div>
       <button onclick="closeModal('qr-sheet-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
     </div>
-    <div id="qr-sheet-grid" class="p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-4 bg-neutral-950"></div>
-    <div class="p-4 border-t border-neutral-900 flex-shrink-0">
-      <button onclick="printQrSheet()" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print Full Sheet</button>
+
+    <div class="overflow-y-auto flex-1 min-h-0">
+      <div class="p-5 space-y-4 border-b border-neutral-900">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sticker size</label>
+          <div id="qr-size-chips" class="flex flex-wrap gap-1.5"></div>
+          <p id="qr-size-hint" class="text-[11px] text-neutral-500"></p>
+        </div>
+        <div id="qr-setup-fields" class="flex flex-col gap-3">
+          <div class="flex flex-col gap-1.5">
+            <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">How many stickers</label>
+            <input type="number" id="qr-count" min="1" max="300" inputmode="numeric" oninput="_qrCountTouched = true" class="w-32 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+          </div>
+          <button id="qr-reprint-btn" type="button" onclick="reprintUnusedQr()" class="hidden self-start text-[11px] font-semibold text-[#c9a96e] hover:text-[#dab77e] transition"></button>
+        </div>
+      </div>
+      <div id="qr-preview-wrap" class="hidden p-5 bg-neutral-950">
+        <div id="qr-sheet-grid" class="flex flex-wrap gap-1.5"></div>
+      </div>
+    </div>
+
+    <div id="qr-footer-setup" class="p-4 border-t border-neutral-900 flex-shrink-0">
+      <button id="qr-create-btn" onclick="createQrBatch()" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] disabled:opacity-60 text-black text-xs font-bold py-2.5 rounded-lg transition">Create stickers</button>
+    </div>
+    <div id="qr-footer-preview" class="hidden p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
+      <button onclick="backToQrSetup()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Back</button>
+      <button onclick="printQrSheet()" class="flex-[2] bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print sheet</button>
     </div>
   </div>
 </div>
@@ -2617,7 +2645,7 @@ setTimeout(() => {
 
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
-    let _inventory = []; // gear/equipment list — { id, emoji, name, serial, category, notes }
+    let _inventory = []; // gear/equipment list — { id, code, assigned, icon, name, serial, category, notes }
 
     // ==========================================
     // STUDIO COMPANY PROFILES
@@ -7723,15 +7751,38 @@ async function toggleBlockDate(dateStr) {
     //     go, then scan a sticker to assign it — each blank tag is saved
     //     to Supabase the instant it's generated (not just when printed),
     //     so it's already there waiting to be claimed on any device.
+    //     Blank tags stay hidden from the list until they're assigned.
     // Every item — blank or filled in — gets a short unique "code", and
     // its QR encodes a link back into this app (?tag=<code>) rather than
     // plain text, so scanning it always opens the right record here.
     // Stored the same way as companies/locations: one row in "settings"
     // under key "inventory".
     // ==========================================
-    const INVENTORY_EMOJI_PRESETS = ['📷','🎥','💻','🖥️','🎤','🔋','💡','📀','🎧','🛠️','📦','🚁','💾','🔌','📱','🖨️'];
+    // Outline (Tabler) icons, same family as the dashboard / calendar / shoots
+    // tabs — replaces the old emoji picker. Stored on the item as `icon`.
+    const INVENTORY_ICONS = ['camera','aperture','video','device-laptop','device-desktop','microphone','headphones','bulb','battery-charging','database','usb','plug','device-mobile','drone','backpack','box'];
+    const INVENTORY_ICON_LABELS = { 'camera':'Camera', 'aperture':'Lens', 'video':'Video camera', 'device-laptop':'Laptop', 'device-desktop':'Monitor', 'microphone':'Microphone', 'headphones':'Headphones', 'bulb':'Light', 'battery-charging':'Battery', 'database':'Drive or memory card', 'usb':'Card reader', 'plug':'Cable or charger', 'device-mobile':'Phone', 'drone':'Drone', 'backpack':'Bag', 'box':'Other' };
+    const INVENTORY_DEFAULT_ICON = 'box';
+    // Items saved before the icon picker existed carry an emoji — map it across.
+    const LEGACY_EMOJI_ICONS = { '📷':'camera', '🎥':'video', '💻':'device-laptop', '🖥':'device-desktop', '🎤':'microphone', '🔋':'battery-charging', '💡':'bulb', '📀':'database', '🎧':'headphones', '🛠':'box', '📦':'box', '🚁':'drone', '💾':'database', '🔌':'plug', '📱':'device-mobile', '🖨':'box' };
+
+    // Sticker sizes (mm = the QR itself). "side" puts the code beside the QR
+    // instead of under it, giving a roughly 2 x 1 cm sticker.
+    const TAG_SIZES = {
+      '10':   { label: '1 cm',     s: 10, side: false },
+      '15':   { label: '1.5 cm',   s: 15, side: false },
+      '20':   { label: '2 cm',     s: 20, side: false },
+      'side': { label: '2 × 1 cm', s: 10, side: true }
+    };
+    const TAG_PAGE_W_MM = 194; // A4 (210) minus 8 mm margins
+    const TAG_PAGE_H_MM = 281; // A4 (297) minus 8 mm margins
+
     let _editingInventoryIndex = null;
     let _qrModalIndex = null;
+    let _invSelectedIcon = INVENTORY_DEFAULT_ICON;
+    let _tagSizeKey = '15';
+    let _pendingTagBatch = null;
+    let _qrCountTouched = false;
 
     function generateTagCode() {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I — easy to read off a small sticker
@@ -7742,35 +7793,54 @@ async function toggleBlockDate(dateStr) {
       return code;
     }
 
+    function inventoryIconName(item) {
+      if (item && item.icon && INVENTORY_ICONS.includes(item.icon)) return item.icon;
+      if (item && item.emoji) return LEGACY_EMOJI_ICONS[String(item.emoji).replace(/\uFE0F/g, '')] || INVENTORY_DEFAULT_ICON;
+      return INVENTORY_DEFAULT_ICON;
+    }
+
+    // Accepts "u6q5b7", " U6Q5B7 ", or a whole scanned link (…?tag=U6Q5B7).
+    function parseTagCodeInput(raw) {
+      let v = String(raw || '').trim();
+      const m = v.match(/[?&]tag=([^&#\s]+)/i);
+      if (m) { try { v = decodeURIComponent(m[1]); } catch (e) { v = m[1]; } }
+      return v.replace(/[^A-Za-z0-9]/g, '').toUpperCase();
+    }
+
+    // Blank (unassigned) stickers live in the database so a scan can find
+    // them, but they stay out of this list until they're assigned to gear.
     function renderInventoryList() {
       const listEl = document.getElementById('inventory-list');
       const emptyEl = document.getElementById('inventory-empty');
       if (!listEl) return;
 
-      if (!_inventory.length) {
+      const rows = _inventory.map((item, i) => ({ item, i })).filter(r => r.item.assigned);
+
+      if (!rows.length) {
         listEl.innerHTML = '';
         if (emptyEl) emptyEl.classList.remove('hidden');
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
 
-      listEl.innerHTML = _inventory.map((item, i) => {
-        const unassigned = !item.assigned;
+      listEl.innerHTML = rows.map(({ item, i }) => {
+        const meta = [
+          item.category ? escapeHtml(item.category) : '',
+          item.serial ? 'SN: ' + escapeHtml(item.serial) : 'No serial number',
+          item.code ? 'Tag ' + escapeHtml(item.code) : ''
+        ].filter(Boolean).join(' · ');
         return `
-        <div class="flex items-center justify-between gap-3 rounded-xl p-3.5 ${unassigned ? 'bg-neutral-950/30 border border-dashed border-neutral-800' : 'bg-neutral-950/50 border border-neutral-900'}">
+        <div class="flex items-center justify-between gap-3 rounded-xl p-3.5 bg-neutral-950/50 border border-neutral-900">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-11 h-11 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl flex-shrink-0">${unassigned ? '<i class="ti ti-qrcode text-neutral-600 text-lg"></i>' : escapeHtml(item.emoji || '📦')}</div>
+            <div class="w-11 h-11 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center flex-shrink-0"><i class="ti ti-${inventoryIconName(item)} text-xl text-[#c9a96e]"></i></div>
             <div class="min-w-0">
-              ${unassigned
-                ? `<p class="text-sm font-bold text-neutral-400 truncate">Unassigned Tag</p><p class="text-[11px] text-neutral-600 truncate">Code: ${escapeHtml(item.code || '')} · tap to assign</p>`
-                : `<p class="text-sm font-bold text-white truncate">${escapeHtml(item.name || 'Untitled')}</p><p class="text-[11px] text-neutral-500 truncate">${item.category ? escapeHtml(item.category) + ' · ' : ''}${item.serial ? 'SN: ' + escapeHtml(item.serial) : 'No serial number'}</p>`
-              }
+              <p class="text-sm font-bold text-white truncate">${escapeHtml(item.name || 'Untitled')}</p>
+              <p class="text-[11px] text-neutral-500 truncate">${meta}</p>
             </div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0">
-            ${unassigned ? `<button onclick="openInventoryModal(${i})" class="px-2.5 py-1.5 text-[11px] font-bold text-black bg-[#c9a96e] hover:bg-[#dab77e] rounded-lg transition">Assign</button>` : ''}
             <button onclick="showItemQr(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="View QR code"><i class="ti ti-qrcode text-sm"></i></button>
-            ${unassigned ? '' : `<button onclick="openInventoryModal(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="Edit"><i class="ti ti-pencil text-sm"></i></button>`}
+            <button onclick="openInventoryModal(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="Edit"><i class="ti ti-pencil text-sm"></i></button>
             <button onclick="deleteInventoryItem(${i})" class="p-2 text-neutral-500 hover:text-red-400 rounded-md hover:bg-red-950/30 transition" title="Delete"><i class="ti ti-trash text-sm"></i></button>
           </div>
         </div>
@@ -7778,30 +7848,74 @@ async function toggleBlockDate(dateStr) {
       }).join('');
     }
 
+    function renderInvIconPicker() {
+      const wrap = document.getElementById('inv-icon-picker');
+      if (!wrap) return;
+      wrap.innerHTML = INVENTORY_ICONS.map(name => {
+        const on = name === _invSelectedIcon;
+        return `<button type="button" onclick="selectInvIcon('${name}')" title="${INVENTORY_ICON_LABELS[name]}" aria-label="${INVENTORY_ICON_LABELS[name]}" aria-pressed="${on}" class="h-10 flex items-center justify-center rounded-lg border transition ${on ? 'border-[#c9a96e] bg-[#c9a96e]/10 text-[#c9a96e]' : 'border-neutral-800 bg-neutral-900 text-neutral-500 hover:text-white hover:border-neutral-700'}"><i class="ti ti-${name} text-xl"></i></button>`;
+      }).join('');
+    }
+
+    function selectInvIcon(name) {
+      _invSelectedIcon = name;
+      renderInvIconPicker();
+    }
+
+    // Looks at the "QR sticker code" field: blank is fine (item just gets
+    // its own new code), a free printed code links to it, an already-used
+    // or unknown code is refused.
+    function checkInvTag() {
+      const el = document.getElementById('inv-tag');
+      const st = document.getElementById('inv-tag-status');
+      if (!el || el.readOnly) return { ok: true, empty: true };
+      const code = parseTagCodeInput(el.value);
+      const say = (ok, msg) => {
+        st.innerHTML = msg ? `<i class="ti ${ok ? 'ti-circle-check' : 'ti-alert-circle'}"></i> ${escapeHtml(msg)}` : '';
+        st.className = `text-[11px] flex items-center gap-1 ${ok ? 'text-emerald-400' : 'text-red-400'}`;
+      };
+      if (!code) { say(true, ''); return { ok: true, empty: true }; }
+      const idx = _inventory.findIndex(t => t.code === code);
+      if (idx === -1) {
+        const msg = 'No printed sticker has this code. Check the code under the QR.';
+        say(false, msg); return { ok: false, msg };
+      }
+      if (_inventory[idx].assigned) {
+        const msg = `Already assigned to ${_inventory[idx].name || 'another item'}.`;
+        say(false, msg); return { ok: false, msg };
+      }
+      say(true, 'Sticker is free. It will be linked to this equipment.');
+      return { ok: true, idx, code };
+    }
+
     function openInventoryModal(i) {
       const isNew = (i === undefined || i === null);
       _editingInventoryIndex = isNew ? -1 : i;
-      const item = isNew ? { emoji: '', name: '', serial: '', category: '', notes: '', code: '' } : _inventory[i];
+      const item = isNew ? { icon: '', name: '', serial: '', category: '', notes: '', code: '' } : _inventory[i];
       const isBlankTag = !isNew && !item.assigned;
 
-      document.getElementById('inv-modal-title').textContent = isNew ? 'Add Equipment' : (isBlankTag ? 'Assign This Tag' : 'Edit Equipment');
+      document.getElementById('inv-modal-title').textContent = isNew ? 'Add Equipment' : (isBlankTag ? 'Assign This Sticker' : 'Edit Equipment');
       document.getElementById('inv-modal-subtitle').textContent = isBlankTag
-        ? `Tag code ${item.code} — give it a name and it's tracked from here on.`
-        : 'Give it a name, an emoji, and a serial number';
+        ? `Sticker ${item.code}. Name it and it's tracked from here on.`
+        : 'Pick an icon, name it, and link it to a QR sticker';
       document.getElementById('inv-save-btn').textContent = isNew ? 'Add Equipment' : (isBlankTag ? 'Assign Equipment' : 'Save Changes');
-      document.getElementById('inv-emoji').value = item.emoji || '';
       document.getElementById('inv-name').value = item.name || '';
       document.getElementById('inv-serial').value = item.serial || '';
       document.getElementById('inv-category').value = item.category || '';
       document.getElementById('inv-notes').value = item.notes || '';
 
-      const presetWrap = document.getElementById('inv-emoji-presets');
-      if (presetWrap && !presetWrap.dataset.built) {
-        presetWrap.innerHTML = INVENTORY_EMOJI_PRESETS.map(e =>
-          `<button type="button" onclick="document.getElementById('inv-emoji').value='${e}'" class="w-8 h-8 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-lg text-base hover:border-[#c9a96e] transition">${e}</button>`
-        ).join('');
-        presetWrap.dataset.built = '1';
-      }
+      _invSelectedIcon = isNew || isBlankTag ? INVENTORY_DEFAULT_ICON : inventoryIconName(item);
+      renderInvIconPicker();
+
+      // QR sticker code: typed for a new item, locked once it belongs to a sticker.
+      const tagEl = document.getElementById('inv-tag');
+      tagEl.value = isNew ? '' : (item.code || '');
+      tagEl.readOnly = !isNew;
+      tagEl.classList.toggle('opacity-60', !isNew);
+      document.getElementById('inv-tag-status').innerHTML = '';
+      document.getElementById('inv-tag-list').innerHTML = _inventory
+        .filter(t => !t.assigned && t.code)
+        .map(t => `<option value="${escapeHtml(t.code)}"></option>`).join('');
 
       openModal('inventory-modal-backdrop');
     }
@@ -7817,36 +7931,47 @@ async function toggleBlockDate(dateStr) {
       if (!name) { showToast('Give this item a name first.', 'error'); return; }
 
       const isNew = _editingInventoryIndex === -1;
-      const existing = isNew ? null : _inventory[_editingInventoryIndex];
+      let targetIdx = _editingInventoryIndex;
+
+      if (isNew) {
+        const chk = checkInvTag();
+        if (!chk.ok) { showToast(chk.msg, 'error'); return; }
+        if (chk.idx !== undefined) targetIdx = chk.idx; // link to the printed sticker
+      }
+
+      const existing = targetIdx === -1 ? null : _inventory[targetIdx];
+      const wasBlank = !!existing && !existing.assigned;
 
       const item = {
         id: existing?.id || ('inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
         code: existing?.code || generateTagCode(),
         assigned: true,
-        emoji: document.getElementById('inv-emoji').value.trim() || '📦',
+        icon: _invSelectedIcon,
         name,
         serial: document.getElementById('inv-serial').value.trim(),
         category: document.getElementById('inv-category').value.trim(),
         notes: document.getElementById('inv-notes').value.trim()
       };
 
-      if (isNew) {
+      if (targetIdx === -1) {
         _inventory.push(item);
       } else {
-        _inventory[_editingInventoryIndex] = item;
+        _inventory[targetIdx] = item;
       }
 
       await saveSettingToDB('inventory', _inventory);
       closeInventoryModal();
       renderInventoryList();
-      showToast(isNew ? `${name} added to inventory.` : (existing && !existing.assigned ? `${name} assigned to that tag.` : 'Equipment updated.'), 'success');
+      showToast(
+        wasBlank ? `${name} linked to sticker ${item.code}.` : (isNew ? `${name} added to inventory.` : 'Equipment updated.'),
+        'success'
+      );
     }
 
     async function deleteInventoryItem(i) {
       const item = _inventory[i];
       if (!item) return;
-      const label = item.assigned ? item.name : 'this blank tag';
-      if (!confirm(`Remove ${item.assigned ? `"${label}"` : label} from inventory?`)) return;
+      if (!confirm(`Remove "${item.name || 'this item'}" from inventory? Its QR sticker will stop working.`)) return;
       _inventory.splice(i, 1);
       await saveSettingToDB('inventory', _inventory);
       renderInventoryList();
@@ -7869,10 +7994,10 @@ async function toggleBlockDate(dateStr) {
       wrap.innerHTML = '';
       new QRCode(wrap, { text: buildQrPayload(item), width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
 
-      document.getElementById('item-qr-name').textContent = item.assigned ? `${item.emoji || '📦'} ${item.name}` : `Unassigned Tag`;
+      document.getElementById('item-qr-name').textContent = item.assigned ? item.name : `Sticker ${item.code}`;
       document.getElementById('item-qr-serial').textContent = item.assigned
-        ? (item.serial ? `SN: ${item.serial}` : 'No serial number on file')
-        : `Code: ${item.code} — scan to assign`;
+        ? `Tag ${item.code}${item.serial ? ' · SN: ' + item.serial : ''}`
+        : `Tag ${item.code}`;
 
       openModal('item-qr-modal-backdrop');
     }
@@ -7880,93 +8005,190 @@ async function toggleBlockDate(dateStr) {
     function printSingleItemQr() {
       if (_qrModalIndex === null) return;
       const item = _inventory[_qrModalIndex];
-      if (item) printInventoryQrSheet([item]);
+      if (item) printTagSheet([item]);
     }
 
-    // Main "Print QR Sheet" action: generates a fresh batch of BLANK,
-    // unclaimed tags (saved to the account immediately), then shows them
-    // as a printable sheet — print it, cut the labels apart, stick one on
-    // each piece of gear, and scan each sticker later to assign it.
-    async function openQrSheetModal() {
-      const countStr = prompt('How many blank QR tags do you want to print?', '12');
-      if (countStr === null) return;
-      const count = Math.max(1, Math.min(60, parseInt(countStr, 10) || 0));
-      if (!count) { showToast('Enter a number of tags to generate.', 'error'); return; }
-
-      const newTags = [];
-      for (let n = 0; n < count; n++) {
-        const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: generateTagCode(), assigned: false, emoji: '', name: '', serial: '', category: '', notes: '' };
-        _inventory.push(tag);
-        newTags.push(tag);
+    // ------------------------------------------------------------------
+    // QR stickers: tiny, code-only labels laid out to fill one A4 sheet.
+    // The QR is drawn as inline SVG straight from the QR matrix, so it is
+    // available instantly (the old print tab grabbed an <img> the QR
+    // library hadn't finished creating yet — hence the broken images) and
+    // stays razor sharp at 1 cm.
+    // ------------------------------------------------------------------
+    function qrSvgMarkup(text, cssSize, level) {
+      const tmp = document.createElement('div');
+      const qr = new QRCode(tmp, { text, width: 64, height: 64, correctLevel: level });
+      const model = qr._oQRCode;
+      const n = model.getModuleCount();
+      let d = '';
+      for (let r = 0; r < n; r++) {
+        for (let c = 0; c < n; c++) {
+          if (model.isDark(r, c)) d += `M${c} ${r}h1v1h-1z`;
+        }
       }
-      await saveSettingToDB('inventory', _inventory);
-      renderInventoryList();
-      showToast(`${count} blank tag${count > 1 ? 's' : ''} created — ready to print.`, 'success');
+      return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="-1 -1 ${n + 2} ${n + 2}" width="${cssSize}" height="${cssSize}" shape-rendering="crispEdges" style="display:block;background:#fff"><path d="${d}" fill="#000"/></svg>`;
+    }
 
-      const grid = document.getElementById('qr-sheet-grid');
-      grid.innerHTML = '';
-      newTags.forEach(item => {
-        const card = document.createElement('div');
-        card.className = 'flex flex-col items-center gap-2 bg-white rounded-lg p-3';
-        const qrBox = document.createElement('div');
-        card.appendChild(qrBox);
-        const label = document.createElement('div');
-        label.className = 'text-black/70 text-[10px] font-bold text-center leading-tight tracking-wide';
-        label.textContent = item.code;
-        card.appendChild(label);
-        grid.appendChild(card);
-        new QRCode(qrBox, { text: buildQrPayload(item), width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
-      });
-      window._pendingQrSheetTags = newTags;
+    function tagLayout(size) {
+      const pad = 1.5, gap = 0.8;
+      const fs = size.side ? 2.4 : Math.max(1.9, size.s * 0.17); // code text height, mm
+      const textW = 6 * fs * 0.68;
+      const w = size.side ? pad * 2 + size.s + gap + textW : pad * 2 + Math.max(size.s, textW);
+      const h = size.side ? pad * 2 + size.s : pad * 2 + size.s + gap + fs * 1.1;
+      return { fs, gap, w: +w.toFixed(2), h: +h.toFixed(2) };
+    }
+
+    function tagsPerPage(size) {
+      const L = tagLayout(size);
+      return Math.max(1, Math.floor(TAG_PAGE_W_MM / L.w)) * Math.max(1, Math.floor(TAG_PAGE_H_MM / L.h));
+    }
+
+    function tagCellHtml(item, size) {
+      const L = tagLayout(size);
+      const svg = qrSvgMarkup(buildQrPayload(item), size.s + 'mm', size.s <= 10 ? QRCode.CorrectLevel.L : QRCode.CorrectLevel.M);
+      return `<div style="box-sizing:border-box;flex:0 0 auto;width:${L.w}mm;height:${L.h}mm;background:#fff;display:flex;flex-direction:${size.side ? 'row' : 'column'};align-items:center;justify-content:center;gap:${L.gap}mm;outline:0.1mm solid #999;outline-offset:-0.05mm;break-inside:avoid;page-break-inside:avoid">${svg}<span style="font:700 ${L.fs}mm/1 Arial,Helvetica,sans-serif;letter-spacing:.04em;color:#000;white-space:nowrap">${escapeHtml(item.code)}</span></div>`;
+    }
+
+    function renderQrSizeChips() {
+      const wrap = document.getElementById('qr-size-chips');
+      if (!wrap) return;
+      wrap.innerHTML = Object.entries(TAG_SIZES).map(([k, v]) => {
+        const on = k === _tagSizeKey;
+        return `<button type="button" onclick="setQrSize('${k}')" aria-pressed="${on}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}">${v.label}</button>`;
+      }).join('');
+    }
+
+    function updateQrHint() {
+      const size = TAG_SIZES[_tagSizeKey];
+      const cap = tagsPerPage(size);
+      const hint = document.getElementById('qr-size-hint');
+      if (_pendingTagBatch) {
+        const pages = Math.ceil(_pendingTagBatch.length / cap);
+        hint.textContent = `${_pendingTagBatch.length} sticker${_pendingTagBatch.length > 1 ? 's' : ''} · ${pages === 1 ? 'fits on one A4 sheet' : pages + ' A4 sheets at this size'}`;
+      } else {
+        hint.textContent = `Fits ${cap} on one A4 sheet` + (size.side ? ' · code sits beside the QR' : '');
+      }
+      return cap;
+    }
+
+    function setQrSize(key) {
+      if (!TAG_SIZES[key]) return;
+      _tagSizeKey = key;
+      renderQrSizeChips();
+      const cap = updateQrHint();
+      if (_pendingTagBatch) renderQrPreview();
+      else if (!_qrCountTouched) document.getElementById('qr-count').value = cap;
+    }
+
+    function showQrStage(stage) {
+      const preview = stage === 'preview';
+      document.getElementById('qr-setup-fields').classList.toggle('hidden', preview);
+      document.getElementById('qr-footer-setup').classList.toggle('hidden', preview);
+      document.getElementById('qr-preview-wrap').classList.toggle('hidden', !preview);
+      document.getElementById('qr-footer-preview').classList.toggle('hidden', !preview);
+    }
+
+    function renderQrPreview() {
+      const size = TAG_SIZES[_tagSizeKey];
+      document.getElementById('qr-sheet-grid').innerHTML = _pendingTagBatch.map(t => tagCellHtml(t, size)).join('');
+      updateQrHint();
+    }
+
+    function openQrSheetModal() {
+      _pendingTagBatch = null;
+      _qrCountTouched = false;
+      renderQrSizeChips();
+      const cap = updateQrHint();
+      document.getElementById('qr-count').value = cap;
+
+      const unused = _inventory.filter(t => !t.assigned);
+      const reBtn = document.getElementById('qr-reprint-btn');
+      reBtn.classList.toggle('hidden', !unused.length);
+      reBtn.textContent = `Reprint ${unused.length} unused sticker${unused.length > 1 ? 's' : ''} instead`;
+
+      showQrStage('setup');
       openModal('qr-sheet-modal-backdrop');
     }
 
-    function printQrSheet() {
-      printInventoryQrSheet(window._pendingQrSheetTags || _inventory);
+    // Creates a fresh batch of BLANK tags, saved to the account right away
+    // so a scan on any device can find them. They only show in the
+    // inventory list once they've been assigned to a piece of gear.
+    async function createQrBatch() {
+      const raw = parseInt(document.getElementById('qr-count').value, 10);
+      if (!raw || raw < 1) { showToast('Enter how many stickers you need.', 'error'); return; }
+      const count = Math.min(300, raw);
+
+      const btn = document.getElementById('qr-create-btn');
+      btn.disabled = true; btn.textContent = 'Creating…';
+      const tags = [];
+      try {
+        for (let n = 0; n < count; n++) {
+          const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: generateTagCode(), assigned: false, icon: '', name: '', serial: '', category: '', notes: '' };
+          _inventory.push(tag);
+          tags.push(tag);
+        }
+        await saveSettingToDB('inventory', _inventory);
+      } catch (e) {
+        _inventory.splice(_inventory.length - tags.length, tags.length);
+        showToast('Could not save the new stickers. Try again.', 'error');
+        return;
+      } finally {
+        btn.disabled = false; btn.textContent = 'Create stickers';
+      }
+
+      _pendingTagBatch = tags;
+      renderQrPreview();
+      showQrStage('preview');
     }
 
-    // Opens a clean, white, print-ready tab with one label per item — kept
-    // separate from the in-app (dark-themed) modal so printing doesn't
-    // inherit the app's dark styling or fixed-position layout.
-    function printInventoryQrSheet(items) {
+    function reprintUnusedQr() {
+      const unused = _inventory.filter(t => !t.assigned);
+      if (!unused.length) return;
+      _pendingTagBatch = unused;
+      renderQrPreview();
+      showQrStage('preview');
+    }
+
+    function backToQrSetup() {
+      _pendingTagBatch = null;
+      updateQrHint();
+      showQrStage('setup');
+    }
+
+    function printQrSheet() {
+      printTagSheet(_pendingTagBatch);
+    }
+
+    // Opens a clean white print tab: stickers packed edge to edge in a grid
+    // (thin cut lines between them), A4, no headings or extra text.
+    function printTagSheet(items) {
       if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
       const win = window.open('', '_blank');
       if (!win) { showToast('Please allow pop-ups to print the QR sheet.', 'error'); return; }
 
-      const cardsHtml = items.map(item => {
-        const box = document.createElement('div');
-        new QRCode(box, { text: buildQrPayload(item), width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
-        const imgEl = box.querySelector('img') || box.querySelector('canvas');
-        const src = imgEl.tagName === 'CANVAS' ? imgEl.toDataURL('image/png') : imgEl.src;
-        const labelText = item.assigned ? `${item.emoji || '📦'} ${item.name}` : item.code;
-        const subText = item.assigned ? (item.serial ? `SN: ${item.serial}` : '') : 'Scan to assign';
-        return `
-          <div class="qr-card">
-            <img src="${src}" width="140" height="140" alt="QR" />
-            <div class="qr-label">${escapeHtml(labelText)}</div>
-            ${subText ? `<div class="qr-sub">${escapeHtml(subText)}</div>` : ''}
-          </div>
-        `;
-      }).join('');
+      const size = TAG_SIZES[_tagSizeKey] || TAG_SIZES['15'];
+      const L = tagLayout(size);
+      const cols = Math.max(1, Math.floor(TAG_PAGE_W_MM / L.w));
+      const cells = items.map(it => tagCellHtml(it, size)).join('');
 
-      win.document.write(`
+      win.document.write(`<!doctype html>
         <html>
         <head>
-          <title>Equipment QR Sheet</title>
+          <meta charset="utf-8">
+          <title>QR stickers</title>
           <style>
-            body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 24px; margin: 0; }
-            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
-            .qr-card { text-align: center; border: 1px dashed #ccc; border-radius: 8px; padding: 12px 8px; break-inside: avoid; }
-            .qr-label { font-weight: bold; font-size: 12px; margin-top: 8px; color: #111; }
-            .qr-sub { font-size: 10px; color: #666; margin-top: 2px; }
+            @page { size: A4; margin: 8mm; }
+            * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+            html, body { margin: 0; background: #fff; }
+            .sheet { display: flex; flex-wrap: wrap; align-content: flex-start; width: ${(cols * L.w + 0.5).toFixed(2)}mm; }
+            @media screen { body { padding: 8mm; } }
           </style>
         </head>
         <body>
-          <div class="grid">${cardsHtml}</div>
-          <script>window.onload = function() { window.print(); };<\/script>
+          <div class="sheet">${cells}</div>
+          <script>window.onload = function () { setTimeout(function () { window.print(); }, 200); };<\/script>
         </body>
-        </html>
-      `);
+        </html>`);
       win.document.close();
     }
 
