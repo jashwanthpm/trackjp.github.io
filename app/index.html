@@ -321,7 +321,98 @@
     <p id="loading-text" class="text-xs text-neutral-500 tracking-wide">Connecting to database...</p>
   </div>
 
-  <div id="main-app" style="display: none;">
+  <!-- QR SCANNER MODAL -->
+<div id="qr-scan-modal-backdrop" class="fixed inset-0 bg-black/90 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="if (event.target === this) closeQrScanner()">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col max-h-[96vh]">
+    <div class="p-4 border-b border-neutral-900 flex items-center justify-between gap-3 flex-shrink-0">
+      <div class="min-w-0">
+        <h4 class="text-white font-bold text-sm">Scan QR sticker</h4>
+        <p id="qr-scan-sub" class="text-[11px] text-neutral-500 mt-0.5"></p>
+      </div>
+      <button onclick="closeQrScanner()" aria-label="Close scanner" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div class="relative bg-black w-full aspect-square max-h-[58vh] overflow-hidden flex-shrink-0">
+      <video id="qr-scan-video" class="absolute inset-0 w-full h-full object-cover" playsinline muted autoplay></video>
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="h-3/5 aspect-square rounded-2xl border-2 border-[#c9a96e]" style="box-shadow:0 0 0 999px rgba(0,0,0,.5)"></div>
+      </div>
+      <div id="qr-scan-fallback" class="hidden absolute inset-0 bg-[#0f0f0f] flex flex-col items-center justify-center gap-3 p-6 text-center">
+        <i class="ti ti-camera-off text-3xl text-neutral-500"></i>
+        <p id="qr-scan-fallback-msg" class="text-xs text-neutral-400 leading-relaxed max-w-xs"></p>
+        <div class="flex gap-2">
+          <button onclick="startQrCamera()" class="px-3 py-2 rounded-lg bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold transition">Try again</button>
+          <button onclick="document.getElementById('qr-scan-file').click()" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold transition">Take a photo</button>
+        </div>
+        <button onclick="openPhoneScanLink()" class="qr-phone-open text-[11px] font-semibold text-[#c9a96e] hover:text-[#dab77e] transition disabled:opacity-60">Or scan with your phone</button>
+      </div>
+    </div>
+    <p id="qr-scan-status" class="px-4 pt-3 text-xs text-center text-neutral-400 min-h-[2rem]" aria-live="polite"></p>
+    <div class="p-4 pt-1 flex items-center justify-center gap-2 flex-wrap flex-shrink-0">
+      <button id="qr-torch-btn" onclick="toggleQrTorch()" class="hidden flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"></button>
+      <button onclick="document.getElementById('qr-scan-file').click()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-photo"></i> Take a photo</button>
+      <button onclick="openPhoneScanLink()" class="qr-phone-open flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition disabled:opacity-60"><i class="ti ti-device-mobile"></i> Scan with phone</button>
+    </div>
+    <input type="file" id="qr-scan-file" accept="image/*" capture="environment" class="hidden" onchange="scanQrFromFile(this)">
+  </div>
+</div>
+
+<!-- PHONE SCAN LINK (owner): link + QR to open the scanner on a phone, no sign-in -->
+<div id="qr-link-modal-backdrop" class="fixed inset-0 bg-black/80 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'qr-link-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-sm overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col max-h-[94vh]">
+    <div class="p-4 border-b border-neutral-900 flex items-center justify-between gap-3 flex-shrink-0">
+      <div class="min-w-0">
+        <h4 class="text-white font-bold text-sm">Scan with a phone</h4>
+        <p class="text-[11px] text-neutral-500 mt-0.5">No sign-in needed. The link works for 10 minutes.</p>
+      </div>
+      <button onclick="closePhoneLinkModal()" aria-label="Close" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div class="p-5 flex flex-col items-center gap-4 overflow-y-auto">
+      <div id="qr-link-qr" class="bg-white p-3 rounded-lg"></div>
+      <p class="text-[11px] text-neutral-500 text-center leading-relaxed">Point a phone camera at this code, or send the link. Every sticker it scans shows up here.</p>
+      <div class="w-full flex gap-2">
+        <input id="qr-link-url" type="text" readonly class="flex-1 min-w-0 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-[11px] text-neutral-300 outline-none"/>
+        <button onclick="copyPhoneLink()" class="flex items-center gap-1.5 px-3 rounded-lg bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold transition flex-shrink-0"><i class="ti ti-copy text-sm"></i> Copy</button>
+      </div>
+      <div class="w-full flex items-center justify-between text-xs">
+        <span id="qr-link-status" class="flex items-center gap-2 text-neutral-300 font-semibold"></span>
+        <span id="qr-link-timer" class="font-bold text-[#c9a96e] tabular-nums"></span>
+      </div>
+    </div>
+    <div class="p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
+      <button onclick="stopPhoneScanLink()" class="flex-1 bg-neutral-800 hover:bg-red-950/40 hover:text-red-300 text-white text-xs font-bold py-2.5 rounded-lg transition">Stop link</button>
+      <button id="qr-link-share-btn" onclick="sharePhoneLink()" class="hidden flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Share</button>
+      <button onclick="closePhoneLinkModal()" class="flex-1 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition">Done</button>
+    </div>
+  </div>
+</div>
+
+<!-- PHONE SCANNER PAGE — what opens on the phone from a scan link (no sign-in) -->
+<div id="remote-scan-page" class="hidden fixed inset-0 z-[60] bg-[#050505] overflow-y-auto">
+  <div class="max-w-md mx-auto px-5 py-8 min-h-full flex flex-col gap-4">
+    <div class="flex items-center gap-3">
+      <div class="w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e] flex items-center justify-center flex-shrink-0"><i class="ti ti-scan text-lg"></i></div>
+      <div>
+        <h1 class="text-white font-bold text-base leading-tight">Sakkhi scanner</h1>
+        <p class="text-[11px] text-neutral-500">Stickers you scan appear on the studio's screen</p>
+      </div>
+    </div>
+    <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 flex flex-col gap-4">
+      <div class="flex items-center justify-between gap-3">
+        <div class="flex items-center gap-2 text-xs"><span id="rs-dot" class="w-2 h-2 rounded-full bg-neutral-600"></span><span id="rs-state-text" class="text-neutral-300 font-semibold">Connecting…</span></div>
+        <div id="rs-timer" class="text-xs font-bold text-[#c9a96e] tabular-nums"></div>
+      </div>
+      <button id="rs-start-btn" onclick="openQrScanner('remote')" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] text-black text-sm font-bold py-3 rounded-lg transition flex items-center justify-center gap-2"><i class="ti ti-camera text-lg"></i> Start scanning</button>
+      <p id="rs-ended" class="hidden text-xs text-neutral-400 leading-relaxed"></p>
+    </div>
+    <div id="rs-list-wrap" class="hidden">
+      <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider mb-2">Scanned</p>
+      <div id="rs-list" class="flex flex-col gap-2"></div>
+    </div>
+    <p class="text-[11px] text-neutral-600 text-center mt-auto pt-4">This link stops working on its own after 10 minutes.</p>
+  </div>
+</div>
+
+<div id="main-app" style="display: none;">
     <header class="sticky top-0 z-40 backdrop-blur-md bg-[#0a0a0a]/90 border-b border-neutral-900 px-4 md:px-8 h-16 flex items-center justify-between transition-colors duration-300">
       <div class="flex items-center">
   <img src="/SAKKHIheader.png" alt="Sakkhi Logo" class="h-8 md:h-10 w-auto object-contain" />
@@ -1559,6 +1650,7 @@
         <p class="text-xs text-neutral-500 mt-1">Keep track of your gear — cameras, cards, laptops, anything with a serial number.</p>
       </div>
       <div class="flex items-center gap-2">
+        <button id="phone-scan-pill" onclick="showPhoneLinkModal()" class="hidden flex items-center gap-2 bg-emerald-950/30 border border-emerald-900/60 text-emerald-300 px-3 py-2 rounded-lg text-xs font-semibold transition hover:border-emerald-700" title="Phone scan link is on"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span id="phone-scan-pill-text"></span></button>
         <button onclick="openQrScanner('open')" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-scan"></i> Scan</button>
         <button onclick="openQrSheetModal()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-qrcode"></i> Print QR Sheet</button>
         <button onclick="openInventoryModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-3 py-2 rounded-lg text-xs font-bold transition"><i class="ti ti-plus"></i> Add Equipment</button>
@@ -1684,40 +1776,6 @@
       <button onclick="backToQrSetup()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Back</button>
       <button onclick="printQrSheet()" class="flex-[2] bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print sheet</button>
     </div>
-  </div>
-</div>
-
-<!-- QR SCANNER MODAL -->
-<div id="qr-scan-modal-backdrop" class="fixed inset-0 bg-black/90 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="if (event.target === this) closeQrScanner()">
-  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col max-h-[96vh]">
-    <div class="p-4 border-b border-neutral-900 flex items-center justify-between gap-3 flex-shrink-0">
-      <div class="min-w-0">
-        <h4 class="text-white font-bold text-sm">Scan QR sticker</h4>
-        <p id="qr-scan-sub" class="text-[11px] text-neutral-500 mt-0.5"></p>
-      </div>
-      <button onclick="closeQrScanner()" aria-label="Close scanner" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
-    </div>
-    <div class="relative bg-black w-full aspect-square max-h-[58vh] overflow-hidden flex-shrink-0">
-      <video id="qr-scan-video" class="absolute inset-0 w-full h-full object-cover" playsinline muted autoplay></video>
-      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
-        <div class="h-3/5 aspect-square rounded-2xl border-2 border-[#c9a96e]" style="box-shadow:0 0 0 999px rgba(0,0,0,.5)"></div>
-      </div>
-      <div id="qr-scan-fallback" class="hidden absolute inset-0 bg-[#0f0f0f] flex flex-col items-center justify-center gap-3 p-6 text-center">
-        <i class="ti ti-camera-off text-3xl text-neutral-500"></i>
-        <p id="qr-scan-fallback-msg" class="text-xs text-neutral-400 leading-relaxed max-w-xs"></p>
-        <div class="flex gap-2">
-          <button onclick="startQrCamera()" class="px-3 py-2 rounded-lg bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold transition">Try again</button>
-          <button onclick="document.getElementById('qr-scan-file').click()" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold transition">Take a photo</button>
-        </div>
-      </div>
-    </div>
-    <p id="qr-scan-status" class="px-4 pt-3 text-xs text-center text-neutral-400 min-h-[2rem]" aria-live="polite"></p>
-    <div class="p-4 pt-1 flex items-center justify-center gap-2 flex-wrap flex-shrink-0">
-      <button id="qr-torch-btn" onclick="toggleQrTorch()" class="hidden flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"></button>
-      <button onclick="document.getElementById('qr-scan-file').click()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-photo"></i> Take a photo</button>
-      <button onclick="copyQrScanLink()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-link"></i> Copy scan link</button>
-    </div>
-    <input type="file" id="qr-scan-file" accept="image/*" capture="environment" class="hidden" onchange="scanQrFromFile(this)">
   </div>
 </div>
 
@@ -2584,7 +2642,11 @@ setTimeout(() => {
     
     // Initialize Auth Logic on page load
     document.addEventListener('DOMContentLoaded', async () => {
-      
+
+      // Opened from a phone scan link (?rscan=...): show only the scanner page — no sign-in, no app.
+      const remoteScanToken = new URLSearchParams(window.location.search).get('rscan');
+      if (remoteScanToken) { startRemoteScanPage(remoteScanToken); return; }
+
       // --- ADMIN OVERRIDE CHECK ---
       const urlParams = new URLSearchParams(window.location.search);
       const adminOverrideId = urlParams.get('admin_override');
@@ -8390,6 +8452,7 @@ async function toggleBlockDate(dateStr) {
 
     // Returns true when the scan was accepted (scanner closes).
     function handleScannedText(raw) {
+      if (_scan.mode === 'remote') { handleRemoteScan(raw); return false; } // phone page: send it to the computer
       const code = extractScannedCode(raw);
       if (!code) { scanFeedback('That QR isn\'t a Sakkhi sticker.'); return false; }
       const idx = _inventory.findIndex(t => t.code === code);
@@ -8446,35 +8509,372 @@ async function toggleBlockDate(dateStr) {
     }
 
     async function openQrScanner(mode) {
-      _scan.mode = mode === 'field' ? 'field' : 'open';
+      _scan.mode = mode === 'field' ? 'field' : (mode === 'remote' ? 'remote' : 'open');
       document.getElementById('qr-scan-sub').textContent = _scan.mode === 'field'
         ? 'Scan the sticker to fill in its code.'
-        : 'Scan a sticker to assign it, or open the item it belongs to.';
+        : (_scan.mode === 'remote'
+          ? 'Point at each sticker. Scans go straight to the computer.'
+          : 'Scan a sticker to assign it, or open the item it belongs to.');
+      document.querySelectorAll('.qr-phone-open').forEach(el => el.classList.toggle('hidden', _scan.mode === 'remote'));
       setScanStatus('Starting camera…');
       document.getElementById('qr-scan-fallback').classList.add('hidden');
-      openModal('qr-scan-modal-backdrop');
+      showScanSheet();
       await startQrCamera();
     }
 
     function closeQrScanner() {
       stopQrCamera();
       clearTimeout(_scan.msgTimer);
-      closeModal('qr-scan-modal-backdrop');
-      // closeModal unlocks page scroll — keep it locked if Add Equipment is still open underneath.
+      hideScanSheet();
+    }
+
+    // ------------------------------------------------------------------
+    // Scanner sheet show/hide. Deliberately doesn't use openModal(): the
+    // phone scanner page has no signed-in app around it.
+    // ------------------------------------------------------------------
+    function showScanSheet() {
+      const m = document.getElementById('qr-scan-modal-backdrop');
+      m.classList.add('opacity-100', 'pointer-events-auto');
+      if (m.firstElementChild) m.firstElementChild.classList.remove('translate-y-full', 'sm:translate-y-4');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function hideScanSheet() {
+      const m = document.getElementById('qr-scan-modal-backdrop');
+      m.classList.remove('opacity-100', 'pointer-events-auto');
+      if (m.firstElementChild) m.firstElementChild.classList.add('translate-y-full', 'sm:translate-y-4');
+      // keep page scroll locked if a form is still open underneath (or this is the phone page)
+      const inv = document.getElementById('inventory-modal-backdrop');
+      const keepLocked = (inv && inv.classList.contains('opacity-100')) || _remote.active;
+      document.body.style.overflow = keepLocked ? 'hidden' : '';
+    }
+
+    // ------------------------------------------------------------------
+    // PHONE SCAN LINK — owner side (signed in, on the computer).
+    // Creates a 10-minute session on the server, shows a link + QR for it,
+    // then listens for stickers the phone scans and applies them here: fills
+    // the QR Sticker Code field if Add Equipment is open, otherwise opens the
+    // assign screen for that sticker. Each scan gets a result sent back so
+    // the phone can show what happened.
+    // ------------------------------------------------------------------
+    const _phone = { token: null, expiresAt: 0, lastId: 0, poll: null, tick: null, connected: false, polling: false };
+
+    function phoneLinkUrl() {
+      return `${window.location.origin}${window.location.pathname}?rscan=${_phone.token}`;
+    }
+
+    function fmtClock(ms) {
+      const s = Math.max(0, Math.ceil(ms / 1000));
+      return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+    }
+
+    async function openPhoneScanLink() {
+      if (isDemoMode) { showToast('Phone scan links need a signed-in account.', 'error'); return; }
+      if (!_phone.token || Date.now() >= _phone.expiresAt) {
+        const btns = document.querySelectorAll('.qr-phone-open');
+        btns.forEach(b => { b.disabled = true; });
+        const ok = await createPhoneScanSession();
+        btns.forEach(b => { b.disabled = false; });
+        if (!ok) return;
+      }
+      closeQrScanner(); // stop this device's camera — the phone takes over
+      showPhoneLinkModal();
+    }
+
+    async function createPhoneScanSession() {
+      try {
+        const r = await sbFetch('rpc/scan_session_create', { method: 'POST', body: JSON.stringify({}) });
+        if (!r || !r.ok || !r.token) throw new Error((r && r.error) || 'failed');
+        _phone.token = r.token;
+        _phone.expiresAt = Date.now() + (r.seconds_left || 600) * 1000;
+        _phone.lastId = 0;
+        _phone.connected = false;
+        startPhonePolling();
+        return true;
+      } catch (e) {
+        showToast(e && e.message === 'SESSION_EXPIRED' ? 'Please sign in again to make a phone link.' : 'Couldn\'t make the phone link. Try again.', 'error');
+        return false;
+      }
+    }
+
+    function startPhonePolling() {
+      stopPhonePolling();
+      _phone.poll = setInterval(pollPhoneSession, 2000);
+      _phone.tick = setInterval(tickPhoneSession, 1000);
+      renderPhoneSessionUI();
+    }
+
+    function stopPhonePolling() {
+      clearInterval(_phone.poll); clearInterval(_phone.tick);
+      _phone.poll = null; _phone.tick = null; _phone.polling = false;
+    }
+
+    function endPhoneSessionLocal(reason) {
+      const wasActive = !!_phone.token;
+      stopPhonePolling();
+      _phone.token = null; _phone.connected = false;
+      renderPhoneSessionUI();
+      const modal = document.getElementById('qr-link-modal-backdrop');
+      if (modal && modal.classList.contains('opacity-100')) closePhoneLinkModal();
+      if (wasActive && reason === 'expired') showToast('Phone scan link expired.', 'info');
+    }
+
+    async function stopPhoneScanLink() {
+      const token = _phone.token;
+      endPhoneSessionLocal('stopped');
+      if (token) { try { await sbFetch('rpc/scan_session_end', { method: 'POST', body: JSON.stringify({ p_token: token }) }); } catch (e) {} }
+      showToast('Phone scan link stopped.', 'success');
+    }
+
+    async function pollPhoneSession() {
+      if (_phone.polling || !_phone.token) return;
+      _phone.polling = true;
+      const token = _phone.token;
+      try {
+        const r = await sbFetch('rpc/scan_session_poll', { method: 'POST', body: JSON.stringify({ p_token: token, p_after: _phone.lastId }) });
+        if (token !== _phone.token) return; // link was stopped/replaced meanwhile
+        if (r.error === 'not_found') { endPhoneSessionLocal('expired'); return; }
+        _phone.expiresAt = Date.now() + (r.seconds_left || 0) * 1000;
+        _phone.connected = !!r.phone_connected;
+        for (const ev of (r.events || [])) {
+          _phone.lastId = Math.max(_phone.lastId, ev.id);
+          await applyRemoteScan(ev, token);
+        }
+        if (!r.active) { endPhoneSessionLocal('expired'); return; }
+        renderPhoneSessionUI();
+      } catch (e) {
+        if (e && e.message === 'SESSION_EXPIRED') endPhoneSessionLocal('stopped');
+        // any other error is a blip — the next poll retries
+      } finally {
+        _phone.polling = false;
+      }
+    }
+
+    function tickPhoneSession() {
+      if (!_phone.token) return;
+      if (Date.now() >= _phone.expiresAt) { endPhoneSessionLocal('expired'); return; }
+      renderPhoneSessionUI();
+    }
+
+    function renderPhoneSessionUI() {
+      const on = !!_phone.token;
+      const left = on ? fmtClock(_phone.expiresAt - Date.now()) : '';
+      const pill = document.getElementById('phone-scan-pill');
+      if (pill) {
+        pill.classList.toggle('hidden', !on);
+        document.getElementById('phone-scan-pill-text').textContent = on ? `Phone link on · ${left}` : '';
+      }
+      const t = document.getElementById('qr-link-timer');
+      if (t) t.textContent = on ? `${left} left` : '';
+      const st = document.getElementById('qr-link-status');
+      if (st) {
+        st.innerHTML = _phone.connected
+          ? '<span class="w-2 h-2 rounded-full bg-emerald-400 inline-block"></span> Phone connected'
+          : '<span class="w-2 h-2 rounded-full bg-neutral-600 inline-block animate-pulse"></span> Waiting for the phone';
+      }
+    }
+
+    function showPhoneLinkModal() {
+      if (!_phone.token) return;
+      const wrap = document.getElementById('qr-link-qr');
+      wrap.innerHTML = '';
+      new QRCode(wrap, { text: phoneLinkUrl(), width: 176, height: 176, correctLevel: QRCode.CorrectLevel.M });
+      document.getElementById('qr-link-url').value = phoneLinkUrl();
+      document.getElementById('qr-link-share-btn').classList.toggle('hidden', !navigator.share);
+      renderPhoneSessionUI();
+      openModal('qr-link-modal-backdrop');
+    }
+
+    function closePhoneLinkModal() {
+      closeModal('qr-link-modal-backdrop');
       const inv = document.getElementById('inventory-modal-backdrop');
       if (inv && inv.classList.contains('opacity-100')) document.body.style.overflow = 'hidden';
     }
 
-    // A link that opens the app straight into the scanner — handy to
-    // send to a phone. (Needs the person to be signed in on that device.)
-    async function copyQrScanLink() {
-      const url = `${window.location.origin}${window.location.pathname}?scan=1`;
+    async function copyPhoneLink() {
+      if (!_phone.token) return;
+      const url = phoneLinkUrl();
       try {
         await navigator.clipboard.writeText(url);
-        showToast('Scan link copied. Open it on your phone to scan.', 'success');
+        showToast('Link copied. It works for 10 minutes.', 'success');
       } catch (e) {
-        window.prompt('Copy this link and open it on your phone:', url);
+        const el = document.getElementById('qr-link-url');
+        el.focus(); el.select();
+        try { document.execCommand('copy'); showToast('Link copied. It works for 10 minutes.', 'success'); }
+        catch (e2) { showToast('Press and hold the link to copy it.', 'info'); }
       }
+    }
+
+    async function sharePhoneLink() {
+      if (!_phone.token || !navigator.share) return;
+      try { await navigator.share({ title: 'Sakkhi scanner', text: 'Scan gear stickers with this link (works for 10 minutes).', url: phoneLinkUrl() }); } catch (e) {}
+    }
+
+    // A sticker arrived from the phone. Decide what it means here and tell
+    // the phone how it went.
+    async function applyRemoteScan(ev, token) {
+      const code = ev.code;
+      const idx = _inventory.findIndex(t => t.code === code);
+      const invModal = document.getElementById('inventory-modal-backdrop');
+      const formOpen = invModal.classList.contains('opacity-100');
+      let result;
+
+      if (idx === -1) {
+        result = 'unknown';
+      } else if (_inventory[idx].assigned) {
+        result = 'assigned';
+        showToast(`Phone scanned ${code}. Already assigned to ${_inventory[idx].name || 'an item'}.`, 'info');
+      } else if (formOpen && _editingInventoryIndex === -1) {
+        const el = document.getElementById('inv-tag');
+        el.value = code; checkInvTag();
+        showToast(`Phone scanned ${code}.`, 'success');
+        result = 'ok';
+      } else if (formOpen) {
+        result = 'busy'; // a different item is mid-edit — don't clobber it
+      } else {
+        const section = document.getElementById('account-inventory');
+        if (!section || getComputedStyle(section).display === 'none') { switchTab('account'); switchAccountTab('inventory'); }
+        setTimeout(() => openInventoryModal(idx), 150);
+        showToast(`Phone scanned ${code}.`, 'success');
+        result = 'ok';
+      }
+
+      try { await sbFetch('rpc/scan_event_result', { method: 'POST', body: JSON.stringify({ p_token: token, p_id: ev.id, p_result: result }) }); } catch (e) {}
+    }
+
+    // ------------------------------------------------------------------
+    // PHONE SCAN LINK — phone side (opened from the link, NO sign-in).
+    // Talks to the server only through the two public scan functions, using
+    // the link's secret token. It never sees the inventory or any account data.
+    // ------------------------------------------------------------------
+    const _remote = { active: false, token: null, expiresAt: 0, poll: null, tick: null, items: [], lastCode: '', lastAt: 0, offline: false };
+
+    async function remoteRpc(fn, args) {
+      const res = await fetch(`${SUPABASE_URL}/rest/v1/rpc/${fn}`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + SUPABASE_KEY },
+        body: JSON.stringify(args)
+      });
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res.json();
+    }
+
+    const REMOTE_RESULT_TEXT = {
+      ok:       { text: 'Received on the computer', cls: 'text-emerald-400' },
+      assigned: { text: 'Already assigned to gear', cls: 'text-amber-400' },
+      unknown:  { text: 'Not one of your stickers', cls: 'text-red-400' },
+      busy:     { text: 'Computer is busy. Scan again in a moment', cls: 'text-amber-400' }
+    };
+
+    function startRemoteScanPage(token) {
+      _remote.active = true;
+      _remote.token = token;
+      ['loading-screen', 'main-app'].forEach(id => { const el = document.getElementById(id); if (el) el.style.display = 'none'; });
+      const login = document.getElementById('login-modal'); if (login) login.classList.remove('active');
+      document.getElementById('remote-scan-page').classList.remove('hidden');
+      document.title = 'Sakkhi scanner';
+      remoteRefresh();
+      _remote.poll = setInterval(remoteRefresh, 2000);
+      _remote.tick = setInterval(remoteTick, 1000);
+    }
+
+    function remoteSetState(dotCls, text) {
+      document.getElementById('rs-dot').className = 'w-2 h-2 rounded-full ' + dotCls;
+      document.getElementById('rs-state-text').textContent = text;
+    }
+
+    function remoteEnd(reason) {
+      clearInterval(_remote.poll); clearInterval(_remote.tick);
+      _remote.poll = null; _remote.tick = null;
+      if (qrScannerIsOpen()) closeQrScanner();
+      remoteSetState('bg-red-500', reason === 'expired' ? 'Link expired' : 'Link not valid');
+      document.getElementById('rs-timer').textContent = '';
+      document.getElementById('rs-start-btn').classList.add('hidden');
+      const ended = document.getElementById('rs-ended');
+      ended.classList.remove('hidden');
+      ended.textContent = reason === 'expired'
+        ? 'This scan link has ended. Ask for a new link to keep scanning. Anything you already scanned was delivered.'
+        : 'This scan link isn\'t valid. Ask for a new link.';
+    }
+
+    function remoteTick() {
+      if (!_remote.expiresAt) return;
+      const ms = _remote.expiresAt - Date.now();
+      if (ms <= 0) { remoteEnd('expired'); return; }
+      document.getElementById('rs-timer').textContent = `${fmtClock(ms)} left`;
+    }
+
+    async function remoteRefresh() {
+      try {
+        const r = await remoteRpc('scan_session_status', { p_token: _remote.token });
+        _remote.offline = false;
+        if (!r.valid) { remoteEnd(r.reason); return; }
+        _remote.expiresAt = Date.now() + r.seconds_left * 1000;
+        remoteSetState('bg-emerald-400', 'Connected');
+        remoteTick();
+
+        // merge server results into the on-screen list
+        const byId = new Map(_remote.items.filter(i => i.id).map(i => [i.id, i]));
+        (r.results || []).forEach(sr => {
+          const local = byId.get(sr.id);
+          if (local) {
+            if (sr.result && local.result !== sr.result) {
+              local.result = sr.result;
+              if (qrScannerIsOpen() && _scan.mode === 'remote') {
+                const info = REMOTE_RESULT_TEXT[sr.result];
+                if (sr.result === 'ok') setScanStatus(`✓ ${sr.code} received on the computer`, 'ok');
+                else if (info) scanFeedback(`${sr.code}: ${info.text}`);
+              }
+            }
+          } else if (!_remote.items.some(i => !i.id && i.code === sr.code && Date.now() - i.at < 6000)) {
+            _remote.items.push({ id: sr.id, code: sr.code, result: sr.result, at: 0 }); // e.g. after a page reload
+          }
+        });
+        _remote.items.sort((a, b) => (b.id || Infinity) - (a.id || Infinity));
+        renderRemoteList();
+      } catch (e) {
+        if (!_remote.offline) { _remote.offline = true; remoteSetState('bg-amber-400', 'Reconnecting…'); }
+      }
+    }
+
+    function renderRemoteList() {
+      const wrap = document.getElementById('rs-list-wrap');
+      wrap.classList.toggle('hidden', !_remote.items.length);
+      document.getElementById('rs-list').innerHTML = _remote.items.map(it => {
+        let text = 'Sending…', cls = 'text-neutral-500';
+        if (it.failed) { text = it.failed === 'limit' ? 'Scan limit reached for this link' : 'Not sent. Scan it again'; cls = 'text-red-400'; }
+        else if (it.result && REMOTE_RESULT_TEXT[it.result]) { text = REMOTE_RESULT_TEXT[it.result].text; cls = REMOTE_RESULT_TEXT[it.result].cls; }
+        else if (it.id) { text = 'Sent'; }
+        return `<div class="flex items-center justify-between gap-3 bg-[#0d0d0d] border border-neutral-900 rounded-lg px-3.5 py-2.5"><span class="text-sm font-bold text-white tracking-widest">${escapeHtml(it.code)}</span><span class="text-[11px] ${cls} text-right">${escapeHtml(text)}</span></div>`;
+      }).join('');
+    }
+
+    // A sticker was read by the phone camera — send it to the computer.
+    async function handleRemoteScan(raw) {
+      const code = extractScannedCode(raw);
+      if (!code) { scanFeedback('That QR isn\'t a Sakkhi sticker.'); return; }
+      const now = Date.now();
+      if (code === _remote.lastCode && now - _remote.lastAt < 8000) return; // same sticker still in view
+      _remote.lastCode = code; _remote.lastAt = now;
+
+      if (navigator.vibrate) navigator.vibrate(60);
+      const item = { id: null, code, result: null, failed: null, at: now };
+      _remote.items.unshift(item);
+      renderRemoteList();
+      setScanStatus(`✓ ${code} sent to the computer`, 'ok');
+      clearTimeout(_scan.msgTimer);
+      _scan.msgTimer = setTimeout(() => { if (qrScannerIsOpen() && _scan.stream) setScanStatus(scanHint()); }, 3000);
+
+      try {
+        const r = await remoteRpc('scan_session_push', { p_token: _remote.token, p_code: code });
+        if (r.ok) { item.id = r.id; }
+        else if (r.error === 'expired' || r.error === 'invalid') { item.failed = r.error; remoteEnd(r.error); }
+        else { item.failed = r.error; _remote.lastCode = ''; scanFeedback(r.error === 'limit' ? 'Scan limit reached for this link.' : 'That sticker couldn\'t be sent.'); }
+      } catch (e) {
+        item.failed = 'network'; _remote.lastCode = '';
+        scanFeedback('Couldn\'t send. Check your connection and scan again.');
+      }
+      renderRemoteList();
     }
 
     // Landed here from scanning a printed sticker (?tag=<code> on the URL).
