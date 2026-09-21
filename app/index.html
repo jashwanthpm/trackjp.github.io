@@ -1578,7 +1578,7 @@
       <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e]"><i class="ti ti-package text-lg"></i></div>
       <div class="flex-1 min-w-0">
         <h4 id="inv-modal-title" class="text-white font-bold text-sm leading-snug">Add Equipment</h4>
-        <p class="text-[11px] text-neutral-500 mt-0.5">Give it a name, an emoji, and a serial number</p>
+        <p id="inv-modal-subtitle" class="text-[11px] text-neutral-500 mt-0.5">Give it a name, an emoji, and a serial number</p>
       </div>
       <button onclick="closeInventoryModal()" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
     </div>
@@ -1644,7 +1644,7 @@
     <div class="p-5 border-b border-neutral-900 flex items-center justify-between flex-shrink-0">
       <div>
         <h4 class="text-white font-bold text-sm">QR Sheet</h4>
-        <p class="text-[11px] text-neutral-500 mt-0.5">One label per item — print, cut, and stick on your gear</p>
+        <p class="text-[11px] text-neutral-500 mt-0.5">Print, cut, stick on your gear — scan later to assign each one</p>
       </div>
       <button onclick="closeModal('qr-sheet-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
     </div>
@@ -2006,6 +2006,22 @@
       if (trialCode) {
         localStorage.setItem(TRIAL_PROMO_STORAGE_KEY, trialCode);
         // Scrub it from the address bar so it doesn't linger/get re-shared
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState(null, '', cleanUrl);
+      }
+    })();
+
+    // A printed equipment QR code links back here with ?tag=<code> — this
+    // catches that on load (same pattern as the trial-promo code above),
+    // and handlePendingInventoryTagScan() (called once the dashboard has
+    // finished loading _inventory) jumps straight to that tag so it can be
+    // viewed or assigned to a piece of gear.
+    let _pendingInventoryTagScan = null;
+    (function captureInventoryTagFromUrl() {
+      const params = new URLSearchParams(window.location.search);
+      const tagCode = params.get('tag');
+      if (tagCode) {
+        _pendingInventoryTagScan = tagCode;
         const cleanUrl = window.location.pathname + window.location.hash;
         window.history.replaceState(null, '', cleanUrl);
       }
@@ -3570,6 +3586,7 @@ try {
       initTimeFilters(); // <--- ADD THIS LINE RIGHT HERE
       renderDashboard();
       updateShootsNavBadge();
+      handlePendingInventoryTagScan();
 
       // First-time visitors get a quick "set up your studio" prompt.
       // Runs after everything else so it never blocks the dashboard render.
@@ -7700,15 +7717,30 @@ async function toggleBlockDate(dateStr) {
     // ==========================================
     // INVENTORY / EQUIPMENT
     // ----------------------------------------
-    // A simple gear list — camera bodies, cards, laptops, anything with a
-    // serial number — plus optional printable QR labels so a physical
-    // sticker on the item can point back to what it is. Stored the same
-    // way as companies/locations: one row in "settings" under key
-    // "inventory", loaded/saved with the studio owner's own session.
+    // Two ways to build the list:
+    //  1. Add a known item directly (name, serial, etc. already in hand).
+    //  2. Print a sheet of blank QR tags FIRST, stick them on gear as you
+    //     go, then scan a sticker to assign it — each blank tag is saved
+    //     to Supabase the instant it's generated (not just when printed),
+    //     so it's already there waiting to be claimed on any device.
+    // Every item — blank or filled in — gets a short unique "code", and
+    // its QR encodes a link back into this app (?tag=<code>) rather than
+    // plain text, so scanning it always opens the right record here.
+    // Stored the same way as companies/locations: one row in "settings"
+    // under key "inventory".
     // ==========================================
     const INVENTORY_EMOJI_PRESETS = ['📷','🎥','💻','🖥️','🎤','🔋','💡','📀','🎧','🛠️','📦','🚁','💾','🔌','📱','🖨️'];
     let _editingInventoryIndex = null;
     let _qrModalIndex = null;
+
+    function generateTagCode() {
+      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I — easy to read off a small sticker
+      let code;
+      do {
+        code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+      } while (_inventory.some(it => it.code === code));
+      return code;
+    }
 
     function renderInventoryList() {
       const listEl = document.getElementById('inventory-list');
@@ -7722,31 +7754,41 @@ async function toggleBlockDate(dateStr) {
       }
       if (emptyEl) emptyEl.classList.add('hidden');
 
-      listEl.innerHTML = _inventory.map((item, i) => `
-        <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-900 rounded-xl p-3.5">
+      listEl.innerHTML = _inventory.map((item, i) => {
+        const unassigned = !item.assigned;
+        return `
+        <div class="flex items-center justify-between gap-3 rounded-xl p-3.5 ${unassigned ? 'bg-neutral-950/30 border border-dashed border-neutral-800' : 'bg-neutral-950/50 border border-neutral-900'}">
           <div class="flex items-center gap-3 min-w-0">
-            <div class="w-11 h-11 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl flex-shrink-0">${escapeHtml(item.emoji || '📦')}</div>
+            <div class="w-11 h-11 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl flex-shrink-0">${unassigned ? '<i class="ti ti-qrcode text-neutral-600 text-lg"></i>' : escapeHtml(item.emoji || '📦')}</div>
             <div class="min-w-0">
-              <p class="text-sm font-bold text-white truncate">${escapeHtml(item.name || 'Untitled')}</p>
-              <p class="text-[11px] text-neutral-500 truncate">${item.category ? escapeHtml(item.category) + ' · ' : ''}${item.serial ? 'SN: ' + escapeHtml(item.serial) : 'No serial number'}</p>
+              ${unassigned
+                ? `<p class="text-sm font-bold text-neutral-400 truncate">Unassigned Tag</p><p class="text-[11px] text-neutral-600 truncate">Code: ${escapeHtml(item.code || '')} · tap to assign</p>`
+                : `<p class="text-sm font-bold text-white truncate">${escapeHtml(item.name || 'Untitled')}</p><p class="text-[11px] text-neutral-500 truncate">${item.category ? escapeHtml(item.category) + ' · ' : ''}${item.serial ? 'SN: ' + escapeHtml(item.serial) : 'No serial number'}</p>`
+              }
             </div>
           </div>
           <div class="flex items-center gap-1 flex-shrink-0">
+            ${unassigned ? `<button onclick="openInventoryModal(${i})" class="px-2.5 py-1.5 text-[11px] font-bold text-black bg-[#c9a96e] hover:bg-[#dab77e] rounded-lg transition">Assign</button>` : ''}
             <button onclick="showItemQr(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="View QR code"><i class="ti ti-qrcode text-sm"></i></button>
-            <button onclick="openInventoryModal(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="Edit"><i class="ti ti-pencil text-sm"></i></button>
+            ${unassigned ? '' : `<button onclick="openInventoryModal(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="Edit"><i class="ti ti-pencil text-sm"></i></button>`}
             <button onclick="deleteInventoryItem(${i})" class="p-2 text-neutral-500 hover:text-red-400 rounded-md hover:bg-red-950/30 transition" title="Delete"><i class="ti ti-trash text-sm"></i></button>
           </div>
         </div>
-      `).join('');
+      `;
+      }).join('');
     }
 
     function openInventoryModal(i) {
       const isNew = (i === undefined || i === null);
       _editingInventoryIndex = isNew ? -1 : i;
-      const item = isNew ? { emoji: '', name: '', serial: '', category: '', notes: '' } : _inventory[i];
+      const item = isNew ? { emoji: '', name: '', serial: '', category: '', notes: '', code: '' } : _inventory[i];
+      const isBlankTag = !isNew && !item.assigned;
 
-      document.getElementById('inv-modal-title').textContent = isNew ? 'Add Equipment' : 'Edit Equipment';
-      document.getElementById('inv-save-btn').textContent = isNew ? 'Add Equipment' : 'Save Changes';
+      document.getElementById('inv-modal-title').textContent = isNew ? 'Add Equipment' : (isBlankTag ? 'Assign This Tag' : 'Edit Equipment');
+      document.getElementById('inv-modal-subtitle').textContent = isBlankTag
+        ? `Tag code ${item.code} — give it a name and it's tracked from here on.`
+        : 'Give it a name, an emoji, and a serial number';
+      document.getElementById('inv-save-btn').textContent = isNew ? 'Add Equipment' : (isBlankTag ? 'Assign Equipment' : 'Save Changes');
       document.getElementById('inv-emoji').value = item.emoji || '';
       document.getElementById('inv-name').value = item.name || '';
       document.getElementById('inv-serial').value = item.serial || '';
@@ -7774,7 +7816,13 @@ async function toggleBlockDate(dateStr) {
       const name = document.getElementById('inv-name').value.trim();
       if (!name) { showToast('Give this item a name first.', 'error'); return; }
 
+      const isNew = _editingInventoryIndex === -1;
+      const existing = isNew ? null : _inventory[_editingInventoryIndex];
+
       const item = {
+        id: existing?.id || ('inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
+        code: existing?.code || generateTagCode(),
+        assigned: true,
         emoji: document.getElementById('inv-emoji').value.trim() || '📦',
         name,
         serial: document.getElementById('inv-serial').value.trim(),
@@ -7782,38 +7830,34 @@ async function toggleBlockDate(dateStr) {
         notes: document.getElementById('inv-notes').value.trim()
       };
 
-      const isNew = _editingInventoryIndex === -1;
       if (isNew) {
-        item.id = 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
         _inventory.push(item);
       } else {
-        item.id = _inventory[_editingInventoryIndex].id || ('inv_' + Date.now());
         _inventory[_editingInventoryIndex] = item;
       }
 
       await saveSettingToDB('inventory', _inventory);
       closeInventoryModal();
       renderInventoryList();
-      showToast(isNew ? `${name} added to inventory.` : 'Equipment updated.', 'success');
+      showToast(isNew ? `${name} added to inventory.` : (existing && !existing.assigned ? `${name} assigned to that tag.` : 'Equipment updated.'), 'success');
     }
 
     async function deleteInventoryItem(i) {
       const item = _inventory[i];
       if (!item) return;
-      if (!confirm(`Remove "${item.name}" from inventory?`)) return;
+      const label = item.assigned ? item.name : 'this blank tag';
+      if (!confirm(`Remove ${item.assigned ? `"${label}"` : label} from inventory?`)) return;
       _inventory.splice(i, 1);
       await saveSettingToDB('inventory', _inventory);
       renderInventoryList();
     }
 
-    // Plain, human-readable text so scanning this QR is useful even
-    // without our app installed — not just an opaque internal id.
+    // Deep-links back into this app instead of plain text — scanning it
+    // opens Sakkhi directly at that item (or the "assign this tag" screen
+    // if it hasn't been claimed yet), which is what makes "scan to keep
+    // track" actually work.
     function buildQrPayload(item) {
-      const parts = [item.name || 'Equipment'];
-      if (item.category) parts.push(item.category);
-      if (item.serial) parts.push(`SN: ${item.serial}`);
-      parts.push('Sakkhi Inventory');
-      return parts.join(' — ');
+      return `${window.location.origin}${window.location.pathname}?tag=${encodeURIComponent(item.code)}`;
     }
 
     function showItemQr(i) {
@@ -7825,8 +7869,10 @@ async function toggleBlockDate(dateStr) {
       wrap.innerHTML = '';
       new QRCode(wrap, { text: buildQrPayload(item), width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
 
-      document.getElementById('item-qr-name').textContent = `${item.emoji || '📦'} ${item.name}`;
-      document.getElementById('item-qr-serial').textContent = item.serial ? `SN: ${item.serial}` : 'No serial number on file';
+      document.getElementById('item-qr-name').textContent = item.assigned ? `${item.emoji || '📦'} ${item.name}` : `Unassigned Tag`;
+      document.getElementById('item-qr-serial').textContent = item.assigned
+        ? (item.serial ? `SN: ${item.serial}` : 'No serial number on file')
+        : `Code: ${item.code} — scan to assign`;
 
       openModal('item-qr-modal-backdrop');
     }
@@ -7837,33 +7883,46 @@ async function toggleBlockDate(dateStr) {
       if (item) printInventoryQrSheet([item]);
     }
 
-    function openQrSheetModal() {
-      if (!_inventory.length) { showToast('Add some equipment first.', 'error'); return; }
+    // Main "Print QR Sheet" action: generates a fresh batch of BLANK,
+    // unclaimed tags (saved to the account immediately), then shows them
+    // as a printable sheet — print it, cut the labels apart, stick one on
+    // each piece of gear, and scan each sticker later to assign it.
+    async function openQrSheetModal() {
+      const countStr = prompt('How many blank QR tags do you want to print?', '12');
+      if (countStr === null) return;
+      const count = Math.max(1, Math.min(60, parseInt(countStr, 10) || 0));
+      if (!count) { showToast('Enter a number of tags to generate.', 'error'); return; }
+
+      const newTags = [];
+      for (let n = 0; n < count; n++) {
+        const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: generateTagCode(), assigned: false, emoji: '', name: '', serial: '', category: '', notes: '' };
+        _inventory.push(tag);
+        newTags.push(tag);
+      }
+      await saveSettingToDB('inventory', _inventory);
+      renderInventoryList();
+      showToast(`${count} blank tag${count > 1 ? 's' : ''} created — ready to print.`, 'success');
+
       const grid = document.getElementById('qr-sheet-grid');
       grid.innerHTML = '';
-      _inventory.forEach(item => {
+      newTags.forEach(item => {
         const card = document.createElement('div');
         card.className = 'flex flex-col items-center gap-2 bg-white rounded-lg p-3';
         const qrBox = document.createElement('div');
         card.appendChild(qrBox);
         const label = document.createElement('div');
-        label.className = 'text-black text-[11px] font-bold text-center leading-tight';
-        label.textContent = `${item.emoji || '📦'} ${item.name}`;
+        label.className = 'text-black/70 text-[10px] font-bold text-center leading-tight tracking-wide';
+        label.textContent = item.code;
         card.appendChild(label);
-        if (item.serial) {
-          const sub = document.createElement('div');
-          sub.className = 'text-black/60 text-[9px] text-center';
-          sub.textContent = `SN: ${item.serial}`;
-          card.appendChild(sub);
-        }
         grid.appendChild(card);
         new QRCode(qrBox, { text: buildQrPayload(item), width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
       });
+      window._pendingQrSheetTags = newTags;
       openModal('qr-sheet-modal-backdrop');
     }
 
     function printQrSheet() {
-      printInventoryQrSheet(_inventory);
+      printInventoryQrSheet(window._pendingQrSheetTags || _inventory);
     }
 
     // Opens a clean, white, print-ready tab with one label per item — kept
@@ -7879,11 +7938,13 @@ async function toggleBlockDate(dateStr) {
         new QRCode(box, { text: buildQrPayload(item), width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
         const imgEl = box.querySelector('img') || box.querySelector('canvas');
         const src = imgEl.tagName === 'CANVAS' ? imgEl.toDataURL('image/png') : imgEl.src;
+        const labelText = item.assigned ? `${item.emoji || '📦'} ${item.name}` : item.code;
+        const subText = item.assigned ? (item.serial ? `SN: ${item.serial}` : '') : 'Scan to assign';
         return `
           <div class="qr-card">
             <img src="${src}" width="140" height="140" alt="QR" />
-            <div class="qr-label">${escapeHtml(item.emoji || '📦')} ${escapeHtml(item.name || '')}</div>
-            ${item.serial ? `<div class="qr-sub">SN: ${escapeHtml(item.serial)}</div>` : ''}
+            <div class="qr-label">${escapeHtml(labelText)}</div>
+            ${subText ? `<div class="qr-sub">${escapeHtml(subText)}</div>` : ''}
           </div>
         `;
       }).join('');
@@ -7907,6 +7968,24 @@ async function toggleBlockDate(dateStr) {
         </html>
       `);
       win.document.close();
+    }
+
+    // Landed here from scanning a printed sticker (?tag=<code> on the URL).
+    // Jumps straight to Account > Inventory and opens that exact item —
+    // either to assign it (blank tag) or just view/edit it (already assigned).
+    function handlePendingInventoryTagScan() {
+      if (!_pendingInventoryTagScan) return;
+      const code = _pendingInventoryTagScan;
+      _pendingInventoryTagScan = null;
+
+      const idx = _inventory.findIndex(it => it.code === code);
+      if (idx === -1) {
+        showToast('That QR tag isn\'t recognized on this account.', 'error');
+        return;
+      }
+      switchTab('account');
+      switchAccountTab('inventory');
+      setTimeout(() => openInventoryModal(idx), 300);
     }
 
     async function addLocation() {
