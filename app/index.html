@@ -29,6 +29,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+   <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
   <style>
     body {
@@ -871,6 +872,10 @@
                 <i class="ti ti-settings text-lg"></i>
                 <span>Management</span>
               </button>
+              <button onclick="switchAccountTab('inventory')" class="account-sidebar-item" data-tab="inventory">
+                <i class="ti ti-package text-lg"></i>
+                <span>Inventory</span>
+              </button>
               <button onclick="switchAccountTab('devices')" class="account-sidebar-item" data-tab="devices">
   <i class="ti ti-devices text-lg"></i>
   <span>Devices</span>
@@ -1542,6 +1547,110 @@
           </div>
         </details>
       </div>
+    </div>
+  </div>
+</div>
+
+<div id="account-inventory" class="account-content-section">
+  <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 space-y-4">
+    <div class="flex items-center justify-between flex-wrap gap-3">
+      <div>
+        <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="ti ti-package text-[#c9a96e]"></i> Inventory &amp; Equipment</h3>
+        <p class="text-xs text-neutral-500 mt-1">Keep track of your gear — cameras, cards, laptops, anything with a serial number.</p>
+      </div>
+      <div class="flex items-center gap-2">
+        <button onclick="openQrSheetModal()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-qrcode"></i> Print QR Sheet</button>
+        <button onclick="openInventoryModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-3 py-2 rounded-lg text-xs font-bold transition"><i class="ti ti-plus"></i> Add Equipment</button>
+      </div>
+    </div>
+    <div id="inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
+    <div id="inventory-empty" class="hidden text-center py-10 text-neutral-600 text-xs">
+      <i class="ti ti-package text-3xl mb-2 block"></i>
+      No equipment added yet. Tap "Add Equipment" to get started.
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT EQUIPMENT MODAL -->
+<div id="inventory-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'inventory-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 max-h-[88vh] flex flex-col">
+    <div class="p-5 border-b border-neutral-900 flex items-start gap-3">
+      <div class="w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0 bg-[#c9a96e]/10 border border-[#c9a96e]/30 text-[#c9a96e]"><i class="ti ti-package text-lg"></i></div>
+      <div class="flex-1 min-w-0">
+        <h4 id="inv-modal-title" class="text-white font-bold text-sm leading-snug">Add Equipment</h4>
+        <p class="text-[11px] text-neutral-500 mt-0.5">Give it a name, an emoji, and a serial number</p>
+      </div>
+      <button onclick="closeInventoryModal()" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div class="p-5 space-y-4 overflow-y-auto text-sm text-neutral-300">
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Icon</label>
+        <div class="flex items-center gap-2">
+          <input type="text" id="inv-emoji" maxlength="4" placeholder="📷" class="w-16 text-center text-2xl bg-neutral-950 border border-neutral-900 rounded-lg px-2 py-2 text-white outline-none focus:border-[#c9a96e] transition"/>
+          <div id="inv-emoji-presets" class="flex flex-wrap gap-1.5 flex-1"></div>
+        </div>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name</label>
+        <input type="text" id="inv-name" placeholder="e.g. Canon 5D Mark IV" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Serial / Card Number</label>
+        <input type="text" id="inv-serial" placeholder="e.g. SN-2381029 or Card #4" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Category <span class="normal-case text-neutral-600">(optional)</span></label>
+        <input type="text" id="inv-category" placeholder="e.g. Camera, Laptop, Monitor, Lens, Card Reader" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Notes <span class="normal-case text-neutral-600">(optional)</span></label>
+        <textarea id="inv-notes" rows="2" placeholder="Condition, accessories, purchase date, anything else" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition resize-none"></textarea>
+      </div>
+
+    </div>
+    <div class="p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
+      <button onclick="closeInventoryModal()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Cancel</button>
+      <button id="inv-save-btn" onclick="saveInventoryItem()" class="flex-1 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition">Add Equipment</button>
+    </div>
+  </div>
+</div>
+
+<!-- SINGLE ITEM QR MODAL -->
+<div id="item-qr-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'item-qr-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col mx-auto">
+    <div class="p-5 border-b border-neutral-900 flex items-center justify-between">
+      <h4 class="text-white font-bold text-sm">Equipment QR Code</h4>
+      <button onclick="closeModal('item-qr-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div class="p-6 flex flex-col items-center gap-3">
+      <div id="item-qr-canvas-wrap" class="bg-white p-3 rounded-lg"></div>
+      <p id="item-qr-name" class="text-sm font-bold text-white text-center"></p>
+      <p id="item-qr-serial" class="text-[11px] text-neutral-500 text-center"></p>
+    </div>
+    <div class="p-4 border-t border-neutral-900">
+      <button onclick="printSingleItemQr()" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print Label</button>
+    </div>
+  </div>
+</div>
+
+<!-- QR SHEET (PRINT ALL) MODAL -->
+<div id="qr-sheet-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'qr-sheet-modal-backdrop')">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-2xl overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 max-h-[88vh] flex flex-col">
+    <div class="p-5 border-b border-neutral-900 flex items-center justify-between flex-shrink-0">
+      <div>
+        <h4 class="text-white font-bold text-sm">QR Sheet</h4>
+        <p class="text-[11px] text-neutral-500 mt-0.5">One label per item — print, cut, and stick on your gear</p>
+      </div>
+      <button onclick="closeModal('qr-sheet-modal-backdrop')" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div id="qr-sheet-grid" class="p-5 overflow-y-auto grid grid-cols-2 sm:grid-cols-3 gap-4 bg-neutral-950"></div>
+    <div class="p-4 border-t border-neutral-900 flex-shrink-0">
+      <button onclick="printQrSheet()" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print Full Sheet</button>
     </div>
   </div>
 </div>
@@ -2492,6 +2601,7 @@ setTimeout(() => {
 
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
+    let _inventory = []; // gear/equipment list — { id, emoji, name, serial, category, notes }
 
     // ==========================================
     // STUDIO COMPANY PROFILES
@@ -3325,6 +3435,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
     
     const eRow = configurations.find(r => r.key === 'events');
     if (eRow) _events = eRow.value;
+
+    const invRow = configurations.find(r => r.key === 'inventory');
+    if (invRow && Array.isArray(invRow.value)) _inventory = invRow.value;
     
     // ADD THIS NEW RULE
     const jtRow = configurations.find(r => r.key === 'job_types');
@@ -7584,6 +7697,218 @@ async function toggleBlockDate(dateStr) {
       showToast(isNew ? `${name} added.` : 'Company settings saved.', 'success');
     }
 
+    // ==========================================
+    // INVENTORY / EQUIPMENT
+    // ----------------------------------------
+    // A simple gear list — camera bodies, cards, laptops, anything with a
+    // serial number — plus optional printable QR labels so a physical
+    // sticker on the item can point back to what it is. Stored the same
+    // way as companies/locations: one row in "settings" under key
+    // "inventory", loaded/saved with the studio owner's own session.
+    // ==========================================
+    const INVENTORY_EMOJI_PRESETS = ['📷','🎥','💻','🖥️','🎤','🔋','💡','📀','🎧','🛠️','📦','🚁','💾','🔌','📱','🖨️'];
+    let _editingInventoryIndex = null;
+    let _qrModalIndex = null;
+
+    function renderInventoryList() {
+      const listEl = document.getElementById('inventory-list');
+      const emptyEl = document.getElementById('inventory-empty');
+      if (!listEl) return;
+
+      if (!_inventory.length) {
+        listEl.innerHTML = '';
+        if (emptyEl) emptyEl.classList.remove('hidden');
+        return;
+      }
+      if (emptyEl) emptyEl.classList.add('hidden');
+
+      listEl.innerHTML = _inventory.map((item, i) => `
+        <div class="flex items-center justify-between gap-3 bg-neutral-950/50 border border-neutral-900 rounded-xl p-3.5">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-11 h-11 rounded-lg bg-neutral-900 border border-neutral-800 flex items-center justify-center text-xl flex-shrink-0">${escapeHtml(item.emoji || '📦')}</div>
+            <div class="min-w-0">
+              <p class="text-sm font-bold text-white truncate">${escapeHtml(item.name || 'Untitled')}</p>
+              <p class="text-[11px] text-neutral-500 truncate">${item.category ? escapeHtml(item.category) + ' · ' : ''}${item.serial ? 'SN: ' + escapeHtml(item.serial) : 'No serial number'}</p>
+            </div>
+          </div>
+          <div class="flex items-center gap-1 flex-shrink-0">
+            <button onclick="showItemQr(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="View QR code"><i class="ti ti-qrcode text-sm"></i></button>
+            <button onclick="openInventoryModal(${i})" class="p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-800 transition" title="Edit"><i class="ti ti-pencil text-sm"></i></button>
+            <button onclick="deleteInventoryItem(${i})" class="p-2 text-neutral-500 hover:text-red-400 rounded-md hover:bg-red-950/30 transition" title="Delete"><i class="ti ti-trash text-sm"></i></button>
+          </div>
+        </div>
+      `).join('');
+    }
+
+    function openInventoryModal(i) {
+      const isNew = (i === undefined || i === null);
+      _editingInventoryIndex = isNew ? -1 : i;
+      const item = isNew ? { emoji: '', name: '', serial: '', category: '', notes: '' } : _inventory[i];
+
+      document.getElementById('inv-modal-title').textContent = isNew ? 'Add Equipment' : 'Edit Equipment';
+      document.getElementById('inv-save-btn').textContent = isNew ? 'Add Equipment' : 'Save Changes';
+      document.getElementById('inv-emoji').value = item.emoji || '';
+      document.getElementById('inv-name').value = item.name || '';
+      document.getElementById('inv-serial').value = item.serial || '';
+      document.getElementById('inv-category').value = item.category || '';
+      document.getElementById('inv-notes').value = item.notes || '';
+
+      const presetWrap = document.getElementById('inv-emoji-presets');
+      if (presetWrap && !presetWrap.dataset.built) {
+        presetWrap.innerHTML = INVENTORY_EMOJI_PRESETS.map(e =>
+          `<button type="button" onclick="document.getElementById('inv-emoji').value='${e}'" class="w-8 h-8 flex items-center justify-center bg-neutral-900 border border-neutral-800 rounded-lg text-base hover:border-[#c9a96e] transition">${e}</button>`
+        ).join('');
+        presetWrap.dataset.built = '1';
+      }
+
+      openModal('inventory-modal-backdrop');
+    }
+
+    function closeInventoryModal() {
+      closeModal('inventory-modal-backdrop');
+      _editingInventoryIndex = null;
+    }
+
+    async function saveInventoryItem() {
+      if (_editingInventoryIndex === null) return;
+      const name = document.getElementById('inv-name').value.trim();
+      if (!name) { showToast('Give this item a name first.', 'error'); return; }
+
+      const item = {
+        emoji: document.getElementById('inv-emoji').value.trim() || '📦',
+        name,
+        serial: document.getElementById('inv-serial').value.trim(),
+        category: document.getElementById('inv-category').value.trim(),
+        notes: document.getElementById('inv-notes').value.trim()
+      };
+
+      const isNew = _editingInventoryIndex === -1;
+      if (isNew) {
+        item.id = 'inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7);
+        _inventory.push(item);
+      } else {
+        item.id = _inventory[_editingInventoryIndex].id || ('inv_' + Date.now());
+        _inventory[_editingInventoryIndex] = item;
+      }
+
+      await saveSettingToDB('inventory', _inventory);
+      closeInventoryModal();
+      renderInventoryList();
+      showToast(isNew ? `${name} added to inventory.` : 'Equipment updated.', 'success');
+    }
+
+    async function deleteInventoryItem(i) {
+      const item = _inventory[i];
+      if (!item) return;
+      if (!confirm(`Remove "${item.name}" from inventory?`)) return;
+      _inventory.splice(i, 1);
+      await saveSettingToDB('inventory', _inventory);
+      renderInventoryList();
+    }
+
+    // Plain, human-readable text so scanning this QR is useful even
+    // without our app installed — not just an opaque internal id.
+    function buildQrPayload(item) {
+      const parts = [item.name || 'Equipment'];
+      if (item.category) parts.push(item.category);
+      if (item.serial) parts.push(`SN: ${item.serial}`);
+      parts.push('Sakkhi Inventory');
+      return parts.join(' — ');
+    }
+
+    function showItemQr(i) {
+      const item = _inventory[i];
+      if (!item) return;
+      _qrModalIndex = i;
+
+      const wrap = document.getElementById('item-qr-canvas-wrap');
+      wrap.innerHTML = '';
+      new QRCode(wrap, { text: buildQrPayload(item), width: 160, height: 160, correctLevel: QRCode.CorrectLevel.M });
+
+      document.getElementById('item-qr-name').textContent = `${item.emoji || '📦'} ${item.name}`;
+      document.getElementById('item-qr-serial').textContent = item.serial ? `SN: ${item.serial}` : 'No serial number on file';
+
+      openModal('item-qr-modal-backdrop');
+    }
+
+    function printSingleItemQr() {
+      if (_qrModalIndex === null) return;
+      const item = _inventory[_qrModalIndex];
+      if (item) printInventoryQrSheet([item]);
+    }
+
+    function openQrSheetModal() {
+      if (!_inventory.length) { showToast('Add some equipment first.', 'error'); return; }
+      const grid = document.getElementById('qr-sheet-grid');
+      grid.innerHTML = '';
+      _inventory.forEach(item => {
+        const card = document.createElement('div');
+        card.className = 'flex flex-col items-center gap-2 bg-white rounded-lg p-3';
+        const qrBox = document.createElement('div');
+        card.appendChild(qrBox);
+        const label = document.createElement('div');
+        label.className = 'text-black text-[11px] font-bold text-center leading-tight';
+        label.textContent = `${item.emoji || '📦'} ${item.name}`;
+        card.appendChild(label);
+        if (item.serial) {
+          const sub = document.createElement('div');
+          sub.className = 'text-black/60 text-[9px] text-center';
+          sub.textContent = `SN: ${item.serial}`;
+          card.appendChild(sub);
+        }
+        grid.appendChild(card);
+        new QRCode(qrBox, { text: buildQrPayload(item), width: 110, height: 110, correctLevel: QRCode.CorrectLevel.M });
+      });
+      openModal('qr-sheet-modal-backdrop');
+    }
+
+    function printQrSheet() {
+      printInventoryQrSheet(_inventory);
+    }
+
+    // Opens a clean, white, print-ready tab with one label per item — kept
+    // separate from the in-app (dark-themed) modal so printing doesn't
+    // inherit the app's dark styling or fixed-position layout.
+    function printInventoryQrSheet(items) {
+      if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
+      const win = window.open('', '_blank');
+      if (!win) { showToast('Please allow pop-ups to print the QR sheet.', 'error'); return; }
+
+      const cardsHtml = items.map(item => {
+        const box = document.createElement('div');
+        new QRCode(box, { text: buildQrPayload(item), width: 140, height: 140, correctLevel: QRCode.CorrectLevel.M });
+        const imgEl = box.querySelector('img') || box.querySelector('canvas');
+        const src = imgEl.tagName === 'CANVAS' ? imgEl.toDataURL('image/png') : imgEl.src;
+        return `
+          <div class="qr-card">
+            <img src="${src}" width="140" height="140" alt="QR" />
+            <div class="qr-label">${escapeHtml(item.emoji || '📦')} ${escapeHtml(item.name || '')}</div>
+            ${item.serial ? `<div class="qr-sub">SN: ${escapeHtml(item.serial)}</div>` : ''}
+          </div>
+        `;
+      }).join('');
+
+      win.document.write(`
+        <html>
+        <head>
+          <title>Equipment QR Sheet</title>
+          <style>
+            body { font-family: -apple-system, Helvetica, Arial, sans-serif; padding: 24px; margin: 0; }
+            .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+            .qr-card { text-align: center; border: 1px dashed #ccc; border-radius: 8px; padding: 12px 8px; break-inside: avoid; }
+            .qr-label { font-weight: bold; font-size: 12px; margin-top: 8px; color: #111; }
+            .qr-sub { font-size: 10px; color: #666; margin-top: 2px; }
+          </style>
+        </head>
+        <body>
+          <div class="grid">${cardsHtml}</div>
+          <script>window.onload = function() { window.print(); };<\/script>
+        </body>
+        </html>
+      `);
+      win.document.close();
+    }
+
     async function addLocation() {
       const el = document.getElementById('new-loc-input');
       const val = el.value.trim(); if (!val) return;
@@ -8466,6 +8791,10 @@ function updateAccountDisplay() {
 
       if (tab === 'activity') {
         renderActivityLog();
+      }
+
+      if (tab === 'inventory') {
+        renderInventoryList();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
