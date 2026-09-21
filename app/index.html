@@ -1559,6 +1559,7 @@
         <p class="text-xs text-neutral-500 mt-1">Keep track of your gear — cameras, cards, laptops, anything with a serial number.</p>
       </div>
       <div class="flex items-center gap-2">
+        <button onclick="openQrScanner('open')" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-scan"></i> Scan</button>
         <button onclick="openQrSheetModal()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-qrcode"></i> Print QR Sheet</button>
         <button onclick="openInventoryModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-3 py-2 rounded-lg text-xs font-bold transition"><i class="ti ti-plus"></i> Add Equipment</button>
       </div>
@@ -1596,7 +1597,10 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">QR Sticker Code <span class="normal-case text-neutral-600">(optional)</span></label>
-        <input type="text" id="inv-tag" list="inv-tag-list" maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-character code printed under the QR" oninput="checkInvTag()" onblur="this.value = parseTagCodeInput(this.value); checkInvTag()" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white tracking-widest font-semibold outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-normal read-only:cursor-not-allowed"/>
+        <div class="flex gap-2">
+          <input type="text" id="inv-tag" list="inv-tag-list" maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-character code printed under the QR" oninput="checkInvTag()" onblur="this.value = parseTagCodeInput(this.value); checkInvTag()" class="flex-1 min-w-0 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white tracking-widest font-semibold outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-normal read-only:cursor-not-allowed"/>
+          <button type="button" id="inv-scan-btn" onclick="openQrScanner('field')" class="flex items-center gap-1.5 px-3 rounded-lg bg-[#c9a96e]/10 border border-[#c9a96e]/40 hover:border-[#c9a96e] text-[#c9a96e] text-xs font-bold transition flex-shrink-0"><i class="ti ti-scan text-base"></i> Scan</button>
+        </div>
         <datalist id="inv-tag-list"></datalist>
         <p id="inv-tag-status" class="text-[11px]"></p>
       </div>
@@ -1680,6 +1684,40 @@
       <button onclick="backToQrSetup()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Back</button>
       <button onclick="printQrSheet()" class="flex-[2] bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print sheet</button>
     </div>
+  </div>
+</div>
+
+<!-- QR SCANNER MODAL -->
+<div id="qr-scan-modal-backdrop" class="fixed inset-0 bg-black/90 z-[70] flex items-end sm:items-center justify-center p-0 sm:p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="if (event.target === this) closeQrScanner()">
+  <div class="bg-[#0f0f0f] border border-neutral-900 rounded-t-2xl sm:rounded-2xl w-full max-w-md overflow-hidden shadow-2xl translate-y-full sm:translate-y-4 transition-transform duration-200 flex flex-col max-h-[96vh]">
+    <div class="p-4 border-b border-neutral-900 flex items-center justify-between gap-3 flex-shrink-0">
+      <div class="min-w-0">
+        <h4 class="text-white font-bold text-sm">Scan QR sticker</h4>
+        <p id="qr-scan-sub" class="text-[11px] text-neutral-500 mt-0.5"></p>
+      </div>
+      <button onclick="closeQrScanner()" aria-label="Close scanner" class="text-neutral-500 hover:text-white transition p-1"><i class="ti ti-x text-lg"></i></button>
+    </div>
+    <div class="relative bg-black w-full aspect-square max-h-[58vh] overflow-hidden flex-shrink-0">
+      <video id="qr-scan-video" class="absolute inset-0 w-full h-full object-cover" playsinline muted autoplay></video>
+      <div class="absolute inset-0 flex items-center justify-center pointer-events-none">
+        <div class="h-3/5 aspect-square rounded-2xl border-2 border-[#c9a96e]" style="box-shadow:0 0 0 999px rgba(0,0,0,.5)"></div>
+      </div>
+      <div id="qr-scan-fallback" class="hidden absolute inset-0 bg-[#0f0f0f] flex flex-col items-center justify-center gap-3 p-6 text-center">
+        <i class="ti ti-camera-off text-3xl text-neutral-500"></i>
+        <p id="qr-scan-fallback-msg" class="text-xs text-neutral-400 leading-relaxed max-w-xs"></p>
+        <div class="flex gap-2">
+          <button onclick="startQrCamera()" class="px-3 py-2 rounded-lg bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold transition">Try again</button>
+          <button onclick="document.getElementById('qr-scan-file').click()" class="px-3 py-2 rounded-lg bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold transition">Take a photo</button>
+        </div>
+      </div>
+    </div>
+    <p id="qr-scan-status" class="px-4 pt-3 text-xs text-center text-neutral-400 min-h-[2rem]" aria-live="polite"></p>
+    <div class="p-4 pt-1 flex items-center justify-center gap-2 flex-wrap flex-shrink-0">
+      <button id="qr-torch-btn" onclick="toggleQrTorch()" class="hidden flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"></button>
+      <button onclick="document.getElementById('qr-scan-file').click()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-photo"></i> Take a photo</button>
+      <button onclick="copyQrScanLink()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-link"></i> Copy scan link</button>
+    </div>
+    <input type="file" id="qr-scan-file" accept="image/*" capture="environment" class="hidden" onchange="scanQrFromFile(this)">
   </div>
 </div>
 
@@ -2045,11 +2083,21 @@
     // finished loading _inventory) jumps straight to that tag so it can be
     // viewed or assigned to a piece of gear.
     let _pendingInventoryTagScan = null;
+    let _pendingScanLaunch = false;
     (function captureInventoryTagFromUrl() {
       const params = new URLSearchParams(window.location.search);
-      const tagCode = params.get('tag');
-      if (tagCode) {
-        _pendingInventoryTagScan = tagCode;
+      let tagCode = params.get('tag');
+      let wantScan = params.get('scan') === '1';
+      // Remember it for this tab in case the page reloads (e.g. via sign-in) before the app finishes loading.
+      try {
+        if (tagCode) sessionStorage.setItem('sakkhi_pending_tag', tagCode);
+        else tagCode = sessionStorage.getItem('sakkhi_pending_tag');
+        if (wantScan) sessionStorage.setItem('sakkhi_pending_scan', '1');
+        else wantScan = sessionStorage.getItem('sakkhi_pending_scan') === '1';
+      } catch (e) {}
+      if (tagCode) _pendingInventoryTagScan = tagCode;
+      if (wantScan) _pendingScanLaunch = true;
+      if (params.has('tag') || params.has('scan')) {
         const cleanUrl = window.location.pathname + window.location.hash;
         window.history.replaceState(null, '', cleanUrl);
       }
@@ -7912,6 +7960,7 @@ async function toggleBlockDate(dateStr) {
       tagEl.value = isNew ? '' : (item.code || '');
       tagEl.readOnly = !isNew;
       tagEl.classList.toggle('opacity-60', !isNew);
+      document.getElementById('inv-scan-btn').classList.toggle('hidden', !isNew);
       document.getElementById('inv-tag-status').innerHTML = '';
       document.getElementById('inv-tag-list').innerHTML = _inventory
         .filter(t => !t.assigned && t.code)
@@ -8192,11 +8241,256 @@ async function toggleBlockDate(dateStr) {
       win.document.close();
     }
 
+    // ------------------------------------------------------------------
+    // In-app QR scanner. Opens the device camera (rear camera on phones,
+    // webcam on a computer), reads a sticker's QR, and either fills in the
+    // "QR Sticker Code" field ('field' mode, opened from Add Equipment) or
+    // jumps straight to that item / assign screen ('open' mode, opened from
+    // the Scan button). Uses the browser's built-in BarcodeDetector where it
+    // exists (Chrome/Android) and falls back to the jsQR library everywhere
+    // else (iPhone Safari, Firefox, desktop). Needs https for camera access.
+    // ------------------------------------------------------------------
+    const JSQR_SRC = 'https://cdnjs.cloudflare.com/ajax/libs/jsQR/1.4.0/jsQR.min.js';
+    const _scan = { mode: 'open', stream: null, timer: null, busy: false, native: null, ready: false, canvas: null, torchOn: false, msgTimer: null };
+
+    function qrScannerIsOpen() {
+      const m = document.getElementById('qr-scan-modal-backdrop');
+      return !!m && m.classList.contains('opacity-100');
+    }
+
+    // Pulls the sticker code out of whatever the QR contained: our link
+    // (…?tag=U6Q5B7) or a bare 6-character code. Anything else is rejected.
+    function extractScannedCode(text) {
+      const s = String(text || '').trim();
+      const m = s.match(/[?&]tag=([A-Za-z0-9]+)/);
+      if (m) return m[1].toUpperCase();
+      if (/^[A-Za-z0-9]{6}$/.test(s)) return s.toUpperCase();
+      return null;
+    }
+
+    function setScanStatus(msg, type) {
+      const el = document.getElementById('qr-scan-status');
+      if (!el) return;
+      el.textContent = msg || '';
+      el.className = 'px-4 pt-3 text-xs text-center min-h-[2rem] ' + (type === 'error' ? 'text-red-400' : type === 'ok' ? 'text-emerald-400' : 'text-neutral-400');
+    }
+
+    function scanHint() {
+      return _scan.mode === 'field' ? 'Point the camera at the QR sticker' : 'Point the camera at a QR sticker';
+    }
+
+    // Shows a problem for a moment, then goes back to the normal hint.
+    function scanFeedback(msg) {
+      if (document.getElementById('qr-scan-status').textContent === msg) return;
+      setScanStatus(msg, 'error');
+      clearTimeout(_scan.msgTimer);
+      _scan.msgTimer = setTimeout(() => { if (qrScannerIsOpen() && _scan.stream) setScanStatus(scanHint()); }, 3000);
+    }
+
+    function showScanFallback(msg) {
+      document.getElementById('qr-scan-fallback-msg').textContent = msg;
+      document.getElementById('qr-scan-fallback').classList.remove('hidden');
+      setScanStatus('');
+    }
+
+    function loadJsQr() {
+      if (window.jsQR) return Promise.resolve();
+      if (window._jsQrLoading) return window._jsQrLoading;
+      window._jsQrLoading = new Promise((resolve, reject) => {
+        const s = document.createElement('script');
+        s.src = JSQR_SRC;
+        s.onload = () => resolve();
+        s.onerror = () => { window._jsQrLoading = null; reject(new Error('jsQR failed to load')); };
+        document.head.appendChild(s);
+      });
+      return window._jsQrLoading;
+    }
+
+    async function ensureQrDecoder() {
+      if (_scan.ready) return;
+      if ('BarcodeDetector' in window) {
+        try {
+          const formats = await window.BarcodeDetector.getSupportedFormats();
+          if (formats.includes('qr_code')) { _scan.native = new window.BarcodeDetector({ formats: ['qr_code'] }); _scan.ready = true; return; }
+        } catch (e) { /* fall through to jsQR */ }
+      }
+      await loadJsQr();
+      _scan.ready = true;
+    }
+
+    // Returns the text of the first QR found in a video frame / image, or null.
+    async function qrDecode(source, srcW, srcH, maxW) {
+      if (_scan.native) {
+        const found = await _scan.native.detect(source);
+        return found.length ? found[0].rawValue : null;
+      }
+      const k = Math.min(1, maxW / srcW);
+      const w = Math.max(1, Math.round(srcW * k)), h = Math.max(1, Math.round(srcH * k));
+      const c = _scan.canvas || (_scan.canvas = document.createElement('canvas'));
+      c.width = w; c.height = h;
+      const ctx = c.getContext('2d', { willReadFrequently: true });
+      ctx.drawImage(source, 0, 0, w, h);
+      const res = window.jsQR(ctx.getImageData(0, 0, w, h).data, w, h, { inversionAttempts: 'attemptBoth' });
+      return res ? res.data : null;
+    }
+
+    function stopQrCamera() {
+      clearInterval(_scan.timer); _scan.timer = null;
+      if (_scan.stream) { _scan.stream.getTracks().forEach(t => t.stop()); _scan.stream = null; }
+      const v = document.getElementById('qr-scan-video');
+      if (v) { v.pause(); v.srcObject = null; }
+      _scan.torchOn = false; _scan.busy = false;
+    }
+
+    async function startQrCamera() {
+      stopQrCamera();
+      document.getElementById('qr-scan-fallback').classList.add('hidden');
+      document.getElementById('qr-torch-btn').classList.add('hidden');
+      if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+        showScanFallback('This browser can\'t open the camera here (it needs a secure https page). Take a photo of the sticker instead.');
+        return;
+      }
+      setScanStatus('Starting camera…');
+      try {
+        const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+        if (!qrScannerIsOpen()) { stream.getTracks().forEach(t => t.stop()); return; } // closed while the permission prompt was up
+        _scan.stream = stream;
+        const video = document.getElementById('qr-scan-video');
+        video.srcObject = stream;
+        await video.play();
+
+        const track = stream.getVideoTracks()[0];
+        const caps = track && track.getCapabilities ? track.getCapabilities() : {};
+        document.getElementById('qr-torch-btn').classList.toggle('hidden', !caps.torch);
+        updateTorchButton();
+
+        await ensureQrDecoder();
+        setScanStatus(scanHint());
+        _scan.timer = setInterval(scanQrFrame, 150);
+      } catch (e) {
+        stopQrCamera();
+        if (e && (e.name === 'NotAllowedError' || e.name === 'SecurityError')) showScanFallback('Camera access is blocked. Allow it for this site in your browser settings, then tap Try again.');
+        else if (e && e.name === 'NotFoundError') showScanFallback('No camera found on this device. Take a photo of the sticker instead.');
+        else if (e && /jsQR/.test(e.message || '')) showScanFallback('The scanner couldn\'t load. Check your connection and try again.');
+        else showScanFallback('Couldn\'t start the camera. Close other apps using it and try again, or take a photo instead.');
+      }
+    }
+
+    async function scanQrFrame() {
+      if (_scan.busy || !_scan.stream) return;
+      const v = document.getElementById('qr-scan-video');
+      if (!v.videoWidth || v.readyState < 2) return;
+      _scan.busy = true;
+      try {
+        const raw = await qrDecode(v, v.videoWidth, v.videoHeight, 1000);
+        if (raw) handleScannedText(raw);
+      } catch (e) { /* a bad frame is fine — try the next one */ }
+      finally { _scan.busy = false; }
+    }
+
+    // Returns true when the scan was accepted (scanner closes).
+    function handleScannedText(raw) {
+      const code = extractScannedCode(raw);
+      if (!code) { scanFeedback('That QR isn\'t a Sakkhi sticker.'); return false; }
+      const idx = _inventory.findIndex(t => t.code === code);
+      if (idx === -1) { scanFeedback(`Sticker ${code} isn't on this account.`); return false; }
+      const item = _inventory[idx];
+
+      if (_scan.mode === 'field') {
+        if (item.assigned) { scanFeedback(`${code} is already assigned to ${item.name || 'another item'}. Try another sticker.`); return false; }
+        if (navigator.vibrate) navigator.vibrate(60);
+        closeQrScanner();
+        const el = document.getElementById('inv-tag');
+        if (el) { el.value = code; checkInvTag(); }
+        showToast(`Sticker ${code} scanned.`, 'success');
+        return true;
+      }
+
+      if (navigator.vibrate) navigator.vibrate(60);
+      closeQrScanner();
+      openInventoryModal(idx); // blank sticker -> assign screen, assigned -> edit screen
+      return true;
+    }
+
+    async function scanQrFromFile(input) {
+      const file = input.files && input.files[0];
+      input.value = '';
+      if (!file) return;
+      setScanStatus('Reading photo…');
+      try {
+        await ensureQrDecoder();
+        const bmp = await createImageBitmap(file);
+        const raw = await qrDecode(bmp, bmp.width, bmp.height, 1800);
+        if (bmp.close) bmp.close();
+        if (raw) { if (!handleScannedText(raw)) return; }
+        else scanFeedback('No QR code found in that photo. Move closer and try again.');
+      } catch (e) {
+        scanFeedback('Couldn\'t read that photo. Try again.');
+      }
+    }
+
+    function updateTorchButton() {
+      const btn = document.getElementById('qr-torch-btn');
+      if (!btn) return;
+      btn.innerHTML = `<i class="ti ${_scan.torchOn ? 'ti-bulb-off' : 'ti-bulb'}"></i> ${_scan.torchOn ? 'Light off' : 'Light on'}`;
+    }
+
+    async function toggleQrTorch() {
+      const track = _scan.stream && _scan.stream.getVideoTracks()[0];
+      if (!track) return;
+      try {
+        await track.applyConstraints({ advanced: [{ torch: !_scan.torchOn }] });
+        _scan.torchOn = !_scan.torchOn;
+      } catch (e) { showToast('This camera has no light.', 'error'); }
+      updateTorchButton();
+    }
+
+    async function openQrScanner(mode) {
+      _scan.mode = mode === 'field' ? 'field' : 'open';
+      document.getElementById('qr-scan-sub').textContent = _scan.mode === 'field'
+        ? 'Scan the sticker to fill in its code.'
+        : 'Scan a sticker to assign it, or open the item it belongs to.';
+      setScanStatus('Starting camera…');
+      document.getElementById('qr-scan-fallback').classList.add('hidden');
+      openModal('qr-scan-modal-backdrop');
+      await startQrCamera();
+    }
+
+    function closeQrScanner() {
+      stopQrCamera();
+      clearTimeout(_scan.msgTimer);
+      closeModal('qr-scan-modal-backdrop');
+      // closeModal unlocks page scroll — keep it locked if Add Equipment is still open underneath.
+      const inv = document.getElementById('inventory-modal-backdrop');
+      if (inv && inv.classList.contains('opacity-100')) document.body.style.overflow = 'hidden';
+    }
+
+    // A link that opens the app straight into the scanner — handy to
+    // send to a phone. (Needs the person to be signed in on that device.)
+    async function copyQrScanLink() {
+      const url = `${window.location.origin}${window.location.pathname}?scan=1`;
+      try {
+        await navigator.clipboard.writeText(url);
+        showToast('Scan link copied. Open it on your phone to scan.', 'success');
+      } catch (e) {
+        window.prompt('Copy this link and open it on your phone:', url);
+      }
+    }
+
     // Landed here from scanning a printed sticker (?tag=<code> on the URL).
     // Jumps straight to Account > Inventory and opens that exact item —
     // either to assign it (blank tag) or just view/edit it (already assigned).
     function handlePendingInventoryTagScan() {
+      if (_pendingScanLaunch) {
+        _pendingScanLaunch = false;
+        try { sessionStorage.removeItem('sakkhi_pending_scan'); } catch (e) {}
+        switchTab('account');
+        switchAccountTab('inventory');
+        setTimeout(() => openQrScanner('open'), 300);
+        return;
+      }
       if (!_pendingInventoryTagScan) return;
+      try { sessionStorage.removeItem('sakkhi_pending_tag'); } catch (e) {}
       const code = _pendingInventoryTagScan;
       _pendingInventoryTagScan = null;
 
