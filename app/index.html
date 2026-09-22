@@ -7927,11 +7927,11 @@ async function toggleBlockDate(dateStr) {
     // camera bodies and lenses without covering anything else.
     const TAG_SIZES = {
       '10':      { label: '1 cm',          s: 10, side: false, note: 'Smallest — memory cards, cables, small accessories.' },
-      '15':      { label: '1.5 cm',        s: 15, side: false, note: 'Recommended — about the size of the fn key on a MacBook. QR on top, code underneath.' },
+      '15':      { label: '1.5 cm',        s: 15, side: false, note: 'Recommended — about the size of the fn key on a MacBook. QR on top, code underneath.', recommended: true },
       '18':      { label: '1.8 cm',        s: 18, side: false, note: 'A bit bigger than the fn key — for scanning from a little further away.' },
       '25':      { label: '2.5 cm',        s: 25, side: false, note: 'Largest square — laptop lids, cases, larger gear.' },
       'side':    { label: '2 × 1 cm',      s: 10, side: true,  note: 'Compact and wide, for a narrow strip of space.' },
-      'fnwide':  { label: '3 × 1.8 cm',    s: 15, side: true,  note: 'Landscape — about two fn keys wide. QR beside the code — lenses, laptops, tripod legs.' },
+      'fnwide':  { label: '3 × 1.8 cm',    s: 15, side: true,  note: 'Recommended — landscape, about two fn keys wide. QR beside the code — lenses, laptops, tripod legs.', recommended: true },
       'wide':    { label: '3.4 × 2 cm',    s: 17, side: true,  note: 'A bigger wide label — lenses, laptops, tripod legs.' },
       'custom':  { label: 'Custom',        s: 15, side: false, note: 'Set your own QR size below.' }
     };
@@ -7953,13 +7953,39 @@ async function toggleBlockDate(dateStr) {
     let _pendingTagBatch = null;
     let _qrCountTouched = false;
 
-    function generateTagCode() {
+    // A code only being unique within THIS account's own inventory isn't
+    // enough — inventory_tag_public (the "found this gear?" page, and the
+    // scanner) looks a code up across every account, since a stranger's
+    // camera has no idea who owns the sticker. So before a fresh code is
+    // saved, we also ask that same public endpoint whether anyone, on any
+    // account, already has it — and pick a new one if so. This is the same
+    // check a stranger's scan would do, just run ahead of time.
+    function randomTagCode(len) {
       const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I — easy to read off a small sticker
-      let code;
-      do {
-        code = Array.from({ length: 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
-      } while (_inventory.some(it => it.code === code));
-      return code;
+      return Array.from({ length: len || 6 }, () => chars[Math.floor(Math.random() * chars.length)]).join('');
+    }
+
+    async function generateTagCode() {
+      const MAX_ATTEMPTS = 8;
+      for (let attempt = 0; attempt < MAX_ATTEMPTS; attempt++) {
+        // A longer code on later attempts guarantees this loop terminates
+        // even in the — astronomically unlikely — event of repeated clashes.
+        const code = randomTagCode(attempt < 5 ? 6 : 8);
+        if (_inventory.some(it => it.code === code)) continue; // taken on this account
+        try {
+          const r = await remoteRpc('inventory_tag_public', { p_code: code });
+          if (r && r.found) continue; // taken on some other account — try again
+        } catch (e) {
+          // Couldn't reach the server to check. Rather than block printing
+          // over a network hiccup, accept the code — it's already unique
+          // within this account, which is the same guarantee the old code
+          // gave. Logged so real outages are still visible.
+          console.warn('Global tag-code uniqueness check failed, proceeding on local check only:', e);
+        }
+        return code;
+      }
+      // Never realistically reached — 8-char codes leave ~1 trillion options.
+      return randomTagCode(8);
     }
 
     function inventoryIconName(item) {
@@ -8115,7 +8141,7 @@ async function toggleBlockDate(dateStr) {
 
       const item = {
         id: existing?.id || ('inv_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7)),
-        code: existing?.code || generateTagCode(),
+        code: existing?.code || await generateTagCode(),
         assigned: true,
         icon: _invSelectedIcon,
         name,
@@ -8308,7 +8334,11 @@ async function toggleBlockDate(dateStr) {
       wrap.innerHTML = Object.entries(TAG_SIZES).map(([k, v]) => {
         const on = k === _tagSizeKey;
         const label = k === 'custom' && on ? `Custom (${(TAG_SIZES.custom.s / 10).toFixed(1)} cm)` : v.label;
-        return `<button type="button" onclick="setQrSize('${k}')" aria-pressed="${on}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}">${label}</button>`;
+        // A small gold dot marks our two recommended sizes (the fn-key
+        // square and its two-fn-key-wide landscape twin) so they stand out
+        // from the rest of the row at a glance, without adding more text.
+        const badge = v.recommended ? `<span class="absolute -top-1 -right-1 w-2.5 h-2.5 rounded-full bg-[#c9a96e] ring-2 ring-neutral-950" title="Recommended size"></span>` : '';
+        return `<button type="button" onclick="setQrSize('${k}')" aria-pressed="${on}" class="relative px-3 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}">${badge}${label}</button>`;
       }).join('');
       renderQrCustomRow();
       const note = document.getElementById('qr-size-note');
@@ -8336,6 +8366,14 @@ async function toggleBlockDate(dateStr) {
 
     function unusedTags() { return _inventory.filter(t => !t.assigned); }
 
+    // A blank sticker that's printed but never stuck on anything and never
+    // assigned just sits in the database forever otherwise. This caps how
+    // many can pile up unassigned at once, so "print a sheet" can't be used
+    // to quietly accumulate an unbounded, ever-growing pile of dead codes.
+    // Reusing already-printed blanks (see createQrBatch) never counts against
+    // this — only making brand NEW ones once the account is at the cap does.
+    const MAX_UNUSED_TAGS = 200;
+
     // Tells the user how many stickers will be reused vs newly made, so
     // asking for a sheet never piles up extra unused stickers.
     function updateQrCountHint() {
@@ -8344,10 +8382,14 @@ async function toggleBlockDate(dateStr) {
       const want = parseInt(document.getElementById('qr-count').value, 10) || 0;
       const have = unusedTags().length;
       if (!want) { el.textContent = ''; return; }
-      const fresh = Math.max(0, want - have);
+      const wantFresh = Math.max(0, want - have);
+      const roomLeft = Math.max(0, MAX_UNUSED_TAGS - have);
+      const fresh = Math.min(wantFresh, roomLeft);
+      const capped = fresh < wantFresh;
       el.textContent = have
         ? `You have ${have} unused sticker${have > 1 ? 's' : ''} that aren't on any gear yet. They're printed first` + (fresh ? `, then ${fresh} new ${fresh > 1 ? 'ones are' : 'one is'} made.` : ', so nothing new is made.')
         : `${want} new sticker${want > 1 ? 's' : ''} will be made.`;
+      if (capped) el.textContent += ` Capped at ${MAX_UNUSED_TAGS} unassigned at once — assign or delete some to make more.`;
     }
 
     function updateQrHint() {
@@ -8411,13 +8453,30 @@ async function toggleBlockDate(dateStr) {
       if (!raw || raw < 1) { showToast('Enter how many stickers you need.', 'error'); return; }
       const count = Math.min(300, raw);
 
+      const have = unusedTags();
+      const reused = have.slice(0, count);
+      // Only codes that don't yet exist anywhere push the unused pile higher
+      // — reusing already-printed blanks never counts against the cap.
+      const wantFresh = Math.max(0, count - reused.length);
+      const roomLeft = Math.max(0, MAX_UNUSED_TAGS - have.length);
+      if (wantFresh > 0 && roomLeft <= 0) {
+        showToast(`You already have ${have.length} unassigned stickers. Assign or delete some before printing new ones.`, 'error');
+        return;
+      }
+      const freshCount = Math.min(wantFresh, roomLeft);
+      const cappedCount = reused.length + freshCount;
+      if (freshCount < wantFresh) {
+        showToast(`Only ${freshCount} new sticker${freshCount === 1 ? '' : 's'} made — that's the most this account can have unassigned at once (${MAX_UNUSED_TAGS}).`, 'error');
+      }
+
       const btn = document.getElementById('qr-create-btn');
       btn.disabled = true; btn.textContent = 'Preparing…';
-      const reused = unusedTags().slice(0, count);
       const fresh = [];
       try {
-        for (let n = reused.length; n < count; n++) {
-          const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: generateTagCode(), assigned: false, icon: '', name: '', serial: '', category: '', notes: '' };
+        for (let n = reused.length; n < cappedCount; n++) {
+          // Awaited one at a time (not in parallel) so two codes generated in
+          // the same batch can never race each other past the uniqueness check.
+          const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: await generateTagCode(), assigned: false, icon: '', name: '', serial: '', category: '', notes: '' };
           _inventory.push(tag);
           fresh.push(tag);
         }
