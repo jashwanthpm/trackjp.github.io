@@ -8176,12 +8176,14 @@ async function toggleBlockDate(dateStr) {
     }
 
     // Sticker look, modelled on the "hi." sticker sheet: a solid maroon tile,
-    // the QR in white, the "hi." mark and the serial number. "Plain" is the
-    // classic black-on-white fallback in case a scanner ever dislikes light-on-dark.
+    // the QR in white, the "hi." mark and the serial number. "Plain" is the same
+    // design in maroon-on-white, in case a scanner ever dislikes light-on-dark.
     const HI_MARK = {"w": 282, "h": 210, "d": "M32.5 208.3 C26.3 205.1 19.1 198.0 16.6 192.7 C13.1 185.3 13.1 184.9 11.5 63.5 C11.2 41.5 10.7 22.3 10.4 20.9 C9.8 17.8 6.6 14.6 2.7 13.1 C0.6 12.3 -0.1 11.4 0.2 9.7 C0.5 7.8 1.3 7.4 7.0 6.9 C22.4 5.4 27.7 5.8 33.3 9.0 C40.6 13.1 52.5 25.3 54.3 30.4 C55.1 32.7 56.3 36.3 57.0 38.5 C57.9 40.9 58.5 48.0 58.6 56.3 C59.0 74.2 59.6 75.9 64.8 73.1 C87.9 60.5 110.5 61.2 124.3 74.7 C136.6 86.8 136.7 87.2 137.6 156.0 C137.9 181.6 138.4 202.8 138.6 203.1 C138.8 203.4 138.4 204.5 137.7 205.4 C136.7 206.7 134.4 207.1 124.5 207.2 L112.5 207.4L106.5 203.6 C96.1 197.0 90.7 185.1 91.2 170.0 C91.6 159.7 89.7 92.4 89.0 91.5 C88.6 91.0 88.0 88.1 87.8 85.2 C87.1 77.8 83.9 74.6 77.2 74.6 C64.5 74.6 58.4 82.1 59.4 96.5 C59.7 100.9 60.2 127.7 60.6 156.0 L61.2 207.6L58.6 208.8 C54.5 210.6 36.2 210.3 32.5 208.3 Z M186.5 203.8 C177.4 200.5 173.0 196.2 168.3 186.0 C166.5 182.1 166.4 179.1 165.2 114.8 L164.5 76.1L161.6 73.1 C160.1 71.5 157.7 69.9 156.3 69.5 C152.5 68.6 153.3 62.8 157.5 61.9 C163.9 60.5 172.7 61.0 178.6 63.1 C181.8 64.2 185.6 65.4 186.8 65.7 C191.1 66.7 204.4 80.9 208.0 88.2 C211.2 94.8 211.2 95.3 212.1 113.7 C213.1 136.6 213.4 202.5 212.5 203.9 C211.7 205.3 190.5 205.2 186.5 203.8 Z M252.8 203.1 C243.9 202.0 235.1 191.2 234.9 181.2 C234.4 160.2 260.5 149.3 275.2 164.2 C284.8 174.1 284.1 188.1 273.4 198.1 C270.0 201.3 261.4 204.6 258.2 203.8 C257.8 203.8 255.4 203.4 252.8 203.1 Z M176.2 42.6 C162.4 36.3 159.6 15.5 171.2 4.3 C174.4 1.2 175.0 1.1 185.0 0.4 C197.0 -0.4 199.5 0.4 204.7 6.4 C213.9 16.8 211.7 31.4 199.5 40.5 C194.7 44.1 182.2 45.2 176.2 42.6 Z"};
     const TAG_STYLES = {
-      maroon: { label: 'Maroon', bg: '#601c27', fg: '#ffffff', text: '#f6ece8', mark: true,  outline: false },
-      plain:  { label: 'Plain',  bg: '#ffffff', fg: '#000000', text: '#000000', mark: false, outline: true  }
+      // tile = sticker colour, page = whole sheet behind them (so a slightly
+      // off cut never shows white paper), line = thin cut guide between stickers
+      maroon: { label: 'Maroon', bg: '#601c27', page: '#601c27', fg: '#ffffff', mark: '#ffffff', text: '#f6ece8', line: 'rgba(255,255,255,0.5)' },
+      plain:  { label: 'Plain',  bg: '#ffffff', page: '#ffffff', fg: '#2a0b12', mark: '#601c27', text: '#601c27', line: '#b9aaa0' }
     };
     let _tagStyleKey = 'maroon';
 
@@ -8191,27 +8193,28 @@ async function toggleBlockDate(dateStr) {
       return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${HI_MARK.w} ${HI_MARK.h}" width="${w}${u}" height="${height}${u}" style="display:block;flex:0 0 auto"><path d="${HI_MARK.d}" fill="${fill}" fill-rule="evenodd"/></svg>`;
     }
 
+    // Both styles share one layout: QR on top, the "hi." mark and serial
+    // number underneath (or beside it in the 2 x 1 cm size).
     function tagLayout(size) {
-      const st = TAG_STYLES[_tagStyleKey];
-      const s = size.s, px = 1.4, py = 1.3, gap = 1.0, cut = 0.3; // mm
+      const s = size.s, px = 1.4, py = 1.3, gap = 1.0; // mm
       const fs = size.side ? 2.3 : Math.max(1.8, s * 0.16);          // serial number text height
-      const markH = st.mark ? (size.side ? 2.8 : Math.max(2.4, s * 0.2)) : 0;
+      const markH = size.side ? 2.8 : Math.max(2.4, s * 0.2);
       const markW = markH * HI_MARK.w / HI_MARK.h;
       const codeW = 6 * fs * 0.82, codeH = fs * 1.15; // widest letters (M, W) are roughly 0.82 em
       let w, h, innerW, footH = 0;
       if (size.side) {
         const colW = Math.max(markW, codeW);
-        const colH = markH + (markH ? gap * 0.8 : 0) + codeH;
+        const colH = markH + gap * 0.8 + codeH;
         innerW = s + gap + colW;
         w = px * 2 + innerW;
         h = py * 2 + Math.max(s, colH);
       } else {
         footH = Math.max(markH, codeH);
-        innerW = Math.max(s, markW + (markH ? 1.2 : 0) + codeW);
+        innerW = Math.max(s, markW + 1.2 + codeW);
         w = px * 2 + innerW;
         h = py * 2 + s + gap + footH;
       }
-      return { s, px, py, gap, cut, fs, markH, footH, innerW: +innerW.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2), fw: +(w + cut).toFixed(2), fh: +(h + cut).toFixed(2) };
+      return { s, px, py, gap, fs, markH, footH, innerW: +innerW.toFixed(2), w: +w.toFixed(2), h: +h.toFixed(2), fw: +w.toFixed(2), fh: +h.toFixed(2) };
     }
 
     function tagsPerPage(size) {
@@ -8219,19 +8222,21 @@ async function toggleBlockDate(dateStr) {
       return Math.max(1, Math.floor(TAG_PAGE_W_MM / L.fw)) * Math.max(1, Math.floor(TAG_PAGE_H_MM / L.fh));
     }
 
-    function tagCellHtml(item, size) {
+    // forPrint: stickers sit edge to edge with a thin cut line between them
+    // (the sheet itself is coloured, see printTagSheet). On screen they get a
+    // small gap so each one reads as its own sticker.
+    function tagCellHtml(item, size, forPrint) {
       const L = tagLayout(size), st = TAG_STYLES[_tagStyleKey];
       const qr = qrSvgMarkup(buildQrPayload(item), L.s + 'mm', size.s <= 10 ? QRCode.CorrectLevel.L : QRCode.CorrectLevel.M, st.fg, 'transparent');
-      const mark = st.mark ? hiMarkSvg(L.markH, st.fg) : '';
+      const mark = hiMarkSvg(L.markH, st.mark);
       const code = `<span style="font:700 ${L.fs}mm/1 Arial,Helvetica,sans-serif;letter-spacing:.06em;color:${st.text};white-space:nowrap">${escapeHtml(item.code)}</span>`;
-      let inner;
-      if (size.side) {
-        inner = `${qr}<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${(L.gap * 0.8).toFixed(2)}mm">${mark}${code}</div>`;
-      } else {
-        inner = `${qr}<div style="display:flex;align-items:center;justify-content:${mark ? 'space-between' : 'center'};width:${L.innerW}mm;height:${L.footH}mm">${mark}${code}</div>`;
-      }
-      const outline = st.outline ? 'outline:0.1mm solid #999;outline-offset:-0.05mm;' : '';
-      return `<div style="box-sizing:border-box;flex:0 0 auto;width:${L.w}mm;height:${L.h}mm;margin:${L.cut / 2}mm;background:${st.bg};border-radius:${st.outline ? 0 : 0.6}mm;${outline}display:flex;flex-direction:${size.side ? 'row' : 'column'};align-items:center;justify-content:center;gap:${L.gap}mm;break-inside:avoid;page-break-inside:avoid">${inner}</div>`;
+      const inner = size.side
+        ? `${qr}<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;gap:${(L.gap * 0.8).toFixed(2)}mm">${mark}${code}</div>`
+        : `${qr}<div style="display:flex;align-items:center;justify-content:space-between;width:${L.innerW}mm;height:${L.footH}mm">${mark}${code}</div>`;
+      const frame = forPrint
+        ? `margin:0;border:0.1mm solid ${st.line};border-radius:0;`
+        : `margin:0.5mm;border-radius:0.6mm;` + (st.bg === '#ffffff' ? 'outline:0.1mm solid #d6d0cc;' : '');
+      return `<div style="box-sizing:border-box;flex:0 0 auto;width:${L.w}mm;height:${L.h}mm;${frame}background:${st.bg};display:flex;flex-direction:${size.side ? 'row' : 'column'};align-items:center;justify-content:center;gap:${L.gap}mm;break-inside:avoid;page-break-inside:avoid">${inner}</div>`;
     }
 
     function renderQrStyleChips() {
@@ -8372,8 +8377,11 @@ async function toggleBlockDate(dateStr) {
       printTagSheet(_pendingTagBatch);
     }
 
-    // Opens a clean white print tab: stickers packed edge to edge in a grid
-    // (thin cut lines between them), A4, no headings or extra text.
+    // Opens a clean print tab: stickers packed edge to edge in a grid with thin
+    // cut lines, A4, no headings. Every page is filled edge to edge with the
+    // sticker colour (maroon for Maroon, white for Plain), so cutting a little
+    // off the line never leaves a white edge. (The printer's own unprintable
+    // rim can still show a sliver of paper; "borderless" printing removes it.)
     function printTagSheet(items) {
       if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
       const win = window.open('', '_blank');
@@ -8381,8 +8389,12 @@ async function toggleBlockDate(dateStr) {
 
       const size = TAG_SIZES[_tagSizeKey] || TAG_SIZES['15'];
       const L = tagLayout(size);
-      const cols = Math.max(1, Math.floor(TAG_PAGE_W_MM / L.fw));
-      const cells = items.map(it => tagCellHtml(it, size)).join('');
+      const perPage = tagsPerPage(size);
+      const page = TAG_STYLES[_tagStyleKey].page;
+      let pagesHtml = '';
+      for (let i = 0; i < items.length; i += perPage) {
+        pagesHtml += `<div class="page">${items.slice(i, i + perPage).map(it => tagCellHtml(it, size, true)).join('')}</div>`;
+      }
 
       win.document.write(`<!doctype html>
         <html>
@@ -8390,15 +8402,16 @@ async function toggleBlockDate(dateStr) {
           <meta charset="utf-8">
           <title>QR stickers</title>
           <style>
-            @page { size: A4; margin: 8mm; }
+            @page { size: A4; margin: 0; }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            html, body { margin: 0; background: #fff; }
-            .sheet { display: flex; flex-wrap: wrap; align-content: flex-start; width: ${(cols * L.fw + 0.5).toFixed(2)}mm; }
-            @media screen { body { padding: 8mm; } }
+            html, body { margin: 0; background: ${page}; }
+            .page { box-sizing: border-box; width: 210mm; height: 296.6mm; padding: 8mm 8mm 0 8mm; display: flex; flex-wrap: wrap; align-content: flex-start; background: ${page}; overflow: hidden; }
+            .page + .page { break-before: page; page-break-before: always; }
+            @media screen { html, body { background: #3a3a3a; } body { padding: 8mm 0; } .page { margin: 0 auto 8mm; box-shadow: 0 2px 18px rgba(0,0,0,.5); } }
           </style>
         </head>
         <body>
-          <div class="sheet">${cells}</div>
+          ${pagesHtml}
           <script>window.onload = function () { setTimeout(function () { window.print(); }, 200); };<\/script>
         </body>
         </html>`);
@@ -9056,14 +9069,17 @@ async function toggleBlockDate(dateStr) {
         body.innerHTML = tpCard('<p class="text-sm font-semibold text-white mb-1">Sticker not recognised</p><p class="text-xs text-neutral-500 leading-relaxed">This QR code isn\'t registered with Sakkhi, or it has been removed.</p>');
         return;
       }
-      if (!r.assigned) {
-        body.innerHTML = tpCard('<p class="text-sm font-semibold text-white mb-1">Not linked to any gear yet</p><p class="text-xs text-neutral-500 leading-relaxed">This sticker is registered but hasn\'t been put on a piece of equipment yet.</p>');
-        return;
-      }
-
       const item = r.item || {};
       const o = r.owner;
-      const itemCard = tpCard(`
+      const itemCard = !r.assigned ? tpCard(`
+        <div class="flex items-center gap-4">
+          <div class="w-14 h-14 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center flex-shrink-0"><i class="ti ti-qrcode text-2xl text-[#c9a96e]"></i></div>
+          <div class="min-w-0">
+            <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">This sticker</p>
+            <p class="text-base font-bold text-white leading-snug">Sakkhi gear tag</p>
+            <p class="text-[11px] text-neutral-500 mt-0.5">Gear details haven't been added yet</p>
+          </div>
+        </div>`) : tpCard(`
         <div class="flex items-center gap-4">
           <div class="w-14 h-14 rounded-xl bg-neutral-900 border border-neutral-800 flex items-center justify-center flex-shrink-0"><i class="ti ti-${inventoryIconName(item)} text-2xl text-[#c9a96e]"></i></div>
           <div class="min-w-0">
@@ -9080,7 +9096,7 @@ async function toggleBlockDate(dateStr) {
       } else {
         const digits = tagPhoneDigits(o.phone);
         const ig = tagInstagramHandle(o.instagram);
-        const waText = encodeURIComponent(`Hi${o.name ? ' ' + o.name : ''}, I found your ${item.name || 'equipment'} (sticker ${code}).`);
+        const waText = encodeURIComponent(`Hi${o.name ? ' ' + o.name : ''}, I found your ${r.assigned ? (item.name || 'equipment') : 'gear'} (sticker ${code}).`);
         const btn = 'w-full flex items-center justify-center gap-2 py-3 rounded-lg text-sm font-bold transition';
         const buttons = [
           digits ? `<a href="tel:+${digits}" class="${btn} bg-[#c9a96e] hover:bg-[#dab77e] text-black"><i class="ti ti-phone text-lg"></i> Call ${escapeHtml(o.name || 'the owner')}</a>` : '',
@@ -9091,7 +9107,7 @@ async function toggleBlockDate(dateStr) {
           <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Belongs to</p>
           <p class="text-lg font-bold text-white mt-1 break-words">${escapeHtml(o.name || 'The owner')}</p>
           ${o.phone ? `<p class="text-xs text-neutral-400 mt-0.5">${escapeHtml(o.phone)}</p>` : ''}
-          <p class="text-xs text-neutral-500 leading-relaxed mt-3 mb-4">Found this, or know whose it is? Please get in touch. Thank you!</p>
+          <p class="text-xs text-neutral-500 leading-relaxed mt-3 mb-4">${r.assigned ? 'Found this, or know whose it is?' : 'Found something with this sticker on it?'} Please get in touch. Thank you!</p>
           <div class="flex flex-col gap-2">${buttons}</div>`);
       }
 
