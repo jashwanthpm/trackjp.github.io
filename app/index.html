@@ -1780,6 +1780,11 @@
         <div class="flex flex-col gap-1.5">
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sticker size</label>
           <div id="qr-size-chips" class="flex flex-wrap gap-1.5"></div>
+          <div id="qr-custom-row" class="hidden flex items-center gap-2 mt-0.5">
+            <input type="number" id="qr-custom-cm" min="0.8" max="5" step="0.1" oninput="applyCustomSize(this.value)" class="w-20 bg-neutral-950 border border-neutral-900 rounded-lg px-2.5 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+            <span class="text-[11px] text-neutral-500">cm QR size (0.8–5 cm)</span>
+          </div>
+          <p id="qr-size-note" class="text-[11px] text-neutral-500"></p>
           <p id="qr-size-hint" class="text-[11px] text-neutral-500"></p>
         </div>
         <div class="flex flex-col gap-1.5">
@@ -1803,7 +1808,8 @@
       </div>
     </div>
 
-    <div id="qr-footer-setup" class="p-4 border-t border-neutral-900 flex-shrink-0">
+    <div id="qr-footer-setup" class="p-4 border-t border-neutral-900 flex-shrink-0 flex flex-col gap-2">
+      <p class="text-[11px] text-neutral-500 leading-relaxed"><i class="ti ti-info-circle text-[#c9a96e]"></i> When the print dialog opens, set <b class="text-neutral-300">Scale to 100%</b> (or "Actual size") — "Fit to page" prints these smaller than the size shown here.</p>
       <button id="qr-create-btn" onclick="createQrBatch()" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] disabled:opacity-60 text-black text-xs font-bold py-2.5 rounded-lg transition">Make sheet</button>
     </div>
     <div id="qr-footer-preview" class="hidden p-4 border-t border-neutral-900 flex gap-2 flex-shrink-0">
@@ -7914,13 +7920,20 @@ async function toggleBlockDate(dateStr) {
     // Items saved before the icon picker existed carry an emoji — map it across.
     const LEGACY_EMOJI_ICONS = { '📷':'camera', '🎥':'video', '💻':'device-laptop', '🖥':'device-desktop', '🎤':'microphone', '🔋':'battery-charging', '💡':'bulb', '📀':'database', '🎧':'headphones', '🛠':'box', '📦':'box', '🚁':'drone', '💾':'database', '🔌':'plug', '📱':'device-mobile', '🖨':'box' };
 
-    // Sticker sizes (mm = the QR itself). "side" puts the code beside the QR
-    // instead of under it, giving a roughly 2 x 1 cm sticker.
+    // Sticker sizes (mm = the QR itself, not the whole label). "side" puts the
+    // code beside the QR instead of under it, for a wider, shorter sticker.
+    // For scale: a MacBook "fn" key is roughly 1.5 cm across, so that's the
+    // baseline size — big enough to scan at a glance, small enough to fit
+    // camera bodies and lenses without covering anything else.
     const TAG_SIZES = {
-      '10':   { label: '1 cm',     s: 10, side: false },
-      '15':   { label: '1.5 cm',   s: 15, side: false },
-      '20':   { label: '2 cm',     s: 20, side: false },
-      'side': { label: '2 × 1 cm', s: 10, side: true }
+      '10':      { label: '1 cm',          s: 10, side: false, note: 'Smallest — memory cards, cables, small accessories.' },
+      '15':      { label: '1.5 cm',        s: 15, side: false, note: 'Recommended — about the size of the fn key on a MacBook. QR on top, code underneath.' },
+      '18':      { label: '1.8 cm',        s: 18, side: false, note: 'A bit bigger than the fn key — for scanning from a little further away.' },
+      '25':      { label: '2.5 cm',        s: 25, side: false, note: 'Largest square — laptop lids, cases, larger gear.' },
+      'side':    { label: '2 × 1 cm',      s: 10, side: true,  note: 'Compact and wide, for a narrow strip of space.' },
+      'fnwide':  { label: '3 × 1.8 cm',    s: 15, side: true,  note: 'Landscape — about two fn keys wide. QR beside the code — lenses, laptops, tripod legs.' },
+      'wide':    { label: '3.4 × 2 cm',    s: 17, side: true,  note: 'A bigger wide label — lenses, laptops, tripod legs.' },
+      'custom':  { label: 'Custom',        s: 15, side: false, note: 'Set your own QR size below.' }
     };
     const A4_W_MM = 210, A4_H_MM = 297, TAG_PAGE_MARGIN_MM = 8;
     // Usable area inside the sheet's margin, for whichever way it's printing.
@@ -7936,7 +7949,7 @@ async function toggleBlockDate(dateStr) {
     let _editingInventoryIndex = null;
     let _qrModalIndex = null;
     let _invSelectedIcon = INVENTORY_DEFAULT_ICON;
-    let _tagSizeKey = '15';
+    let _tagSizeKey = '15'; // recommended default — fn-key size, see TAG_SIZES note above
     let _pendingTagBatch = null;
     let _qrCountTouched = false;
 
@@ -8294,8 +8307,31 @@ async function toggleBlockDate(dateStr) {
       if (!wrap) return;
       wrap.innerHTML = Object.entries(TAG_SIZES).map(([k, v]) => {
         const on = k === _tagSizeKey;
-        return `<button type="button" onclick="setQrSize('${k}')" aria-pressed="${on}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}">${v.label}</button>`;
+        const label = k === 'custom' && on ? `Custom (${(TAG_SIZES.custom.s / 10).toFixed(1)} cm)` : v.label;
+        return `<button type="button" onclick="setQrSize('${k}')" aria-pressed="${on}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}">${label}</button>`;
       }).join('');
+      renderQrCustomRow();
+      const note = document.getElementById('qr-size-note');
+      if (note) note.textContent = TAG_SIZES[_tagSizeKey].note || '';
+    }
+
+    function renderQrCustomRow() {
+      const row = document.getElementById('qr-custom-row');
+      if (!row) return;
+      row.classList.toggle('hidden', _tagSizeKey !== 'custom');
+      const input = document.getElementById('qr-custom-cm');
+      if (input && document.activeElement !== input) input.value = (TAG_SIZES.custom.s / 10).toFixed(1);
+    }
+
+    function applyCustomSize(cm) {
+      const v = Math.max(0.8, Math.min(5, parseFloat(cm) || 1.5));
+      TAG_SIZES.custom.s = Math.round(v * 10);
+      if (_tagSizeKey === 'custom') {
+        renderQrSizeChips();
+        const cap = updateQrHint();
+        if (_pendingTagBatch) renderQrPreview();
+        else if (!_qrCountTouched) { document.getElementById('qr-count').value = cap; updateQrCountHint(); }
+      }
     }
 
     function unusedTags() { return _inventory.filter(t => !t.assigned); }
