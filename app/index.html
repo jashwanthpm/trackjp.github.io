@@ -1798,9 +1798,14 @@
         <div id="qr-setup-fields" class="flex flex-col gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">How many stickers</label>
-            <input type="number" id="qr-count" min="1" max="300" inputmode="numeric" oninput="_qrCountTouched = true; updateQrCountHint()" class="w-32 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+            <div class="flex items-center gap-2">
+              <input type="number" id="qr-count" min="1" max="300" inputmode="numeric" oninput="_qrCountTouched = true; updateQrCountHint()" class="w-32 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+              <button type="button" onclick="addQrGroup()" class="px-3 py-2 rounded-lg text-xs font-bold border border-neutral-800 text-neutral-300 hover:text-white hover:border-neutral-700 transition flex items-center gap-1.5 flex-shrink-0"><i class="ti ti-plus"></i> Add this size</button>
+            </div>
           </div>
           <p id="qr-count-hint" class="text-[11px] text-neutral-500 leading-relaxed -mt-1"></p>
+          <p class="text-[11px] text-neutral-600 leading-relaxed -mt-1">Need more than one size on the same sheet — say 100 in a portrait size and 100 in a landscape one? Pick a size above, set the count, tap <b class="text-neutral-400">Add this size</b>, then repeat for the next size before making the sheet.</p>
+          <div id="qr-groups-list" class="hidden flex flex-col gap-1.5"></div>
         </div>
       </div>
       <div id="qr-preview-wrap" class="hidden p-5 bg-neutral-950">
@@ -8374,6 +8379,52 @@ async function toggleBlockDate(dateStr) {
     // this — only making brand NEW ones once the account is at the cap does.
     const MAX_UNUSED_TAGS = 200;
 
+    // Queued (size, count) groups for a single combined sheet — lets someone
+    // ask for, say, 100 stickers at one size AND 100 at another, and get them
+    // all back as one print job instead of running "Print QR Sheet" twice.
+    // Whatever is still sitting in the count field when "Make sheet" is
+    // pressed is folded in automatically as one more group, so the simple
+    // one-size case still works exactly as before with no extra click.
+    let _qrGroups = [];
+
+    function qrGroupLabel(key) {
+      const v = TAG_SIZES[key];
+      return key === 'custom' ? `Custom (${(TAG_SIZES.custom.s / 10).toFixed(1)} cm)` : v.label;
+    }
+
+    function renderQrGroupsList() {
+      const wrap = document.getElementById('qr-groups-list');
+      if (!wrap) return;
+      wrap.classList.toggle('hidden', _qrGroups.length === 0);
+      const rows = _qrGroups.map((g, i) => `
+        <div class="flex items-center justify-between gap-2 bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5">
+          <span class="text-xs text-neutral-300"><b class="text-white">${g.count}</b> × ${escapeHtml(qrGroupLabel(g.key))}</span>
+          <button type="button" onclick="removeQrGroup(${i})" class="text-neutral-500 hover:text-red-400 transition p-0.5" title="Remove this size"><i class="ti ti-x text-sm"></i></button>
+        </div>`).join('');
+      const total = _qrGroups.reduce((s, g) => s + g.count, 0);
+      const totalLine = _qrGroups.length ? `<p class="text-[11px] text-neutral-500 mt-0.5">Queued so far: ${total} sticker${total > 1 ? 's' : ''} across ${_qrGroups.length} size${_qrGroups.length > 1 ? 's' : ''}. Add more, or make the sheet to include what's in the count field too.</p>` : '';
+      wrap.innerHTML = rows + totalLine;
+    }
+
+    function addQrGroup() {
+      const raw = parseInt(document.getElementById('qr-count').value, 10);
+      if (!raw || raw < 1) { showToast('Enter how many stickers of this size first.', 'error'); return; }
+      const count = Math.min(300, raw);
+      _qrGroups.push({ key: _tagSizeKey, count });
+      renderQrGroupsList();
+      showToast(`${count} × ${qrGroupLabel(_tagSizeKey)} added. Pick another size and count for the next batch.`, 'success');
+      // Clear the count field so it's obvious this size has already been
+      // queued and the field is ready for the NEXT size's count.
+      _qrCountTouched = false;
+      document.getElementById('qr-count').value = '';
+      updateQrCountHint();
+    }
+
+    function removeQrGroup(i) {
+      _qrGroups.splice(i, 1);
+      renderQrGroupsList();
+    }
+
     // Tells the user how many stickers will be reused vs newly made, so
     // asking for a sheet never piles up extra unused stickers.
     function updateQrCountHint() {
@@ -8392,13 +8443,32 @@ async function toggleBlockDate(dateStr) {
       if (capped) el.textContent += ` Capped at ${MAX_UNUSED_TAGS} unassigned at once — assign or delete some to make more.`;
     }
 
+    // A ready-to-print batch is a flat list of { item, sizeKey } entries.
+    // This splits it into contiguous runs of the same size — each run is
+    // one size's worth of stickers, in the order its group was added/queued
+    // — which is exactly how the preview and the print pagination lay
+    // things out: every run gets its own page(s), never mixed with another
+    // size's grid.
+    function qrBatchRuns(entries) {
+      const runs = [];
+      for (const entry of entries || []) {
+        const last = runs[runs.length - 1];
+        if (last && last.sizeKey === entry.sizeKey) last.items.push(entry.item);
+        else runs.push({ sizeKey: entry.sizeKey, items: [entry.item] });
+      }
+      return runs;
+    }
+
     function updateQrHint() {
       const size = TAG_SIZES[_tagSizeKey];
       const cap = tagsPerPage(size);
       const hint = document.getElementById('qr-size-hint');
       if (_pendingTagBatch) {
-        const pages = Math.ceil(_pendingTagBatch.length / cap);
-        hint.textContent = `${_pendingTagBatch.length} sticker${_pendingTagBatch.length > 1 ? 's' : ''} · ${pages === 1 ? 'fits on one A4 sheet' : pages + ' A4 sheets at this size'}`;
+        const runs = qrBatchRuns(_pendingTagBatch);
+        const pages = runs.reduce((sum, run) => sum + Math.ceil(run.items.length / tagsPerPage(TAG_SIZES[run.sizeKey])), 0);
+        const total = _pendingTagBatch.length;
+        const mixed = runs.length > 1 ? ` across ${runs.length} size${runs.length > 1 ? 's' : ''}` : ' at this size';
+        hint.textContent = `${total} sticker${total > 1 ? 's' : ''}${mixed} · ${pages === 1 ? 'fits on one A4 sheet' : pages + ' A4 sheets'}`;
       } else {
         hint.textContent = `Fits ${cap} on one A4 sheet` + (size.side ? ' · code sits beside the QR' : '');
       }
@@ -8426,14 +8496,25 @@ async function toggleBlockDate(dateStr) {
     }
 
     function renderQrPreview() {
-      const size = TAG_SIZES[_tagSizeKey];
-      document.getElementById('qr-sheet-grid').innerHTML = _pendingTagBatch.map(t => tagCellHtml(t, size)).join('');
+      const runs = qrBatchRuns(_pendingTagBatch);
+      document.getElementById('qr-sheet-grid').innerHTML = runs.map(run => {
+        const size = TAG_SIZES[run.sizeKey] || TAG_SIZES['15'];
+        // Only bother labelling each section when there's more than one
+        // size in the batch — the common single-size case stays exactly
+        // as plain as before.
+        const heading = runs.length > 1
+          ? `<p class="w-full text-[11px] font-bold text-neutral-400 mt-3 mb-0.5 first:mt-0">${escapeHtml(size.label)} · ${run.items.length}</p>`
+          : '';
+        return heading + run.items.map(it => tagCellHtml(it, size)).join('');
+      }).join('');
       updateQrHint();
     }
 
     function openQrSheetModal() {
       _pendingTagBatch = null;
       _qrCountTouched = false;
+      _qrGroups = [];
+      renderQrGroupsList();
       renderQrSizeChips();
       renderQrStyleChips();
       renderQrOrientationChips();
@@ -8444,41 +8525,70 @@ async function toggleBlockDate(dateStr) {
       openModal('qr-sheet-modal-backdrop');
     }
 
-    // Builds the sheet. Stickers that were printed before but aren't on any
-    // gear yet are reused FIRST; new ones are only made for whatever is
-    // still missing. Stickers already assigned to equipment are never
-    // included. Nothing is created if enough unused ones already exist.
+    // Builds the sheet — now possibly across several sizes at once (e.g.
+    // 100 at one size, 100 at another): whatever is queued in _qrGroups
+    // PLUS whatever's currently sitting in the count field (so the simple,
+    // single-size case needs no extra "Add" click) are combined into one
+    // list of groups. Stickers printed before but never assigned are reused
+    // FIRST, filling groups in the order they were added, before anything
+    // new is made; already-assigned stickers are never touched. Nothing new
+    // is made if enough unused ones already exist, and the account-wide
+    // unused-sticker cap applies to the combined total, not per size.
     async function createQrBatch() {
       const raw = parseInt(document.getElementById('qr-count').value, 10);
-      if (!raw || raw < 1) { showToast('Enter how many stickers you need.', 'error'); return; }
-      const count = Math.min(300, raw);
+      const liveCount = (raw && raw > 0) ? Math.min(300, raw) : 0;
+      const groups = _qrGroups.map(g => ({ key: g.key, count: g.count }));
+      if (liveCount > 0) groups.push({ key: _tagSizeKey, count: liveCount });
+      if (!groups.length) { showToast('Enter how many stickers you need.', 'error'); return; }
 
+      const total = groups.reduce((sum, g) => sum + g.count, 0);
       const have = unusedTags();
-      const reused = have.slice(0, count);
+      const reused = have.slice(0, total);
       // Only codes that don't yet exist anywhere push the unused pile higher
       // — reusing already-printed blanks never counts against the cap.
-      const wantFresh = Math.max(0, count - reused.length);
+      const wantFresh = Math.max(0, total - reused.length);
       const roomLeft = Math.max(0, MAX_UNUSED_TAGS - have.length);
       if (wantFresh > 0 && roomLeft <= 0) {
         showToast(`You already have ${have.length} unassigned stickers. Assign or delete some before printing new ones.`, 'error');
         return;
       }
       const freshCount = Math.min(wantFresh, roomLeft);
-      const cappedCount = reused.length + freshCount;
+      const cappedTotal = reused.length + freshCount;
       if (freshCount < wantFresh) {
         showToast(`Only ${freshCount} new sticker${freshCount === 1 ? '' : 's'} made — that's the most this account can have unassigned at once (${MAX_UNUSED_TAGS}).`, 'error');
+      }
+
+      // Trim group counts, from the end of the queue, so the combined total
+      // never exceeds what's actually available/allowed to make.
+      let budget = cappedTotal;
+      const trimmedGroups = [];
+      for (const g of groups) {
+        if (budget <= 0) break;
+        const count = Math.min(g.count, budget);
+        trimmedGroups.push({ key: g.key, count });
+        budget -= count;
       }
 
       const btn = document.getElementById('qr-create-btn');
       btn.disabled = true; btn.textContent = 'Preparing…';
       const fresh = [];
+      const batch = [];
+      let reusedPtr = 0;
       try {
-        for (let n = reused.length; n < cappedCount; n++) {
-          // Awaited one at a time (not in parallel) so two codes generated in
-          // the same batch can never race each other past the uniqueness check.
-          const tag = { id: 'inv_' + Date.now() + '_' + n + '_' + Math.random().toString(36).slice(2, 5), code: await generateTagCode(), assigned: false, icon: '', name: '', serial: '', category: '', notes: '' };
-          _inventory.push(tag);
-          fresh.push(tag);
+        for (const g of trimmedGroups) {
+          for (let n = 0; n < g.count; n++) {
+            let tag;
+            if (reusedPtr < reused.length) {
+              tag = reused[reusedPtr++];
+            } else {
+              // Awaited one at a time (not in parallel) so two codes generated
+              // in the same batch can never race each other past the check.
+              tag = { id: 'inv_' + Date.now() + '_' + fresh.length + '_' + Math.random().toString(36).slice(2, 5), code: await generateTagCode(), assigned: false, icon: '', name: '', serial: '', category: '', notes: '' };
+              _inventory.push(tag);
+              fresh.push(tag);
+            }
+            batch.push({ item: tag, sizeKey: g.key });
+          }
         }
         if (fresh.length) await saveSettingToDB('inventory', _inventory);
       } catch (e) {
@@ -8489,13 +8599,14 @@ async function toggleBlockDate(dateStr) {
         btn.disabled = false; btn.textContent = 'Make sheet';
       }
 
-      _pendingTagBatch = reused.concat(fresh);
+      _pendingTagBatch = batch;
       renderQrPreview();
       showQrStage('preview');
     }
 
     function backToQrSetup() {
       _pendingTagBatch = null;
+      renderQrGroupsList();
       updateQrHint();
       updateQrCountHint();
       showQrStage('setup');
@@ -8510,12 +8621,14 @@ async function toggleBlockDate(dateStr) {
     // sticker colour (maroon for Maroon, white for Plain), so cutting a little
     // off the line never leaves a white edge. (The printer's own unprintable
     // rim can still show a sliver of paper; "borderless" printing removes it.)
-    function printSheetDetails(items) {
-      const size = TAG_SIZES[_tagSizeKey], style = TAG_STYLES[_tagStyleKey];
+    function printSheetDetails(entries) {
+      const style = TAG_STYLES[_tagStyleKey];
       const studio = (_profile.bizName || '').trim();
       const paper = _tagOrientation === 'landscape' ? 'A4 landscape' : 'A4 portrait';
       const stamp = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
-      return [studio, `${items.length} sticker${items.length > 1 ? 's' : ''} · ${size.label} · ${style.label}`, paper, stamp].filter(Boolean).join('  ·  ');
+      const distinctSizes = new Set(entries.map(e => e.sizeKey));
+      const sizeLabel = distinctSizes.size === 1 ? TAG_SIZES[entries[0].sizeKey].label : `${distinctSizes.size} sizes`;
+      return [studio, `${entries.length} sticker${entries.length > 1 ? 's' : ''} · ${sizeLabel} · ${style.label}`, paper, stamp].filter(Boolean).join('  ·  ');
     }
 
     // Opens a clean print tab: stickers packed edge to edge in a grid with thin
@@ -8528,27 +8641,33 @@ async function toggleBlockDate(dateStr) {
     // colour (maroon for Maroon, white for Plain), so cutting a little off
     // the line never leaves a white edge. (The printer's own unprintable rim
     // can still show a sliver of paper; "borderless" printing removes it.)
-    function printTagSheet(items) {
-      if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
+    function printTagSheet(entries) {
+      if (!entries || !entries.length) { showToast('Nothing to print.', 'error'); return; }
       const win = window.open('', '_blank');
       if (!win) { showToast('Please allow pop-ups to print the QR sheet.', 'error'); return; }
 
-      const size = TAG_SIZES[_tagSizeKey] || TAG_SIZES['15'];
       const style = TAG_STYLES[_tagStyleKey];
       const dims = tagPageSize();
-      const L = tagLayout(size);
-      const perPage = tagsPerPage(size);
-      const details = printSheetDetails(items);
+      const details = printSheetDetails(entries);
 
-      // The details line sits inside the page's own top margin (which is
-      // otherwise blank), so it never bumps a sticker onto a later page —
-      // the count promised in "Fits N on one sheet" always matches what
-      // actually prints.
+      // A mixed-size batch is several same-size runs back to back. Each run
+      // gets its own page(s) at its own footprint — a size never bleeds
+      // into another size's grid. The details line sits inside the very
+      // first page's top margin only (otherwise blank), so it never bumps a
+      // sticker onto a later page — "Fits N on one sheet" always matches
+      // what actually prints.
+      const runs = qrBatchRuns(entries);
       let pagesHtml = '';
-      for (let i = 0; i < items.length; i += perPage) {
-        const chunk = items.slice(i, i + perPage);
-        const header = i === 0 ? `<div class="hdr">${escapeHtml(details)}</div>` : '';
-        pagesHtml += `<div class="page">${header}<div class="grid">${chunk.map(it => tagCellHtml(it, size, true)).join('')}</div></div>`;
+      let firstPage = true;
+      for (const run of runs) {
+        const size = TAG_SIZES[run.sizeKey] || TAG_SIZES['15'];
+        const perPage = tagsPerPage(size);
+        for (let i = 0; i < run.items.length; i += perPage) {
+          const chunk = run.items.slice(i, i + perPage);
+          const header = firstPage ? `<div class="hdr">${escapeHtml(details)}</div>` : '';
+          pagesHtml += `<div class="page">${header}<div class="grid">${chunk.map(it => tagCellHtml(it, size, true)).join('')}</div></div>`;
+          firstPage = false;
+        }
       }
 
       win.document.write(`<!doctype html>
