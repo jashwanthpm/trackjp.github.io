@@ -1786,6 +1786,10 @@
           <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Style</label>
           <div id="qr-style-chips" class="flex flex-wrap gap-1.5"></div>
         </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Sheet orientation</label>
+          <div id="qr-orientation-chips" class="flex flex-wrap gap-1.5"></div>
+        </div>
         <div id="qr-setup-fields" class="flex flex-col gap-3">
           <div class="flex flex-col gap-1.5">
             <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">How many stickers</label>
@@ -7918,8 +7922,16 @@ async function toggleBlockDate(dateStr) {
       '20':   { label: '2 cm',     s: 20, side: false },
       'side': { label: '2 × 1 cm', s: 10, side: true }
     };
-    const TAG_PAGE_W_MM = 194; // A4 (210) minus 8 mm margins
-    const TAG_PAGE_H_MM = 281; // A4 (297) minus 8 mm margins
+    const A4_W_MM = 210, A4_H_MM = 297, TAG_PAGE_MARGIN_MM = 8;
+    // Usable area inside the sheet's margin, for whichever way it's printing.
+    // The header strip on the actual printed page (see printTagSheet) eats a
+    // little more height on the first page only, so this is deliberately the
+    // full-height figure — one row's worth of slack is fine.
+    function tagPageSize() {
+      const w = _tagOrientation === 'landscape' ? A4_H_MM : A4_W_MM;
+      const h = _tagOrientation === 'landscape' ? A4_W_MM : A4_H_MM;
+      return { w: w - TAG_PAGE_MARGIN_MM * 2, h: h - TAG_PAGE_MARGIN_MM * 2, fullW: w, fullH: h };
+    }
 
     let _editingInventoryIndex = null;
     let _qrModalIndex = null;
@@ -8186,6 +8198,7 @@ async function toggleBlockDate(dateStr) {
       plain:  { label: 'Plain',  bg: '#ffffff', page: '#ffffff', fg: '#2a0b12', mark: '#601c27', text: '#601c27', line: '#b9aaa0' }
     };
     let _tagStyleKey = 'maroon';
+    let _tagOrientation = 'portrait'; // 'portrait' | 'landscape' — which way the printed sheet runs
 
     function hiMarkSvg(height, fill, unit) {
       const u = unit || 'mm';
@@ -8219,7 +8232,7 @@ async function toggleBlockDate(dateStr) {
 
     function tagsPerPage(size) {
       const L = tagLayout(size);
-      return Math.max(1, Math.floor(TAG_PAGE_W_MM / L.fw)) * Math.max(1, Math.floor(TAG_PAGE_H_MM / L.fh));
+      return Math.max(1, Math.floor(tagPageSize().w / L.fw)) * Math.max(1, Math.floor(tagPageSize().h / L.fh));
     }
 
     // forPrint: stickers sit edge to edge with a thin cut line between them
@@ -8237,6 +8250,25 @@ async function toggleBlockDate(dateStr) {
         ? `margin:0;border:0.1mm solid ${st.line};border-radius:0;`
         : `margin:0.5mm;border-radius:0.6mm;` + (st.bg === '#ffffff' ? 'outline:0.1mm solid #d6d0cc;' : '');
       return `<div style="box-sizing:border-box;flex:0 0 auto;width:${L.w}mm;height:${L.h}mm;${frame}background:${st.bg};display:flex;flex-direction:${size.side ? 'row' : 'column'};align-items:center;justify-content:center;gap:${L.gap}mm;break-inside:avoid;page-break-inside:avoid">${inner}</div>`;
+    }
+
+    function renderQrOrientationChips() {
+      const wrap = document.getElementById('qr-orientation-chips');
+      if (!wrap) return;
+      const opts = [['portrait', 'Portrait', 'ti-rectangle-vertical'], ['landscape', 'Landscape', 'ti-rectangle']];
+      wrap.innerHTML = opts.map(([k, label, icon]) => {
+        const on = k === _tagOrientation;
+        return `<button type="button" onclick="setQrOrientation('${k}')" aria-pressed="${on}" class="px-3 py-1.5 rounded-lg text-xs font-bold border transition flex items-center gap-1.5 ${on ? 'bg-[#c9a96e]/10 border-[#c9a96e] text-[#c9a96e]' : 'bg-neutral-900 border-neutral-800 text-neutral-400 hover:text-white hover:border-neutral-700'}"><i class="ti ${icon}"></i> ${label}</button>`;
+      }).join('');
+    }
+
+    function setQrOrientation(key) {
+      if (key !== 'portrait' && key !== 'landscape') return;
+      _tagOrientation = key;
+      renderQrOrientationChips();
+      const cap = updateQrHint();
+      if (_pendingTagBatch) renderQrPreview();
+      else if (!_qrCountTouched) { document.getElementById('qr-count').value = cap; updateQrCountHint(); }
     }
 
     function renderQrStyleChips() {
@@ -8326,6 +8358,7 @@ async function toggleBlockDate(dateStr) {
       _qrCountTouched = false;
       renderQrSizeChips();
       renderQrStyleChips();
+      renderQrOrientationChips();
       const cap = updateQrHint();
       document.getElementById('qr-count').value = cap;
       updateQrCountHint();
@@ -8382,18 +8415,48 @@ async function toggleBlockDate(dateStr) {
     // sticker colour (maroon for Maroon, white for Plain), so cutting a little
     // off the line never leaves a white edge. (The printer's own unprintable
     // rim can still show a sliver of paper; "borderless" printing removes it.)
+    function printSheetDetails(items) {
+      const size = TAG_SIZES[_tagSizeKey], style = TAG_STYLES[_tagStyleKey];
+      const studio = (_profile.bizName || '').trim();
+      const paper = _tagOrientation === 'landscape' ? 'A4 landscape' : 'A4 portrait';
+      const stamp = new Date().toLocaleDateString(undefined, { day: 'numeric', month: 'short', year: 'numeric' });
+      return [studio, `${items.length} sticker${items.length > 1 ? 's' : ''} · ${size.label} · ${style.label}`, paper, stamp].filter(Boolean).join('  ·  ');
+    }
+
+    // Opens a clean print tab: stickers packed edge to edge in a grid with thin
+    // cut lines, A4 (portrait or landscape), no headings on the stickers
+    // themselves. A slim strip along the top of the FIRST page only carries
+    // the basic details of this printout — studio name, sheet size/style,
+    // paper size and date — so a stack of printed sheets can still be told
+    // apart later; it never appears on the stickers or later pages. Every
+    // page is filled edge to edge with the sticker colour (maroon for Maroon,
+    // white for Plain), so cutting a little off the line never leaves a white
+    // edge. (The printer's own unprintable rim can still show a sliver of
+    // paper; "borderless" printing removes it.)
     function printTagSheet(items) {
       if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
       const win = window.open('', '_blank');
       if (!win) { showToast('Please allow pop-ups to print the QR sheet.', 'error'); return; }
 
       const size = TAG_SIZES[_tagSizeKey] || TAG_SIZES['15'];
+      const style = TAG_STYLES[_tagStyleKey];
+      const dims = tagPageSize();
       const L = tagLayout(size);
       const perPage = tagsPerPage(size);
-      const page = TAG_STYLES[_tagStyleKey].page;
+      const details = printSheetDetails(items);
+      const headerH = 7; // mm — first page only
+      const firstPageCap = Math.max(1, Math.floor(dims.w / L.fw)) * Math.max(1, Math.floor((dims.h - headerH) / L.fh));
+
       let pagesHtml = '';
-      for (let i = 0; i < items.length; i += perPage) {
-        pagesHtml += `<div class="page">${items.slice(i, i + perPage).map(it => tagCellHtml(it, size, true)).join('')}</div>`;
+      let i = 0, pageNum = 0;
+      while (i < items.length) {
+        const cap = pageNum === 0 ? firstPageCap : perPage;
+        const chunk = items.slice(i, i + cap);
+        const header = pageNum === 0
+          ? `<div class="hdr"><span>${escapeHtml(details)}</span></div>`
+          : '';
+        pagesHtml += `<div class="page">${header}<div class="grid">${chunk.map(it => tagCellHtml(it, size, true)).join('')}</div></div>`;
+        i += cap; pageNum++;
       }
 
       win.document.write(`<!doctype html>
@@ -8402,11 +8465,13 @@ async function toggleBlockDate(dateStr) {
           <meta charset="utf-8">
           <title>QR stickers</title>
           <style>
-            @page { size: A4; margin: 0; }
+            @page { size: A4 ${_tagOrientation}; margin: 0; }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
-            html, body { margin: 0; background: ${page}; }
-            .page { box-sizing: border-box; width: 210mm; height: 296.6mm; padding: 8mm 8mm 0 8mm; display: flex; flex-wrap: wrap; align-content: flex-start; background: ${page}; overflow: hidden; }
+            html, body { margin: 0; background: ${style.page}; }
+            .page { box-sizing: border-box; width: ${dims.fullW}mm; height: ${dims.fullH}mm; padding: ${TAG_PAGE_MARGIN_MM}mm ${TAG_PAGE_MARGIN_MM}mm 0 ${TAG_PAGE_MARGIN_MM}mm; background: ${style.page}; overflow: hidden; }
             .page + .page { break-before: page; page-break-before: always; }
+            .hdr { height: ${headerH}mm; display: flex; align-items: center; font: 600 2.6mm/1 Arial,Helvetica,sans-serif; color: ${style.text}; opacity: .75; white-space: nowrap; overflow: hidden; }
+            .grid { display: flex; flex-wrap: wrap; align-content: flex-start; }
             @media screen { html, body { background: #3a3a3a; } body { padding: 8mm 0; } .page { margin: 0 auto 8mm; box-shadow: 0 2px 18px rgba(0,0,0,.5); } }
           </style>
         </head>
