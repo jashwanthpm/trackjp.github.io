@@ -8425,14 +8425,14 @@ async function toggleBlockDate(dateStr) {
 
     // Opens a clean print tab: stickers packed edge to edge in a grid with thin
     // cut lines, A4 (portrait or landscape), no headings on the stickers
-    // themselves. A slim strip along the top of the FIRST page only carries
-    // the basic details of this printout — studio name, sheet size/style,
-    // paper size and date — so a stack of printed sheets can still be told
-    // apart later; it never appears on the stickers or later pages. Every
-    // page is filled edge to edge with the sticker colour (maroon for Maroon,
-    // white for Plain), so cutting a little off the line never leaves a white
-    // edge. (The printer's own unprintable rim can still show a sliver of
-    // paper; "borderless" printing removes it.)
+    // themselves. The basic details of this printout — studio name, sheet
+    // size/style, paper size and date — sit inside the page's own top margin
+    // on the FIRST page only, a band that's otherwise blank, so adding it
+    // never bumps a sticker onto a later page: "Fits N on one sheet" always
+    // matches what prints. Every page is filled edge to edge with the sticker
+    // colour (maroon for Maroon, white for Plain), so cutting a little off
+    // the line never leaves a white edge. (The printer's own unprintable rim
+    // can still show a sliver of paper; "borderless" printing removes it.)
     function printTagSheet(items) {
       if (!items || !items.length) { showToast('Nothing to print.', 'error'); return; }
       const win = window.open('', '_blank');
@@ -8444,19 +8444,16 @@ async function toggleBlockDate(dateStr) {
       const L = tagLayout(size);
       const perPage = tagsPerPage(size);
       const details = printSheetDetails(items);
-      const headerH = 7; // mm — first page only
-      const firstPageCap = Math.max(1, Math.floor(dims.w / L.fw)) * Math.max(1, Math.floor((dims.h - headerH) / L.fh));
 
+      // The details line sits inside the page's own top margin (which is
+      // otherwise blank), so it never bumps a sticker onto a later page —
+      // the count promised in "Fits N on one sheet" always matches what
+      // actually prints.
       let pagesHtml = '';
-      let i = 0, pageNum = 0;
-      while (i < items.length) {
-        const cap = pageNum === 0 ? firstPageCap : perPage;
-        const chunk = items.slice(i, i + cap);
-        const header = pageNum === 0
-          ? `<div class="hdr"><span>${escapeHtml(details)}</span></div>`
-          : '';
+      for (let i = 0; i < items.length; i += perPage) {
+        const chunk = items.slice(i, i + perPage);
+        const header = i === 0 ? `<div class="hdr">${escapeHtml(details)}</div>` : '';
         pagesHtml += `<div class="page">${header}<div class="grid">${chunk.map(it => tagCellHtml(it, size, true)).join('')}</div></div>`;
-        i += cap; pageNum++;
       }
 
       win.document.write(`<!doctype html>
@@ -8468,9 +8465,9 @@ async function toggleBlockDate(dateStr) {
             @page { size: A4 ${_tagOrientation}; margin: 0; }
             * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
             html, body { margin: 0; background: ${style.page}; }
-            .page { box-sizing: border-box; width: ${dims.fullW}mm; height: ${dims.fullH}mm; padding: ${TAG_PAGE_MARGIN_MM}mm ${TAG_PAGE_MARGIN_MM}mm 0 ${TAG_PAGE_MARGIN_MM}mm; background: ${style.page}; overflow: hidden; }
+            .page { position: relative; box-sizing: border-box; width: ${dims.fullW}mm; height: ${dims.fullH}mm; padding: ${TAG_PAGE_MARGIN_MM}mm ${TAG_PAGE_MARGIN_MM}mm 0 ${TAG_PAGE_MARGIN_MM}mm; background: ${style.page}; overflow: hidden; }
             .page + .page { break-before: page; page-break-before: always; }
-            .hdr { height: ${headerH}mm; display: flex; align-items: center; font: 600 2.6mm/1 Arial,Helvetica,sans-serif; color: ${style.text}; opacity: .75; white-space: nowrap; overflow: hidden; }
+            .hdr { position: absolute; top: 1.5mm; left: ${TAG_PAGE_MARGIN_MM}mm; right: ${TAG_PAGE_MARGIN_MM}mm; font: 600 2.4mm/1 Arial,Helvetica,sans-serif; color: ${style.text}; opacity: .75; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
             .grid { display: flex; flex-wrap: wrap; align-content: flex-start; }
             @media screen { html, body { background: #3a3a3a; } body { padding: 8mm 0; } .page { margin: 0 auto 8mm; box-shadow: 0 2px 18px rgba(0,0,0,.5); } }
           </style>
