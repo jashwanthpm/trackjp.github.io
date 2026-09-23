@@ -1669,6 +1669,7 @@
         <button id="phone-scan-pill" onclick="showPhoneLinkModal()" class="hidden flex items-center gap-2 bg-emerald-950/30 border border-emerald-900/60 text-emerald-300 px-3 py-2 rounded-lg text-xs font-semibold transition hover:border-emerald-700" title="Phone scan link is on"><span class="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse"></span><span id="phone-scan-pill-text"></span></button>
         <button onclick="openQrScanner('open')" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-scan"></i> Scan</button>
         <button onclick="openQrSheetModal()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-qrcode"></i> Print QR Sheet</button>
+        <button onclick="exportInventoryCsv()" class="flex items-center gap-1.5 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-300 px-3 py-2 rounded-lg text-xs font-semibold transition"><i class="ti ti-download"></i> Export</button>
         <button onclick="openInventoryModal()" class="flex items-center gap-1.5 bg-[#c9a96e] hover:bg-[#dab77e] text-black px-3 py-2 rounded-lg text-xs font-bold transition"><i class="ti ti-plus"></i> Add Equipment</button>
       </div>
     </div>
@@ -1682,10 +1683,14 @@
       </div>
       <button id="inv-contact-toggle" type="button" role="switch" aria-checked="true" aria-label="Show owner details when a sticker is scanned" onclick="toggleTagContact()" class="relative w-10 h-6 rounded-full transition flex-shrink-0 bg-[#c9a96e]"><span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white transition-transform" style="transform:translateX(16px)"></span></button>
     </div>
+    <div class="relative">
+      <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500 text-sm pointer-events-none"></i>
+      <input type="text" id="inv-search" placeholder="Search by name, serial, category or tag code" oninput="renderInventoryList()" class="w-full bg-neutral-950 border border-neutral-900 rounded-lg pl-9 pr-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+    </div>
     <div id="inventory-list" class="grid grid-cols-1 sm:grid-cols-2 gap-3"></div>
     <div id="inventory-empty" class="hidden text-center py-10 text-neutral-600 text-xs">
       <i class="ti ti-package text-3xl mb-2 block"></i>
-      No equipment yet. Tap "Add Equipment", or print a QR sheet, stick the tags on your gear and scan each one to assign it.
+      <p id="inventory-empty-text">No equipment yet. Tap "Add Equipment", or print a QR sheet, stick the tags on your gear and scan each one to assign it.</p>
     </div>
   </div>
 </div>
@@ -1710,13 +1715,13 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Name</label>
-        <input type="text" id="inv-name" placeholder="e.g. Canon 5D Mark IV" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <input type="text" id="inv-name" placeholder="e.g. Canon 5D Mark IV" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveInventoryItem();}" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">QR Sticker Code <span class="normal-case text-neutral-600">(optional)</span></label>
         <div class="flex gap-2">
-          <input type="text" id="inv-tag" list="inv-tag-list" maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-character code printed under the QR" oninput="checkInvTag()" onblur="this.value = parseTagCodeInput(this.value); checkInvTag()" class="flex-1 min-w-0 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white tracking-widest font-semibold outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-normal read-only:cursor-not-allowed"/>
+          <input type="text" id="inv-tag" list="inv-tag-list" maxlength="120" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="6-character code printed under the QR" oninput="checkInvTag()" onblur="this.value = parseTagCodeInput(this.value); checkInvTag()" onkeydown="if(event.key==='Enter'){event.preventDefault(); this.value = parseTagCodeInput(this.value); checkInvTag(); saveInventoryItem();}" class="flex-1 min-w-0 bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white tracking-widest font-semibold outline-none focus:border-[#c9a96e] transition placeholder:tracking-normal placeholder:font-normal read-only:cursor-not-allowed"/>
           <button type="button" id="inv-scan-btn" onclick="openQrScanner('field')" class="flex items-center gap-1.5 px-3 rounded-lg bg-[#c9a96e]/10 border border-[#c9a96e]/40 hover:border-[#c9a96e] text-[#c9a96e] text-xs font-bold transition flex-shrink-0"><i class="ti ti-scan text-base"></i> Scan</button>
         </div>
         <datalist id="inv-tag-list"></datalist>
@@ -1725,12 +1730,12 @@
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Serial / Card Number</label>
-        <input type="text" id="inv-serial" placeholder="e.g. SN-2381029 or Card #4" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <input type="text" id="inv-serial" placeholder="e.g. SN-2381029 or Card #4" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveInventoryItem();}" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
         <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Category <span class="normal-case text-neutral-600">(optional)</span></label>
-        <input type="text" id="inv-category" placeholder="e.g. Camera, Laptop, Monitor, Lens, Card Reader" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+        <input type="text" id="inv-category" placeholder="e.g. Camera, Laptop, Monitor, Lens, Card Reader" onkeydown="if(event.key==='Enter'){event.preventDefault(); saveInventoryItem();}" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
       </div>
 
       <div class="flex flex-col gap-1.5">
@@ -7951,6 +7956,19 @@ async function toggleBlockDate(dateStr) {
       return { w: w - TAG_PAGE_MARGIN_MM * 2, h: h - TAG_PAGE_MARGIN_MM * 2, fullW: w, fullH: h };
     }
 
+    // Deleting equipment doesn't hand its sticker's code straight back into
+    // the pool of blanks — the physical sticker might still be sitting on
+    // the old gear, or just not peeled off yet, and having it suddenly
+    // resolve to something completely different would be confusing (or
+    // worse, misleading) for whoever scans it. So a deleted item is
+    // "retired": kept out of the reuse pool for a while, then it quietly
+    // becomes an ordinary spare blank again.
+    const RETIRE_COOLDOWN_DAYS = 30;
+    const RETIRE_COOLDOWN_MS = RETIRE_COOLDOWN_DAYS * 24 * 60 * 60 * 1000;
+    function tagIsCoolingDown(tag) {
+      return !!(tag && tag.retired && tag.retiredAt && (Date.now() - tag.retiredAt) < RETIRE_COOLDOWN_MS);
+    }
+
     let _editingInventoryIndex = null;
     let _qrModalIndex = null;
     let _invSelectedIcon = INVENTORY_DEFAULT_ICON;
@@ -8013,13 +8031,25 @@ async function toggleBlockDate(dateStr) {
       renderInventoryContactCard();
       const listEl = document.getElementById('inventory-list');
       const emptyEl = document.getElementById('inventory-empty');
+      const emptyText = document.getElementById('inventory-empty-text');
       if (!listEl) return;
 
-      const rows = _inventory.map((item, i) => ({ item, i })).filter(r => r.item.assigned);
+      const q = (document.getElementById('inv-search')?.value || '').trim().toLowerCase();
+      let rows = _inventory.map((item, i) => ({ item, i })).filter(r => r.item.assigned);
+      const hadAny = rows.length > 0;
+      if (q) {
+        rows = rows.filter(({ item }) => [item.name, item.serial, item.category, item.code, item.notes]
+          .some(v => (v || '').toLowerCase().includes(q)));
+      }
 
       if (!rows.length) {
         listEl.innerHTML = '';
         if (emptyEl) emptyEl.classList.remove('hidden');
+        if (emptyText) {
+          emptyText.textContent = (q && hadAny)
+            ? `No equipment matches "${document.getElementById('inv-search').value.trim()}".`
+            : 'No equipment yet. Tap "Add Equipment", or print a QR sheet, stick the tags on your gear and scan each one to assign it.';
+        }
         return;
       }
       if (emptyEl) emptyEl.classList.add('hidden');
@@ -8047,6 +8077,26 @@ async function toggleBlockDate(dateStr) {
         </div>
       `;
       }).join('');
+    }
+
+    // Exports the current equipment list as a CSV file, entirely client-side
+    // — no server round-trip, just whatever's already loaded here.
+    function exportInventoryCsv() {
+      const rows = _inventory.filter(t => t.assigned);
+      if (!rows.length) { showToast('No equipment to export yet.', 'error'); return; }
+      const esc = v => `"${String(v || '').replace(/"/g, '""')}"`;
+      const lines = [['Name', 'Category', 'Serial / Card Number', 'Tag Code', 'Notes'].map(esc).join(',')];
+      rows.forEach(item => lines.push([item.name, item.category, item.serial, item.code, item.notes].map(esc).join(',')));
+      const blob = new Blob([lines.join('\r\n')], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `equipment-list-${new Date().toISOString().slice(0, 10)}.csv`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+      showToast(`Exported ${rows.length} item${rows.length > 1 ? 's' : ''}.`, 'success');
     }
 
     function renderInvIconPicker() {
@@ -8085,6 +8135,11 @@ async function toggleBlockDate(dateStr) {
         const msg = `Already assigned to ${_inventory[idx].name || 'another item'}.`;
         say(false, msg); return { ok: false, msg };
       }
+      if (tagIsCoolingDown(_inventory[idx])) {
+        const daysLeft = Math.ceil((RETIRE_COOLDOWN_MS - (Date.now() - _inventory[idx].retiredAt)) / 86400000);
+        const msg = `This code was recently deleted and isn't reusable yet (about ${daysLeft} day${daysLeft === 1 ? '' : 's'} left).`;
+        say(false, msg); return { ok: false, msg };
+      }
       say(true, 'Sticker is free. It will be linked to this equipment.');
       return { ok: true, idx, code };
     }
@@ -8116,7 +8171,7 @@ async function toggleBlockDate(dateStr) {
       document.getElementById('inv-scan-btn').classList.toggle('hidden', !isNew);
       document.getElementById('inv-tag-status').innerHTML = '';
       document.getElementById('inv-tag-list').innerHTML = _inventory
-        .filter(t => !t.assigned && t.code)
+        .filter(t => !t.assigned && t.code && !tagIsCoolingDown(t))
         .map(t => `<option value="${escapeHtml(t.code)}"></option>`).join('');
 
       openModal('inventory-modal-backdrop');
@@ -8170,13 +8225,40 @@ async function toggleBlockDate(dateStr) {
       );
     }
 
-    async function deleteInventoryItem(i) {
+    function deleteInventoryItem(i) {
       const item = _inventory[i];
       if (!item) return;
-      if (!confirm(`Remove "${item.name || 'this item'}" from inventory? Its QR sticker will stop working.`)) return;
-      _inventory.splice(i, 1);
+      const targetId = item.id; // resolved again at confirm time, in case the list changes meanwhile
+      document.getElementById('confirm-title').textContent = 'Delete this equipment?';
+      document.getElementById('confirm-sub-text').innerHTML = item.code
+        ? `"${escapeHtml(item.name || 'This item')}" will be removed. Its sticker (<b class="text-neutral-300">${escapeHtml(item.code)}</b>) stops working right away — and since the physical sticker might still be stuck on something, that code is set aside for ${RETIRE_COOLDOWN_DAYS} days before it can be printed for anything new.`
+        : `"${escapeHtml(item.name || 'This item')}" will be removed from inventory.`;
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = () => executeDeleteInventoryItem(targetId);
+      openModal('confirm-modal-backdrop');
+    }
+
+    async function executeDeleteInventoryItem(id) {
+      const idx = _inventory.findIndex(t => t.id === id);
+      closeConfirmModal();
+      if (idx === -1) return;
+      const item = _inventory[idx];
+      const name = item.name || 'Item';
+      if (item.code) {
+        // Retire rather than remove: the code stays reserved (see
+        // RETIRE_COOLDOWN_DAYS above) so it can't be handed to a new sticker
+        // while the old one might still be out there. Personal details are
+        // cleared right away since the item itself really is gone.
+        item.assigned = false;
+        item.retired = true;
+        item.retiredAt = Date.now();
+        item.name = ''; item.serial = ''; item.category = ''; item.notes = ''; item.icon = '';
+      } else {
+        _inventory.splice(idx, 1); // no sticker was ever linked — nothing to retire
+      }
       await saveSettingToDB('inventory', _inventory);
       renderInventoryList();
+      showToast(`${name} removed from inventory.`, 'success');
     }
 
     // Deep-links back into this app instead of plain text — scanning it
@@ -8369,7 +8451,7 @@ async function toggleBlockDate(dateStr) {
       }
     }
 
-    function unusedTags() { return _inventory.filter(t => !t.assigned); }
+    function unusedTags() { return _inventory.filter(t => !t.assigned && !tagIsCoolingDown(t)); }
 
     // A blank sticker that's printed but never stuck on anything and never
     // assigned just sits in the database forever otherwise. This caps how
