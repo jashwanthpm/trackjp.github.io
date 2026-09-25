@@ -446,6 +446,10 @@
       <h3 class="text-sm font-bold text-white"><i class="ti ti-bell-ringing text-[#c9a96e] mr-1"></i> Notifications</h3>
       <button onclick="clearNotifications()" class="text-[10px] text-neutral-500 hover:text-white transition uppercase font-bold tracking-wider">Clear All</button>
     </div>
+    <div id="browser-notif-row" class="hidden px-3 py-2 border-b border-neutral-900 flex items-center justify-between gap-2 bg-neutral-950/60 sticky top-[45px] z-10">
+      <span id="browser-notif-label" class="text-[11px] text-neutral-400 leading-snug"></span>
+      <button id="browser-notif-btn" onclick="toggleBrowserNotifications()" class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition"></button>
+    </div>
     <div id="notification-list" class="flex-1 overflow-y-auto p-2 space-y-2 hide-scrollbar">
       <div class="p-4 text-center text-xs text-neutral-500">No new notifications</div>
     </div>
@@ -2810,6 +2814,14 @@ setTimeout(() => {
     let _shoots = [];
     let _companies = [...DEFAULT_COMPANIES];
     let _inventory = []; // gear/equipment list — { id, code, assigned, icon, name, serial, category, notes }
+    // IDs of shoots created manually from inside the dashboard (as opposed to
+    // arriving through the public booking link). The old localStorage-only
+    // "sakkhi_own_shoot_ids" only ever protected the SAME device that made
+    // the shoot — a different device (e.g. your phone) had no way to know,
+    // so it saw the new row and thought it was an incoming booking. This is
+    // synced through the same "settings" table as inventory/companies/etc.,
+    // so every device recognizes it, not just the one that created it.
+    let _manualShootIds = [];
 
     // ==========================================
     // STUDIO COMPANY PROFILES
@@ -3089,6 +3101,69 @@ function addNotification(title, message, targetId, actionUrl = null, actionLabel
   
   saveNotifications();
   updateNotificationUI();
+  fireBrowserNotification(title, message, actionUrl);
+}
+
+// --- Browser (OS-level) notifications, mirroring the in-app bell ---
+// A per-device opt-in — the browser's own permission is per-device anyway,
+// so there's no point syncing the on/off preference across devices.
+const BROWSER_NOTIF_PREF_KEY = 'sakkhi_browser_notifs_enabled';
+
+function browserNotifOn() {
+  return typeof Notification !== 'undefined'
+    && Notification.permission === 'granted'
+    && localStorage.getItem(BROWSER_NOTIF_PREF_KEY) === '1';
+}
+
+// Shows a real OS notification for anything that would otherwise only show
+// up in the in-app bell. Only fires while the tab is backgrounded/unfocused
+// — if someone's actively looking at the app, the bell and toast already
+// covered it, so a popup on top would just be a redundant second alert for
+// the same thing.
+function fireBrowserNotification(title, body, url) {
+  try {
+    if (!browserNotifOn()) return;
+    if (document.visibilityState === 'visible' && document.hasFocus()) return;
+    const n = new Notification(title, { body: body || '', tag: url || title });
+    n.onclick = () => { window.focus(); n.close(); };
+  } catch (e) { console.warn('Browser notification failed:', e); }
+}
+
+function renderBrowserNotifRow() {
+  const row = document.getElementById('browser-notif-row');
+  const label = document.getElementById('browser-notif-label');
+  const btn = document.getElementById('browser-notif-btn');
+  if (!row || !label || !btn) return;
+  if (typeof Notification === 'undefined') { row.classList.add('hidden'); return; }
+  row.classList.remove('hidden');
+  if (Notification.permission === 'denied') {
+    label.textContent = "Blocked for this site — allow notifications in your browser's site settings to turn this on.";
+    btn.classList.add('hidden');
+  } else if (browserNotifOn()) {
+    label.textContent = "You'll get these as browser notifications on this device too.";
+    btn.textContent = 'Disable';
+    btn.classList.remove('hidden');
+  } else {
+    label.textContent = 'Also get these as browser notifications on this device.';
+    btn.textContent = 'Enable';
+    btn.classList.remove('hidden');
+  }
+}
+
+async function toggleBrowserNotifications() {
+  if (typeof Notification === 'undefined') return;
+  if (browserNotifOn()) {
+    localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '0');
+    renderBrowserNotifRow();
+    return;
+  }
+  if (Notification.permission === 'denied') { renderBrowserNotifRow(); return; }
+  const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+  if (perm === 'granted') {
+    localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '1');
+    showToast('Browser notifications enabled on this device.', 'success');
+  }
+  renderBrowserNotifRow();
 }
     
 // Updated: Removes a single notification locally and from the cloud
@@ -3133,6 +3208,7 @@ function toggleNotifications() {
   // Re-render UI when opened so times update (e.g., turning "Today" into "Yesterday" if a day passed)
   if (!dropdown.classList.contains('hidden')) {
     updateNotificationUI();
+    renderBrowserNotifRow();
   }
 }
 
@@ -3250,6 +3326,7 @@ async function notifyNewBooking(booking, wasAuto) {
         local.actionUrl = actionUrl;
       } else {
         _notifications.unshift({ id: match.id, targetId: booking.id, title, message, timestamp: match.created_at || new Date().toISOString(), actionUrl, actionLabel, isRead: !!match.is_read });
+        fireBrowserNotification(title, message, actionUrl);
       }
       saveNotifications();
       updateNotificationUI();
@@ -3287,11 +3364,20 @@ async function pollForUpdates() {
     const ownShootIds = new Set(JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]'));
     const existingIds = new Set(_shoots.map(s => s.id));
 
+    // Pick up any shoots marked "manually created" from OTHER devices since
+    // the last poll — this is how a shoot you added on your laptop a moment
+    // ago gets recognized (not alerted on) here on your phone too.
+    try {
+      const manRows = await sbFetch(`settings?key=eq.${userId}_manual_shoot_ids&select=value`);
+      if (manRows && manRows[0] && Array.isArray(manRows[0].value)) _manualShootIds = manRows[0].value;
+    } catch (e) { /* keep whatever we already had */ }
+    const manualShootIdSet = new Set(_manualShootIds);
+
     // 1. Check for new or changed shoots (new Magic Link booking requests,
     //    or edits made from another device)
     const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
     const freshShoots = raw.map(dbToShoot);
-    const brandNew = freshShoots.filter(s => !existingIds.has(s.id) && !ownShootIds.has(s.id));
+    const brandNew = freshShoots.filter(s => !existingIds.has(s.id) && !ownShootIds.has(s.id) && !manualShootIdSet.has(s.id));
 
     const dataChanged = freshShoots.length !== _shoots.length ||
       JSON.stringify(freshShoots) !== JSON.stringify(_shoots);
@@ -3341,6 +3427,7 @@ async function pollForUpdates() {
           actionUrl: n.action_url,
           isRead: n.is_read
         });
+        fireBrowserNotification(n.title, n.message, n.action_url);
       });
       saveNotifications();
       updateNotificationUI();
@@ -3646,6 +3733,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     const invRow = configurations.find(r => r.key === 'inventory');
     if (invRow && Array.isArray(invRow.value)) _inventory = invRow.value;
+
+    const manRow = configurations.find(r => r.key === 'manual_shoot_ids');
+    if (manRow && Array.isArray(manRow.value)) _manualShootIds = manRow.value;
     
     // ADD THIS NEW RULE
     const jtRow = configurations.find(r => r.key === 'job_types');
@@ -3753,13 +3843,15 @@ try {
     const ownShootIds = new Set(JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]'));
     let newBookings = [];
 
+    const manualShootIdSet = new Set(_manualShootIds);
     if (lastSeenStr) {
       // Convert to exact milliseconds and subtract a 5-second buffer for server/browser clock differences
       const lastSeenTime = new Date(lastSeenStr).getTime() - 5000; 
       
       newBookings = _shoots.filter(s => {
         if (!s.created) return false;
-        if (ownShootIds.has(s.id)) return false; // created by me, from this dashboard — never a Magic Link alert
+        if (ownShootIds.has(s.id)) return false; // created by me, from THIS device — never a Magic Link alert
+        if (manualShootIdSet.has(s.id)) return false; // created by me, from ANY of my devices — same rule, synced
         const shootTime = new Date(s.created).getTime();
         return shootTime > lastSeenTime;
       });
@@ -3856,13 +3948,22 @@ if (newBookings.length > 0 && !isDemoMode) {
         setSyncStatus('synced', 'Saved Successfully');
         showToast('Shoot record saved successfully');
         
-        // Mark this shoot as created by ME, on this device, via the dashboard —
-        // so it can never be mistaken for an external Magic Link booking,
-        // regardless of any timestamp/clock-skew edge cases.
+        // Mark this shoot as created by ME via the dashboard — so it can
+        // never be mistaken for an external Magic Link booking, regardless
+        // of any timestamp/clock-skew edge cases. Kept in two places: this
+        // device's localStorage (instant, no round-trip needed) AND a
+        // synced setting (so your OTHER devices — e.g. your phone — also
+        // recognize it, instead of seeing a brand new shoot appear and
+        // assuming it's an incoming booking).
         if (!existing) {
           const seenIds = JSON.parse(localStorage.getItem('sakkhi_own_shoot_ids') || '[]');
           seenIds.push(shoot.id);
           localStorage.setItem('sakkhi_own_shoot_ids', JSON.stringify(seenIds.slice(-300)));
+
+          _manualShootIds.push(shoot.id);
+          _manualShootIds = _manualShootIds.slice(-500);
+          try { await saveSettingToDB('manual_shoot_ids', _manualShootIds); }
+          catch (e) { console.warn('Could not sync manual-shoot marker (other devices may briefly see this as a new booking):', e); }
         }
 
         // Update "last seen" so your own shoots don't trigger the alert on refresh
