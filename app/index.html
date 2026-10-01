@@ -424,7 +424,10 @@
       </div>
     </div>
     <div id="tp-body" class="flex flex-col gap-4"></div>
-    <p class="text-[11px] text-neutral-600 text-center mt-auto pt-4">Sticker <span id="tp-code" class="tracking-widest font-semibold"></span></p>
+    <div class="mt-auto flex flex-col gap-3 pt-4">
+      <div id="tp-ad-slot" class="hidden"></div>
+      <p class="text-[11px] text-neutral-600 text-center">Sticker <span id="tp-code" class="tracking-widest font-semibold"></span></p>
+    </div>
   </div>
 </div>
 
@@ -986,6 +989,10 @@
               <button onclick="switchAccountTab('inventory')" class="account-sidebar-item" data-tab="inventory">
                 <i class="ti ti-package text-lg"></i>
                 <span>Inventory</span>
+              </button>
+              <button onclick="switchAccountTab('ads')" class="account-sidebar-item" data-tab="ads">
+                <i class="ti ti-speakerphone text-lg"></i>
+                <span>Ads</span>
               </button>
               <button onclick="switchAccountTab('devices')" class="account-sidebar-item" data-tab="devices">
   <i class="ti ti-devices text-lg"></i>
@@ -1830,6 +1837,41 @@
       <button onclick="backToQrSetup()" class="flex-1 bg-neutral-800 hover:bg-neutral-700 text-white text-xs font-bold py-2.5 rounded-lg transition">Back</button>
       <button onclick="printQrSheet()" class="flex-[2] bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition flex items-center justify-center gap-1.5"><i class="ti ti-printer"></i> Print sheet</button>
     </div>
+  </div>
+</div>
+
+<div id="account-ads" class="account-content-section">
+  <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 space-y-4">
+    <div>
+      <h3 class="text-base font-bold text-white flex items-center gap-2"><i class="ti ti-speakerphone text-[#c9a96e]"></i> Ads &amp; Promotions</h3>
+      <p class="text-xs text-neutral-500 mt-1">Fills the space at the bottom of the page a stranger sees after scanning one of your gear stickers — good for promoting your own site, socials, or a sign-up link. With more than one enabled, a random one shows each time.</p>
+    </div>
+
+    <div class="rounded-xl border border-neutral-900 bg-neutral-950/50 p-4 space-y-3">
+      <p class="text-xs font-bold text-neutral-300">Add a banner</p>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Image (recommended ~600 × 200px, under 300KB) — optional</label>
+        <input type="file" id="ad-image-input" accept="image/*" onchange="handleAdImageUpload(event)" class="text-xs text-neutral-400"/>
+        <div id="ad-image-preview" class="hidden mt-1 rounded-lg overflow-hidden border border-neutral-800 max-w-[280px]"><img class="w-full"/></div>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Caption (shown under the image, or alone if no image)</label>
+        <input type="text" id="ad-caption-input" placeholder="e.g. Run your studio like this — try Sakkhi" maxlength="120" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+      <div class="flex flex-col gap-1.5">
+        <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Link (opens when tapped) — optional</label>
+        <input type="text" id="ad-link-input" placeholder="https://" class="bg-neutral-950 border border-neutral-900 rounded-lg px-3 py-2 text-sm text-white outline-none focus:border-[#c9a96e] transition"/>
+      </div>
+      <button onclick="saveAd()" id="ad-save-btn" class="w-full bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold py-2.5 rounded-lg transition">Add banner</button>
+    </div>
+
+    <div id="ads-list" class="space-y-2"></div>
+    <div id="ads-empty" class="hidden text-center py-8 text-neutral-600 text-xs">
+      <i class="ti ti-speakerphone text-3xl mb-2 block"></i>
+      No banners yet — add one above.
+    </div>
+
+    <p class="text-[11px] text-neutral-600 leading-relaxed border-t border-neutral-900 pt-3"><i class="ti ti-info-circle text-[#c9a96e]"></i> Heads up: showing this to the anonymous stranger who scans a sticker needs one small addition on the server side first. Everything above saves correctly to your account right now — the banner on the public page will start appearing once that's in place.</p>
   </div>
 </div>
 
@@ -3736,6 +3778,9 @@ create policy "Allow all" on settings for all using (true) with check (true);`;
 
     const manRow = configurations.find(r => r.key === 'manual_shoot_ids');
     if (manRow && Array.isArray(manRow.value)) _manualShootIds = manRow.value;
+
+    const adsRow = configurations.find(r => r.key === 'public_ads');
+    if (adsRow && Array.isArray(adsRow.value)) _ads = adsRow.value;
     
     // ADD THIS NEW RULE
     const jtRow = configurations.find(r => r.key === 'job_types');
@@ -8180,6 +8225,106 @@ async function toggleBlockDate(dateStr) {
       }).join('');
     }
 
+    // --- Ads & Promotions: the banner shown in the bottom space of the
+    // public sticker page. Stored the same way inventory/manual-shoot-ids
+    // are — a named key in the account's own settings row.
+    let _ads = [];
+    let _pendingAdImage = null;
+
+    function renderAdsList() {
+      const wrap = document.getElementById('ads-list');
+      const empty = document.getElementById('ads-empty');
+      if (!wrap) return;
+      if (!_ads.length) {
+        wrap.innerHTML = '';
+        if (empty) empty.classList.remove('hidden');
+        return;
+      }
+      if (empty) empty.classList.add('hidden');
+      wrap.innerHTML = _ads.map(ad => `
+        <div class="flex items-center gap-3 bg-neutral-900 border border-neutral-800 rounded-lg p-3">
+          ${ad.image
+            ? `<img src="${ad.image}" class="w-16 h-10 object-cover rounded-md border border-neutral-800 flex-shrink-0"/>`
+            : `<div class="w-16 h-10 rounded-md border border-neutral-800 bg-neutral-950 flex items-center justify-center flex-shrink-0"><i class="ti ti-speakerphone text-neutral-600"></i></div>`}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm text-white font-semibold truncate">${escapeHtml(ad.caption || ad.link || 'Banner')}</p>
+            ${ad.link ? `<p class="text-[11px] text-neutral-500 truncate">${escapeHtml(ad.link)}</p>` : ''}
+          </div>
+          <button onclick="toggleAdEnabled('${ad.id}')" class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-md border transition ${ad.enabled ? 'border-emerald-700 text-emerald-300' : 'border-neutral-700 text-neutral-500'}">${ad.enabled ? 'On' : 'Off'}</button>
+          <button onclick="deleteAd('${ad.id}')" class="flex-shrink-0 p-2 text-neutral-500 hover:text-red-400 rounded-md hover:bg-red-950/30 transition" title="Delete"><i class="ti ti-trash text-sm"></i></button>
+        </div>`).join('');
+    }
+
+    // Resizes/compresses the chosen image client-side before it's ever
+    // stored — a banner only needs to be a few hundred pixels wide, so
+    // there's no reason to save someone's full-resolution photo into the
+    // account's settings row.
+    function handleAdImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const maxW = 640;
+          const scale = Math.min(1, maxW / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          _pendingAdImage = canvas.toDataURL('image/jpeg', 0.82);
+          const prev = document.getElementById('ad-image-preview');
+          prev.classList.remove('hidden');
+          prev.querySelector('img').src = _pendingAdImage;
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveAd() {
+      const caption = document.getElementById('ad-caption-input').value.trim();
+      const link = document.getElementById('ad-link-input').value.trim();
+      if (!_pendingAdImage && !caption) { showToast('Add an image or a caption first.', 'error'); return; }
+      if (link && !/^https?:\/\//i.test(link)) { showToast('Link should start with http:// or https://', 'error'); return; }
+      const ad = { id: 'ad_' + Date.now() + '_' + Math.random().toString(36).slice(2, 6), image: _pendingAdImage, caption, link, enabled: true };
+      _ads.push(ad);
+      await saveSettingToDB('public_ads', _ads);
+      renderAdsList();
+      document.getElementById('ad-caption-input').value = '';
+      document.getElementById('ad-link-input').value = '';
+      document.getElementById('ad-image-input').value = '';
+      document.getElementById('ad-image-preview').classList.add('hidden');
+      _pendingAdImage = null;
+      showToast('Banner added.', 'success');
+    }
+
+    async function toggleAdEnabled(id) {
+      const ad = _ads.find(a => a.id === id);
+      if (!ad) return;
+      ad.enabled = !ad.enabled;
+      await saveSettingToDB('public_ads', _ads);
+      renderAdsList();
+    }
+
+    function deleteAd(id) {
+      const ad = _ads.find(a => a.id === id);
+      if (!ad) return;
+      document.getElementById('confirm-title').textContent = 'Delete this banner?';
+      document.getElementById('confirm-sub-text').textContent = `"${ad.caption || ad.link || 'This banner'}" will stop showing on your sticker page.`;
+      document.getElementById('confirm-action-btn').className = "w-1/2 py-2 text-xs font-bold bg-red-600 hover:bg-red-500 text-white rounded-lg transition";
+      document.getElementById('confirm-action-btn').onclick = () => executeDeleteAd(id);
+      openModal('confirm-modal-backdrop');
+    }
+
+    async function executeDeleteAd(id) {
+      closeConfirmModal();
+      _ads = _ads.filter(a => a.id !== id);
+      await saveSettingToDB('public_ads', _ads);
+      renderAdsList();
+      showToast('Banner removed.', 'success');
+    }
+
     // Exports the current equipment list as a CSV file, entirely client-side
     // — no server round-trip, just whatever's already loaded here.
     function exportInventoryCsv() {
@@ -9576,6 +9721,28 @@ async function toggleBlockDate(dateStr) {
       } } catch (e) {}
 
       body.innerHTML = itemCard + ownerCard + mine;
+      renderPublicAdSlot(r.ad);
+    }
+
+    // Fills the bottom-space ad slot on the public sticker page. `ad`
+    // (when present) comes from inventory_tag_public's response — the
+    // public lookup has no sign-in, so this is the only channel an
+    // anonymous viewer's page can get the studio's banner through. Until
+    // that RPC is extended to include it, `ad` is simply undefined and
+    // this quietly does nothing, same as today.
+    function renderPublicAdSlot(ad) {
+      const slot = document.getElementById('tp-ad-slot');
+      if (!slot) return;
+      if (!ad || (!ad.image && !ad.caption)) { slot.classList.add('hidden'); slot.innerHTML = ''; return; }
+      const safeLink = ad.link && /^https?:\/\//i.test(ad.link) ? ad.link : '';
+      const inner = `
+        ${ad.image ? `<img src="${ad.image}" alt="" class="w-full rounded-lg border border-neutral-900"/>` : ''}
+        ${ad.caption ? `<p class="text-xs text-neutral-400 text-center ${ad.image ? 'mt-1.5' : ''}">${escapeHtml(ad.caption)}</p>` : ''}
+        <p class="text-[9px] uppercase tracking-wider text-neutral-600 text-center mt-1">Sponsored</p>`;
+      slot.innerHTML = safeLink
+        ? `<a href="${safeLink}" target="_blank" rel="noopener" class="block">${inner}</a>`
+        : `<div>${inner}</div>`;
+      slot.classList.remove('hidden');
     }
 
     // Owner-side switch: show / hide studio name + phone on that page.
@@ -10512,6 +10679,10 @@ function updateAccountDisplay() {
 
       if (tab === 'inventory') {
         renderInventoryList();
+      }
+
+      if (tab === 'ads') {
+        renderAdsList();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
