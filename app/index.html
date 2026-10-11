@@ -9595,8 +9595,14 @@ async function toggleBlockDate(dateStr) {
       if (!slot) return;
       slot.classList.add('hidden'); slot.innerHTML = '';
       try {
-        const ads = await sbFetch('ads?enabled=eq.true&select=id,image,caption,link,weight');
-        if (!Array.isArray(ads) || !ads.length) return;
+        const all = await sbFetch('ads?enabled=eq.true&select=*');
+        // Only ads inside their run window (the server rule enforces this
+        // too; this keeps it right even before that rule is updated).
+        const nowMs = Date.now();
+        const ads = (all || []).filter(x =>
+          (!x.starts_at || new Date(x.starts_at).getTime() <= nowMs) &&
+          (!x.ends_at || new Date(x.ends_at).getTime() > nowMs));
+        if (!ads.length) return;
         // Weighted random pick: weight 2 shows about twice as often as 1.
         const total = ads.reduce((n, a) => n + Math.max(1, a.weight || 1), 0);
         let roll = Math.random() * total, ad = ads[0];
