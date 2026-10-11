@@ -9581,27 +9581,55 @@ async function toggleBlockDate(dateStr) {
       } } catch (e) {}
 
       body.innerHTML = itemCard + ownerCard + mine;
-      renderPublicAdSlot(r.ad);
+      loadPublicAd(code);
     }
 
-    // Fills the bottom-space ad slot on the public sticker page. `ad`
-    // (when present) comes from inventory_tag_public's response — the
-    // public lookup has no sign-in, so this is the only channel an
-    // anonymous viewer's page can get the studio's banner through. Until
-    // that RPC is extended to include it, `ad` is simply undefined and
-    // this quietly does nothing, same as today.
-    function renderPublicAdSlot(ad) {
+    // Bottom-space ad on the public sticker page. Ads are managed ONLY from
+    // the separate admin panel and live in their own platform-wide table, so
+    // this page reads them directly (the table allows public reads of ads
+    // that are switched on) — no sign-in and no change to the tag lookup.
+    // Any failure here just leaves the slot hidden; it must never get in the
+    // way of someone trying to return lost gear.
+    async function loadPublicAd(stickerCode) {
+      const slot = document.getElementById('tp-ad-slot');
+      if (!slot) return;
+      slot.classList.add('hidden'); slot.innerHTML = '';
+      try {
+        const ads = await sbFetch('ads?enabled=eq.true&select=id,image,caption,link,weight');
+        if (!Array.isArray(ads) || !ads.length) return;
+        // Weighted random pick: weight 2 shows about twice as often as 1.
+        const total = ads.reduce((n, a) => n + Math.max(1, a.weight || 1), 0);
+        let roll = Math.random() * total, ad = ads[0];
+        for (const a of ads) { roll -= Math.max(1, a.weight || 1); if (roll <= 0) { ad = a; break; } }
+        renderPublicAdSlot(ad, stickerCode);
+        logAdEvent(ad.id, 'impression', stickerCode);
+      } catch (e) { console.warn('Ad load skipped:', e); }
+    }
+
+    function logAdEvent(adId, type, stickerCode) {
+      // Fire-and-forget; analytics must never block or break the page.
+      sbFetch('ad_events', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'Prefer': 'return=minimal' },
+        body: JSON.stringify({ ad_id: adId, event_type: type, sticker_code: stickerCode || null })
+      }).catch(() => {});
+    }
+
+    function renderPublicAdSlot(ad, stickerCode) {
       const slot = document.getElementById('tp-ad-slot');
       if (!slot) return;
       if (!ad || (!ad.image && !ad.caption)) { slot.classList.add('hidden'); slot.innerHTML = ''; return; }
       const safeLink = ad.link && /^https?:\/\//i.test(ad.link) ? ad.link : '';
+      const safeImg = ad.image && /^(data:image\/|https?:\/\/)/i.test(ad.image) ? ad.image : '';
       const inner = `
-        ${ad.image ? `<img src="${ad.image}" alt="" class="w-full rounded-lg border border-neutral-900"/>` : ''}
-        ${ad.caption ? `<p class="text-xs text-neutral-400 text-center ${ad.image ? 'mt-1.5' : ''}">${escapeHtml(ad.caption)}</p>` : ''}
+        ${safeImg ? `<img src="${escapeHtml(safeImg)}" alt="" class="w-full rounded-lg border border-neutral-900"/>` : ''}
+        ${ad.caption ? `<p class="text-xs text-neutral-400 text-center ${safeImg ? 'mt-1.5' : ''}">${escapeHtml(ad.caption)}</p>` : ''}
         <p class="text-[9px] uppercase tracking-wider text-neutral-600 text-center mt-1">Sponsored</p>`;
       slot.innerHTML = safeLink
-        ? `<a href="${safeLink}" target="_blank" rel="noopener" class="block">${inner}</a>`
+        ? `<a href="${escapeHtml(safeLink)}" target="_blank" rel="noopener" class="block">${inner}</a>`
         : `<div>${inner}</div>`;
+      const a = slot.querySelector('a');
+      if (a) a.addEventListener('click', () => logAdEvent(ad.id, 'click', stickerCode));
       slot.classList.remove('hidden');
     }
 
