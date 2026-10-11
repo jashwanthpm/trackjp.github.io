@@ -335,6 +335,11 @@
           <p class="mb-2">One-time setup: run this in the <span class="text-neutral-300 font-medium">Supabase SQL Editor</span>, then reload. It only creates two brand-new tables, so nothing existing is touched:</p>
           <pre class="bg-[#050505] border border-neutral-800 rounded-lg p-3 text-[10px] text-emerald-400 overflow-x-auto whitespace-pre-wrap" id="ads-admin-setup-sql"></pre>
         </div>
+        <div id="ads-admin-upgrade" class="hidden text-xs text-neutral-500 leading-relaxed p-5 border-t border-neutral-800/80">
+          <p class="mb-2 text-yellow-500 font-semibold"><i class="ti ti-alert-triangle"></i> One more step to turn on run durations and fix deleting.</p>
+          <p class="mb-2">Run this once in the <span class="text-neutral-300 font-medium">Supabase SQL Editor</span>, then reload. It only adds two date columns, a delete function, and updates the public-read rule — your existing ads and stats stay as they are:</p>
+          <pre class="bg-[#050505] border border-neutral-800 rounded-lg p-3 text-[10px] text-emerald-400 overflow-x-auto whitespace-pre-wrap" id="ads-admin-upgrade-sql"></pre>
+        </div>
       </div>
 
       <div id="ad-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
@@ -361,6 +366,26 @@
               <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Weight — how often vs other active ads</label>
               <input type="number" id="ad-weight-input" min="1" max="100" value="1" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition"/>
               <p class="text-[10px] text-neutral-600 mt-1">An ad with weight 2 shows about twice as often as one with weight 1.</p>
+            </div>
+            <div id="ad-schedule-wrap" class="rounded-xl border border-neutral-800 bg-[#050505] p-3 space-y-3">
+              <p class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Run duration (optional)</p>
+              <div class="flex flex-wrap gap-1.5">
+                <button type="button" onclick="setAdDuration(7)" class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-neutral-800 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">7 days</button>
+                <button type="button" onclick="setAdDuration(14)" class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-neutral-800 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">14 days</button>
+                <button type="button" onclick="setAdDuration(30)" class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-neutral-800 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">30 days</button>
+                <button type="button" onclick="setAdDuration(0)" class="px-2.5 py-1 text-[11px] font-bold rounded-md border border-neutral-800 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">No end</button>
+              </div>
+              <div class="grid grid-cols-2 gap-3">
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Starts</label>
+                  <input type="date" id="ad-start-input" class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-2.5 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition [color-scheme:dark]"/>
+                </div>
+                <div>
+                  <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Expires (end of day)</label>
+                  <input type="date" id="ad-end-input" class="w-full bg-[#0a0a0a] border border-neutral-800 rounded-lg px-2.5 py-2 text-xs text-white outline-none focus:border-[#c9a96e] mt-1 transition [color-scheme:dark]"/>
+                </div>
+              </div>
+              <p class="text-[10px] text-neutral-600">Leave both empty to run until you turn it off. After the expiry date it stops showing on its own.</p>
             </div>
             <label class="flex items-center gap-2 cursor-pointer">
               <input type="checkbox" id="ad-enabled-input" checked class="w-4 h-4 accent-[#c9a96e]"/>
@@ -1268,6 +1293,36 @@ create policy "Anyone can log ad events" on public.ad_events
 create policy "Admin can read ad events" on public.ad_events
   for select to authenticated using (auth.jwt() ->> 'email' = '@@ADMIN@@');`.replaceAll('@@ADMIN@@', ALLOWED_ADMIN_EMAIL);
 
+    const ADS_UPGRADE_SQL = `-- Run durations: optional start/end for each ad.
+alter table public.ads add column if not exists starts_at timestamptz;
+alter table public.ads add column if not exists ends_at timestamptz;
+
+-- The public page only sees ads that are on AND inside their run window,
+-- so an expired ad stops showing by itself, even from a stale browser tab.
+drop policy if exists "Public can read enabled ads" on public.ads;
+create policy "Public can read enabled ads" on public.ads
+  for select to anon, authenticated
+  using (
+    enabled = true
+    and (starts_at is null or starts_at <= now())
+    and (ends_at is null or ends_at > now())
+  );
+
+-- Delete through a function (a plain POST call), admin only.
+create or replace function public.delete_ad(p_id uuid)
+returns void language plpgsql security definer
+set search_path = public as $$
+begin
+  if (auth.jwt() ->> 'email') is distinct from '@@ADMIN@@' then
+    raise exception 'not allowed';
+  end if;
+  delete from public.ads where id = p_id;
+end;
+$$;
+revoke all on function public.delete_ad(uuid) from public, anon;
+grant execute on function public.delete_ad(uuid) to authenticated;`.replaceAll('@@ADMIN@@', ALLOWED_ADMIN_EMAIL);
+
+    let adsScheduleReady = false;
     let allAds = [];
     let adEventCounts = {};
     let pendingAdImage = null;
@@ -1288,6 +1343,13 @@ create policy "Admin can read ad events" on public.ad_events
       document.getElementById('ads-admin-setup').classList.add('hidden');
       allAds = ads || [];
 
+      // Are the run-duration columns there yet? If not, show the upgrade SQL.
+      const probe = await supabaseClient.from('ads').select('starts_at, ends_at').limit(1);
+      adsScheduleReady = !probe.error;
+      document.getElementById('ads-admin-upgrade-sql').textContent = ADS_UPGRADE_SQL;
+      document.getElementById('ads-admin-upgrade').classList.toggle('hidden', adsScheduleReady);
+      document.getElementById('ad-schedule-wrap').classList.toggle('hidden', !adsScheduleReady);
+
       adEventCounts = {};
       const { data: events, error: evErr } = await supabaseClient.from('ad_events').select('ad_id, event_type');
       if (!evErr && events) {
@@ -1301,6 +1363,20 @@ create policy "Admin can read ad events" on public.ad_events
     }
 
     function escAd(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function adRunStatus(ad) {
+      const now = Date.now();
+      const st = ad.starts_at ? new Date(ad.starts_at).getTime() : null;
+      const en = ad.ends_at ? new Date(ad.ends_at).getTime() : null;
+      const fmt = t => new Date(t).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' });
+      if (st && st > now) return { label: 'Scheduled', cls: 'text-blue-400', note: 'starts ' + fmt(st) };
+      if (en && en <= now) return { label: 'Expired', cls: 'text-red-400', note: 'ended ' + fmt(en) };
+      if (en) {
+        const d = Math.ceil((en - now) / 86400000);
+        return { label: 'Live', cls: 'text-emerald-400', note: d <= 1 ? 'ends today' : d + ' days left' };
+      }
+      return { label: 'Live', cls: 'text-emerald-400', note: 'no end date' };
+    }
 
     function renderAdsAdmin() {
       const wrap = document.getElementById('ads-admin-list');
@@ -1318,6 +1394,7 @@ create policy "Admin can read ad events" on public.ad_events
           <div class="flex-1 min-w-0">
             <p class="text-sm font-bold text-white truncate">${escAd(ad.caption || 'Untitled ad')}</p>
             <p class="text-[11px] text-neutral-500 truncate">${escAd(ad.link || 'No link')} · weight ${ad.weight ?? 1}</p>
+            ${adsScheduleReady ? (() => { const r = adRunStatus(ad); return `<p class="text-[11px] mt-0.5"><span class="font-bold ${r.cls}">${r.label}</span> <span class="text-neutral-500">· ${r.note}</span></p>`; })() : ''}
           </div>
           <div class="text-right text-xs text-neutral-400 hidden sm:block flex-shrink-0">
             <p><span class="text-white font-bold tabular-nums">${st.impressions.toLocaleString()}</span> views</p>
@@ -1343,8 +1420,26 @@ create policy "Admin can read ad events" on public.ad_events
       document.getElementById('ad-link-input').value = ad ? (ad.link || '') : '';
       document.getElementById('ad-weight-input').value = ad ? (ad.weight ?? 1) : 1;
       document.getElementById('ad-enabled-input').checked = ad ? !!ad.enabled : true;
+      document.getElementById('ad-start-input').value = ad && ad.starts_at ? adToDateInput(ad.starts_at) : '';
+      document.getElementById('ad-end-input').value = ad && ad.ends_at ? adToDateInput(ad.ends_at) : '';
       if (ad && ad.image) { pendingAdImage = ad.image; preview.classList.remove('hidden'); preview.querySelector('img').src = ad.image; }
       document.getElementById('ad-modal').classList.remove('hidden');
+    }
+
+    function adToDateInput(iso) {
+      const d = new Date(iso), p = n => String(n).padStart(2, '0');
+      return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}`;
+    }
+
+    // Quick presets: run for N days starting from the Starts date (or today).
+    function setAdDuration(days) {
+      const startEl = document.getElementById('ad-start-input');
+      const endEl = document.getElementById('ad-end-input');
+      if (days === 0) { endEl.value = ''; return; }
+      const base = startEl.value ? new Date(startEl.value + 'T00:00:00') : new Date();
+      if (!startEl.value) startEl.value = adToDateInput(base);
+      base.setDate(base.getDate() + days);
+      endEl.value = adToDateInput(base);
     }
 
     function closeAdModal() {
@@ -1386,6 +1481,15 @@ create policy "Admin can read ad events" on public.ad_events
       const btn = document.getElementById('save-ad-btn');
       btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
       const payload = { image: pendingAdImage || null, caption, link, weight, enabled };
+      if (adsScheduleReady) {
+        const sv = document.getElementById('ad-start-input').value;
+        const ev = document.getElementById('ad-end-input').value;
+        const sd = sv ? new Date(sv + 'T00:00:00') : null;
+        const ed = ev ? new Date(ev + 'T23:59:59') : null;
+        if (sd && ed && ed < sd) { alert('The expiry date is before the start date.'); btn.innerHTML = 'Save Ad'; return; }
+        payload.starts_at = sd ? sd.toISOString() : null;
+        payload.ends_at = ed ? ed.toISOString() : null;
+      }
       try {
         if (id) {
           const { error } = await supabaseClient.from('ads').update(payload).eq('id', id);
@@ -1415,8 +1519,17 @@ create policy "Admin can read ad events" on public.ad_events
       const ad = allAds.find(a => a.id === id);
       if (!ad) return;
       if (!confirm(`Delete "${ad.caption || 'this ad'}"? It stops showing immediately on every studio's sticker page.`)) return;
-      const { error } = await supabaseClient.from('ads').delete().eq('id', id);
-      if (error) { alert('Error deleting ad: ' + error.message); return; }
+      // Try the function first (a plain POST, like saving). Fall back to a
+      // direct delete if the function hasn't been created yet.
+      let { error } = await supabaseClient.rpc('delete_ad', { p_id: id });
+      if (error) {
+        const direct = await supabaseClient.from('ads').delete().eq('id', id);
+        error = direct.error;
+      }
+      if (error) {
+        alert('Could not delete the ad. Run the upgrade SQL shown in the Ads & Promotions card (it adds the delete function), reload, and try again.\n\nDetails: ' + error.message);
+        return;
+      }
       await fetchAds();
     }
 
