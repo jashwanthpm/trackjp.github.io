@@ -315,6 +315,65 @@
 
       </div>
 
+      <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl shadow-xl overflow-hidden flex flex-col">
+        <div class="p-5 border-b border-neutral-800/80 flex flex-col md:flex-row md:items-center justify-between gap-4 bg-[#0a0a0a]">
+          <div>
+            <h2 class="text-lg font-bold text-white tracking-wide flex items-center gap-2"><i class="ti ti-speakerphone text-[#c9a96e]"></i> Ads &amp; Promotions</h2>
+            <p class="text-xs text-neutral-500 mt-0.5">Shown in the footer space of the page a stranger sees after scanning any studio's gear sticker — platform-wide, managed only from here.</p>
+          </div>
+          <button onclick="openAdModal()" class="px-4 py-2.5 bg-[#c9a96e] hover:bg-[#e6c98a] text-black text-xs font-bold rounded-xl transition shadow-lg flex items-center gap-1.5 whitespace-nowrap">
+            <i class="ti ti-plus"></i> New Ad
+          </button>
+        </div>
+        <div id="ads-admin-list" class="divide-y divide-neutral-800/50">
+          <div class="p-10 text-center text-neutral-500 text-sm"><i class="ti ti-loader animate-spin text-2xl mb-2 block text-[#c9a96e]"></i>Loading ads…</div>
+        </div>
+        <div id="ads-admin-empty" class="hidden p-10 text-center text-neutral-500 text-sm">
+          <i class="ti ti-speakerphone text-3xl mb-2 block text-neutral-700"></i>No ads yet. Click "New Ad" to add one.
+        </div>
+        <div id="ads-admin-setup" class="hidden text-xs text-neutral-500 leading-relaxed p-5 border-t border-neutral-800/80">
+          <p class="mb-2">One-time setup: run this in the <span class="text-neutral-300 font-medium">Supabase SQL Editor</span>, then reload. It only creates two brand-new tables, so nothing existing is touched:</p>
+          <pre class="bg-[#050505] border border-neutral-800 rounded-lg p-3 text-[10px] text-emerald-400 overflow-x-auto whitespace-pre-wrap" id="ads-admin-setup-sql"></pre>
+        </div>
+      </div>
+
+      <div id="ad-modal" class="hidden fixed inset-0 z-[100] bg-black/80 flex items-center justify-center p-4">
+        <div class="bg-[#0a0a0a] border border-neutral-800/80 rounded-2xl p-6 w-full max-w-md shadow-2xl relative overflow-hidden max-h-[90vh] overflow-y-auto">
+          <div class="absolute top-0 left-0 w-full h-1 bg-[#c9a96e]"></div>
+          <h3 class="text-lg font-bold text-white mb-1" id="ad-modal-title">New Ad</h3>
+          <p class="text-xs text-neutral-500 mb-5">Shows at the bottom of every studio's public sticker-scan page.</p>
+          <input type="hidden" id="ad-edit-id"/>
+          <div class="space-y-4">
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Image (~600×200px) — optional</label>
+              <input type="file" id="ad-image-input" accept="image/*" onchange="handleAdImageUpload(event)" class="w-full text-xs text-neutral-400 mt-1"/>
+              <div id="ad-image-preview" class="hidden mt-2 rounded-lg overflow-hidden border border-neutral-800 max-w-[280px]"><img class="w-full"/></div>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Caption</label>
+              <input type="text" id="ad-caption-input" maxlength="120" placeholder="e.g. Run your studio like this — try Sakkhi" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition"/>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Link (opens when tapped) — optional</label>
+              <input type="text" id="ad-link-input" placeholder="https://" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition"/>
+            </div>
+            <div>
+              <label class="text-[10px] uppercase font-bold text-neutral-500 tracking-wider">Weight — how often vs other active ads</label>
+              <input type="number" id="ad-weight-input" min="1" max="100" value="1" class="w-full bg-[#050505] border border-neutral-800 rounded-lg px-3 py-2.5 text-sm text-white outline-none focus:border-[#c9a96e] mt-1 transition"/>
+              <p class="text-[10px] text-neutral-600 mt-1">An ad with weight 2 shows about twice as often as one with weight 1.</p>
+            </div>
+            <label class="flex items-center gap-2 cursor-pointer">
+              <input type="checkbox" id="ad-enabled-input" checked class="w-4 h-4 accent-[#c9a96e]"/>
+              <span class="text-xs font-semibold text-neutral-300">Enabled (shows on the public page)</span>
+            </label>
+          </div>
+          <div class="flex gap-3 mt-8">
+            <button onclick="closeAdModal()" class="w-1/2 py-2.5 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:bg-neutral-900 hover:text-white transition">Cancel</button>
+            <button onclick="saveAdAdmin()" id="save-ad-btn" class="w-1/2 py-2.5 text-xs font-bold bg-[#c9a96e] text-black hover:bg-[#e6c98a] rounded-lg transition shadow-lg">Save Ad</button>
+          </div>
+        </div>
+      </div>
+
       <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         <!-- Database Storage Usage -->
@@ -522,6 +581,7 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
       document.getElementById('admin-dashboard').classList.remove('hidden');
       fetchAdminData();
       fetchDatabaseSize();
+      fetchAds();
     }
 
     // --- DATABASE STORAGE (Supabase 500MB free-tier tracker) ---
@@ -1160,6 +1220,204 @@ const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_
         alert('Error updating user plan: ' + e.message);
         btn.innerHTML = 'Update Plan';
       }
+    }
+
+    // ==========================================
+    // ADS & PROMOTIONS (admin-only, platform-wide)
+    // ==========================================
+    const ADS_SETUP_SQL = `-- Ads shown in the footer of the public sticker-scan page.
+create table if not exists public.ads (
+  id uuid primary key default gen_random_uuid(),
+  image text,
+  caption text,
+  link text,
+  enabled boolean not null default true,
+  weight int not null default 1,
+  created_at timestamptz not null default now(),
+  created_by text
+);
+alter table public.ads enable row level security;
+
+-- Anyone (incl. the anonymous page after a sticker scan) can read ads that are on.
+create policy "Public can read enabled ads" on public.ads
+  for select to anon, authenticated using (enabled = true);
+
+-- Only the master admin can see disabled ads or manage anything.
+create policy "Admin can read all ads" on public.ads
+  for select to authenticated using (auth.jwt() ->> 'email' = '@@ADMIN@@');
+create policy "Admin can insert ads" on public.ads
+  for insert to authenticated with check (auth.jwt() ->> 'email' = '@@ADMIN@@');
+create policy "Admin can update ads" on public.ads
+  for update to authenticated using (auth.jwt() ->> 'email' = '@@ADMIN@@')
+  with check (auth.jwt() ->> 'email' = '@@ADMIN@@');
+create policy "Admin can delete ads" on public.ads
+  for delete to authenticated using (auth.jwt() ->> 'email' = '@@ADMIN@@');
+
+-- One row per view/click.
+create table if not exists public.ad_events (
+  id bigint generated always as identity primary key,
+  ad_id uuid references public.ads(id) on delete cascade,
+  event_type text not null check (event_type in ('impression','click')),
+  sticker_code text,
+  created_at timestamptz not null default now()
+);
+alter table public.ad_events enable row level security;
+
+create policy "Anyone can log ad events" on public.ad_events
+  for insert to anon, authenticated with check (true);
+create policy "Admin can read ad events" on public.ad_events
+  for select to authenticated using (auth.jwt() ->> 'email' = '@@ADMIN@@');`.replaceAll('@@ADMIN@@', ALLOWED_ADMIN_EMAIL);
+
+    let allAds = [];
+    let adEventCounts = {};
+    let pendingAdImage = null;
+    let adsTablesMissing = false;
+
+    async function fetchAds() {
+      const { data: ads, error: adsErr } = await supabaseClient.from('ads').select('*').order('created_at', { ascending: false });
+      if (adsErr) {
+        adsTablesMissing = true;
+        document.getElementById('ads-admin-setup-sql').textContent = ADS_SETUP_SQL;
+        document.getElementById('ads-admin-setup').classList.remove('hidden');
+        document.getElementById('ads-admin-list').innerHTML = '';
+        document.getElementById('ads-admin-empty').classList.add('hidden');
+        console.warn('Ads tables not available yet:', adsErr.message);
+        return;
+      }
+      adsTablesMissing = false;
+      document.getElementById('ads-admin-setup').classList.add('hidden');
+      allAds = ads || [];
+
+      adEventCounts = {};
+      const { data: events, error: evErr } = await supabaseClient.from('ad_events').select('ad_id, event_type');
+      if (!evErr && events) {
+        events.forEach(e => {
+          if (!adEventCounts[e.ad_id]) adEventCounts[e.ad_id] = { impressions: 0, clicks: 0 };
+          if (e.event_type === 'impression') adEventCounts[e.ad_id].impressions++;
+          else if (e.event_type === 'click') adEventCounts[e.ad_id].clicks++;
+        });
+      }
+      renderAdsAdmin();
+    }
+
+    function escAd(s) { return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+    function renderAdsAdmin() {
+      const wrap = document.getElementById('ads-admin-list');
+      const empty = document.getElementById('ads-admin-empty');
+      if (!allAds.length) { wrap.innerHTML = ''; empty.classList.remove('hidden'); return; }
+      empty.classList.add('hidden');
+      wrap.innerHTML = allAds.map(ad => {
+        const st = adEventCounts[ad.id] || { impressions: 0, clicks: 0 };
+        const ctr = st.impressions ? ((st.clicks / st.impressions) * 100).toFixed(1) : '0.0';
+        return `
+        <div class="flex items-center gap-4 p-4">
+          ${ad.image
+            ? `<img src="${escAd(ad.image)}" class="w-16 h-10 object-cover rounded-md border border-neutral-800 flex-shrink-0"/>`
+            : `<div class="w-16 h-10 rounded-md border border-neutral-800 bg-neutral-950 flex items-center justify-center flex-shrink-0"><i class="ti ti-speakerphone text-neutral-700"></i></div>`}
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-bold text-white truncate">${escAd(ad.caption || 'Untitled ad')}</p>
+            <p class="text-[11px] text-neutral-500 truncate">${escAd(ad.link || 'No link')} · weight ${ad.weight ?? 1}</p>
+          </div>
+          <div class="text-right text-xs text-neutral-400 hidden sm:block flex-shrink-0">
+            <p><span class="text-white font-bold tabular-nums">${st.impressions.toLocaleString()}</span> views</p>
+            <p><span class="text-white font-bold tabular-nums">${st.clicks.toLocaleString()}</span> clicks · ${ctr}% CTR</p>
+          </div>
+          <button onclick="toggleAdEnabledAdmin('${ad.id}')" class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1.5 rounded-md border transition ${ad.enabled ? 'border-emerald-700 text-emerald-300 bg-emerald-950/20' : 'border-neutral-700 text-neutral-500'}">${ad.enabled ? 'On' : 'Off'}</button>
+          <button onclick="openAdModal('${ad.id}')" class="flex-shrink-0 p-2 text-neutral-500 hover:text-white rounded-md hover:bg-neutral-900 transition" title="Edit"><i class="ti ti-edit text-sm"></i></button>
+          <button onclick="deleteAdAdmin('${ad.id}')" class="flex-shrink-0 p-2 text-neutral-500 hover:text-red-400 rounded-md hover:bg-red-950/30 transition" title="Delete"><i class="ti ti-trash text-sm"></i></button>
+        </div>`;
+      }).join('');
+    }
+
+    function openAdModal(id) {
+      if (adsTablesMissing) { alert('Run the setup SQL shown in the Ads & Promotions card first, then reload.'); return; }
+      pendingAdImage = null;
+      document.getElementById('ad-image-input').value = '';
+      const preview = document.getElementById('ad-image-preview');
+      preview.classList.add('hidden');
+      const ad = id ? allAds.find(a => a.id === id) : null;
+      document.getElementById('ad-edit-id').value = id || '';
+      document.getElementById('ad-modal-title').textContent = ad ? 'Edit Ad' : 'New Ad';
+      document.getElementById('ad-caption-input').value = ad ? (ad.caption || '') : '';
+      document.getElementById('ad-link-input').value = ad ? (ad.link || '') : '';
+      document.getElementById('ad-weight-input').value = ad ? (ad.weight ?? 1) : 1;
+      document.getElementById('ad-enabled-input').checked = ad ? !!ad.enabled : true;
+      if (ad && ad.image) { pendingAdImage = ad.image; preview.classList.remove('hidden'); preview.querySelector('img').src = ad.image; }
+      document.getElementById('ad-modal').classList.remove('hidden');
+    }
+
+    function closeAdModal() {
+      document.getElementById('ad-modal').classList.add('hidden');
+      document.getElementById('save-ad-btn').innerHTML = 'Save Ad';
+    }
+
+    function handleAdImageUpload(event) {
+      const file = event.target.files && event.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const scale = Math.min(1, 640 / img.width);
+          const canvas = document.createElement('canvas');
+          canvas.width = Math.max(1, Math.round(img.width * scale));
+          canvas.height = Math.max(1, Math.round(img.height * scale));
+          canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+          pendingAdImage = canvas.toDataURL('image/jpeg', 0.82);
+          const prev = document.getElementById('ad-image-preview');
+          prev.classList.remove('hidden');
+          prev.querySelector('img').src = pendingAdImage;
+        };
+        img.src = reader.result;
+      };
+      reader.readAsDataURL(file);
+    }
+
+    async function saveAdAdmin() {
+      const id = document.getElementById('ad-edit-id').value;
+      const caption = document.getElementById('ad-caption-input').value.trim();
+      const link = document.getElementById('ad-link-input').value.trim();
+      const weight = Math.max(1, parseInt(document.getElementById('ad-weight-input').value, 10) || 1);
+      const enabled = document.getElementById('ad-enabled-input').checked;
+      if (!pendingAdImage && !caption) { alert('Add an image or a caption first.'); return; }
+      if (link && !/^https?:\/\//i.test(link)) { alert('Link should start with http:// or https://'); return; }
+
+      const btn = document.getElementById('save-ad-btn');
+      btn.innerHTML = '<i class="ti ti-loader animate-spin"></i> Saving...';
+      const payload = { image: pendingAdImage || null, caption, link, weight, enabled };
+      try {
+        if (id) {
+          const { error } = await supabaseClient.from('ads').update(payload).eq('id', id);
+          if (error) throw error;
+        } else {
+          const { data: { session } } = await supabaseClient.auth.getSession();
+          const { error } = await supabaseClient.from('ads').insert([{ ...payload, created_by: session?.user?.email || null }]);
+          if (error) throw error;
+        }
+        closeAdModal();
+        await fetchAds();
+      } catch (e) {
+        alert('Error saving ad: ' + e.message);
+        btn.innerHTML = 'Save Ad';
+      }
+    }
+
+    async function toggleAdEnabledAdmin(id) {
+      const ad = allAds.find(a => a.id === id);
+      if (!ad) return;
+      const { error } = await supabaseClient.from('ads').update({ enabled: !ad.enabled }).eq('id', id);
+      if (error) { alert('Error updating ad: ' + error.message); return; }
+      await fetchAds();
+    }
+
+    async function deleteAdAdmin(id) {
+      const ad = allAds.find(a => a.id === id);
+      if (!ad) return;
+      if (!confirm(`Delete "${ad.caption || 'this ad'}"? It stops showing immediately on every studio's sticker page.`)) return;
+      const { error } = await supabaseClient.from('ads').delete().eq('id', id);
+      if (error) { alert('Error deleting ad: ' + error.message); return; }
+      await fetchAds();
     }
 
     if ('serviceWorker' in navigator) {
