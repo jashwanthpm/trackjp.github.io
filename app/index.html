@@ -3278,6 +3278,45 @@ async function autoConfirmDirectBookings(bookingsList) {
   return autoConfirmed;
 }
 
+// How we tell a REAL booking-link booking from a shoot you added yourself
+// (on this device or any other): the submit_booking_request database
+// function creates a "New Booking Request" notification on the server in
+// the same instant a client books through the link. Shoots added from a
+// dashboard never get one. So "does the server have a booking alert for
+// this shoot?" is the one signal that works the same on every device, with
+// no syncing or timing to go wrong.
+function findServerBookingNotification(booking, rows) {
+  const bookingCreatedMs = booking.created ? new Date(booking.created).getTime() : null;
+  const clientName = (booking.name || '').trim().toLowerCase();
+  const actionUrl = `shoot:${booking.id}`;
+  return (rows || []).find(r => {
+    if (!r.created_at) return false;
+    const title = (r.title || '').toLowerCase();
+    const looksLikeBooking = title.includes('booking') || title.includes('request');
+    if (r.action_url === actionUrl) return true;
+    if (!looksLikeBooking) return false;
+    const t = new Date(r.created_at).getTime();
+    if (bookingCreatedMs !== null && Math.abs(t - bookingCreatedMs) <= 2 * 60 * 1000) return true;
+    if (t < Date.now() - 10 * 60 * 1000) return false;
+    return !!clientName && (r.message || '').toLowerCase().includes(clientName);
+  });
+}
+
+// Of the shoots that just appeared, keeps only the ones that genuinely came
+// in through the booking link. Anything else (added from a dashboard) is
+// simply adopted into the list quietly: no alert, toast or activity entry.
+async function filterRealLinkBookings(candidates) {
+  if (!candidates || !candidates.length) return [];
+  try {
+    const userId = currentUser?.id || currentUser?.email || 'default_user';
+    const rows = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc&limit=50`);
+    return candidates.filter(b => !!findServerBookingNotification(b, rows));
+  } catch (e) {
+    console.warn('Could not verify booking origin; skipping alert to avoid a false one:', e);
+    return [];
+  }
+}
+
 // The submit_booking_request database function already creates a "New
 // Booking Request" notification server-side the moment someone books — so
 // if we also add our own client-side one, every booking shows up twice
@@ -3302,19 +3341,7 @@ async function notifyNewBooking(booking, wasAuto) {
     // reliable signal; name-in-message and action_url are backups in case
     // the timestamps don't line up exactly.
     const rows = await sbFetch(`notifications?user_id=eq.${userId}&order=created_at.desc&limit=25`);
-    const bookingCreatedMs = booking.created ? new Date(booking.created).getTime() : null;
-    const windowCutoff = Date.now() - 10 * 60 * 1000; // last 10 minutes, as a broader backstop
-    const clientName = (booking.name || '').trim().toLowerCase();
-
-    const match = (rows || []).find(r => {
-      if (!r.created_at) return false;
-      const t = new Date(r.created_at).getTime();
-      if (bookingCreatedMs !== null && Math.abs(t - bookingCreatedMs) <= 2 * 60 * 1000) return true;
-      if (t < windowCutoff) return false;
-      if (!(r.title || '').toLowerCase().includes('booking')) return false;
-      if (r.action_url === actionUrl) return true;
-      return clientName && (r.message || '').toLowerCase().includes(clientName);
-    });
+    const match = findServerBookingNotification(booking, rows);
 
     if (match) {
       if (match.title !== title || match.message !== message || match.action_url !== actionUrl) {
@@ -3337,28 +3364,13 @@ async function notifyNewBooking(booking, wasAuto) {
       return;
     }
   } catch (e) {
-    console.warn('Could not reconcile booking notification, adding locally instead:', e);
+    console.warn('Could not reconcile booking notification:', e);
   }
-
-  // Last-resort safety net: if something already added a matching alert
-  // locally this session (e.g. a near-simultaneous poll), don't pile on
-  // a second one — just leave the existing entry as-is.
-  const recentLocalDupe = _notifications.find(n => {
-    if (!n.timestamp || Date.now() - new Date(n.timestamp).getTime() > 10 * 60 * 1000) return false;
-    if (!(n.title || '').toLowerCase().includes('booking')) return false;
-    const clientName = (booking.name || '').trim().toLowerCase();
-    return clientName && (n.message || '').toLowerCase().includes(clientName);
-  });
-  if (recentLocalDupe) {
-    recentLocalDupe.title = title;
-    recentLocalDupe.message = message;
-    recentLocalDupe.actionUrl = actionUrl;
-    saveNotifications();
-    updateNotificationUI();
-    return;
-  }
-
-  addNotification(title, message, booking.id, actionUrl, actionLabel);
+  // Deliberately NO fallback that creates a notification of our own. If the
+  // server has no booking alert for this shoot, it did not come from the
+  // booking link (it was added from a dashboard), so there is nothing to
+  // announce. A genuine booking's own server alert also reaches this device
+  // through the regular notification sync.
 }
 
 async function pollForUpdates() {
@@ -3381,7 +3393,7 @@ async function pollForUpdates() {
     //    or edits made from another device)
     const raw = await sbFetch(`shoots?user_id=eq.${userId}&select=*&order=date.desc`);
     const freshShoots = raw.map(dbToShoot);
-    const brandNew = freshShoots.filter(s => !existingIds.has(s.id) && !ownShootIds.has(s.id) && !manualShootIdSet.has(s.id));
+    const brandNewCandidates = freshShoots.filter(s => !existingIds.has(s.id) && !ownShootIds.has(s.id) && !manualShootIdSet.has(s.id));
 
     const dataChanged = freshShoots.length !== _shoots.length ||
       JSON.stringify(freshShoots) !== JSON.stringify(_shoots);
@@ -3390,6 +3402,10 @@ async function pollForUpdates() {
       _shoots = freshShoots;
       refreshActiveSectionUI();
     }
+
+    // Only shoots the server has its own booking alert for are real link
+    // bookings; everything else (added from a dashboard) stays silent.
+    const brandNew = await filterRealLinkBookings(brandNewCandidates);
 
     if (brandNew.length > 0) {
       const autoConfirmedIds = await autoConfirmDirectBookings(brandNew);
@@ -3861,6 +3877,10 @@ try {
         return shootTime > lastSeenTime;
       });
     }
+
+    // Same rule as the live poll: only shoots with a server-side booking
+    // alert came through the booking link; dashboard-added ones stay silent.
+    if (newBookings.length && !isDemoMode) newBookings = await filterRealLinkBookings(newBookings);
 
     // Update the tracker to right now
     localStorage.setItem('sakkhi_last_seen', new Date().toISOString());
