@@ -451,7 +451,10 @@
     </div>
     <div id="browser-notif-row" class="hidden px-3 py-2 border-b border-neutral-900 flex items-center justify-between gap-2 bg-neutral-950/60 sticky top-[45px] z-10">
       <span id="browser-notif-label" class="text-[11px] text-neutral-400 leading-snug"></span>
-      <button id="browser-notif-btn" onclick="toggleBrowserNotifications()" class="flex-shrink-0 text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition"></button>
+      <div class="flex-shrink-0 flex items-center gap-1.5">
+        <button id="browser-notif-test" onclick="sendTestPush()" class="hidden text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">Test</button>
+        <button id="browser-notif-btn" onclick="toggleBrowserNotifications()" class="text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition"></button>
+      </div>
     </div>
     <div id="notification-list" class="flex-1 overflow-y-auto p-2 space-y-2 hide-scrollbar">
       <div class="p-4 text-center text-xs text-neutral-500">No new notifications</div>
@@ -3108,10 +3111,30 @@ function addNotification(title, message, targetId, actionUrl = null, actionLabel
   fireBrowserNotification(title, message, actionUrl);
 }
 
-// --- Browser (OS-level) notifications, mirroring the in-app bell ---
-// A per-device opt-in — the browser's own permission is per-device anyway,
-// so there's no point syncing the on/off preference across devices.
+// --- Notifications on this device ---
+// Two layers, both per-device (permission is per-device anyway):
+//  1) Real background PUSH — delivered by the browser/phone itself, so it
+//     arrives even when Sakkhi is closed (Android, desktop, and iPhone once
+//     the app is added to the Home Screen).
+//  2) An in-page popup for alerts that only exist on this device (never
+//     reach the server), shown while the tab is open but in the background.
 const BROWSER_NOTIF_PREF_KEY = 'sakkhi_browser_notifs_enabled';
+const PUSH_ACTIVE_KEY = 'sakkhi_push_active';
+const PUSH_SW_URL = '/push-sw.js';
+const PUSH_SW_SCOPE = '/push-scope/';
+// Public half of the key pair (safe to ship in the page). The private half
+// lives only in the server-side function's secrets.
+const VAPID_PUBLIC_KEY = 'BD8RkPD5_buDJqb0IumbKkgeLaP_-DqIjpWJgHqroxrswZtm5SRk6V96jTuAWfT9R_ReJNAiJ4XPSCC97Kapn-o';
+
+function pushSupported() {
+  return 'serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined';
+}
+function isIOSDevice() {
+  return /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+function isInstalledApp() {
+  return window.navigator.standalone === true || (window.matchMedia && window.matchMedia('(display-mode: standalone)').matches);
+}
 
 function browserNotifOn() {
   return typeof Notification !== 'undefined'
@@ -3119,55 +3142,163 @@ function browserNotifOn() {
     && localStorage.getItem(BROWSER_NOTIF_PREF_KEY) === '1';
 }
 
-// Shows a real OS notification for anything that would otherwise only show
-// up in the in-app bell. Only fires while the tab is backgrounded/unfocused
-// — if someone's actively looking at the app, the bell and toast already
-// covered it, so a popup on top would just be a redundant second alert for
-// the same thing.
-function fireBrowserNotification(title, body, url) {
+// In-page popup. Skipped when the alert is server-backed AND real push is
+// active on this device (the push already delivers it — showing both would
+// just be the same alert twice). Also skipped while the app is in front.
+function fireBrowserNotification(title, body, url, serverBacked) {
   try {
     if (!browserNotifOn()) return;
+    if (serverBacked && localStorage.getItem(PUSH_ACTIVE_KEY) === '1') return;
     if (document.visibilityState === 'visible' && document.hasFocus()) return;
     const n = new Notification(title, { body: body || '', tag: url || title });
     n.onclick = () => { window.focus(); n.close(); };
   } catch (e) { console.warn('Browser notification failed:', e); }
 }
 
+function vapidKeyBytes() {
+  const pad = '='.repeat((4 - VAPID_PUBLIC_KEY.length % 4) % 4);
+  const raw = atob((VAPID_PUBLIC_KEY + pad).replace(/-/g, '+').replace(/_/g, '/'));
+  return Uint8Array.from(raw, c => c.charCodeAt(0));
+}
+
+// Registers the push service worker (separate from the app's own sw.js, so
+// nothing existing is touched) and waits until it is ready to use.
+async function getPushRegistration() {
+  const reg = await navigator.serviceWorker.register(PUSH_SW_URL, { scope: PUSH_SW_SCOPE });
+  if (reg.active) return reg;
+  const sw = reg.installing || reg.waiting;
+  if (!sw || sw.state === 'activated') return reg;
+  await new Promise((resolve, reject) => {
+    const t = setTimeout(() => reject(new Error('The notification service took too long to start.')), 10000);
+    sw.addEventListener('statechange', () => {
+      if (sw.state === 'activated') { clearTimeout(t); resolve(); }
+      else if (sw.state === 'redundant') { clearTimeout(t); reject(new Error('The notification service failed to start.')); }
+    });
+  });
+  return reg;
+}
+
+async function subscribeAndSavePush() {
+  const reg = await getPushRegistration();
+  let sub = await reg.pushManager.getSubscription();
+  if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: vapidKeyBytes() });
+  const j = sub.toJSON();
+  await sbFetch('rpc/save_push_subscription', {
+    method: 'POST',
+    body: JSON.stringify({ p_endpoint: j.endpoint, p_p256dh: j.keys.p256dh, p_auth: j.keys.auth, p_ua: navigator.userAgent.slice(0, 200) })
+  });
+  localStorage.setItem(PUSH_ACTIVE_KEY, '1');
+  return sub;
+}
+
+// Runs at login. Browsers occasionally rotate or drop subscriptions, so
+// this quietly re-registers this device whenever notifications are on.
+async function syncPushSubscription() {
+  try {
+    if (!currentUser || isDemoMode || !browserNotifOn() || !pushSupported()) return;
+    await subscribeAndSavePush();
+  } catch (e) { console.warn('Push sync skipped:', e); }
+}
+
+async function disablePush() {
+  localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '0');
+  localStorage.removeItem(PUSH_ACTIVE_KEY);
+  try {
+    const reg = await navigator.serviceWorker.getRegistration(location.origin + PUSH_SW_SCOPE);
+    const sub = reg && await reg.pushManager.getSubscription();
+    if (sub) {
+      const endpoint = sub.endpoint;
+      await sub.unsubscribe();
+      await sbFetch('rpc/remove_push_subscription', { method: 'POST', body: JSON.stringify({ p_endpoint: endpoint }) });
+    }
+  } catch (e) { console.warn('Could not fully remove push subscription:', e); }
+}
+
 function renderBrowserNotifRow() {
   const row = document.getElementById('browser-notif-row');
   const label = document.getElementById('browser-notif-label');
   const btn = document.getElementById('browser-notif-btn');
-  if (!row || !label || !btn) return;
-  if (typeof Notification === 'undefined') { row.classList.add('hidden'); return; }
+  const test = document.getElementById('browser-notif-test');
+  if (!row || !label || !btn || !test) return;
   row.classList.remove('hidden');
-  if (Notification.permission === 'denied') {
-    label.textContent = "Blocked for this site — allow notifications in your browser's site settings to turn this on.";
+  test.classList.add('hidden');
+  btn.classList.remove('hidden');
+
+  if (!pushSupported()) {
     btn.classList.add('hidden');
+    label.textContent = (isIOSDevice() && !isInstalledApp())
+      ? 'On iPhone/iPad: tap Share → "Add to Home Screen", then open Sakkhi from your Home Screen and turn this on.'
+      : "This browser doesn't support notifications.";
+    return;
+  }
+  if (Notification.permission === 'denied') {
+    btn.classList.add('hidden');
+    label.textContent = "Blocked for this site — allow notifications in your browser's site settings, then come back here.";
   } else if (browserNotifOn()) {
-    label.textContent = "You'll get these as browser notifications on this device too.";
+    label.textContent = "On — you'll get booking alerts on this device, even when Sakkhi is closed.";
     btn.textContent = 'Disable';
-    btn.classList.remove('hidden');
+    test.classList.remove('hidden');
   } else {
-    label.textContent = 'Also get these as browser notifications on this device.';
+    label.textContent = 'Get booking alerts on this device, even when Sakkhi is closed.';
     btn.textContent = 'Enable';
-    btn.classList.remove('hidden');
   }
 }
 
+function pushErrorHint(e) {
+  const m = String((e && e.message) || e || '');
+  if (/save_push_subscription|schema cache|does not exist/i.test(m)) return 'the server setup (SQL) has not been run yet.';
+  if (/ServiceWorker|push-sw|404|script/i.test(m)) return 'push-sw.js has not been uploaded next to this page yet.';
+  if (/SESSION_EXPIRED/.test(m)) return 'your session expired — log in again.';
+  return m.slice(0, 120);
+}
+
 async function toggleBrowserNotifications() {
-  if (typeof Notification === 'undefined') return;
+  if (!pushSupported()) { renderBrowserNotifRow(); return; }
+  const btn = document.getElementById('browser-notif-btn');
   if (browserNotifOn()) {
-    localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '0');
+    await disablePush();
     renderBrowserNotifRow();
+    showToast('Notifications turned off on this device.', 'success');
     return;
   }
   if (Notification.permission === 'denied') { renderBrowserNotifRow(); return; }
-  const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
-  if (perm === 'granted') {
+  if (btn) { btn.disabled = true; btn.textContent = 'Working…'; }
+  try {
+    const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+    if (perm !== 'granted') return;
+    await subscribeAndSavePush();
     localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '1');
-    showToast('Browser notifications enabled on this device.', 'success');
+    showToast('Notifications are on for this device. Tap Test to try one.', 'success');
+  } catch (e) {
+    console.warn('Enable notifications failed:', e);
+    showToast('Could not turn on notifications: ' + pushErrorHint(e), 'error');
+  } finally {
+    if (btn) btn.disabled = false;
+    renderBrowserNotifRow();
   }
-  renderBrowserNotifRow();
+}
+
+// Asks the server to push a test notification to every device this account
+// has enabled — proves the whole chain works end to end.
+async function sendTestPush() {
+  const test = document.getElementById('browser-notif-test');
+  if (test) { test.disabled = true; test.textContent = 'Sending…'; }
+  try {
+    const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'apikey': SUPABASE_KEY, 'Authorization': 'Bearer ' + ((currentUser && currentUser.token) || SUPABASE_KEY) },
+      body: JSON.stringify({ test: true })
+    });
+    const j = await res.json().catch(() => ({}));
+    if (res.status === 404) throw new Error('The send-push function has not been deployed yet.');
+    if (!res.ok) throw new Error(j.error || ('Server said ' + res.status));
+    if (!j.devices) showToast('No device is registered yet — turn notifications on, then try again.', 'error');
+    else showToast(`Test sent to ${j.sent} of ${j.devices} device${j.devices > 1 ? 's' : ''}. It should pop up in a moment.`, 'success');
+  } catch (e) {
+    showToast('Test failed: ' + ((e && e.message) || e), 'error');
+  } finally {
+    if (test) { test.disabled = false; test.textContent = 'Test'; }
+  }
 }
     
 // Updated: Removes a single notification locally and from the cloud
@@ -3357,7 +3488,7 @@ async function notifyNewBooking(booking, wasAuto) {
         local.actionUrl = actionUrl;
       } else {
         _notifications.unshift({ id: match.id, targetId: booking.id, title, message, timestamp: match.created_at || new Date().toISOString(), actionUrl, actionLabel, isRead: !!match.is_read });
-        fireBrowserNotification(title, message, actionUrl);
+        fireBrowserNotification(title, message, actionUrl, true);
       }
       saveNotifications();
       updateNotificationUI();
@@ -3447,7 +3578,7 @@ async function pollForUpdates() {
           actionUrl: n.action_url,
           isRead: n.is_read
         });
-        fireBrowserNotification(n.title, n.message, n.action_url);
+        fireBrowserNotification(n.title, n.message, n.action_url, true);
       });
       saveNotifications();
       updateNotificationUI();
@@ -3906,6 +4037,7 @@ try {
       // Start background polling so new bookings/notifications show up live,
       // without needing a manual reload.
       startLivePolling();
+      syncPushSubscription(); // keep this device's push registration fresh
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
