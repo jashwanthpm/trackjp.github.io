@@ -27,14 +27,6 @@ jobs:
           [ -n "$SUPABASE_ACCESS_TOKEN" ] || { echo "::error::Add the SUPABASE_ACCESS_TOKEN secret (see SETUP.md step 2)"; exit 1; }
           [ -n "${{ secrets.VAPID_PRIVATE_KEY }}" ] || { echo "::error::Add the VAPID_PRIVATE_KEY secret (see SETUP.md step 2)"; exit 1; }
 
-      - name: Create tables, functions and the trigger in Supabase
-        run: |
-          jq -Rs '{query: .}' supabase/push_setup.sql > /tmp/query.json
-          curl -sS --fail-with-body -X POST \
-            "https://api.supabase.com/v1/projects/$PROJECT_REF/database/query" \
-            -H "Authorization: Bearer $SUPABASE_ACCESS_TOKEN" \
-            -H "Content-Type: application/json" \
-            --data @/tmp/query.json
 
       - name: Save the push keys as function secrets
         run: |
