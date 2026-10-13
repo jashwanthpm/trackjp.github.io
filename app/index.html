@@ -3126,6 +3126,10 @@ const PUSH_SW_SCOPE = '/push-scope/';
 // lives only in the server-side function's secrets.
 const VAPID_PUBLIC_KEY = 'BD8RkPD5_buDJqb0IumbKkgeLaP_-DqIjpWJgHqroxrswZtm5SRk6V96jTuAWfT9R_ReJNAiJ4XPSCC97Kapn-o';
 
+// Set when turning notifications on fails for a fixable reason, so the bell
+// keeps showing exactly what to do instead of a toast that disappears.
+let _pushFailHint = '';
+
 function pushSupported() {
   return 'serviceWorker' in navigator && 'PushManager' in window && typeof Notification !== 'undefined';
 }
@@ -3239,13 +3243,20 @@ function renderBrowserNotifRow() {
     btn.textContent = 'Disable';
     test.classList.remove('hidden');
   } else {
-    label.textContent = 'Get booking alerts on this device, even when Sakkhi is closed.';
-    btn.textContent = 'Enable';
+    label.textContent = _pushFailHint || 'Get booking alerts on this device, even when Sakkhi is closed.';
+    btn.textContent = _pushFailHint ? 'Try again' : 'Enable';
   }
 }
 
 function pushErrorHint(e) {
   const m = String((e && e.message) || e || '');
+  // "push service error" = the browser could not reach its push server.
+  // On Brave this is almost always the privacy switch below being off.
+  if (/push service error|AbortError/i.test(m)) {
+    return (navigator.brave
+      ? "Brave blocks push by default. Open brave://settings/privacy, turn ON \"Use Google services for push messaging\", restart Brave, then tap Enable again."
+      : "your browser couldn't reach its push service. Check you're online and notifications aren't blocked for this browser, then try again.");
+  }
   if (/save_push_subscription|schema cache|does not exist/i.test(m)) return 'the server setup (SQL) has not been run yet.';
   if (/ServiceWorker|push-sw|404|script/i.test(m)) return 'push-sw.js has not been uploaded next to this page yet.';
   if (/SESSION_EXPIRED/.test(m)) return 'your session expired — log in again.';
@@ -3267,11 +3278,13 @@ async function toggleBrowserNotifications() {
     const perm = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
     if (perm !== 'granted') return;
     await subscribeAndSavePush();
+    _pushFailHint = '';
     localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '1');
     showToast('Notifications are on for this device. Tap Test to try one.', 'success');
   } catch (e) {
     console.warn('Enable notifications failed:', e);
-    showToast('Could not turn on notifications: ' + pushErrorHint(e), 'error');
+    _pushFailHint = pushErrorHint(e);
+    showToast('Could not turn on notifications. ' + _pushFailHint, 'error');
   } finally {
     if (btn) btn.disabled = false;
     renderBrowserNotifRow();
