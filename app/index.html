@@ -449,13 +449,6 @@
       <h3 class="text-sm font-bold text-white"><i class="ti ti-bell-ringing text-[#c9a96e] mr-1"></i> Notifications</h3>
       <button onclick="clearNotifications()" class="text-[10px] text-neutral-500 hover:text-white transition uppercase font-bold tracking-wider">Clear All</button>
     </div>
-    <div id="browser-notif-row" class="hidden px-3 py-2 border-b border-neutral-900 flex items-center justify-between gap-2 bg-neutral-950/60 sticky top-[45px] z-10">
-      <span id="browser-notif-label" class="text-[11px] text-neutral-400 leading-snug"></span>
-      <div class="flex-shrink-0 flex items-center gap-1.5">
-        <button id="browser-notif-test" onclick="sendTestPush()" class="hidden text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition">Test</button>
-        <button id="browser-notif-btn" onclick="toggleBrowserNotifications()" class="text-[10px] font-bold px-2.5 py-1 rounded-md border border-neutral-700 text-neutral-300 hover:border-[#c9a96e] hover:text-[#c9a96e] transition"></button>
-      </div>
-    </div>
     <div id="notification-list" class="flex-1 overflow-y-auto p-2 space-y-2 hide-scrollbar">
       <div class="p-4 text-center text-xs text-neutral-500">No new notifications</div>
     </div>
@@ -977,6 +970,10 @@
                 <i class="ti ti-lock text-lg"></i>
                 <span>Security</span>
               </button>
+              <button onclick="switchAccountTab('notifications')" class="account-sidebar-item" data-tab="notifications">
+                <i class="ti ti-bell text-lg"></i>
+                <span>Notifications</span>
+              </button>
               <button onclick="switchAccountTab('whatsapp')" class="account-sidebar-item" data-tab="whatsapp">
                 <i class="ti ti-brand-whatsapp text-lg"></i>
                 <span>WhatsApp</span>
@@ -1209,6 +1206,33 @@
                 </div>
             </div>
             
+
+            <div id="account-notifications" class="account-content-section">
+              <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 space-y-4">
+                <div class="border-b border-neutral-800 pb-4">
+                  <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ti ti-bell-ringing text-[#c9a96e]"></i> Notifications</h3>
+                  <p class="text-xs text-neutral-500 mt-1">Get an alert the moment a client books you, even when Sakkhi is closed. This is set per device.</p>
+                </div>
+                <div class="flex items-center justify-between gap-3 bg-neutral-950 border border-neutral-900 rounded-xl p-4">
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2 mb-1"><p class="text-sm font-bold text-white">This device</p><span id="notif-set-pill"></span></div>
+                    <p id="notif-set-label" class="text-xs text-neutral-500 leading-relaxed"></p>
+                  </div>
+                  <button id="notif-set-btn" onclick="toggleBrowserNotifications()" class="flex-shrink-0 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold px-3.5 py-2 rounded-lg transition"></button>
+                </div>
+                <div id="notif-set-test-row" class="hidden flex items-center justify-between gap-3 bg-neutral-950 border border-neutral-900 rounded-xl p-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-white">Send a test</p>
+                    <p class="text-xs text-neutral-500 mt-0.5">Checks that alerts reach this device.</p>
+                  </div>
+                  <button id="notif-set-test" onclick="sendTestPush()" class="flex-shrink-0 bg-neutral-900 border border-neutral-800 hover:border-neutral-700 text-neutral-200 text-xs font-bold px-3.5 py-2 rounded-lg transition">Send test</button>
+                </div>
+                <div class="text-[11px] text-neutral-600 leading-relaxed border-t border-neutral-900 pt-3 space-y-1">
+                  <p><span class="text-neutral-400 font-semibold">iPhone/iPad:</span> add Sakkhi to your Home Screen (Share → Add to Home Screen) and open it from there.</p>
+                  <p><span class="text-neutral-400 font-semibold">Brave:</span> turn on Settings → Privacy and security → "Use Google services for push messaging", then restart Brave.</p>
+                </div>
+              </div>
+            </div>
 
             <div id="account-whatsapp" class="account-content-section">
               <div class="bg-[#0d0d0d] border border-neutral-900 rounded-xl p-5 space-y-4">
@@ -2015,6 +2039,24 @@
           </div>
         </div>
       </div>
+    </div>
+
+    <div id="notif-prompt" class="hidden opacity-0 fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm transition-opacity duration-200">
+      <div id="notif-prompt-card" class="w-full max-w-[290px] scale-95 transition-transform duration-200 bg-[#1c1c1e] rounded-2xl overflow-hidden text-center shadow-2xl border border-white/10">
+        <div class="px-5 pt-6 pb-5">
+          <div class="w-14 h-14 mx-auto rounded-[14px] bg-[#c9a96e] flex items-center justify-center mb-3.5"><i class="ti ti-bell-ringing text-[28px] text-black"></i></div>
+          <h3 id="notif-prompt-title" class="text-[17px] font-semibold text-white leading-snug"></h3>
+          <p id="notif-prompt-text" class="text-[13px] text-neutral-400 mt-2 leading-snug"></p>
+        </div>
+        <div id="notif-prompt-actions" class="border-t border-white/10 grid grid-cols-2 divide-x divide-white/10"></div>
+      </div>
+    </div>
+
+    <div id="notif-banner" class="hidden fixed left-3 right-3 bottom-24 z-[65] max-w-md mx-auto bg-[#141414] border border-neutral-800 rounded-xl shadow-2xl p-3 flex items-center gap-3">
+      <div class="w-9 h-9 rounded-lg bg-[#c9a96e]/15 flex items-center justify-center flex-shrink-0"><i class="ti ti-bell-ringing text-[#c9a96e]"></i></div>
+      <p class="flex-1 text-xs text-neutral-300 leading-snug">Don't miss a booking — turn on notifications.</p>
+      <button onclick="acceptNotifPrompt()" class="flex-shrink-0 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-[11px] font-bold px-3 py-1.5 rounded-md transition">Turn on</button>
+      <button onclick="closeNotifBanner()" class="flex-shrink-0 text-neutral-500 hover:text-white p-1" title="Later"><i class="ti ti-x"></i></button>
     </div>
 
     <div id="confirm-modal-backdrop" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'confirm-modal-backdrop')">
@@ -3218,34 +3260,127 @@ async function disablePush() {
   } catch (e) { console.warn('Could not fully remove push subscription:', e); }
 }
 
+// Draws the Notifications card in Settings (status pill, explanation and
+// the on/off + test buttons). Safe to call anytime; does nothing if that
+// card isn't on screen yet.
 function renderBrowserNotifRow() {
-  const row = document.getElementById('browser-notif-row');
-  const label = document.getElementById('browser-notif-label');
-  const btn = document.getElementById('browser-notif-btn');
-  const test = document.getElementById('browser-notif-test');
-  if (!row || !label || !btn || !test) return;
-  row.classList.remove('hidden');
-  test.classList.add('hidden');
+  const label = document.getElementById('notif-set-label');
+  const btn = document.getElementById('notif-set-btn');
+  const testRow = document.getElementById('notif-set-test-row');
+  const pill = document.getElementById('notif-set-pill');
+  if (!label || !btn || !testRow || !pill) return;
+  testRow.classList.add('hidden');
   btn.classList.remove('hidden');
+
+  const setPill = (text, tone) => {
+    const tones = {
+      on: 'bg-emerald-950/40 text-emerald-300 border-emerald-800/60',
+      off: 'bg-neutral-900 text-neutral-400 border-neutral-700',
+      bad: 'bg-red-950/40 text-red-300 border-red-900/60'
+    };
+    pill.className = 'text-[10px] font-bold px-2 py-0.5 rounded-full border ' + tones[tone];
+    pill.textContent = text;
+  };
 
   if (!pushSupported()) {
     btn.classList.add('hidden');
+    setPill('Not available', 'off');
     label.textContent = (isIOSDevice() && !isInstalledApp())
-      ? 'On iPhone/iPad: tap Share → "Add to Home Screen", then open Sakkhi from your Home Screen and turn this on.'
+      ? 'On iPhone/iPad: tap Share → "Add to Home Screen", then open Sakkhi from your Home Screen and come back here.'
       : "This browser doesn't support notifications.";
     return;
   }
   if (Notification.permission === 'denied') {
     btn.classList.add('hidden');
-    label.textContent = "Blocked for this site — allow notifications in your browser's site settings, then come back here.";
+    setPill('Blocked', 'bad');
+    label.textContent = "Notifications are blocked for this site. Allow them in your browser's site settings (the lock icon next to the address bar), then come back here.";
   } else if (browserNotifOn()) {
-    label.textContent = "On — you'll get booking alerts on this device, even when Sakkhi is closed.";
-    btn.textContent = 'Disable';
-    test.classList.remove('hidden');
+    setPill('On', 'on');
+    label.textContent = "You'll get booking alerts on this device, even when Sakkhi is closed.";
+    btn.textContent = 'Turn off';
+    testRow.classList.remove('hidden');
   } else {
-    label.textContent = _pushFailHint || 'Get booking alerts on this device, even when Sakkhi is closed.';
-    btn.textContent = _pushFailHint ? 'Try again' : 'Enable';
+    setPill('Off', 'off');
+    label.textContent = _pushFailHint || 'Turn on to get booking alerts on this device, even when Sakkhi is closed.';
+    btn.textContent = _pushFailHint ? 'Try again' : 'Turn on';
   }
+}
+
+// ---- The "Allow notifications?" pop-up (iPhone-style) ----
+// Shown after sign-in. First time: a full pop-up. If they say Not Now, the
+// next time they open Sakkhi (at least 12 hours later) a small banner nudges
+// them instead — at most 3 reminders in total, then never again. They can
+// always turn it on later from Settings → Notifications.
+function notifPromptKey() { return 'sakkhi_notif_prompt_' + ((currentUser && (currentUser.id || currentUser.email)) || 'x'); }
+function notifPromptState() { try { return JSON.parse(localStorage.getItem(notifPromptKey()) || '{}'); } catch (e) { return {}; } }
+function saveNotifPromptState(patch) { try { localStorage.setItem(notifPromptKey(), JSON.stringify({ ...notifPromptState(), ...patch })); } catch (e) {} }
+
+function maybeShowNotifPrompt() {
+  try {
+    if (!currentUser || isDemoMode) return;
+    const st = notifPromptState();
+    if (st.done) return;
+    // iPhone/iPad in plain Safari can't do push until the app is on the Home Screen.
+    const needsInstall = isIOSDevice() && !isInstalledApp() && !pushSupported();
+    if (!needsInstall) {
+      if (!pushSupported()) return;
+      if (Notification.permission === 'denied') return;                  // can't ask again; Settings explains
+      if (browserNotifOn()) { saveNotifPromptState({ done: true }); return; }
+      if (localStorage.getItem(BROWSER_NOTIF_PREF_KEY) === '0') return;  // they turned it off on purpose
+    }
+    const count = st.count || 0;
+    if (count >= 3) return;
+    if (st.last && Date.now() - st.last < 12 * 3600 * 1000) return;
+    setTimeout(() => {
+      if (document.visibilityState !== 'visible') return;
+      saveNotifPromptState({ count: count + 1, last: Date.now() });
+      if (needsInstall) showNotifPrompt('install');
+      else if (count === 0) showNotifPrompt('ask');
+      else showNotifBanner();
+    }, 2500);
+  } catch (e) { console.warn('Notification prompt skipped:', e); }
+}
+
+function showNotifPrompt(mode) {
+  const el = document.getElementById('notif-prompt');
+  const card = document.getElementById('notif-prompt-card');
+  if (!el || !card) return;
+  const install = mode === 'install';
+  document.getElementById('notif-prompt-title').textContent = install ? 'Get alerts on your iPhone' : '\u201CSakkhi\u201D Would Like to Send You Notifications';
+  document.getElementById('notif-prompt-text').textContent = install
+    ? 'Tap the Share button, choose \u201CAdd to Home Screen\u201D, then open Sakkhi from your Home Screen to turn on notifications.'
+    : 'Get an instant alert the moment a client books you, even when the app is closed.';
+  document.getElementById('notif-prompt-actions').innerHTML = install
+    ? '<button onclick="dismissNotifPrompt()" class="col-span-2 py-3 text-[16px] font-semibold text-[#c9a96e] active:bg-white/5">Got It</button>'
+    : '<button onclick="dismissNotifPrompt()" class="py-3 text-[16px] text-neutral-300 active:bg-white/5">Not Now</button><button onclick="acceptNotifPrompt()" class="py-3 text-[16px] font-semibold text-[#c9a96e] active:bg-white/5">Allow</button>';
+  el.classList.remove('hidden');
+  requestAnimationFrame(() => { el.classList.remove('opacity-0'); card.classList.remove('scale-95'); });
+}
+
+function hideNotifPrompt() {
+  const el = document.getElementById('notif-prompt');
+  const card = document.getElementById('notif-prompt-card');
+  if (!el || !card) return;
+  el.classList.add('opacity-0'); card.classList.add('scale-95');
+  setTimeout(() => el.classList.add('hidden'), 200);
+}
+
+function showNotifBanner() {
+  const b = document.getElementById('notif-banner');
+  if (b) b.classList.remove('hidden');
+}
+function closeNotifBanner() {
+  const b = document.getElementById('notif-banner');
+  if (b) b.classList.add('hidden');
+}
+
+function dismissNotifPrompt() { hideNotifPrompt(); }
+
+async function acceptNotifPrompt() {
+  hideNotifPrompt();
+  closeNotifBanner();
+  await toggleBrowserNotifications();          // asks the browser, registers this device
+  if (browserNotifOn()) saveNotifPromptState({ done: true });
 }
 
 function pushErrorHint(e) {
@@ -3265,7 +3400,7 @@ function pushErrorHint(e) {
 
 async function toggleBrowserNotifications() {
   if (!pushSupported()) { renderBrowserNotifRow(); return; }
-  const btn = document.getElementById('browser-notif-btn');
+  const btn = document.getElementById('notif-set-btn');
   if (browserNotifOn()) {
     await disablePush();
     renderBrowserNotifRow();
@@ -3280,6 +3415,7 @@ async function toggleBrowserNotifications() {
     await subscribeAndSavePush();
     _pushFailHint = '';
     localStorage.setItem(BROWSER_NOTIF_PREF_KEY, '1');
+    saveNotifPromptState({ done: true });
     showToast('Notifications are on for this device. Tap Test to try one.', 'success');
   } catch (e) {
     console.warn('Enable notifications failed:', e);
@@ -3294,7 +3430,7 @@ async function toggleBrowserNotifications() {
 // Asks the server to push a test notification to every device this account
 // has enabled — proves the whole chain works end to end.
 async function sendTestPush() {
-  const test = document.getElementById('browser-notif-test');
+  const test = document.getElementById('notif-set-test');
   if (test) { test.disabled = true; test.textContent = 'Sending…'; }
   try {
     const res = await fetch(`${SUPABASE_URL}/functions/v1/send-push`, {
@@ -3310,7 +3446,7 @@ async function sendTestPush() {
   } catch (e) {
     showToast('Test failed: ' + ((e && e.message) || e), 'error');
   } finally {
-    if (test) { test.disabled = false; test.textContent = 'Test'; }
+    if (test) { test.disabled = false; test.textContent = 'Send test'; }
   }
 }
     
@@ -3356,7 +3492,6 @@ function toggleNotifications() {
   // Re-render UI when opened so times update (e.g., turning "Today" into "Yesterday" if a day passed)
   if (!dropdown.classList.contains('hidden')) {
     updateNotificationUI();
-    renderBrowserNotifRow();
   }
 }
 
@@ -4051,6 +4186,7 @@ try {
       // without needing a manual reload.
       startLivePolling();
       syncPushSubscription(); // keep this device's push registration fresh
+      maybeShowNotifPrompt();  // iPhone-style "Allow notifications?" pop-up
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
@@ -10738,6 +10874,10 @@ function updateAccountDisplay() {
 
       if (tab === 'inventory') {
         renderInventoryList();
+      }
+
+      if (tab === 'notifications') {
+        renderBrowserNotifRow();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
