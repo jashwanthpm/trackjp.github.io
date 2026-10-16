@@ -2041,14 +2041,14 @@
       </div>
     </div>
 
-    <div id="notif-prompt" class="hidden opacity-0 fixed inset-0 z-[70] flex items-center justify-center p-6 bg-black/70 backdrop-blur-sm transition-opacity duration-200">
-      <div id="notif-prompt-card" class="w-full max-w-[290px] scale-95 transition-transform duration-200 bg-[#1c1c1e] rounded-2xl overflow-hidden text-center shadow-2xl border border-white/10">
-        <div class="px-5 pt-6 pb-5">
-          <div class="w-14 h-14 mx-auto rounded-[14px] bg-[#c9a96e] flex items-center justify-center mb-3.5"><i class="ti ti-bell-ringing text-[28px] text-black"></i></div>
-          <h3 id="notif-prompt-title" class="text-[17px] font-semibold text-white leading-snug"></h3>
-          <p id="notif-prompt-text" class="text-[13px] text-neutral-400 mt-2 leading-snug"></p>
+    <div id="notif-prompt" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'notif-prompt')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
+        <div class="w-12 h-12 bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-bell-ringing"></i></div>
+        <div class="space-y-1">
+          <h4 id="notif-prompt-title" class="text-white font-bold text-sm tracking-wide">Turn on notifications?</h4>
+          <p id="notif-prompt-text" class="text-xs text-neutral-500 leading-relaxed">Get an instant alert the moment a client books you, even when Sakkhi is closed.</p>
         </div>
-        <div id="notif-prompt-actions" class="border-t border-white/10 grid grid-cols-2 divide-x divide-white/10"></div>
+        <div id="notif-prompt-actions" class="flex items-center justify-center gap-2 pt-2"></div>
       </div>
     </div>
 
@@ -3342,27 +3342,20 @@ function maybeShowNotifPrompt() {
 }
 
 function showNotifPrompt(mode) {
-  const el = document.getElementById('notif-prompt');
-  const card = document.getElementById('notif-prompt-card');
-  if (!el || !card) return;
+  if (!document.getElementById('notif-prompt')) return;
   const install = mode === 'install';
-  document.getElementById('notif-prompt-title').textContent = install ? 'Get alerts on your iPhone' : '\u201CSakkhi\u201D Would Like to Send You Notifications';
+  document.getElementById('notif-prompt-title').textContent = install ? 'Get alerts on your iPhone' : 'Turn on notifications?';
   document.getElementById('notif-prompt-text').textContent = install
-    ? 'Tap the Share button, choose \u201CAdd to Home Screen\u201D, then open Sakkhi from your Home Screen to turn on notifications.'
-    : 'Get an instant alert the moment a client books you, even when the app is closed.';
+    ? 'Tap the Share button, choose "Add to Home Screen", then open Sakkhi from your Home Screen to turn on notifications.'
+    : 'Get an instant alert the moment a client books you, even when Sakkhi is closed.';
   document.getElementById('notif-prompt-actions').innerHTML = install
-    ? '<button onclick="dismissNotifPrompt()" class="col-span-2 py-3 text-[16px] font-semibold text-[#c9a96e] active:bg-white/5">Got It</button>'
-    : '<button onclick="dismissNotifPrompt()" class="py-3 text-[16px] text-neutral-300 active:bg-white/5">Not Now</button><button onclick="acceptNotifPrompt()" class="py-3 text-[16px] font-semibold text-[#c9a96e] active:bg-white/5">Allow</button>';
-  el.classList.remove('hidden');
-  requestAnimationFrame(() => { el.classList.remove('opacity-0'); card.classList.remove('scale-95'); });
+    ? '<button onclick="dismissNotifPrompt()" class="w-full py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Got it</button>'
+    : '<button onclick="dismissNotifPrompt()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Not now</button><button onclick="acceptNotifPrompt()" class="w-1/2 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Allow</button>';
+  openModal('notif-prompt');
 }
 
 function hideNotifPrompt() {
-  const el = document.getElementById('notif-prompt');
-  const card = document.getElementById('notif-prompt-card');
-  if (!el || !card) return;
-  el.classList.add('opacity-0'); card.classList.add('scale-95');
-  setTimeout(() => el.classList.add('hidden'), 200);
+  if (document.getElementById('notif-prompt')) closeModal('notif-prompt');
 }
 
 function showNotifBanner() {
