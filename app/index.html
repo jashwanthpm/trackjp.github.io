@@ -5857,7 +5857,9 @@ async function deleteEditJob() {
       // Clients pay after the shoot, so only COMPLETED shoots (before today)
       // can be "due". An upcoming shoot never adds to Due — but any advance
       // already received on it still counts in Received above.
-      let trueOutstanding = _shoots.reduce((a, s) => {
+      // Follows the same period filter as Total Amount and Received above,
+      // so the three numbers always add up for whatever period is selected.
+      let trueOutstanding = shoots.reduce((a, s) => {
         if (s.date >= td) return a;
         const gross = Number(s.amount || 0);
         const received = s.payStatus === 'done' ? gross : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0;
@@ -5872,8 +5874,8 @@ async function deleteEditJob() {
          totalGross += filteredEdits.reduce((a, e) => a + Number(e.amount || 0), 0);
          realizedReceived += filteredEdits.reduce((a, e) => e.pay_status === 'done' ? a + Number(e.amount || 0) : a, 0);
          
-         // Outstanding is calculated against all active history, so we don't use the filtered array here
-         trueOutstanding += _edits.reduce((a, e) => {
+         // Editing jobs follow the same period filter as everything else here
+         trueOutstanding += filteredEdits.reduce((a, e) => {
            if (e.work_status !== 'completed') return a; // due only once the job is completed
            const gross = Number(e.amount || 0);
            const received = e.pay_status === 'done' ? gross : 0;
