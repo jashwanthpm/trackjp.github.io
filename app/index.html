@@ -6852,13 +6852,19 @@ async function toggleBlockDate(dateStr) {
       });
       Object.values(grouped).forEach(arr => arr.sort((a, b) => (a.date || '').localeCompare(b.date || '')));
 
+      // With no filter, older months start collapsed to keep the page short.
+      // The moment a filter is active (a stat card, the status/expense
+      // dropdowns, a company, or a search), every month opens with its
+      // shoots showing, so the filtered results are right there to read.
+      const filterActive = !!(fs || fe || q || fc);
+
       let html = '';
       Object.keys(grouped).sort().reverse().forEach(monthKey => {
         const shoots = grouped[monthKey];
         const [year, month] = monthKey.split('-');
         const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
         const monthTotal = shoots.reduce((a, s) => a + Number(s.amount || 0), 0);
-        const isPast = !isCurrentMonthKey(monthKey);
+        const isPast = !filterActive && !isCurrentMonthKey(monthKey);
 
         html += `
           <div class="mb-6" data-month-group>
