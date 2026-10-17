@@ -5835,7 +5835,11 @@ async function deleteEditJob() {
       let totalExpenses = shoots.reduce((a, s) => a + Number(s.expense || 0), 0);
       let realizedReceived = shoots.reduce((a, s) => s.payStatus === 'done' ? a + Number(s.amount || 0) : s.payStatus === 'part' ? a + Number(s.partPaid || 0) : a, 0);
       
+      // Clients pay after the shoot, so only COMPLETED shoots (before today)
+      // can be "due". An upcoming shoot never adds to Due — but any advance
+      // already received on it still counts in Received above.
       let trueOutstanding = _shoots.reduce((a, s) => {
+        if (s.date >= td) return a;
         const gross = Number(s.amount || 0);
         const received = s.payStatus === 'done' ? gross : s.payStatus === 'part' ? Number(s.partPaid || 0) : 0;
         return a + (gross - received);
@@ -5893,7 +5897,7 @@ async function deleteEditJob() {
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
               <p class="text-xl md:text-2xl font-bold text-red-400 privacy-target tracking-tight">${fmtAmt(trueOutstanding)}</p>
-              <p class="text-[11px] text-neutral-600 mt-2">Outstanding</p>
+              <p class="text-[11px] text-neutral-600 mt-2">Outstanding, completed shoots</p>
             </div>
             <i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i>
           </div>
@@ -5991,7 +5995,7 @@ if (daCard) {
   // calculated from ALL shoots for that company, not just the FY-filtered set.
   _shoots.forEach(s => {
         const comp = s.company || 'Direct';
-        if (s.payStatus !== 'done' && companyStats[comp]) {
+        if (s.payStatus !== 'done' && s.date < today() && companyStats[comp]) {
           companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
         }
       });
@@ -6034,7 +6038,7 @@ if (daCard) {
         }
         companyStats[comp].shoots++;
         companyStats[comp].revenue += Number(s.amount || 0);
-        if (s.payStatus !== 'done') {
+        if (s.payStatus !== 'done' && s.date < today()) {
           companyStats[comp].pending += Number(s.amount || 0) - (s.payStatus === 'part' ? Number(s.partPaid || 0) : 0);
         }
       });
@@ -6774,7 +6778,9 @@ async function toggleBlockDate(dateStr) {
       let pendingBase = _shoots.filter(s => s.amount);
       if (q) pendingBase = pendingBase.filter(s => (s.name || '').toLowerCase().includes(q));
       if (fc) pendingBase = pendingBase.filter(s => s.company === fc);
+      const tdLedger = today();
       const outstanding = pendingBase.reduce((a, s) => {
+        if (s.date >= tdLedger) return a; // upcoming: not due until the shoot is done
         if (s.payStatus === 'pending') return a + Number(s.amount || 0);
         if (s.payStatus === 'part') return a + (Number(s.amount || 0) - Number(s.partPaid || 0));
         return a;
@@ -6798,7 +6804,7 @@ async function toggleBlockDate(dateStr) {
           <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Filter by Pending — across all time">
             <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
             <div class="text-2xl font-bold tracking-tight text-red-400 mt-1 privacy-target">${fmtAmt(outstanding)}</div>
-            <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues • all time</div>
+            <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues • completed shoots</div>
           </div>
           <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition flex flex-col cursor-pointer" onclick="document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-status').value=''; renderPaymentsList();" title="View All Expenses">
             <div class="text-[10px] font-bold text-amber-500 uppercase tracking-wider">Total Expenses</div>
