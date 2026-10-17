@@ -5400,7 +5400,9 @@ function renderEditingList() {
     const [year, month] = monthKey.split('-');
     const monthName = MONTHS[parseInt(month) - 1] || 'Unknown';
     const monthTotal = jobs.reduce((a, b) => a + Number(b.amount || 0), 0);
-    const isPast = !isCurrentMonthKey(monthKey);
+    // Older months start collapsed, but as soon as a filter or search is
+    // active every month opens so the matching jobs (date, client...) show.
+    const isPast = !hasActiveFilter && !isCurrentMonthKey(monthKey);
 
     html += `
       <div class="mb-6" data-month-group>
@@ -6826,7 +6828,7 @@ async function toggleBlockDate(dateStr) {
             <div class="text-2xl font-bold tracking-tight text-emerald-400 mt-1 privacy-target">${fmtAmt(captured)}</div>
             <div class="text-[10px] text-emerald-600/60 mt-auto pt-2">Settled payments</div>
           </div>
-          <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-stage').value=completed'; document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Pending dues on completed shoots — across all time">
+          <div onclick="document.getElementById('pay-filter-status').value='pending'; document.getElementById('pay-filter-expenses').value=''; document.getElementById('pay-filter-stage').value='completed'; document.getElementById('pay-filter-fy').value='all'; handleTimeFilterChange('pay','renderPaymentsList');" class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 hover:bg-red-950/20 transition flex flex-col cursor-pointer" title="Pending dues on completed shoots — across all time">
             <div class="text-[10px] font-bold text-red-400 uppercase tracking-wider">Amount Pending</div>
             <div class="text-2xl font-bold tracking-tight text-red-400 mt-1 privacy-target">${fmtAmt(outstanding)}</div>
             <div class="text-[10px] text-red-600/60 mt-auto pt-2">Outstanding dues • completed shoots</div>
