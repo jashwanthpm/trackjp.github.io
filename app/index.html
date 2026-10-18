@@ -1223,6 +1223,13 @@
                   <h3 class="text-lg font-bold text-white flex items-center gap-2"><i class="ti ti-bell-ringing text-[#c9a96e]"></i> Notifications</h3>
                   <p class="text-xs text-neutral-500 mt-1">Get an alert the moment a client books you, even when Sakkhi is closed. This is set per device.</p>
                 </div>
+                <div id="install-set-card" class="hidden flex items-center justify-between gap-3 bg-neutral-950 border border-neutral-900 rounded-xl p-4">
+                  <div class="min-w-0">
+                    <p class="text-sm font-bold text-white">Install Sakkhi</p>
+                    <p class="text-xs text-neutral-500 mt-0.5 leading-relaxed">Add it to your home screen or dock for one-tap access. On iPhone this is needed for notifications.</p>
+                  </div>
+                  <button onclick="installAppNow()" class="flex-shrink-0 bg-[#c9a96e] hover:bg-[#dab77e] text-black text-xs font-bold px-3.5 py-2 rounded-lg transition">Install</button>
+                </div>
                 <div class="flex items-center justify-between gap-3 bg-neutral-950 border border-neutral-900 rounded-xl p-4">
                   <div class="min-w-0">
                     <div class="flex items-center gap-2 mb-1"><p class="text-sm font-bold text-white">This device</p><span id="notif-set-pill"></span></div>
@@ -2059,6 +2066,17 @@
           <p id="notif-prompt-text" class="text-xs text-neutral-500 leading-relaxed">Get an instant alert the moment a client books you, even when Sakkhi is closed.</p>
         </div>
         <div id="notif-prompt-actions" class="flex items-center justify-center gap-2 pt-2"></div>
+      </div>
+    </div>
+
+    <div id="install-prompt" class="fixed inset-0 bg-black/80 z-[60] flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200" onclick="handleBackdropClick(event, 'install-prompt')">
+      <div class="bg-[#0f0f0f] border border-neutral-900 rounded-2xl w-full max-w-xs overflow-hidden shadow-2xl p-5 text-center space-y-4">
+        <div class="w-12 h-12 bg-[#c9a96e]/10 border border-[#c9a96e]/30 rounded-full flex items-center justify-center text-[#c9a96e] text-2xl mx-auto"><i class="ti ti-download"></i></div>
+        <div class="space-y-1">
+          <h4 id="install-prompt-title" class="text-white font-bold text-sm tracking-wide">Install Sakkhi</h4>
+          <p id="install-prompt-text" class="text-xs text-neutral-500 leading-relaxed"></p>
+        </div>
+        <div id="install-prompt-actions" class="flex items-center justify-center gap-2 pt-2"></div>
       </div>
     </div>
 
@@ -3332,6 +3350,7 @@ function maybeShowNotifPrompt() {
     if (st.done) return;
     // iPhone/iPad in plain Safari can't do push until the app is on the Home Screen.
     const needsInstall = isIOSDevice() && !isInstalledApp() && !pushSupported();
+    if (needsInstall) return; // the Install pop-up handles iPhone/iPad
     if (!needsInstall) {
       if (!pushSupported()) return;
       if (Notification.permission === 'denied') return;                  // can't ask again; Settings explains
@@ -3384,6 +3403,114 @@ async function acceptNotifPrompt() {
   closeNotifBanner();
   await toggleBrowserNotifications();          // asks the browser, registers this device
   if (browserNotifOn()) saveNotifPromptState({ done: true });
+}
+
+// ---- "Install Sakkhi" pop-up (add to home screen / dock) ----
+// Shown only to people who haven't installed the app yet. Chrome, Edge and
+// Brave (Android + laptop) get the browser's real install button; iPhone/iPad
+// and Safari on Mac get the short steps instead, since they have no install
+// button we can trigger. Max 3 reminders, at least 3 days apart.
+const INSTALL_KEY = 'sakkhi_install_prompt';
+let _deferredInstall = null;
+let _installScheduled = false;
+
+function installState() { try { return JSON.parse(localStorage.getItem(INSTALL_KEY) || '{}'); } catch (e) { return {}; } }
+function saveInstallState(patch) { try { localStorage.setItem(INSTALL_KEY, JSON.stringify({ ...installState(), ...patch })); } catch (e) {} }
+
+function installMode() {
+  if (isInstalledApp()) return null;
+  if (_deferredInstall) return 'native';
+  if (isIOSDevice()) return 'ios';
+  const ua = navigator.userAgent;
+  if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox/.test(ua) && !navigator.brave) return 'mac-safari';
+  return null;
+}
+
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();            // keep the browser's own mini-bar away; we show our pop-up
+  _deferredInstall = e;
+  renderInstallCard();
+  if (typeof currentUser !== 'undefined' && currentUser) maybeShowInstallPrompt();
+});
+window.addEventListener('appinstalled', () => {
+  _deferredInstall = null;
+  saveInstallState({ done: true });
+  hideInstallPrompt();
+  renderInstallCard();
+  showToast('Sakkhi is installed. Open it from your home screen or dock.', 'success');
+});
+
+function maybeShowInstallPrompt() {
+  try {
+    if (!currentUser || isDemoMode || _installScheduled) return;
+    const st = installState();
+    if (st.done || !installMode()) return;
+    const count = st.count || 0;
+    if (count >= 3) return;
+    if (st.last && Date.now() - st.last < 3 * 24 * 3600 * 1000) return;
+    _installScheduled = true;
+    const tryShow = (n) => {
+      if (document.visibilityState !== 'visible') { _installScheduled = false; return; }
+      // Never stack on top of the notifications pop-up; wait for it to be answered.
+      const np = document.getElementById('notif-prompt');
+      const busy = np && !np.classList.contains('pointer-events-none');
+      if (busy && n < 4) { setTimeout(() => tryShow(n + 1), 8000); return; }
+      _installScheduled = false;
+      const mode = installMode();
+      if (busy || !mode) return;
+      saveInstallState({ count: count + 1, last: Date.now() });
+      showInstallPrompt(mode);
+    };
+    setTimeout(() => tryShow(0), 7000);
+  } catch (e) { console.warn('Install prompt skipped:', e); }
+}
+
+function showInstallPrompt(mode) {
+  if (!document.getElementById('install-prompt')) return;
+  const title = document.getElementById('install-prompt-title');
+  const text = document.getElementById('install-prompt-text');
+  const actions = document.getElementById('install-prompt-actions');
+  const gotIt = '<button onclick="dismissInstallPrompt()" class="w-full py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Got it</button>';
+  if (mode === 'ios') {
+    title.textContent = 'Add Sakkhi to your Home Screen';
+    text.textContent = 'Tap the Share button, then choose \u201CAdd to Home Screen\u201D. Open Sakkhi from your Home Screen afterwards to turn on booking alerts.';
+    actions.innerHTML = gotIt;
+  } else if (mode === 'mac-safari') {
+    title.textContent = 'Add Sakkhi to your Dock';
+    text.textContent = 'In the menu bar choose File \u2192 Add to Dock. Then open Sakkhi from your Dock like any other app.';
+    actions.innerHTML = gotIt;
+  } else {
+    title.textContent = 'Install Sakkhi';
+    text.textContent = 'Add Sakkhi to your device for one-tap access, a full-screen app feel and booking alerts.';
+    actions.innerHTML = '<button onclick="dismissInstallPrompt()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Not now</button><button onclick="acceptInstallPrompt()" class="w-1/2 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Install</button>';
+  }
+  openModal('install-prompt');
+}
+
+function hideInstallPrompt() { if (document.getElementById('install-prompt')) closeModal('install-prompt'); }
+function dismissInstallPrompt() { hideInstallPrompt(); }
+
+async function acceptInstallPrompt() {
+  hideInstallPrompt();
+  if (!_deferredInstall) return;
+  try {
+    _deferredInstall.prompt();                       // the browser's own install dialog
+    const choice = await _deferredInstall.userChoice;
+    if (choice && choice.outcome === 'accepted') saveInstallState({ done: true });
+  } catch (e) { console.warn('Install prompt failed:', e); }
+  _deferredInstall = null;
+  renderInstallCard();
+}
+
+// The "Install Sakkhi" card in Settings → Notifications (only while not installed)
+function renderInstallCard() {
+  const card = document.getElementById('install-set-card');
+  if (card) card.classList.toggle('hidden', !installMode());
+}
+function installAppNow() {
+  const mode = installMode();
+  if (mode === 'native') acceptInstallPrompt();
+  else if (mode) showInstallPrompt(mode);
 }
 
 function pushErrorHint(e) {
@@ -4189,7 +4316,8 @@ try {
       // without needing a manual reload.
       startLivePolling();
       syncPushSubscription(); // keep this device's push registration fresh
-      maybeShowNotifPrompt();  // iPhone-style "Allow notifications?" pop-up
+      maybeShowNotifPrompt();  // "Allow notifications?" pop-up
+      maybeShowInstallPrompt(); // "Install Sakkhi" pop-up (never stacks on the one above)
 
       // Add external bookings to the notification center
 if (newBookings.length > 0 && !isDemoMode) {
@@ -5870,6 +5998,9 @@ async function deleteEditJob() {
       }, 0);
 
       let editsGross = 0, editsCount = 0, editsIncluded = false;
+      const receivedShoots = realizedReceived;   // before editing is added in
+      const dueShoots = trueOutstanding;
+      let receivedEdits = 0, dueEdits = 0;
 
       // Dynamically add Editing Totals if the toggle is active
       if (_profile.dashEdits && typeof _edits !== 'undefined') {
@@ -5880,15 +6011,18 @@ async function deleteEditJob() {
          editsCount = filteredEdits.length;
          editsIncluded = true;
          totalGross += editsGross;
-         realizedReceived += filteredEdits.reduce((a, e) => e.pay_status === 'done' ? a + Number(e.amount || 0) : a, 0);
+         // Part payments on editing jobs count too (they were being ignored here).
+         receivedEdits = filteredEdits.reduce((a, e) => e.pay_status === 'done' ? a + Number(e.amount || 0) : e.pay_status === 'part' ? a + Number(e.part_paid || 0) : a, 0);
+         realizedReceived += receivedEdits;
          
          // Editing jobs follow the same period filter as everything else here
-         trueOutstanding += filteredEdits.reduce((a, e) => {
+         dueEdits = filteredEdits.reduce((a, e) => {
            if (e.work_status !== 'completed') return a; // due only once the job is completed
            const gross = Number(e.amount || 0);
-           const received = e.pay_status === 'done' ? gross : 0;
+           const received = e.pay_status === 'done' ? gross : e.pay_status === 'part' ? Number(e.part_paid || 0) : 0;
            return a + (gross - received);
          }, 0);
+         trueOutstanding += dueEdits;
       }
 
       document.getElementById('dash-stats').innerHTML = `
@@ -5924,7 +6058,7 @@ async function deleteEditJob() {
             <div class="flex items-center justify-between gap-3 text-xs"><span class="text-neutral-400">Still to pay</span><span class="text-orange-400 font-semibold privacy-target">${fmtAmt(expensesToPay)}</span></div>
           </div>
         </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div tabindex="0" class="group relative outline-none bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 focus:border-neutral-700 transition cursor-default">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Received</p>
@@ -5933,8 +6067,15 @@ async function deleteEditJob() {
             </div>
             <i class="ti ti-check-circle text-2xl text-emerald-400 opacity-20"></i>
           </div>
+          <div class="pointer-events-none absolute left-0 right-0 top-full mt-2 z-30 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus:opacity-100 group-focus:translate-y-0 transition duration-150 bg-[#0f0f0f] border border-neutral-700 rounded-xl p-3 shadow-2xl space-y-1.5">
+            <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Received from</p>
+            <div class="flex items-center justify-between gap-3 text-xs"><span class="text-neutral-400">Shoots</span><span class="text-white font-semibold privacy-target">${fmtAmt(receivedShoots)}</span></div>
+            ${editsIncluded
+              ? `<div class="flex items-center justify-between gap-3 text-xs"><span class="text-neutral-400">Editing</span><span class="text-white font-semibold privacy-target">${fmtAmt(receivedEdits)}</span></div>`
+              : `<div class="text-[11px] text-neutral-600 leading-snug">Editing jobs aren't included.</div>`}
+          </div>
         </div>
-        <div class="bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 transition">
+        <div tabindex="0" class="group relative outline-none bg-neutral-950 border border-neutral-800 rounded-xl p-4 hover:border-neutral-700 focus:border-neutral-700 transition cursor-default">
           <div class="flex items-start justify-between">
             <div class="flex-1">
               <p class="text-[11px] uppercase font-bold tracking-widest text-neutral-500 mb-2">Due</p>
@@ -5942,6 +6083,13 @@ async function deleteEditJob() {
               <p class="text-[11px] text-neutral-600 mt-2">Outstanding, completed shoots</p>
             </div>
             <i class="ti ti-alert-circle text-2xl text-red-400 opacity-20"></i>
+          </div>
+          <div class="pointer-events-none absolute left-0 right-0 top-full mt-2 z-30 opacity-0 translate-y-1 group-hover:opacity-100 group-hover:translate-y-0 group-focus:opacity-100 group-focus:translate-y-0 transition duration-150 bg-[#0f0f0f] border border-neutral-700 rounded-xl p-3 shadow-2xl space-y-1.5">
+            <p class="text-[10px] uppercase tracking-widest text-neutral-500 font-bold">Due from completed work</p>
+            <div class="flex items-center justify-between gap-3 text-xs"><span class="text-neutral-400">Shoots</span><span class="text-white font-semibold privacy-target">${fmtAmt(dueShoots)}</span></div>
+            ${editsIncluded
+              ? `<div class="flex items-center justify-between gap-3 text-xs"><span class="text-neutral-400">Editing</span><span class="text-white font-semibold privacy-target">${fmtAmt(dueEdits)}</span></div>`
+              : `<div class="text-[11px] text-neutral-600 leading-snug">Editing jobs aren't included.</div>`}
           </div>
         </div>`;
 
@@ -5971,7 +6119,8 @@ async function deleteEditJob() {
 
       const verifiedSettledCount = shoots.filter(s => s.payStatus === 'done').length;
       const allocatedTrancheCount = shoots.filter(s => s.payStatus === 'part').length;
-      const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending').length;
+      // "Pending" = completed shoots still unpaid (upcoming ones aren't due yet)
+      const unliquidatedCount = shoots.filter(s => s.payStatus === 'pending' && s.date < td).length;
 
       const settledPct = totalGross ? (realizedReceived / totalGross * 100).toFixed(0) : 0;
       const duePct = totalGross ? (trueOutstanding / totalGross * 100).toFixed(0) : 0;
@@ -6003,7 +6152,7 @@ async function deleteEditJob() {
           <div class="flex flex-wrap gap-2 pt-3 border-t border-neutral-900">
             <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-emerald-950/40 border border-emerald-900/60 text-emerald-400">${verifiedSettledCount} Settled</span>
             <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-purple-950/40 border border-purple-900/60 text-purple-400">${allocatedTrancheCount} Partial</span>
-            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400">${unliquidatedCount} Pending</span>
+            <span class="px-2.5 py-1 rounded-md text-[11px] font-bold bg-red-950/40 border border-red-900/60 text-red-400" title="Completed shoots with no payment yet">${unliquidatedCount} Pending</span>
           </div>
         </div>`;
 
@@ -10936,6 +11085,7 @@ function updateAccountDisplay() {
 
       if (tab === 'notifications') {
         renderBrowserNotifRow();
+        renderInstallCard();
       }
     }
 // --- SAMPLE CSV GENERATOR ---
