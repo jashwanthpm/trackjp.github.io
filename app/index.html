@@ -14,11 +14,15 @@
   <meta property="og:image" content="https://sakkhi.co.in/dashboadss.jpg">
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#050505">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Sakkhi">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black">
 
   
-   <link rel="icon" type="image/png" href="/sakkhi 300px.png">
-  <link rel="shortcut icon" href="/sakkhi 300px.png">
-  <link rel="apple-touch-icon" href="/sakkhi 300px.png">
+   <link rel="icon" type="image/png" href="/sakkhi%20300px.png">
+  <link rel="shortcut icon" href="/sakkhi%20300px.png">
+  <link rel="apple-touch-icon" href="/sakkhi%20300px.png">
   
 <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3417,10 +3421,19 @@ let _installScheduled = false;
 function installState() { try { return JSON.parse(localStorage.getItem(INSTALL_KEY) || '{}'); } catch (e) { return {}; } }
 function saveInstallState(patch) { try { localStorage.setItem(INSTALL_KEY, JSON.stringify({ ...installState(), ...patch })); } catch (e) {} }
 
+// Instagram / WhatsApp / Facebook / Gmail etc. open links in their own mini
+// browser, which has no "Add to Home Screen". Those need to open Safari first.
+function isIOSInAppBrowser() {
+  const ua = navigator.userAgent;
+  if (!isIOSDevice()) return false;
+  if (/FBAN|FBAV|FB_IAB|Instagram|Line\/|Snapchat|LinkedInApp|Twitter|MicroMessenger|GSA\//.test(ua)) return true;
+  return !/Safari\//.test(ua) && !/CriOS|FxiOS|EdgiOS|OPiOS/.test(ua);   // a bare web view
+}
+
 function installMode(forCard) {
   if (isInstalledApp()) return null;
   if (_deferredInstall) return 'native';
-  if (isIOSDevice()) return 'ios';
+  if (isIOSDevice()) return isIOSInAppBrowser() ? 'ios-inapp' : 'ios';
   const ua = navigator.userAgent;
   if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox/.test(ua) && !navigator.brave) return 'mac-safari';
   // Chrome-family browsers (Chrome, Edge, Brave...) normally fire the install
@@ -3476,11 +3489,21 @@ function showInstallPrompt(mode) {
   const title = document.getElementById('install-prompt-title');
   const text = document.getElementById('install-prompt-text');
   const actions = document.getElementById('install-prompt-actions');
+  text.textContent = '';
   const gotIt = '<button onclick="dismissInstallPrompt()" class="w-full py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Got it</button>';
   if (mode === 'ios') {
     title.textContent = 'Add Sakkhi to your Home Screen';
-    text.textContent = 'Tap the Share button, then choose \u201CAdd to Home Screen\u201D. Open Sakkhi from your Home Screen afterwards to turn on booking alerts.';
+    text.innerHTML = '<ol class="text-left space-y-1.5 list-decimal pl-4">'
+      + '<li>Tap the <b class="text-neutral-300">Share</b> button (the square with an arrow) in Safari\u2019s toolbar.</li>'
+      + '<li>Scroll down and tap <b class="text-neutral-300">Add to Home Screen</b>. If you don\u2019t see it, tap <b class="text-neutral-300">View More</b> first.</li>'
+      + '<li>Keep <b class="text-neutral-300">Open as Web App</b> on, then tap <b class="text-neutral-300">Add</b>.</li>'
+      + '<li>Open Sakkhi from your Home Screen to turn on booking alerts.</li></ol>'
+      + '<p class="text-[11px] text-neutral-600 mt-3 text-left">Can\u2019t find it? Make sure you\u2019re in Safari itself (not inside Instagram or WhatsApp) and not in a Private tab.</p>';
     actions.innerHTML = gotIt;
+  } else if (mode === 'ios-inapp') {
+    title.textContent = 'Open this page in Safari';
+    text.innerHTML = 'This browser can\u2019t add apps to your Home Screen. Tap <b class="text-neutral-300">Share</b> or <b class="text-neutral-300">\u22EF</b> and choose <b class="text-neutral-300">Open in Safari</b> (or copy the link and paste it into Safari). Then use Share \u2192 Add to Home Screen.';
+    actions.innerHTML = '<button onclick="dismissInstallPrompt()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Got it</button><button onclick="copyInstallLink()" class="w-1/2 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Copy link</button>';
   } else if (mode === 'chromium-desktop') {
     title.textContent = 'Install Sakkhi';
     text.textContent = 'Click the install icon at the right end of the address bar, or open the browser menu and choose \u201CInstall Sakkhi\u201D. In Brave: menu \u2192 Save and Share \u2192 Install Sakkhi.';
@@ -3499,6 +3522,12 @@ function showInstallPrompt(mode) {
     actions.innerHTML = '<button onclick="dismissInstallPrompt()" class="w-1/2 py-2 text-xs font-semibold border border-neutral-800 rounded-lg text-neutral-400 hover:text-white transition">Not now</button><button onclick="acceptInstallPrompt()" class="w-1/2 py-2 text-xs font-bold bg-[#c9a96e] hover:bg-[#dab77e] text-black rounded-lg transition">Install</button>';
   }
   openModal('install-prompt');
+}
+
+async function copyInstallLink() {
+  const url = location.origin + '/app/';
+  try { await navigator.clipboard.writeText(url); showToast('Link copied. Paste it into Safari.', 'success'); }
+  catch (e) { window.prompt('Copy this link and open it in Safari:', url); }
 }
 
 function hideInstallPrompt() { if (document.getElementById('install-prompt')) closeModal('install-prompt'); }
