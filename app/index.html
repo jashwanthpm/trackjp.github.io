@@ -3417,12 +3417,18 @@ let _installScheduled = false;
 function installState() { try { return JSON.parse(localStorage.getItem(INSTALL_KEY) || '{}'); } catch (e) { return {}; } }
 function saveInstallState(patch) { try { localStorage.setItem(INSTALL_KEY, JSON.stringify({ ...installState(), ...patch })); } catch (e) {} }
 
-function installMode() {
+function installMode(forCard) {
   if (isInstalledApp()) return null;
   if (_deferredInstall) return 'native';
   if (isIOSDevice()) return 'ios';
   const ua = navigator.userAgent;
   if (/Macintosh/.test(ua) && /Safari\//.test(ua) && !/Chrome|Chromium|CriOS|Edg|OPR|Firefox/.test(ua) && !navigator.brave) return 'mac-safari';
+  // Chrome-family browsers (Chrome, Edge, Brave...) normally fire the install
+  // event handled above. Some, Brave in particular, don't always. We can't
+  // tell "already installed" from "browser didn't offer it" there, so these
+  // manual steps are only offered from the Settings card, never as an
+  // automatic pop-up (which would nag people who've already installed).
+  if (forCard && (/Chrome|Chromium|Edg\//.test(ua) || navigator.brave)) return /Android/.test(ua) ? 'chromium-android' : 'chromium-desktop';
   return null;
 }
 
@@ -3475,6 +3481,14 @@ function showInstallPrompt(mode) {
     title.textContent = 'Add Sakkhi to your Home Screen';
     text.textContent = 'Tap the Share button, then choose \u201CAdd to Home Screen\u201D. Open Sakkhi from your Home Screen afterwards to turn on booking alerts.';
     actions.innerHTML = gotIt;
+  } else if (mode === 'chromium-desktop') {
+    title.textContent = 'Install Sakkhi';
+    text.textContent = 'Click the install icon at the right end of the address bar, or open the browser menu and choose \u201CInstall Sakkhi\u201D. In Brave: menu \u2192 Save and Share \u2192 Install Sakkhi.';
+    actions.innerHTML = gotIt;
+  } else if (mode === 'chromium-android') {
+    title.textContent = 'Install Sakkhi';
+    text.textContent = 'Open the browser menu (\u22EE) and tap \u201CInstall app\u201D or \u201CAdd to Home screen\u201D.';
+    actions.innerHTML = gotIt;
   } else if (mode === 'mac-safari') {
     title.textContent = 'Add Sakkhi to your Dock';
     text.textContent = 'In the menu bar choose File \u2192 Add to Dock. Then open Sakkhi from your Dock like any other app.';
@@ -3505,10 +3519,10 @@ async function acceptInstallPrompt() {
 // The "Install Sakkhi" card in Settings → Notifications (only while not installed)
 function renderInstallCard() {
   const card = document.getElementById('install-set-card');
-  if (card) card.classList.toggle('hidden', !installMode());
+  if (card) card.classList.toggle('hidden', !installMode(true));
 }
 function installAppNow() {
-  const mode = installMode();
+  const mode = installMode(true);
   if (mode === 'native') acceptInstallPrompt();
   else if (mode) showInstallPrompt(mode);
 }
