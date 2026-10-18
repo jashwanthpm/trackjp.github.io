@@ -14,6 +14,16 @@
   <meta property="og:image" content="https://sakkhi.co.in/dashboadss.jpg">
   <link rel="manifest" href="/manifest.json">
 <meta name="theme-color" content="#050505">
+  <script>
+    // Chrome/Edge/Brave announce "this app can be installed" once, early.
+    // Catch it here so the Install button can use it later, whenever it is tapped.
+    window.__deferredInstall = null;
+    window.addEventListener('beforeinstallprompt', function (e) {
+      e.preventDefault();
+      window.__deferredInstall = e;
+      window.dispatchEvent(new Event('sakkhi-installable'));
+    });
+  </script>
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Sakkhi">
@@ -22,7 +32,7 @@
   
    <link rel="icon" type="image/png" href="/sakkhi%20300px.png">
   <link rel="shortcut icon" href="/sakkhi%20300px.png">
-  <link rel="apple-touch-icon" href="/sakkhi%20300px.png">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
   
 <script src="https://cdn.tailwindcss.com"></script>
   <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -3415,7 +3425,7 @@ async function acceptNotifPrompt() {
 // and Safari on Mac get the short steps instead, since they have no install
 // button we can trigger. Max 3 reminders, at least 3 days apart.
 const INSTALL_KEY = 'sakkhi_install_prompt';
-let _deferredInstall = null;
+let _deferredInstall = window.__deferredInstall || null;
 let _installScheduled = false;
 
 function installState() { try { return JSON.parse(localStorage.getItem(INSTALL_KEY) || '{}'); } catch (e) { return {}; } }
@@ -3445,12 +3455,13 @@ function installMode(forCard) {
   return null;
 }
 
-window.addEventListener('beforeinstallprompt', (e) => {
-  e.preventDefault();            // keep the browser's own mini-bar away; we show our pop-up
-  _deferredInstall = e;
+function onInstallable() {
+  _deferredInstall = window.__deferredInstall || _deferredInstall;
   renderInstallCard();
   if (typeof currentUser !== 'undefined' && currentUser) maybeShowInstallPrompt();
-});
+}
+window.addEventListener('sakkhi-installable', onInstallable);
+if (_deferredInstall) setTimeout(onInstallable, 0);   // the signal arrived before this script ran
 window.addEventListener('appinstalled', () => {
   _deferredInstall = null;
   saveInstallState({ done: true });
@@ -3539,9 +3550,16 @@ async function acceptInstallPrompt() {
   try {
     _deferredInstall.prompt();                       // the browser's own install dialog
     const choice = await _deferredInstall.userChoice;
-    if (choice && choice.outcome === 'accepted') saveInstallState({ done: true });
-  } catch (e) { console.warn('Install prompt failed:', e); }
+    if (choice && choice.outcome === 'accepted') {
+      saveInstallState({ done: true });
+      showToast('Installing Sakkhi\u2026 it will appear on your home screen / apps in a moment.', 'success');
+    }
+  } catch (e) {
+    console.warn('Install prompt failed:', e);
+    showToast('The browser could not start the install. Use the browser menu \u2192 Install Sakkhi.', 'error');
+  }
   _deferredInstall = null;
+  window.__deferredInstall = null;   // the browser allows one use per signal
   renderInstallCard();
 }
 
