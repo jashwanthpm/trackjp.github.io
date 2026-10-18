@@ -1,15 +1,20 @@
 {
+  "id": "/app/",
   "name": "Sakkhi Shoot Management",
   "short_name": "Sakkhi",
+  "description": "Manage your shoots, payments, editing jobs and gear in one place.",
   "start_url": "/app/",
   "display": "standalone",
   "background_color": "#050505",
   "theme_color": "#050505",
+  "lang": "en-IN",
+  "categories": ["business", "productivity"],
   "icons": [
     {
-      "src": "/sakkhi 300px.png",
+      "src": "/sakkhi%20300px.png",
       "sizes": "300x300",
-      "type": "image/png"
+      "type": "image/png",
+      "purpose": "any"
     }
   ]
 }
