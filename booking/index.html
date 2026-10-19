@@ -621,6 +621,12 @@ By ticking the box and submitting this booking request, you confirm that you hav
         const thisDateObj = new Date(calYear, calMonth, d);
         
         const isPast = thisDateObj < today;
+        // Completed dates have no availability state at all: no free/booked/
+        // partial/blocked indicator, regardless of historical booking data.
+        if (isPast) {
+          html += `<div class="w-10 h-10 rounded-full flex items-center justify-center mx-auto text-neutral-700 cursor-not-allowed" aria-disabled="true"><span class="text-sm">${d}</span></div>`;
+          continue;
+        }
         const isBlocked = blockedDatesMap.includes(dateStr);
         const bookedSessions = dateStatusMap[dateStr] || [];
         
