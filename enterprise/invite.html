@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sakkhi | Invite Team Member</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"><style>
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}
+.panel{background:#0f0f0f;border:1px solid #202020;border-radius:12px}
+.field{width:100%;background:#090909;border:1px solid #292929;border-radius:8px;padding:9px 11px;color:#eee;font-size:12px;outline:none}
+.field:focus{border-color:rgba(201,169,110,.7)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;transition:.15s}
+.btn-gold{background:#c9a96e;color:#090909}.btn-gold:hover{background:#e0c184}
+.btn-ghost{border:1px solid #303030;color:#d4d4d4}.btn-ghost:hover{border-color:#c9a96e;color:#c9a96e}
+.eyebrow{font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777}
+.muted{color:#858585}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#777;font-weight:800;border-bottom:1px solid #252525;padding:10px 12px}td{font-size:12px;color:#ddd;border-bottom:1px solid #1e1e1e;padding:11px 12px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;border:1px solid #333;border-radius:999px;padding:3px 8px;font-size:10px;color:#aaa}
+.toast{position:fixed;right:18px;bottom:18px;z-index:80;background:#151515;border:1px solid #333;padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 10px 30px #0008}
+</style></head>
+<body class="min-h-screen p-3 sm:p-5"><main class="max-w-5xl mx-auto space-y-4">
+<header class="flex items-center justify-between border-b border-neutral-900 pb-3"><div><h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2"><i class="ti ti-mail-plus text-[#c9a96e]"></i> Invite Team Member</h2><p class="text-[11px] text-neutral-500 mt-1">Create a tracked invitation and prepare an email to send to your teammate.</p></div><span id="sync-pill" class="badge"><span class="w-1.5 h-1.5 rounded-full bg-neutral-500 mr-1.5"></span>Workspace</span></header>
+
+<section class="panel p-4 max-w-3xl"><div class="mb-4"><a href="team.html" target="app-viewer" class="text-[10px] text-[#c9a96e] hover:underline">← Back to Team Access</a><h3 class="text-sm font-bold mt-3">New team invitation</h3><p class="text-[10px] text-neutral-500 mt-1">This records the invite in Supabase and opens your email app with a ready-to-send message. It does not create a Supabase Auth account automatically.</p></div><form id="invite-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3"><label class="text-[10px] text-neutral-500">Full name<input id="invite-name" required class="field mt-1" placeholder="Teammate name"></label><label class="text-[10px] text-neutral-500">Email address<input id="invite-email" required type="email" class="field mt-1" placeholder="name@example.com"></label><label class="text-[10px] text-neutral-500">Role<select id="invite-role" class="field mt-1"><option>Photographer</option><option>Cinematographer</option><option>Editor</option><option>Production Manager</option><option>Studio Admin</option><option>Assistant</option><option>Other</option></select></label><label class="text-[10px] text-neutral-500">Access level<select id="invite-access" class="field mt-1"><option>Team member</option><option>Production</option><option>Finance</option><option>Manager</option></select></label><label class="text-[10px] text-neutral-500 sm:col-span-2">Personal message<textarea id="invite-message" rows="3" class="field mt-1" placeholder="Welcome to our Sakkhi workspace…"></textarea></label><div class="sm:col-span-2 flex flex-wrap gap-2"><button class="btn btn-gold" type="submit"><i class="ti ti-mail-forward"></i> Save invite & prepare email</button><a href="team.html" target="app-viewer" class="btn btn-ghost">Cancel</a></div></form><p id="invite-result" class="text-xs text-neutral-400 mt-4"></p></section></main><script>
+const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
+const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1IiwiaWF0IjoxNzc5ODYwNzMyLCJleHAiOjIwOTU0MzY3MzJ9.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
+function sessionToken(){
+ const u=currentUser(); if(u&&(u.access_token||u.accessToken))return u.access_token||u.accessToken;
+ for(const store of [localStorage,sessionStorage]){
+  for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
+   try{const v=JSON.parse(store.getItem(k));if(v&&v.access_token)return v.access_token;if(v&&v.currentSession&&v.currentSession.access_token)return v.currentSession.access_token}catch(e){}
+  }
+ }
+ return null;
+}
+function userId(){const u=currentUser();return u&&(u.id||u.user_id)}
+function authHeaders(extra){const t=sessionToken();return Object.assign({'apikey':DB_KEY,'Authorization':'Bearer '+(t||DB_KEY),'Content-Type':'application/json'},extra||{})}
+async function api(path,opts){
+ if(!currentUser()||!userId())throw new Error('Please sign in to Sakkhi again before using Enterprise.');
+ if(!sessionToken())throw new Error('Your secure Supabase session was not found. Sign out and sign in again, then retry.');
+ const res=await fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store',headers:authHeaders()},opts||{}));
+ const txt=await res.text();if(!res.ok)throw new Error(txt||('Request failed ('+res.status+')'));return txt?JSON.parse(txt):null;
+}
+function enc(v){return encodeURIComponent(String(v==null?'':v))}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
+function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
+async function getSetting(suffix, fallback){
+ const key=userId()+'_'+suffix;const rows=await api('settings?key=eq.'+enc(key)+'&select=value');
+ return rows&&rows.length?rows[0].value:fallback;
+}
+async function setSetting(suffix,value){
+ const id=userId(),key=id+'_'+suffix;
+ await api('settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
+}
+function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Sign in required</h2><p class="text-sm text-neutral-400 mt-2">Please sign in to Sakkhi and reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}if(!sessionToken()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Session refresh needed</h2><p class="text-sm text-neutral-400 mt-2">A secure Supabase session is needed to save changes. Sign out and sign in again, then reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}return true}
+
+
+if(requireUser()){document.getElementById('invite-form').onsubmit=async e=>{e.preventDefault();const name=document.getElementById('invite-name').value.trim(),email=document.getElementById('invite-email').value.trim().toLowerCase(),role=document.getElementById('invite-role').value,access=document.getElementById('invite-access').value,msg=document.getElementById('invite-message').value.trim();try{const list=await getSetting('enterprise_invites',[]);if(list.some(i=>i.email===email&&i.status==='Pending'))throw new Error('A pending invitation already exists for this email.');const invite={id:'inv_'+Date.now().toString(36),name,email,role,access,status:'Pending',message:msg,createdAt:new Date().toISOString()};list.unshift(invite);await setSetting('enterprise_invites',list);document.getElementById('invite-result').textContent='Invitation saved. Your email app will open so you can send it.';const subject=encodeURIComponent('Invitation to join our Sakkhi studio workspace');const body=encodeURIComponent('Hi '+name+',\n\nYou are invited to join our Sakkhi studio workspace as '+role+'.\n\n'+(msg?msg+'\n\n':'')+'Please reply to this email when ready, and we will link your Sakkhi account to the team.\n\nThanks.');window.location.href='mailto:'+encodeURIComponent(email)+'?subject='+subject+'&body='+body;toast('Invitation tracked in Supabase')}catch(err){toast('Could not save invitation: '+err.message)}}}</script></body></html>
