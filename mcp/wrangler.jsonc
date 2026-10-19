@@ -13,11 +13,5 @@
     "SUPABASE_URL": "https://smyupcjfusgduaoxqfvu.supabase.co",
     "ENABLE_MCP_SERVER": "false",
     "ENABLE_MCP_WRITES": "false"
-  },
-  "kv_namespaces": [
-    {
-      "binding": "OAUTH_KV",
-      "id": "REPLACE_WITH_REAL_KV_NAMESPACE_ID"
-    }
-  ]
+  }
 }
