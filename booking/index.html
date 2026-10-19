@@ -3,7 +3,12 @@
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Book a Shoot</title>
+  <title>Booking Link | Sakkhi</title>
+  <meta name="description" content="Submit a shoot booking request with your studio.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Booking Link | Sakkhi">
+  <meta property="og:description" content="Submit a shoot booking request with your studio.">
+  <meta name="twitter:card" content="summary">
 
   <link rel="icon" type="image/png" href="/sakkhi 300px.png">
   <link rel="shortcut icon" href="/sakkhi 300px.png">
@@ -361,6 +366,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             targetUserName = portal.name;
 
             let displayBizName = portal.bizName || targetUserName;
+            document.title = `${displayBizName} | Booking Link`;
             const isSubActive = !!portal.isSubActive;
 
             if (!isSubActive) {
