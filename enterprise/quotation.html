@@ -818,12 +818,19 @@ if (enterpriseMode && !crmParams.get('documentId')) {
   if (!crmClient) state.clientName = '';
   if (!crmEvent && !crmRequirements) state.intro = 'Thank you for considering our photography studio. This proposal outlines the requested coverage, deliverables, and terms. Edit each section to match the client and event before sending.';
 }
+async function enterpriseRpc(name,args){
+  const res=await fetch(DB_URL+'/rest/v1/rpc/'+name,{method:'POST',headers:authHeaders(),body:JSON.stringify(args||{}),cache:'no-store'});
+  const txt=await res.text();if(!res.ok)throw new Error(txt||'Workspace setup failed');return txt?JSON.parse(txt):null;
+}
 async function loadEnterpriseDocument(){
   if(!enterpriseMode) return;
   if(!currentUser() || !userId() || !sessionToken()){ toast('Sign in to Sakkhi before saving to Enterprise.'); return; }
   try{
     enterpriseDocs = await getSetting('enterprise_documents', []);
-    enterpriseClients = await getSetting('enterprise_clients', []);
+    try{
+      const workspaceId=await enterpriseRpc('enterprise_create_workspace',{workspace_name:'My Studio'});
+      enterpriseClients = await api('enterprise_clients?select=*&workspace_id=eq.'+encodeURIComponent(workspaceId)+'&order=created_at.desc');
+    }catch(clientError){ enterpriseClients = await getSetting('enterprise_clients', []); }
     const id = crmParams.get('documentId');
     if(id){
       currentEnterpriseDoc = enterpriseDocs.find(d=>d.id===id) || null;
