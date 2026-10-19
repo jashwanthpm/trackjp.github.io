@@ -55,67 +55,16 @@
     </div>
 
     <div class="flex-1 overflow-y-auto py-4 space-y-2">
-      
       <div>
-        <button onclick="toggleFolder('folder-main', 'icon-main')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-apps text-neutral-500"></i> Main Menu</div>
-          <i id="icon-main" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
-        </button>
-        <div id="folder-main" class="flex flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
-          <a href="dashboard.html" target="app-viewer" onclick="setActive(this)" class="nav-link active w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Overview
-          </a>
-          <a href="calendar.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Master Calendar
+        <div class="px-4 py-2 text-sm font-bold text-neutral-300 flex items-center gap-2">
+          <i class="ti ti-building-community text-neutral-500"></i> Enterprise
+        </div>
+        <div class="flex flex-col mt-1 pl-4 pr-2 space-y-1">
+          <a href="/shooters/" target="app-viewer" onclick="setActive(this)" class="nav-link active w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
+            <i class="ti ti-camera text-neutral-500"></i> Shooters
           </a>
         </div>
       </div>
-
-      <div>
-        <button onclick="toggleFolder('folder-prod', 'icon-prod')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-video text-neutral-500"></i> Production</div>
-          <i id="icon-prod" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
-        </button>
-        <div id="folder-prod" class="flex flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
-          <a href="pipelines.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Active Pipelines
-          </a>
-          <a href="/shooters" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Shooters
-          </a>
-        </div>
-      </div>
-
-      <div>
-        <button onclick="toggleFolder('folder-finance', 'icon-finance')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-wallet text-neutral-500"></i> Ledgers</div>
-          <i id="icon-finance" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
-        </button>
-        <div id="folder-finance" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
-          <a href="clients.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Studio Clients
-          </a>
-          <a href="invoices.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Invoices & Dues
-          </a>
-        </div>
-      </div>
-
-      <div class="mt-8 border-t border-neutral-900/80 pt-2">
-        <button onclick="toggleFolder('folder-mgmt', 'icon-mgmt')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-settings text-neutral-500"></i> Management</div>
-          <i id="icon-mgmt" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
-        </button>
-        <div id="folder-mgmt" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1 overflow-hidden transition-all duration-300">
-          <a href="account.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Company Settings
-          </a>
-          <a href="team.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">
-            Team Access
-          </a>
-        </div>
-      </div>
-
     </div>
   </aside>
 
@@ -202,7 +151,7 @@
       </div>
     </header>
 
-    <iframe name="app-viewer" src="dashboard.html" class="w-full flex-1 border-none bg-[#0a0a0a]"></iframe>
+    <iframe name="app-viewer" src="/shooters/" class="w-full flex-1 border-none bg-[#0a0a0a]"></iframe>
 
   </main>
 
