@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sakkhi | Overview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
+    ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#c9a96e}
+    .panel{background:#0f0f0f;border:1px solid #202020;border-radius:14px}
+    .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#777}
+    .field{width:100%;background:#090909;border:1px solid #292929;border-radius:9px;padding:10px 12px;color:#eee;font-size:13px;outline:none}
+    .field:focus{border-color:rgba(201,169,110,.65)}
+    .muted{color:#858585}
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+  <main class="max-w-6xl mx-auto space-y-6">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-900 pb-5">
+      <div>
+        <div class="flex items-center gap-2 text-[#c9a96e] text-xs font-bold tracking-widest uppercase mb-2"><i class="ti ti-layout-dashboard text-base"></i> Sakkhi Enterprise</div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Overview</h1>
+        <p class="text-sm text-neutral-500 mt-2">A quick view of your studio’s activity and upcoming work.</p>
+      </div>
+      <div class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-2 rounded-full border border-neutral-800 bg-neutral-950 text-xs text-neutral-400"><span class="w-2 h-2 rounded-full bg-[#c9a96e]"></span> Workspace setup</div>
+    </header>
+    <div class="rounded-xl border border-[#c9a96e]/20 bg-[#c9a96e]/5 px-4 py-3 flex items-start gap-3">
+      <i class="ti ti-info-circle text-[#c9a96e] text-lg mt-0.5"></i>
+      <div><p class="text-sm text-neutral-200 font-semibold">Page created — ready for development</p><p class="text-xs text-neutral-500 mt-1 leading-relaxed">This is the matching visual foundation for this section. Data connections and working actions can be added next without changing the overall Enterprise layout.</p></div>
+    </div>
+    
+    <section class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+      <article class="panel p-5"><div class="flex justify-between items-center"><span class="text-sm text-neutral-400">Active Shoots</span><i class="ti ti-camera text-xl text-[#c9a96e]"></i></div><p class="text-3xl font-bold text-white mt-5">—</p><p class="text-xs text-neutral-600 mt-2">Will populate when connected</p></article><article class="panel p-5"><div class="flex justify-between items-center"><span class="text-sm text-neutral-400">Upcoming Events</span><i class="ti ti-calendar-event text-xl text-[#c9a96e]"></i></div><p class="text-3xl font-bold text-white mt-5">—</p><p class="text-xs text-neutral-600 mt-2">Will populate when connected</p></article><article class="panel p-5"><div class="flex justify-between items-center"><span class="text-sm text-neutral-400">Pending Dues</span><i class="ti ti-wallet text-xl text-[#c9a96e]"></i></div><p class="text-3xl font-bold text-white mt-5">—</p><p class="text-xs text-neutral-600 mt-2">Will populate when connected</p></article><article class="panel p-5"><div class="flex justify-between items-center"><span class="text-sm text-neutral-400">Team Members</span><i class="ti ti-users text-xl text-[#c9a96e]"></i></div><p class="text-3xl font-bold text-white mt-5">—</p><p class="text-xs text-neutral-600 mt-2">Will populate when connected</p></article>
+    </section>
+    <section class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+      <div class="panel p-5"><h2 class="font-bold text-white">Upcoming activity</h2><p class="text-xs text-neutral-500 mt-1">Your next shoots and deadlines will appear here.</p><div class="mt-5 py-10 text-center border border-dashed border-neutral-800 rounded-xl"><i class="ti ti-calendar-off text-2xl text-neutral-600"></i><p class="text-sm text-neutral-400 mt-3">No activity connected yet</p></div></div>
+      <div class="panel p-5"><h2 class="font-bold text-white">Quick links</h2><p class="text-xs text-neutral-500 mt-1">Jump to a workspace section.</p><div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-5"><a href="calendar.html" target="app-viewer" class="panel p-4 hover:border-[#c9a96e]/50 transition flex items-center gap-3"><i class="ti ti-calendar text-[#c9a96e] text-xl"></i><span class="text-sm font-semibold">Master Calendar</span></a><a href="pipelines.html" target="app-viewer" class="panel p-4 hover:border-[#c9a96e]/50 transition flex items-center gap-3"><i class="ti ti-route text-[#c9a96e] text-xl"></i><span class="text-sm font-semibold">Active Pipelines</span></a><a href="clients.html" target="app-viewer" class="panel p-4 hover:border-[#c9a96e]/50 transition flex items-center gap-3"><i class="ti ti-building text-[#c9a96e] text-xl"></i><span class="text-sm font-semibold">Studio Clients</span></a><a href="invoices.html" target="app-viewer" class="panel p-4 hover:border-[#c9a96e]/50 transition flex items-center gap-3"><i class="ti ti-receipt text-[#c9a96e] text-xl"></i><span class="text-sm font-semibold">Invoices & Dues</span></a></div></div>
+    </section>
+  </main>
+</body>
+</html>
