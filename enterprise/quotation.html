@@ -511,6 +511,7 @@ function renderPreview(){
         <div class="lead">Our total charges for all events will amount to</div>
         <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
         <div class="terms-note">${esc(state.paymentNote)}</div>
+        ${enterpriseMode && crmParams.get("docType") === "Invoice" ? `<div class="terms-note" style="margin-top:10px">Paid: ₹${amountText(enterprisePaid)} · Balance: ₹${amountText(Math.max(0,amountNumber(state.amount)-enterprisePaid))}</div>` : ""}
       </div>
     </div>
 
@@ -616,6 +617,7 @@ function renderLeftPanel(){
     <div class="lp-section" id="lp-payments">
       <h3>${sectionIcon('package')}Payments</h3>
       <div class="field"><label>Total amount (₹)</label><input type="text" value="${esc(state.amount)}" oninput="state.amount=this.value;renderPreview()"></div>
+      <div class="field"><label>Paid so far (₹)</label><input type="number" min="0" step="100" value="${enterprisePaid}" oninput="enterprisePaid=Number(this.value)||0;renderPreview()"></div>
       <div class="field"><label>Payment terms</label><textarea oninput="state.paymentNote=this.value;renderPreview();autoGrow(this)">${esc(state.paymentNote)}</textarea></div>
     </div>
 
@@ -794,6 +796,7 @@ const crmRequirements = crmParams.get('requirements') || '';
 let enterpriseDocs = [];
 let enterpriseClients = [];
 let currentEnterpriseDoc = null;
+let enterprisePaid = 0;
 function amountNumber(value){ return Number(String(value == null ? '' : value).replace(/,/g,'').replace(/[^0-9.\-]/g,'')) || 0; }
 function amountText(value){ return Number(value||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
 function proposalNotes(s){
@@ -835,6 +838,7 @@ async function loadEnterpriseDocument(){
     if(id){
       currentEnterpriseDoc = enterpriseDocs.find(d=>d.id===id) || null;
       if(currentEnterpriseDoc){
+        enterprisePaid=Number(currentEnterpriseDoc.paid||0);
         if(currentEnterpriseDoc.quotationState) state = JSON.parse(JSON.stringify(currentEnterpriseDoc.quotationState));
         else {
           state.clientName = currentEnterpriseDoc.clientName || '';
@@ -867,7 +871,7 @@ async function saveEnterpriseDocument(){
     date:existing&&existing.date?existing.date:new Date().toISOString().slice(0,10),
     dueDate:existing&&existing.dueDate?existing.dueDate:'',
     amount:amount,
-    paid:existing?Number(existing.paid||0):0,
+    paid:Math.max(0,Number(enterprisePaid)||0),
     status:existing?existing.status:'Draft',
     notes:proposalNotes(state),
     quotationState:JSON.parse(JSON.stringify(state)),
