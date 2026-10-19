@@ -21,23 +21,39 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8
 const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
 const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
-function sessionToken(){
- const u=currentUser(); if(u&&(u.access_token||u.accessToken||u.token))return u.access_token||u.accessToken||u.token;
+function storedAuthSession(){
  for(const store of [localStorage,sessionStorage]){
   for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
-   try{const v=JSON.parse(store.getItem(k));if(v&&v.access_token)return v.access_token;if(v&&v.currentSession&&v.currentSession.access_token)return v.currentSession.access_token}catch(e){}
+   try{const raw=JSON.parse(store.getItem(k));const session=raw&&raw.currentSession?raw.currentSession:raw;if(session&&(session.access_token||session.refresh_token))return {store,key:k,raw,session,nested:!!(raw&&raw.currentSession)}}catch(e){}
   }
  }
  return null;
+}
+function sessionToken(){const s=storedAuthSession();if(s&&s.session.access_token)return s.session.access_token;const u=currentUser();return u&&(u.access_token||u.accessToken||u.token)||null}
+function refreshTokenValue(){const s=storedAuthSession();if(s&&s.session.refresh_token)return s.session.refresh_token;const u=currentUser();return u&&(u.refresh_token||u.refreshToken)||null}
+function tokenNeedsRefresh(t){try{const p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));return !!p.exp&&p.exp*1000<Date.now()+45000}catch(e){return false}}
+async function refreshSession(){
+ const rt=refreshTokenValue();if(!rt)return null;
+ const res=await fetch(DB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:DB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt}),cache:'no-store'});
+ const txt=await res.text();if(!res.ok)throw new Error(txt||'Session refresh failed');const next=JSON.parse(txt),s=storedAuthSession();
+ if(s){if(s.nested)s.raw.currentSession=Object.assign({},s.raw.currentSession,next);else s.raw=Object.assign({},s.raw,next);s.store.setItem(s.key,JSON.stringify(s.raw))}
+ try{for(const store of [localStorage,sessionStorage]){const raw=store.getItem('currentUser');if(!raw)continue;const u=JSON.parse(raw);if(u&&typeof u==='object'){if('access_token'in u)u.access_token=next.access_token;if('accessToken'in u)u.accessToken=next.access_token;if('token'in u)u.token=next.access_token;if(next.refresh_token&&'refresh_token'in u)u.refresh_token=next.refresh_token;store.setItem('currentUser',JSON.stringify(u))}}}catch(e){}
+ return next.access_token;
 }
 function userId(){const u=currentUser();return u&&(u.id||u.user_id)}
 function authHeaders(extra){const t=sessionToken();return Object.assign({'apikey':DB_KEY,'Authorization':'Bearer '+(t||DB_KEY),'Content-Type':'application/json'},extra||{})}
 async function api(path,opts){
  if(!currentUser()||!userId())throw new Error('Please sign in to Sakkhi again before using Enterprise.');
- if(!sessionToken())throw new Error('Your secure Supabase session was not found. Sign out and sign in again, then retry.');
- const res=await fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store',headers:authHeaders()},opts||{}));
- const txt=await res.text();if(!res.ok)throw new Error(txt||('Request failed ('+res.status+')'));return txt?JSON.parse(txt):null;
+ let token=sessionToken();if(!token)throw new Error('Your secure Supabase session was not found. Please sign in again to reconnect Enterprise.');
+ if(tokenNeedsRefresh(token)&&refreshTokenValue()){try{token=await refreshSession()||token}catch(e){}}
+ const options=opts||{};
+ const send=()=>fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store'},options,{headers:authHeaders(options.headers||{})}));
+ let res=await send();
+ if((res.status===401||res.status===403)&&refreshTokenValue()){try{const fresh=await refreshSession();if(fresh)res=await send()}catch(e){}}
+ const txt=await res.text();if(!res.ok){let detail=txt;try{const j=JSON.parse(txt);detail=j.message||j.msg||j.hint||txt}catch(e){}throw new Error(detail||('Request failed ('+res.status+')'))}
+ return txt?JSON.parse(txt):null;
 }
+
 function enc(v){return encodeURIComponent(String(v==null?'':v))}
 function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
