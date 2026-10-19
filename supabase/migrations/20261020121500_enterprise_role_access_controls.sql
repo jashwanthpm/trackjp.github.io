@@ -3,7 +3,7 @@ create or replace function private.enterprise_is_assigned_to_shoot(p_workspace_i
 returns boolean
 language sql stable security definer
 set search_path = pg_catalog, public
-as $
+as $func$
   select exists (
     select 1
     from public.enterprise_shoot_assignments a
@@ -12,7 +12,7 @@ as $
       and a.shoot_id = p_shoot_id
       and c.user_id = (select auth.uid())::text
   );
-$;
+$func$;
 revoke all on function private.enterprise_is_assigned_to_shoot(uuid,text) from public, anon;
 grant execute on function private.enterprise_is_assigned_to_shoot(uuid,text) to authenticated;
 
