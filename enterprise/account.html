@@ -1,34 +1,57 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Sakkhi | Company Settings</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
-  <style>
-    body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
-    ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#c9a96e}
-    .panel{background:#0f0f0f;border:1px solid #202020;border-radius:14px}
-    .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#777}
-    .field{width:100%;background:#090909;border:1px solid #292929;border-radius:9px;padding:10px 12px;color:#eee;font-size:13px;outline:none}
-    .field:focus{border-color:rgba(201,169,110,.65)}
-    .muted{color:#858585}
-  </style>
-</head>
-<body class="min-h-screen p-4 sm:p-8">
-  <main class="max-w-5xl mx-auto space-y-6">
-    <header class="flex items-center justify-between border-b border-neutral-900 pb-4">
-      <div>
-        <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
-          <i class="ti ti-settings text-[#c9a96e]"></i> Company Settings
-        </h2>
-        <p class="text-xs text-neutral-500 mt-1">Set up your enterprise profile and studio preferences.</p>
-      </div>
-      
-    </header>
-    <section class="panel p-5 sm:p-6 max-w-3xl"><div class="mb-5"><h2 class="font-bold">Company profile</h2><p class="text-xs text-neutral-500 mt-1">These fields are a visual template and do not save yet.</p></div><form class="space-y-5" onsubmit="event.preventDefault(); alert('Settings form is a visual template. Save functionality will be added later.');"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><label class="block"><span class="eyebrow block mb-2">Company name</span><input class="field" placeholder="Your studio name"></label><label class="block"><span class="eyebrow block mb-2">Business email</span><input class="field" type="email" placeholder="studio@example.com"></label><label class="block"><span class="eyebrow block mb-2">Phone number</span><input class="field" placeholder="+91"></label><label class="block"><span class="eyebrow block mb-2">Website</span><input class="field" placeholder="https://"></label></div><label class="block"><span class="eyebrow block mb-2">Studio address</span><textarea class="field" rows="3" placeholder="Enter studio address"></textarea></label><div class="pt-2"><button class="px-4 py-2.5 rounded-lg bg-[#c9a96e] text-black text-sm font-bold" type="submit">Save settings (preview)</button></div></form></section>
-  </main>
-</body>
-</html>
+<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sakkhi | Company Settings</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"><style>
+body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
+::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}
+.panel{background:#0f0f0f;border:1px solid #202020;border-radius:12px}
+.field{width:100%;background:#090909;border:1px solid #292929;border-radius:8px;padding:9px 11px;color:#eee;font-size:12px;outline:none}
+.field:focus{border-color:rgba(201,169,110,.7)}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;transition:.15s}
+.btn-gold{background:#c9a96e;color:#090909}.btn-gold:hover{background:#e0c184}
+.btn-ghost{border:1px solid #303030;color:#d4d4d4}.btn-ghost:hover{border-color:#c9a96e;color:#c9a96e}
+.eyebrow{font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777}
+.muted{color:#858585}
+.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#777;font-weight:800;border-bottom:1px solid #252525;padding:10px 12px}td{font-size:12px;color:#ddd;border-bottom:1px solid #1e1e1e;padding:11px 12px;vertical-align:middle}
+.badge{display:inline-flex;align-items:center;border:1px solid #333;border-radius:999px;padding:3px 8px;font-size:10px;color:#aaa}
+.toast{position:fixed;right:18px;bottom:18px;z-index:80;background:#151515;border:1px solid #333;padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 10px 30px #0008}
+</style></head>
+<body class="min-h-screen p-3 sm:p-5"><main class="max-w-5xl mx-auto space-y-4">
+<header class="flex items-center justify-between border-b border-neutral-900 pb-3"><div><h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2"><i class="ti ti-settings text-[#c9a96e]"></i> Company Settings</h2><p class="text-[11px] text-neutral-500 mt-1">Set up studio identity, default payment terms, and invoice preferences.</p></div><span id="sync-pill" class="badge"><span class="w-1.5 h-1.5 rounded-full bg-neutral-500 mr-1.5"></span>Workspace</span></header>
+
+<section class="panel p-4"><div class="mb-3"><h3 class="text-sm font-bold">Studio profile</h3><p class="text-[10px] text-neutral-500 mt-1">These defaults are saved to your workspace and can be expanded later.</p></div><form id="settings-form" class="grid grid-cols-1 sm:grid-cols-2 gap-3"><label class="text-[10px] text-neutral-500">Studio / company name<input id="studio-name" class="field mt-1" placeholder="Your studio name"></label><label class="text-[10px] text-neutral-500">Business email<input id="studio-email" type="email" class="field mt-1" placeholder="studio@example.com"></label><label class="text-[10px] text-neutral-500">Phone / WhatsApp<input id="studio-phone" class="field mt-1" placeholder="+91…"></label><label class="text-[10px] text-neutral-500">Website<input id="studio-website" class="field mt-1" placeholder="https://"></label><label class="text-[10px] text-neutral-500">Default currency<select id="studio-currency" class="field mt-1"><option>INR (₹)</option><option>USD ($)</option><option>EUR (€)</option></select></label><label class="text-[10px] text-neutral-500">Default payment terms<input id="studio-terms" class="field mt-1" placeholder="50% advance, balance on delivery"></label><label class="text-[10px] text-neutral-500 sm:col-span-2">Studio address<textarea id="studio-address" rows="2" class="field mt-1" placeholder="Billing address"></textarea></label><label class="text-[10px] text-neutral-500 sm:col-span-2">Quotation / invoice footer<textarea id="studio-footer" rows="2" class="field mt-1" placeholder="Thank you for choosing our studio."></textarea></label><div class="sm:col-span-2"><button class="btn btn-gold">Save settings</button></div></form></section><section class="panel p-4"><h3 class="text-sm font-bold">Workspace data</h3><p class="text-[10px] text-neutral-500 mt-1">Your Enterprise clients, documents, and invitations are stored separately per signed-in account in Supabase.</p><div id="settings-status" class="text-xs text-neutral-400 mt-3">Checking connection…</div></section></main><script>
+const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
+const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1IiwiaWF0IjoxNzc5ODYwNzMyLCJleHAiOjIwOTU0MzY3MzJ9.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
+function sessionToken(){
+ const u=currentUser(); if(u&&(u.access_token||u.accessToken))return u.access_token||u.accessToken;
+ for(const store of [localStorage,sessionStorage]){
+  for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
+   try{const v=JSON.parse(store.getItem(k));if(v&&v.access_token)return v.access_token;if(v&&v.currentSession&&v.currentSession.access_token)return v.currentSession.access_token}catch(e){}
+  }
+ }
+ return null;
+}
+function userId(){const u=currentUser();return u&&(u.id||u.user_id)}
+function authHeaders(extra){const t=sessionToken();return Object.assign({'apikey':DB_KEY,'Authorization':'Bearer '+(t||DB_KEY),'Content-Type':'application/json'},extra||{})}
+async function api(path,opts){
+ if(!currentUser()||!userId())throw new Error('Please sign in to Sakkhi again before using Enterprise.');
+ if(!sessionToken())throw new Error('Your secure Supabase session was not found. Sign out and sign in again, then retry.');
+ const res=await fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store',headers:authHeaders()},opts||{}));
+ const txt=await res.text();if(!res.ok)throw new Error(txt||('Request failed ('+res.status+')'));return txt?JSON.parse(txt):null;
+}
+function enc(v){return encodeURIComponent(String(v==null?'':v))}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
+function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
+async function getSetting(suffix, fallback){
+ const key=userId()+'_'+suffix;const rows=await api('settings?key=eq.'+enc(key)+'&select=value');
+ return rows&&rows.length?rows[0].value:fallback;
+}
+async function setSetting(suffix,value){
+ const id=userId(),key=id+'_'+suffix;
+ await api('settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
+}
+function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Sign in required</h2><p class="text-sm text-neutral-400 mt-2">Please sign in to Sakkhi and reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}if(!sessionToken()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Session refresh needed</h2><p class="text-sm text-neutral-400 mt-2">A secure Supabase session is needed to save changes. Sign out and sign in again, then reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}return true}
+
+
+async function load(){if(!requireUser())return;try{const s=await getSetting('enterprise_profile',{});['name','email','phone','website','currency','terms','address','footer'].forEach(k=>{const el=document.getElementById('studio-'+k);if(el)el.value=s[k]||''});document.getElementById('settings-status').textContent='Connected to the current signed-in workspace.'}catch(e){document.getElementById('settings-status').textContent='Could not load settings: '+e.message}}
+document.getElementById('settings-form').onsubmit=async e=>{e.preventDefault();const s={};['name','email','phone','website','currency','terms','address','footer'].forEach(k=>s[k]=document.getElementById('studio-'+k).value.trim());try{await setSetting('enterprise_profile',s);toast('Company settings saved')}catch(err){toast('Save failed: '+err.message)}};load();</script></body></html>
