@@ -22,7 +22,7 @@ const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
 const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
 function sessionToken(){
- const u=currentUser(); if(u&&(u.access_token||u.accessToken))return u.access_token||u.accessToken;
+ const u=currentUser(); if(u&&(u.access_token||u.accessToken||u.token))return u.access_token||u.accessToken||u.token;
  for(const store of [localStorage,sessionStorage]){
   for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
    try{const v=JSON.parse(store.getItem(k));if(v&&v.access_token)return v.access_token;if(v&&v.currentSession&&v.currentSession.access_token)return v.currentSession.access_token}catch(e){}
