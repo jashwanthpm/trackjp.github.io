@@ -1,4 +1,21 @@
 -- Role-specific policies for Sakkhi Enterprise. Crew and editors do not receive finance access.
+create or replace function private.enterprise_is_assigned_to_shoot(p_workspace_id uuid, p_shoot_id text)
+returns boolean
+language sql stable security definer
+set search_path = pg_catalog, public
+as $
+  select exists (
+    select 1
+    from public.enterprise_shoot_assignments a
+    join public.enterprise_crew c on c.id = a.crew_id
+    where a.workspace_id = p_workspace_id
+      and a.shoot_id = p_shoot_id
+      and c.user_id = (select auth.uid())::text
+  );
+$;
+revoke all on function private.enterprise_is_assigned_to_shoot(uuid,text) from public, anon;
+grant execute on function private.enterprise_is_assigned_to_shoot(uuid,text) to authenticated;
+
 drop policy if exists enterprise_workspace_member_all on public.enterprise_clients;
 drop policy if exists enterprise_workspace_member_all on public.enterprise_leads;
 drop policy if exists enterprise_workspace_member_all on public.enterprise_quotes;
@@ -46,10 +63,14 @@ with check (private.enterprise_has_workspace_role(workspace_id,array['owner','ad
 create policy enterprise_assignments_assigned_read on public.enterprise_shoot_assignments
 for select to authenticated using (
   private.enterprise_has_workspace_role(workspace_id,array['shooter','crew'])
-  and exists (select 1 from public.enterprise_crew c where c.id=crew_id and c.workspace_id=workspace_id and c.user_id=(select auth.uid())::text)
+  and private.enterprise_is_assigned_to_shoot(workspace_id,shoot_id)
 );
 
 -- Crew can check out gear only to themselves and view their own checkout history.
+create policy enterprise_gear_team_read on public.enterprise_gear
+for select to authenticated using (
+  status <> 'retired' and private.enterprise_has_workspace_role(workspace_id,array['shooter','crew'])
+);
 create policy enterprise_checkouts_manager_all on public.enterprise_gear_checkouts
 for all to authenticated
 using (private.enterprise_has_workspace_role(workspace_id,array['owner','admin','manager']))
@@ -83,10 +104,8 @@ for delete to authenticated using (private.enterprise_has_workspace_role(workspa
 create policy enterprise_data_logs_read on public.enterprise_data_logs
 for select to authenticated using (
   private.enterprise_has_workspace_role(workspace_id,array['owner','admin','manager','editor'])
-  or (private.enterprise_has_workspace_role(workspace_id,array['shooter','crew']) and exists (
-    select 1 from public.enterprise_shoot_assignments a join public.enterprise_crew c on c.id=a.crew_id
-    where a.workspace_id=enterprise_data_logs.workspace_id and a.shoot_id=enterprise_data_logs.shoot_id and c.user_id=(select auth.uid())::text
-  ))
+  or (private.enterprise_has_workspace_role(workspace_id,array['shooter','crew'])
+      and private.enterprise_is_assigned_to_shoot(workspace_id,shoot_id))
 );
 create policy enterprise_data_logs_write on public.enterprise_data_logs
 for all to authenticated using (private.enterprise_has_workspace_role(workspace_id,array['owner','admin','manager','editor']))
