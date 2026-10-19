@@ -59,12 +59,12 @@ function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;',
 function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
 function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
 async function getSetting(suffix, fallback){
- const key=userId()+'_'+suffix;const rows=await api('settings?key=eq.'+enc(key)+'&select=value');
+ const key=userId()+'_'+suffix;const rows=await api('enterprise_settings?key=eq.'+enc(key)+'&select=value');
  return rows&&rows.length?rows[0].value:fallback;
 }
 async function setSetting(suffix,value){
  const id=userId(),key=id+'_'+suffix;
- await api('settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
+ await api('enterprise_settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
 }
 function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Sign in required</h2><p class="text-sm text-neutral-400 mt-2">Please sign in to Sakkhi and reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}if(!sessionToken()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Session refresh needed</h2><p class="text-sm text-neutral-400 mt-2">A secure Supabase session is needed to save changes. Sign out and sign in again, then reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}return true}
 
