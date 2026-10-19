@@ -20,7 +20,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8
 <section class="grid grid-cols-2 xl:grid-cols-5 gap-2" id="pipeline-summary"></section>
 <section class="panel p-4"><div class="flex flex-wrap items-center justify-between gap-2"><div><h3 class="text-sm font-bold">Production board</h3><p class="text-[10px] text-neutral-500 mt-1">Change a status here; it updates the linked shoot record.</p></div><a href="calendar.html" target="app-viewer" class="btn btn-gold"><i class="ti ti-plus"></i> New shoot</a></div><div id="pipeline-board" class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-3 mt-4"></div></section></main><script>
 const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
-const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1IiwiaWF0IjoxNzc5ODYwNzMyLCJleHAiOjIwOTU0MzY3MzJ9.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
 function sessionToken(){
  const u=currentUser(); if(u&&(u.access_token||u.accessToken))return u.access_token||u.accessToken;
