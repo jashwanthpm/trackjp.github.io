@@ -5,7 +5,12 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <meta name="theme-color" content="#050505"/>
   <link rel="apple-touch-icon" href="/sakkhi 300px.png">
-  <title>Client Ledger | Sakkhi</title>
+  <title>Client Ledger Link | Sakkhi</title>
+  <meta name="description" content="View the secure client ledger shared by your studio.">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Client Ledger Link | Sakkhi">
+  <meta property="og:description" content="View the secure client ledger shared by your studio.">
+  <meta name="twitter:card" content="summary">
 
 <link rel="icon" type="image/png" href="/sakkhi 300px.png">
   <link rel="shortcut icon" href="/sakkhi 300px.png">
@@ -530,6 +535,8 @@ The studio's total liability shall not exceed the total amount paid by the clien
         }
         
         ledgerData = payload;
+            const sharingStudioName = payload.profile.bizName || payload.profile.businessName || payload.profile.ownerName || 'Studio Partner';
+         document.title = `${sharingStudioName} | Client Ledger Link`;
         companySettings = await loadCompanySettings();
         // Cache these once so both the summary totals and the history list
         // below apply the exact same rule — no drift between the two.
