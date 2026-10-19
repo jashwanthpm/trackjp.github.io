@@ -730,6 +730,30 @@ function resetAll(){
 }
 
 state = sampleState();
+// CRM hand-off: prefill this designed proposal from the selected Enterprise lead.
+const crmParams = new URLSearchParams(window.location.search);
+const crmClient = crmParams.get('clientName');
+const crmEvent = crmParams.get('event');
+const crmDate = crmParams.get('eventDate');
+const crmLocation = crmParams.get('location');
+const crmRequirements = crmParams.get('requirements');
+if (crmClient) state.clientName = crmClient;
+if (crmEvent || crmDate || crmLocation || crmRequirements) {
+  const parts = [];
+  if (crmEvent) parts.push(crmEvent);
+  if (crmDate) parts.push('scheduled for ' + crmDate);
+  if (crmLocation) parts.push('at ' + crmLocation);
+  state.intro = 'Thank you for considering us. We have prepared this proposal for ' + parts.join(' ') + '. Please review the coverage, deliverables and terms below. We look forward to documenting your occasion.';
+  if (crmEvent) {
+    const roles = JSON.parse(JSON.stringify(state.events[0]?.roles || []));
+    state.events = [{name: crmEvent + (crmDate ? ' · ' + crmDate : ''), roles}];
+  }
+  if (crmRequirements) {
+    state.highlights = [{icon:'camera', text:'Enquiry details received from the studio CRM:\\n' + crmRequirements}, ...state.highlights.slice(1)];
+  }
+  // Never leave the sample quotation total on a real lead; enter the studio's actual quote amount.
+  state.amount = '';
+}
 renderPreview();
 renderLeftPanel();
 
