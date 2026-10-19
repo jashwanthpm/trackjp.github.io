@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sakkhi | Team Access</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+  <style>
+    body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
+    ::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}::-webkit-scrollbar-thumb:hover{background:#c9a96e}
+    .panel{background:#0f0f0f;border:1px solid #202020;border-radius:14px}
+    .eyebrow{font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:#777}
+    .field{width:100%;background:#090909;border:1px solid #292929;border-radius:9px;padding:10px 12px;color:#eee;font-size:13px;outline:none}
+    .field:focus{border-color:rgba(201,169,110,.65)}
+    .muted{color:#858585}
+  </style>
+</head>
+<body class="min-h-screen p-4 sm:p-8">
+  <main class="max-w-6xl mx-auto space-y-6">
+    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-900 pb-5">
+      <div>
+        <div class="flex items-center gap-2 text-[#c9a96e] text-xs font-bold tracking-widest uppercase mb-2"><i class="ti ti-users text-base"></i> Sakkhi Enterprise</div>
+        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Team Access</h1>
+        <p class="text-sm text-neutral-500 mt-2">Plan team roles and permissions for your enterprise workspace.</p>
+      </div>
+      <div class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-2 rounded-full border border-neutral-800 bg-neutral-950 text-xs text-neutral-400"><span class="w-2 h-2 rounded-full bg-[#c9a96e]"></span> Workspace setup</div>
+    </header>
+    <div class="rounded-xl border border-[#c9a96e]/20 bg-[#c9a96e]/5 px-4 py-3 flex items-start gap-3">
+      <i class="ti ti-info-circle text-[#c9a96e] text-lg mt-0.5"></i>
+      <div><p class="text-sm text-neutral-200 font-semibold">Page created — ready for development</p><p class="text-xs text-neutral-500 mt-1 leading-relaxed">This is the matching visual foundation for this section. Data connections and working actions can be added next without changing the overall Enterprise layout.</p></div>
+    </div>
+    
+    <section class="panel p-5"><div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3"><div><h2 class="font-bold">Team members</h2><p class="text-xs text-neutral-500 mt-1">The team roster and invitations can be connected here.</p></div><button class="px-4 py-2.5 rounded-lg border border-[#c9a96e]/40 text-[#c9a96e] text-xs font-bold" onclick="alert('Invitations will be implemented in a later step.')"><i class="ti ti-user-plus mr-1"></i> Invite member (preview)</button></div><div class="overflow-x-auto mt-5"><table class="w-full text-left text-sm"><thead><tr class="text-[10px] uppercase tracking-widest text-neutral-500 border-b border-neutral-800"><th class="py-3 pr-4">Member</th><th class="py-3 pr-4">Role</th><th class="py-3 pr-4">Access</th><th class="py-3">Status</th></tr></thead><tbody><tr><td colspan="4" class="py-12 text-center text-neutral-500"><i class="ti ti-user-cog text-2xl block mb-2"></i>Team access controls will appear here.</td></tr></tbody></table></div></section>
+  </main>
+</body>
+</html>
