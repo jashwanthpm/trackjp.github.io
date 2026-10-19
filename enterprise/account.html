@@ -18,20 +18,18 @@
   </style>
 </head>
 <body class="min-h-screen p-4 sm:p-8">
-  <main class="max-w-6xl mx-auto space-y-6">
-    <header class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-neutral-900 pb-5">
+  <main class="max-w-5xl mx-auto space-y-6">
+    <header class="flex items-center justify-between border-b border-neutral-900 pb-4">
       <div>
-        <div class="flex items-center gap-2 text-[#c9a96e] text-xs font-bold tracking-widest uppercase mb-2"><i class="ti ti-settings text-base"></i> Sakkhi Enterprise</div>
-        <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-white">Company Settings</h1>
-        <p class="text-sm text-neutral-500 mt-2">Set up your enterprise profile and studio preferences.</p>
+        <h2 class="text-xl md:text-2xl font-bold text-white flex items-center gap-2">
+          <i class="ti ti-settings text-[#c9a96e]"></i> Company Settings
+        </h2>
+        <p class="text-xs text-neutral-500 mt-1">Set up your enterprise profile and studio preferences.</p>
       </div>
-      <div class="inline-flex items-center gap-2 self-start sm:self-auto px-3 py-2 rounded-full border border-neutral-800 bg-neutral-950 text-xs text-neutral-400"><span class="w-2 h-2 rounded-full bg-[#c9a96e]"></span> Workspace setup</div>
+      <div class="flex items-center gap-2 px-3 py-1.5 rounded-full border border-neutral-800 bg-neutral-950 text-xs font-medium text-neutral-400">
+        <span class="w-2 h-2 rounded-full bg-[#c9a96e]"></span> Enterprise
+      </div>
     </header>
-    <div class="rounded-xl border border-[#c9a96e]/20 bg-[#c9a96e]/5 px-4 py-3 flex items-start gap-3">
-      <i class="ti ti-info-circle text-[#c9a96e] text-lg mt-0.5"></i>
-      <div><p class="text-sm text-neutral-200 font-semibold">Page created — ready for development</p><p class="text-xs text-neutral-500 mt-1 leading-relaxed">This is the matching visual foundation for this section. Data connections and working actions can be added next without changing the overall Enterprise layout.</p></div>
-    </div>
-    
     <section class="panel p-5 sm:p-6 max-w-3xl"><div class="mb-5"><h2 class="font-bold">Company profile</h2><p class="text-xs text-neutral-500 mt-1">These fields are a visual template and do not save yet.</p></div><form class="space-y-5" onsubmit="event.preventDefault(); alert('Settings form is a visual template. Save functionality will be added later.');"><div class="grid grid-cols-1 sm:grid-cols-2 gap-4"><label class="block"><span class="eyebrow block mb-2">Company name</span><input class="field" placeholder="Your studio name"></label><label class="block"><span class="eyebrow block mb-2">Business email</span><input class="field" type="email" placeholder="studio@example.com"></label><label class="block"><span class="eyebrow block mb-2">Phone number</span><input class="field" placeholder="+91"></label><label class="block"><span class="eyebrow block mb-2">Website</span><input class="field" placeholder="https://"></label></div><label class="block"><span class="eyebrow block mb-2">Studio address</span><textarea class="field" rows="3" placeholder="Enter studio address"></textarea></label><div class="pt-2"><button class="px-4 py-2.5 rounded-lg bg-[#c9a96e] text-black text-sm font-bold" type="submit">Save settings (preview)</button></div></form></section>
   </main>
 </body>
