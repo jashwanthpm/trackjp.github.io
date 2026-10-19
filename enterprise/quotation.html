@@ -1,0 +1,906 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Enterprise | Quotation Designer</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --panel-bg:#1a1815;
+  --panel-bg-raised:#242018;
+  --panel-bg-input:#2b261d;
+  --panel-ink:#eee3cd;
+  --panel-ink-dim:#a89d84;
+  --panel-line:#3c352a;
+  --panel-gold:#c9a15a;
+  --panel-accent:#b5673a;
+  --pv-bg:#cdb89d;
+  --pv-header:#d9c7ac;
+  --pv-card:#e9decb;
+  --pv-ink:#2c2822;
+  --pv-ink-soft:#4a4339;
+  --pv-accent:#7d1f2b;
+}
+*{ box-sizing:border-box; }
+html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0d0b; color:var(--panel-ink); }
+
+/* ---------------- Top bar ---------------- */
+.topbar{
+  position:sticky; top:0; z-index:60;
+  background:var(--panel-bg); color:#eee3cd;
+  padding:11px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  border-bottom:1px solid var(--panel-line);
+}
+.topbar .title{ font-family:'Playfair Display',serif; font-weight:700; font-size:15px; margin-right:auto; }
+.topbar button{
+  background:#2a251e; color:#f2e8d5; border:1px solid #453e32; padding:8px 14px;
+  border-radius:6px; font-family:'EB Garamond',serif; font-size:14px; cursor:pointer;
+}
+.topbar button:hover{ background:#3a3226; }
+.topbar button.primary{ background:var(--pv-accent); border-color:var(--pv-accent); }
+.topbar button.primary:hover{ background:#921d2b; }
+.topbar .hint{ width:100%; font-size:12.5px; color:#b8ab8c; }
+.toolbar-group { display:flex; gap:10px; border-right: 1px solid var(--panel-line); padding-right:15px; margin-right:5px; }
+
+/* ---------------- Layout ---------------- */
+.workspace{ display:flex; align-items:flex-start; min-height:calc(100vh - 54px); }
+
+.left-panel{
+  width:400px; min-width:340px; max-width:440px;
+  background:var(--panel-bg); color:var(--panel-ink);
+  height:calc(100vh - 54px); overflow-y:auto; position:sticky; top:54px;
+  padding:18px 18px 60px;
+  border-right:1px solid var(--panel-line);
+}
+.right-panel{ flex:1; padding:28px 20px 60px; display:flex; justify-content:center; background:#100e0b; min-height:calc(100vh - 54px); }
+
+.lp-section{ margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--panel-line); }
+.lp-section:last-child{ border-bottom:none; margin-bottom:6px; }
+.lp-section h3{
+  display:flex; align-items:center; gap:8px;
+  font-family:'EB Garamond',serif; font-weight:600;
+  margin:0 0 14px; text-transform:uppercase; font-size:12px; letter-spacing:.12em; color:var(--panel-gold);
+}
+.lp-section h3 .hicon{ width:15px; height:15px; flex-shrink:0; opacity:.9; }
+.lp-section h3 .hicon svg{ width:15px; height:15px; fill:var(--panel-gold); display:block; }
+.lp-section h3::after{ content:""; flex:1; height:1px; background:linear-gradient(to right, var(--panel-line), transparent); }
+
+.field{ margin-bottom:12px; }
+.field label{ display:block; font-size:12px; color:var(--panel-ink-dim); margin-bottom:5px; letter-spacing:.01em; }
+.subhint{ font-size:11.5px; color:#7d715a; line-height:1.5; margin:2px 0 8px; }
+
+/* Uniform dark styling for every form control */
+.left-panel input[type=text],
+.left-panel input[type=number],
+.left-panel textarea,
+.left-panel select{
+  width:100%; background:var(--panel-bg-input); border:1px solid #4a4231; color:var(--panel-ink);
+  padding:8px 10px; border-radius:6px; font-family:'EB Garamond',serif; font-size:14.5px;
+  appearance:none; -webkit-appearance:none;
+}
+.left-panel select{
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%23c9a15a' d='M7 10l5 5 5-5z'/></svg>");
+  background-repeat:no-repeat; background-position:right 8px center; background-size:16px; padding-right:30px;
+}
+.left-panel input:focus, .left-panel textarea:focus, .left-panel select:focus{
+  outline:none; border-color:var(--panel-gold); box-shadow:0 0 0 3px rgba(201,161,90,.15);
+}
+.left-panel textarea{ resize:none; overflow:hidden; min-height:44px; line-height:1.5; }
+
+.field input[type=color]{
+  width:100%; height:36px; border:1px solid #4a4231; background:var(--panel-bg-input);
+  padding:3px; cursor:pointer; border-radius:6px;
+}
+.row-inline{ display:flex; gap:10px; align-items:flex-end; }
+.row-inline > div{ flex:1; }
+.row-inline .grow{ flex:1; }
+.swatch-row{ display:flex; gap:10px; }
+.swatch-row .field{ flex:1; margin-bottom:0; }
+
+.mini-btn{
+  background:var(--panel-bg-raised); border:1px solid #4a4231; color:#e7dcc4; font-size:12px;
+  padding:6px 10px; border-radius:5px; cursor:pointer; font-family:'EB Garamond',serif;
+}
+.mini-btn:hover{ background:#332c20; border-color:var(--panel-gold); color:var(--panel-gold); }
+.mini-btn.danger{ color:#d98e88; }
+.mini-btn.danger:hover{ background:#332119; border-color:#a85c56; color:#e9a29c; }
+.add-btn-full{
+  width:100%; margin-top:4px; padding:9px; border-radius:7px; border:1.5px dashed #5c5138;
+  background:transparent; color:var(--panel-gold); font-family:'EB Garamond',serif; font-size:13.5px; cursor:pointer;
+  letter-spacing:.01em;
+}
+.add-btn-full:hover{ background:rgba(201,161,90,.08); border-color:var(--panel-gold); }
+
+.item-card{
+  background:var(--panel-bg-raised); border:1px solid var(--panel-line); border-left:2.5px solid var(--panel-gold);
+  border-radius:0 8px 8px 0; padding:11px 12px; margin-bottom:10px;
+}
+.item-card .item-top{ display:flex; gap:8px; margin-bottom:8px; }
+.item-card .item-top select{ width:auto; flex:1; }
+.item-card .item-top .remove{ flex-shrink:0; width:auto; }
+
+.event-card{
+  background:var(--panel-bg-raised); border:1px solid var(--panel-line); border-left:2.5px solid var(--pv-accent);
+  border-radius:0 8px 8px 0; padding:13px; margin-bottom:14px;
+}
+.event-card .ev-top{ display:flex; gap:8px; margin-bottom:10px; }
+.role-block{ background:#1f1b14; border:1px solid #342c1f; border-radius:7px; padding:9px; margin-bottom:9px; }
+.role-block .rb-head{ display:flex; gap:6px; margin-bottom:7px; align-items:center; }
+.role-block .rb-head input{ flex:1; }
+.style-edit{ display:flex; gap:6px; align-items:center; margin-bottom:6px; }
+.style-edit input[type=number]{ width:52px; flex-shrink:0; }
+.style-edit input[type=text]{ flex:1; }
+
+/* ---------------- Preview (the actual design) ---------------- */
+.page{
+  width:100%; max-width:680px; background:var(--pv-bg); padding:52px 54px 64px;
+  border-radius:6px; box-shadow:0 10px 40px rgba(0,0,0,.4); color:var(--pv-ink);
+  font-family:'EB Garamond',serif;
+}
+.logo-block{ padding:30px 20px 20px; text-align:center; margin-bottom:6px; }
+.logo-block img{ max-height:85px; max-width:90%; }
+.logo-text{ font-family:'Playfair Display',serif; font-weight:800; font-size:60px; margin:0 0 14px; }
+
+.divider-wrap{ padding:14px 0 4px; }
+.divider-dots{ display:flex; align-items:center; justify-content:center; }
+.divider-dots::before,.divider-dots::after{ content:""; height:2px; background:#6b6560; flex:1; max-width:230px; }
+.divider-dots .dot{ width:9px; height:9px; border-radius:50%; background:#6b6560; margin:0 -2px; }
+.divider-simple{ height:1.5px; background:#6b6560; width:70%; margin:0 auto; }
+.divider-diamond{ display:flex; align-items:center; justify-content:center; gap:10px; }
+.divider-diamond::before,.divider-diamond::after{ content:""; height:1.5px; background:#6b6560; flex:1; max-width:220px; }
+.divider-diamond .diamond{ width:9px; height:9px; background:var(--pv-accent); transform:rotate(45deg); }
+.divider-none{ height:0; }
+
+.greeting{ text-align:center; font-style:italic; font-size:32px; margin:26px 0 16px; }
+.intro{ text-align:center; font-size:20px; line-height:1.65; max-width:620px; margin:0 auto 36px; color:var(--pv-ink-soft); }
+h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-size:28px; margin:44px 0 24px; }
+
+.card{ background:var(--pv-card); border-radius:16px; padding:22px 26px; margin-bottom:15px; display:flex; align-items:flex-start; gap:18px; }
+.card .icon-wrap{ flex-shrink:0; width:28px; height:28px; margin-top:3px; }
+.card .icon-wrap svg{ width:28px; height:28px; fill:#1c1a17; display:block; }
+.card .text{ font-size:18.5px; line-height:1.55; flex:1; white-space:pre-wrap; }
+
+.events-list{ display:flex; flex-direction:column; gap:16px; }
+.event-row{ background:var(--pv-card); border-radius:16px; padding:22px 26px; }
+.event-row .ev-name{ font-size:22px; font-weight:600; margin-bottom:14px; }
+.roles-wrap{ display:flex; flex-wrap:wrap; gap:18px 30px; }
+.role-view{ min-width:180px; }
+.role-view .rlabel{ font-size:16px; font-weight:600; color:var(--pv-ink-soft); margin-bottom:8px; }
+.style-view{ display:flex; align-items:center; gap:8px; font-size:17.5px; margin-bottom:6px; }
+.style-view .ppl{ display:inline-flex; }
+.style-view .ppl svg{ width:16px; height:16px; fill:#1c1a17; margin-right:-3px; }
+
+.payments-block{ text-align:center; margin-bottom:40px; }
+.payments-block .lead{ font-size:19px; color:var(--pv-ink-soft); margin-bottom:8px; }
+.amount{ font-weight:600; font-size:48px; margin:8px 0 20px; }
+.amount .currency{ font-size:36px; margin-right:4px; }
+.terms-note{ font-size:18px; line-height:1.6; max-width:580px; margin:0 auto; color:var(--pv-ink-soft); white-space:pre-wrap; }
+
+.account-box{ text-align:center; font-size:18.5px; line-height:1.9; margin-bottom:10px; }
+.account-box b{ font-weight:600; }
+
+.terms-list{ list-style:none; padding:0; margin:0; }
+.term-item{ display:flex; gap:12px; font-size:18.5px; line-height:1.6; margin-bottom:16px; }
+.term-item::before{ content:"•"; font-size:22px; line-height:1.3; }
+.term-item span{ flex:1; white-space:pre-wrap; }
+
+.thankyou{ text-align:center; font-family:'Playfair Display',serif; font-style:italic; letter-spacing:.08em; font-size:28px; margin-top:44px; }
+
+@media print{
+  /* Removes browser headers/footers (dates, page numbers, URLs) */
+  @page { margin: 0mm; }
+  
+  /* Forces the browser to print colors and background graphics */
+  * {
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  /* Force the entire printed document to use the tan background, fixing the black bottom bleed */
+  html, body { 
+    background: var(--pv-bg) !important; 
+    height: 100%;
+  }
+  
+  .topbar, .left-panel { display: none !important; }
+  
+  .workspace, .right-panel { 
+    background: var(--pv-bg) !important; 
+    padding: 0 !important; 
+    display: block; 
+  }
+  
+  .page { 
+    box-shadow: none; 
+    margin: 0 auto; 
+    max-width: 100%; 
+    padding: 40px 30px !important; 
+    border-radius: 0; 
+    background: transparent !important;
+  }
+
+  /* Prevent blocks from being sliced in half across pages */
+  .card, .event-row, .payments-block, .account-box, .logo-block, .term-item {
+    page-break-inside: avoid;
+    break-inside: avoid;
+  }
+  
+  /* Prevent section titles from sitting at the very bottom of a page */
+  h2.section-title {
+    page-break-inside: avoid;
+    break-inside: avoid;
+    page-break-after: avoid;
+    break-after: avoid;
+  }
+}
+
+@media (max-width:980px){
+  .workspace{ flex-direction:column; }
+  .left-panel{ width:100%; max-width:100%; height:auto; position:relative; top:0; max-height:60vh; }
+  .right-panel{ width:100%; padding:20px 12px; }
+  .page{ padding:34px 20px; max-width:100%; }
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="title">Enterprise · Quotation Designer</div>
+  
+  <div class="toolbar-group">
+    <button onclick="document.getElementById('fileInput').click()">📂 Load Working Draft</button>
+    <button onclick="saveProject()">💾 Save Working Draft</button>
+    <button onclick="saveEnterpriseDocument()">Save to Invoices &amp; Dues</button>
+    <button onclick="location.href='invoices.html'">Back to Invoices &amp; Dues</button>
+  </div>
+  
+  <button class="primary" onclick="window.print()">🖨️ Export Final PDF</button>
+  <button onclick="resetAll()">↺ Reset</button>
+  
+  <!-- Hidden file input for loading drafts -->
+  <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadProject(this)">
+  
+  <div class="hint"><b>Workspace Files (.json):</b> Save your progress and load it back later to make quick edits. <b>Client Export (.pdf):</b> Generates the final un-editable design to send to your clients.</div>
+</div>
+
+<div class="workspace">
+  <div class="left-panel" id="leftPanel"></div>
+  <div class="right-panel">
+    <div class="page" id="previewPage"></div>
+  </div>
+</div>
+
+<script>
+/* ================= ICONS ================= */
+const ICONS = {
+  camera: `<svg viewBox="0 0 24 24"><path d="M9 3l-1.5 2H4a2 2 0 0 0-2 2v11a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3.5L15 3H9zm3 6.5a4 4 0 1 1 0 8 4 4 0 0 1 0-8z"/></svg>`,
+  gallery: `<svg viewBox="0 0 24 24"><path d="M4 4h16a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zm1.5 13h13l-4-5.5-3 3.8-2-2.3L5.5 17zM8 10a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3z"/></svg>`,
+  film: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M10 9v6l5-3-5-3z" fill="#e9decb"/></svg>`,
+  harddrive: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="16" rx="2"/><rect x="6" y="7" width="12" height="6" fill="#e9decb"/><circle cx="8" cy="17" r="1" fill="#e9decb"/><circle cx="12" cy="17" r="1" fill="#e9decb"/></svg>`,
+  cloud: `<svg viewBox="0 0 24 24"><path d="M7 18a4.5 4.5 0 0 1-.4-8.98A5.5 5.5 0 0 1 17.2 8.1 4 4 0 0 1 17 16H7z"/></svg>`,
+  server: `<svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="6" rx="1.5"/><rect x="3" y="12" width="18" height="6" rx="1.5"/><circle cx="7" cy="7" r="1" fill="#e9decb"/><circle cx="7" cy="15" r="1" fill="#e9decb"/></svg>`,
+  drone: `<svg viewBox="0 0 24 24"><circle cx="5" cy="5" r="2.4"/><circle cx="19" cy="5" r="2.4"/><circle cx="5" cy="19" r="2.4"/><circle cx="19" cy="19" r="2.4"/><path d="M8 8h8v8H8z"/><path d="M6.5 6.5l3 3m5-3l-3 3m-5 5l3-3m5 3l-3-3" stroke="#1c1a17" stroke-width="1"/></svg>`,
+  calendar: `<svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="16" rx="2"/><rect x="3" y="5" width="18" height="4" fill="#0e0c0a"/><rect x="6" y="12" width="3" height="3" fill="#e9decb"/><rect x="11" y="12" width="3" height="3" fill="#e9decb"/><rect x="16" y="12" width="3" height="3" fill="#e9decb"/></svg>`,
+  location: `<svg viewBox="0 0 24 24"><path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 9.5A2.5 2.5 0 1 1 12 6a2.5 2.5 0 0 1 0 5.5z"/></svg>`,
+  package: `<svg viewBox="0 0 24 24"><path d="M12 2 3 6v12l9 4 9-4V6l-9-4zm0 2.2 6.3 2.8L12 9.8 5.7 7 12 4.2zM5 8.5l6 2.7v8.6l-6-2.7V8.5zm8 11.3v-8.6l6-2.7v8.6l-6 2.7z"/></svg>`,
+  disc: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3" fill="#e9decb"/><circle cx="12" cy="12" r="1.1"/></svg>`,
+  info: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><rect x="11" y="10" width="2" height="7" fill="#e9decb"/><rect x="11" y="6.5" width="2" height="2" fill="#e9decb"/></svg>`,
+  clock: `<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 7v5.5l4 2.3" stroke="#e9decb" stroke-width="1.6" fill="none" stroke-linecap="round"/></svg>`
+};
+const ICON_LABELS = {
+  camera:'Camera (shoot coverage)', gallery:'Gallery (photos)', film:'Film reel (video)',
+  harddrive:'Hard drive / RAW', cloud:'Cloud storage', server:'Server / backup',
+  drone:'Drone', calendar:'Calendar / schedule', location:'Location', package:'Package / delivery',
+  disc:'Disc', info:'Info note', clock:'Timeline / duration'
+};
+const PERSON_SVG = `<svg viewBox="0 0 24 24"><circle cx="12" cy="7" r="4"/><path d="M4 21c0-4.4 3.6-8 8-8s8 3.6 8 8"/></svg>`;
+
+function iconSelectHTML(selected, onchangeAttr){
+  let opts = Object.keys(ICONS).map(k=>`<option value="${k}" ${k===selected?'selected':''}>${ICON_LABELS[k]}</option>`).join('');
+  return `<select ${onchangeAttr}>${opts}</select>`;
+}
+
+/* ================= STATE ================= */
+let state = null;
+
+const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
+const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
+function storedAuthSession(){
+ for(const store of [localStorage,sessionStorage]){
+  for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
+   try{const raw=JSON.parse(store.getItem(k));const session=raw&&raw.currentSession?raw.currentSession:raw;if(session&&(session.access_token||session.refresh_token))return {store,key:k,raw,session,nested:!!(raw&&raw.currentSession)}}catch(e){}
+  }
+ }
+ return null;
+}
+function sessionToken(){const s=storedAuthSession();if(s&&s.session.access_token)return s.session.access_token;const u=currentUser();return u&&(u.access_token||u.accessToken||u.token)||null}
+function refreshTokenValue(){const s=storedAuthSession();if(s&&s.session.refresh_token)return s.session.refresh_token;const u=currentUser();return u&&(u.refresh_token||u.refreshToken)||null}
+function tokenNeedsRefresh(t){try{const p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));return !!p.exp&&p.exp*1000<Date.now()+45000}catch(e){return false}}
+async function refreshSession(){
+ const rt=refreshTokenValue();if(!rt)return null;
+ const res=await fetch(DB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:DB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt}),cache:'no-store'});
+ const txt=await res.text();if(!res.ok)throw new Error(txt||'Session refresh failed');const next=JSON.parse(txt),s=storedAuthSession();
+ if(s){if(s.nested)s.raw.currentSession=Object.assign({},s.raw.currentSession,next);else s.raw=Object.assign({},s.raw,next);s.store.setItem(s.key,JSON.stringify(s.raw))}
+ try{for(const store of [localStorage,sessionStorage]){const raw=store.getItem('currentUser');if(!raw)continue;const u=JSON.parse(raw);if(u&&typeof u==='object'){if('access_token'in u)u.access_token=next.access_token;if('accessToken'in u)u.accessToken=next.access_token;if('token'in u)u.token=next.access_token;if(next.refresh_token&&'refresh_token'in u)u.refresh_token=next.refresh_token;store.setItem('currentUser',JSON.stringify(u))}}}catch(e){}
+ return next.access_token;
+}
+function userId(){const u=currentUser();return u&&(u.id||u.user_id)}
+function authHeaders(extra){const t=sessionToken();return Object.assign({'apikey':DB_KEY,'Authorization':'Bearer '+(t||DB_KEY),'Content-Type':'application/json'},extra||{})}
+async function api(path,opts){
+ if(!currentUser()||!userId())throw new Error('Please sign in to Sakkhi again before using Enterprise.');
+ let token=sessionToken();if(!token)throw new Error('Your secure Supabase session was not found. Please sign in again to reconnect Enterprise.');
+ if(tokenNeedsRefresh(token)&&refreshTokenValue()){try{token=await refreshSession()||token}catch(e){}}
+ const options=opts||{};
+ const send=()=>{const extra=Object.assign({},options.headers||{});delete extra.Authorization;delete extra.apikey;delete extra['Content-Type'];return fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store'},options,{headers:authHeaders(extra)}))};
+ let res=await send();
+ if((res.status===401||res.status===403)&&refreshTokenValue()){try{const fresh=await refreshSession();if(fresh)res=await send()}catch(e){}}
+ const txt=await res.text();if(!res.ok){let detail=txt;try{const j=JSON.parse(txt);detail=j.message||j.msg||j.hint||txt}catch(e){}throw new Error(detail||('Request failed ('+res.status+')'))}
+ return txt?JSON.parse(txt):null;
+}
+
+function enc(v){return encodeURIComponent(String(v==null?'':v))}
+function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
+function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
+function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
+async function getSetting(suffix, fallback){
+ const key=userId()+'_'+suffix;const rows=await api('enterprise_settings?key=eq.'+enc(key)+'&select=value');
+ return rows&&rows.length?rows[0].value:fallback;
+}
+async function setSetting(suffix,value){
+ const id=userId(),key=id+'_'+suffix;
+ await api('enterprise_settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
+}
+function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Sign in required</h2><p class="text-sm text-neutral-400 mt-2">Please sign in to Sakkhi and reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}if(!sessionToken()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Session refresh needed</h2><p class="text-sm text-neutral-400 mt-2">A secure Supabase session is needed to save changes. Sign out and sign in again, then reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}return true}
+
+
+function sampleState(){
+  return {
+    theme:{ bg:'#cdb89d', card:'#e9decb', accent:'#7d1f2b' },
+    logo:{ mode:'text', text:'Sakkhi.', image:null },
+    divider:'dots',
+    clientName:'Ashika',
+    intro:"Congratulations on your upcoming Engagement! Wishing you all the best as you prepare for this beautiful and joyous occasion. We truly appreciate your trust in us and looking forward to making beautiful memories for you. As per your requirements we curated a proposal for you.",
+    highlights:[
+      {icon:'camera', text:'In accordance with your requirements, we will be covering Five events and a pre-wedding shoot.'},
+      {icon:'gallery', text:'~800-1200 Curated and professionally edited photographs will be provided from the events.'},
+      {icon:'film', text:'A cinematic film of 5-8 min featuring the finest visuals from each of your events will be crafted.'},
+      {icon:'harddrive', text:'All RAW files from your shoots will be delivered via external hard drives which will be delivered at end of project completion.'}
+    ],
+    notes:[
+      {icon:'cloud', text:'You will receive free one year of access to a cloud gallery, where all the edited photos will be stored for easy download and sharing.'},
+      {icon:'server', text:'You are required to provide us with two 6TB hard drives to facilitate the secure backup and preservation of your data.'}
+    ],
+    events:[
+      {name:'Engagement', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Bride Haldi, Mehndi, Bangle ceremony', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Groom Haldi, Bangle ceremony', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Rituals', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Reception', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Wedding', roles:[
+        {roleName:'Photographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]},
+        {roleName:'Cinematographers', styles:[{count:2,label:'Candid'},{count:1,label:'Traditional'}]}
+      ]},
+      {name:'Pre-Wedding shoot', roles:[
+        {roleName:'Photographers', styles:[{count:1,label:'Candid'}]},
+        {roleName:'Cinematographers', styles:[{count:1,label:'Candid'}]}
+      ]}
+    ],
+    amount:'4,40,000',
+    paymentNote:'A 50% deposit is required in advance to secure the dates. The remaining 50% must be paid at the beginning of the events. Full payment is necessary to initiate the post-production process.',
+    account:{ name:'Mr. Jashwanth P M', accNo:'92030100010938', ifsc:'BARB0DBCHOL', bank:'Bank of Baroda' },
+    deliverables:[
+      {icon:'gallery', text:'~800-1200 Curated and professionally edited photographs will be provided within 45 days of payment clearance.'},
+      {icon:'film', text:'A cinematic film featuring the finest highlights from each of your events will be delivered within 60 days of payment clearance.'},
+      {icon:'disc', text:'An edited long traditional videos of all events will be delivered along with hard drive deliveries.'},
+      {icon:'package', text:'Once all the work is complete, we will provide your hard drives containing edited pictures, films and all the raw files.'}
+    ],
+    terms:[
+      "Kindly allocate a dedicated 45 to 60 minute slot for couple & family portraits during each event. We recommend scheduling this session before the event begins. If that is not feasible, portraits can be captured afterward. Please be aware that we cannot be held responsible for a reduced number of portraits if adequate time is not provided.",
+      "If you cancel the project after making the advance payment and reserving the team's schedule, a cancellation fee of 25% of the total order value will be charged. It may take up to 60 days to process the refund of the remaining amount.",
+      "For each deliverable, you may request valid changes in it; however, please provide all your revisions at once within 15 days of delivery. Additional charges will apply for further re-edits.",
+      "Once all the photos and videos have been delivered, we will consider the project complete and will be unable to accommodate any additional work requests.",
+      "Once your data is delivered via hard drives, we will not retain any ownership of your information. You will be considered as sole owner of your data, and all responsibility for it will rest with you.",
+      "You are responsible for arranging travel and accommodation for our shooting crew for all occurring events outside of Bangalore."
+    ]
+  };
+}
+
+/* ================= RENDER: PREVIEW ================= */
+function esc(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+function renderDivider(){
+  if(state.divider==='dots') return `<div class="divider-wrap"><div class="divider-dots"><span class="dot"></span></div></div>`;
+  if(state.divider==='simple') return `<div class="divider-wrap"><div class="divider-simple"></div></div>`;
+  if(state.divider==='diamond') return `<div class="divider-wrap"><div class="divider-diamond"><span class="diamond"></span></div></div>`;
+  return `<div class="divider-wrap"><div class="divider-none"></div></div>`;
+}
+
+function renderLogo(){
+  if(state.logo.mode==='image' && state.logo.image){
+    return `<img src="${state.logo.image}" alt="logo">`;
+  }
+  return `<div class="logo-text">${esc(state.logo.text)}</div>`;
+}
+
+function renderCards(list){
+  return list.map(item => `
+    <div class="card">
+      <div class="icon-wrap">${ICONS[item.icon]||ICONS.info}</div>
+      <div class="text">${esc(item.text)}</div>
+    </div>`).join('');
+}
+
+function renderPeople(n){
+  n = Math.max(0, parseInt(n)||0);
+  let s='<span class="ppl">';
+  for(let i=0;i<n;i++) s += PERSON_SVG;
+  return s + '</span>';
+}
+
+function renderEvents(){
+  return state.events.map(ev => `
+    <div class="event-row">
+      <div class="ev-name">${esc(ev.name)}</div>
+      <div class="roles-wrap">
+        ${ev.roles.map(r => `
+          <div class="role-view">
+            <div class="rlabel">${esc(r.roleName)}</div>
+            ${r.styles.map(s => `<div class="style-view">${renderPeople(s.count)}<span>${esc(s.label)}</span></div>`).join('')}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+
+function renderTerms(){
+  return state.terms.map(t => `<li class="term-item"><span>${esc(t)}</span></li>`).join('');
+}
+
+function renderPreview(){
+  document.documentElement.style.setProperty('--pv-bg', state.theme.bg);
+  document.documentElement.style.setProperty('--pv-card', state.theme.card);
+  document.documentElement.style.setProperty('--pv-accent', state.theme.accent);
+  const page = document.getElementById('previewPage');
+  page.innerHTML = `
+    <div id="pv-logo" class="logo-block">
+      ${renderLogo()}
+      ${renderDivider()}
+    </div>
+    <div id="pv-intro">
+      <div class="greeting">Dear ${esc(state.clientName)},</div>
+      <div class="intro">${esc(state.intro)}</div>
+    </div>
+
+    <div id="pv-highlights">
+      <h2 class="section-title">Here is our customised proposal</h2>
+      ${renderCards(state.highlights)}
+    </div>
+    
+    <div id="pv-notes">
+      ${renderCards(state.notes)}
+    </div>
+
+    <div id="pv-events">
+      <h2 class="section-title">List of events</h2>
+      <div class="events-list">${renderEvents()}</div>
+    </div>
+
+    <div id="pv-payments">
+      <h2 class="section-title">Payments</h2>
+      <div class="payments-block">
+        <div class="lead">Our total charges for all events will amount to</div>
+        <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
+        <div class="terms-note">${esc(state.paymentNote)}</div>
+      </div>
+    </div>
+
+    <div id="pv-account">
+      <h2 class="section-title">Account details</h2>
+      <div class="account-box">
+        <div><b>Name : </b>${esc(state.account.name)}</div>
+        <div><b>Account No: </b>${esc(state.account.accNo)}</div>
+        <div><b>IFSC code : </b>${esc(state.account.ifsc)}</div>
+        <div><b>Bank name : </b>${esc(state.account.bank)}</div>
+      </div>
+    </div>
+
+    <div id="pv-deliverables">
+      <h2 class="section-title">Deliverables</h2>
+      ${renderCards(state.deliverables)}
+    </div>
+
+    <div id="pv-terms">
+      <h2 class="section-title">Terms and Conditions</h2>
+      <ul class="terms-list">${renderTerms()}</ul>
+    </div>
+
+    <div class="thankyou">THANK YOU</div>
+  `;
+}
+
+function autoGrow(el){
+  if(!el) return;
+  el.style.height = 'auto';
+  el.style.height = (el.scrollHeight + 2) + 'px';
+}
+function autoGrowAll(scope){
+  (scope||document).querySelectorAll('textarea').forEach(autoGrow);
+}
+function sectionIcon(key){
+  return `<span class="hicon">${ICONS[key]||''}</span>`;
+}
+
+/* ================= RENDER: LEFT PANEL ================= */
+function renderLeftPanel(){
+  const lp = document.getElementById('leftPanel');
+  lp.innerHTML = `
+    <div class="lp-section" id="lp-theme">
+      <h3>${sectionIcon('gallery')}Theme &amp; Colors</h3>
+      <div class="swatch-row">
+        <div class="field"><label>Background</label><input type="color" value="${state.theme.bg}" onchange="state.theme.bg=this.value;renderPreview()"></div>
+        <div class="field"><label>Cards</label><input type="color" value="${state.theme.card}" onchange="state.theme.card=this.value;renderPreview()"></div>
+        <div class="field"><label>Accent</label><input type="color" value="${state.theme.accent}" onchange="state.theme.accent=this.value;renderPreview()"></div>
+      </div>
+      <div class="field">
+        <label>Divider style</label>
+        <select onchange="state.divider=this.value;renderPreview()">
+          <option value="dots" ${state.divider==='dots'?'selected':''}>Dots + line (original)</option>
+          <option value="simple" ${state.divider==='simple'?'selected':''}>Simple line</option>
+          <option value="diamond" ${state.divider==='diamond'?'selected':''}>Line + diamond accent</option>
+          <option value="none" ${state.divider==='none'?'selected':''}>No divider</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="lp-section" id="lp-logo">
+      <h3>${sectionIcon('camera')}Logo</h3>
+      <div class="field">
+        <div class="row-inline" style="margin-bottom:10px;">
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex:none;"><input type="radio" name="logomode" style="width:auto;" ${state.logo.mode==='image'?'checked':''} onchange="state.logo.mode='image';renderPreview();renderLeftPanel()"> Upload PNG</label>
+          <label style="display:flex;align-items:center;gap:6px;font-size:13px;flex:none;"><input type="radio" name="logomode" style="width:auto;" ${state.logo.mode==='text'?'checked':''} onchange="state.logo.mode='text';renderPreview();renderLeftPanel()"> Text only</label>
+        </div>
+        ${state.logo.mode==='image' ? `
+          <input type="file" accept="image/*" onchange="handleLogoUpload(this)">
+          <div class="subhint">A transparent-background PNG works best.${state.logo.image ? ' ✓ Logo uploaded.' : ''}</div>
+        ` : `
+          <input type="text" value="${esc(state.logo.text)}" oninput="state.logo.text=this.value;renderPreview()" placeholder="Sakkhi.">
+          <div class="subhint">Shown in a single color on a flat background.</div>
+        `}
+      </div>
+    </div>
+
+    <div class="lp-section" id="lp-intro">
+      <h3>${sectionIcon('info')}Greeting &amp; Intro</h3>
+      <div class="field"><label>Client name</label><input type="text" value="${esc(state.clientName)}" oninput="state.clientName=this.value;renderPreview()"></div>
+      <div class="field"><label>Intro paragraph</label><textarea oninput="state.intro=this.value;renderPreview();autoGrow(this)">${esc(state.intro)}</textarea></div>
+    </div>
+
+    <div class="lp-section" id="lp-highlights">
+      <h3>${sectionIcon('gallery')}Proposal Highlights</h3>
+      <div id="highlightsList"></div>
+      <button class="add-btn-full" onclick="addListItem('highlights','camera','New highlight — describe what\\'s included.')">+ Add highlight</button>
+    </div>
+
+    <div class="lp-section" id="lp-notes">
+      <h3>${sectionIcon('info')}Additional Notes</h3>
+      <div id="notesList"></div>
+      <button class="add-btn-full" onclick="addListItem('notes','info','New note for the client.')">+ Add note</button>
+    </div>
+
+    <div class="lp-section" id="lp-events">
+      <h3>${sectionIcon('calendar')}Events</h3>
+      <div id="eventsListLeft"></div>
+      <button class="add-btn-full" onclick="addEvent()">+ Add event</button>
+    </div>
+
+    <div class="lp-section" id="lp-payments">
+      <h3>${sectionIcon('package')}Payments</h3>
+      <div class="field"><label>Total amount (₹)</label><input type="text" value="${esc(state.amount)}" oninput="state.amount=this.value;renderPreview()"></div>
+      <div class="field"><label>Payment terms</label><textarea oninput="state.paymentNote=this.value;renderPreview();autoGrow(this)">${esc(state.paymentNote)}</textarea></div>
+    </div>
+
+    <div class="lp-section" id="lp-account">
+      <h3>${sectionIcon('server')}Account Details</h3>
+      <div class="field"><label>Name</label><input type="text" value="${esc(state.account.name)}" oninput="state.account.name=this.value;renderPreview()"></div>
+      <div class="field"><label>Account No.</label><input type="text" value="${esc(state.account.accNo)}" oninput="state.account.accNo=this.value;renderPreview()"></div>
+      <div class="field"><label>IFSC code</label><input type="text" value="${esc(state.account.ifsc)}" oninput="state.account.ifsc=this.value;renderPreview()"></div>
+      <div class="field"><label>Bank name</label><input type="text" value="${esc(state.account.bank)}" oninput="state.account.bank=this.value;renderPreview()"></div>
+    </div>
+
+    <div class="lp-section" id="lp-deliverables">
+      <h3>${sectionIcon('package')}Deliverables</h3>
+      <div id="deliverablesList"></div>
+      <button class="add-btn-full" onclick="addListItem('deliverables','package','New deliverable — what and when.')">+ Add deliverable</button>
+    </div>
+
+    <div class="lp-section" id="lp-terms">
+      <h3>${sectionIcon('info')}Terms &amp; Conditions</h3>
+      <div id="termsListLeft"></div>
+      <button class="add-btn-full" onclick="addTerm('New term or condition.')">+ Add term</button>
+    </div>
+  `;
+  renderListEditor('highlights','highlightsList');
+  renderListEditor('notes','notesList');
+  renderListEditor('deliverables','deliverablesList');
+  renderTermsEditor();
+  renderEventsEditor();
+  autoGrowAll(lp);
+}
+
+function handleLogoUpload(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => { state.logo.image = e.target.result; renderPreview(); };
+  reader.readAsDataURL(file);
+}
+
+function renderListEditor(key, containerId){
+  const container = document.getElementById(containerId);
+  container.innerHTML = state[key].map((item, i) => `
+    <div class="item-card">
+      <div class="item-top">
+        ${iconSelectHTML(item.icon, `onchange="state['${key}'][${i}].icon=this.value;renderPreview();renderListEditor('${key}','${containerId}')"`)}
+        <button class="mini-btn danger remove" onclick="state['${key}'].splice(${i},1);renderPreview();renderListEditor('${key}','${containerId}')">Remove</button>
+      </div>
+      <textarea oninput="state['${key}'][${i}].text=this.value;renderPreview();autoGrow(this)">${esc(item.text)}</textarea>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No items yet.</div>`;
+  autoGrowAll(container);
+}
+function addListItem(key, icon, text){
+  state[key].push({icon, text});
+  renderPreview();
+  renderLeftPanel();
+}
+
+function renderTermsEditor(){
+  const container = document.getElementById('termsListLeft');
+  container.innerHTML = state.terms.map((t,i) => `
+    <div class="item-card">
+      <textarea oninput="state.terms[${i}]=this.value;renderPreview();autoGrow(this)">${esc(t)}</textarea>
+      <div class="item-top" style="margin-top:8px;"><button class="mini-btn danger remove" onclick="state.terms.splice(${i},1);renderPreview();renderTermsEditor()">Remove</button></div>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No terms yet.</div>`;
+  autoGrowAll(container);
+}
+function addTerm(text){
+  state.terms.push(text);
+  renderPreview();
+  renderTermsEditor();
+}
+
+function renderEventsEditor(){
+  const container = document.getElementById('eventsListLeft');
+  container.innerHTML = state.events.map((ev, ei) => `
+    <div class="event-card">
+      <div class="ev-top">
+        <input type="text" class="grow" value="${esc(ev.name)}" oninput="state.events[${ei}].name=this.value;renderPreview()" placeholder="Event name">
+        <button class="mini-btn danger" onclick="state.events.splice(${ei},1);renderPreview();renderEventsEditor()">Remove event</button>
+      </div>
+      ${ev.roles.map((r, ri) => `
+        <div class="role-block">
+          <div class="rb-head">
+            <input type="text" value="${esc(r.roleName)}" oninput="state.events[${ei}].roles[${ri}].roleName=this.value;renderPreview()" placeholder="Role name (e.g. Drone)">
+            <button class="mini-btn danger" onclick="state.events[${ei}].roles.splice(${ri},1);renderPreview();renderEventsEditor()">✕</button>
+          </div>
+          ${r.styles.map((s, si) => `
+            <div class="style-edit">
+              <input type="number" min="0" max="9" value="${s.count}" oninput="state.events[${ei}].roles[${ri}].styles[${si}].count=this.value;renderPreview()">
+              <input type="text" value="${esc(s.label)}" oninput="state.events[${ei}].roles[${ri}].styles[${si}].label=this.value;renderPreview()" placeholder="Candid / Traditional">
+              <button class="mini-btn danger" onclick="state.events[${ei}].roles[${ri}].styles.splice(${si},1);renderPreview();renderEventsEditor()">✕</button>
+            </div>
+          `).join('')}
+          <button class="mini-btn" onclick="state.events[${ei}].roles[${ri}].styles.push({count:1,label:'Candid'});renderPreview();renderEventsEditor()">+ Add style row</button>
+        </div>
+      `).join('')}
+      <button class="mini-btn" onclick="state.events[${ei}].roles.push({roleName:'Drone',styles:[{count:1,label:'Aerial'}]});renderPreview();renderEventsEditor()">+ Add role (e.g. Drone)</button>
+    </div>
+  `).join('') || `<div style="font-size:13px;color:#8a7f68;">No events yet.</div>`;
+}
+function addEvent(){
+  state.events.push({
+    name:'New Event',
+    roles:[
+      {roleName:'Photographers', styles:[{count:1,label:'Candid'}]},
+      {roleName:'Cinematographers', styles:[{count:1,label:'Candid'}]}
+    ]
+  });
+  renderPreview();
+  renderEventsEditor();
+}
+
+/* ================= SAVE / LOAD SYSTEM ================= */
+function saveProject() {
+  const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(state));
+  const dlAnchorElem = document.createElement('a');
+  dlAnchorElem.setAttribute("href", dataStr);
+  
+  // Names the file based on the client name automatically
+  let fileName = state.clientName.replace(/[^a-z0-9]/gi, '_').toLowerCase();
+  if(!fileName) fileName = "quotation";
+  
+  dlAnchorElem.setAttribute("download", fileName + "_workspace.json");
+  dlAnchorElem.click();
+}
+
+function loadProject(input) {
+  const file = input.files[0];
+  if (!file) return;
+  
+  // Safeguard: Check if user accidentally uploaded a PDF
+  if (file.name.toLowerCase().endsWith('.pdf')) {
+    alert("Please select a Workspace file (.json) instead of a PDF.\\n\\nPDFs are for sending to clients. The .json files are your saved editable drafts.");
+    input.value = "";
+    return;
+  }
+  
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    try {
+      const loadedState = JSON.parse(e.target.result);
+      if (loadedState && loadedState.theme) {
+        state = loadedState;
+        renderPreview();
+        renderLeftPanel();
+      } else {
+        alert("This doesn't look like a valid workspace file.");
+      }
+    } catch (err) {
+      alert("Error reading file. Ensure you uploaded a .json file.");
+    }
+  };
+  reader.readAsText(file);
+  input.value = ""; // reset so you can load the same file again if needed
+}
+
+function resetAll(){
+  if(confirm('Reset everything back to the original sample quotation? Your edits will be lost.')){
+    state = sampleState();
+const crmParams = new URLSearchParams(window.location.search);
+const enterpriseMode = crmParams.get('enterprise') === '1';
+const crmClient = crmParams.get('clientName') || '';
+const crmEvent = crmParams.get('event') || '';
+const crmDate = crmParams.get('eventDate') || '';
+const crmLocation = crmParams.get('location') || '';
+const crmRequirements = crmParams.get('requirements') || '';
+let enterpriseDocs = [];
+let enterpriseClients = [];
+let currentEnterpriseDoc = null;
+function amountNumber(value){ return Number(String(value == null ? '' : value).replace(/,/g,'').replace(/[^0-9.\-]/g,'')) || 0; }
+function amountText(value){ return Number(value||0).toLocaleString('en-IN',{maximumFractionDigits:2}); }
+function proposalNotes(s){
+  const events=(s.events||[]).map(ev=>ev.name+'\n'+(ev.roles||[]).map(r=>'  '+r.roleName+': '+(r.styles||[]).map(st=>st.count+' × '+st.label).join(', ')).join('\n')).join('\n\n');
+  return [s.intro, 'COVERAGE\n'+events, 'HIGHLIGHTS\n'+(s.highlights||[]).map(x=>'• '+x.text).join('\n'), 'NOTES\n'+(s.notes||[]).map(x=>'• '+x.text).join('\n'), 'DELIVERABLES\n'+(s.deliverables||[]).map(x=>'• '+x.text).join('\n'), 'PAYMENT TERMS\n'+s.paymentNote, 'TERMS & CONDITIONS\n'+(s.terms||[]).map((x,i)=>(i+1)+'. '+x).join('\n')].filter(Boolean).join('\n\n');
+}
+if (crmClient) state.clientName = crmClient;
+if (crmEvent || crmDate || crmLocation || crmRequirements) {
+  const parts = [];
+  if (crmEvent) parts.push(crmEvent);
+  if (crmDate) parts.push('scheduled for ' + crmDate);
+  if (crmLocation) parts.push('at ' + crmLocation);
+  state.intro = 'Thank you for considering us. We have prepared this proposal for ' + parts.join(' ') + '. Please review the coverage, deliverables and terms below. We look forward to documenting your occasion.';
+  if (crmEvent) {
+    const roles = JSON.parse(JSON.stringify(state.events[0]?.roles || []));
+    state.events = [{name: crmEvent + (crmDate ? ' · ' + crmDate : '') + (crmLocation ? ' · ' + crmLocation : ''), roles}];
+  }
+  if (crmRequirements) state.highlights = [{icon:'camera', text:'Enquiry details received from the studio CRM:\n' + crmRequirements}, ...state.highlights.slice(1)];
+}
+if (enterpriseMode && !crmParams.get('documentId')) {
+  state.amount = '';
+  if (!crmClient) state.clientName = '';
+  if (!crmEvent && !crmRequirements) state.intro = 'Thank you for considering our photography studio. This proposal outlines the requested coverage, deliverables, and terms. Edit each section to match the client and event before sending.';
+}
+async function loadEnterpriseDocument(){
+  if(!enterpriseMode) return;
+  if(!currentUser() || !userId() || !sessionToken()){ toast('Sign in to Sakkhi before saving to Enterprise.'); return; }
+  try{
+    enterpriseDocs = await getSetting('enterprise_documents', []);
+    enterpriseClients = await getSetting('enterprise_clients', []);
+    const id = crmParams.get('documentId');
+    if(id){
+      currentEnterpriseDoc = enterpriseDocs.find(d=>d.id===id) || null;
+      if(currentEnterpriseDoc){
+        if(currentEnterpriseDoc.quotationState) state = JSON.parse(JSON.stringify(currentEnterpriseDoc.quotationState));
+        else {
+          state.clientName = currentEnterpriseDoc.clientName || '';
+          state.amount = currentEnterpriseDoc.amount ? amountText(currentEnterpriseDoc.amount) : '';
+          state.intro = currentEnterpriseDoc.notes || state.intro;
+          if(currentEnterpriseDoc.title) state.events = [{name:currentEnterpriseDoc.title,roles:state.events[0]?.roles||[]}];
+        }
+      }
+    }
+    renderPreview();
+    renderLeftPanel();
+  }catch(e){ toast('Could not load Enterprise document: '+e.message); }
+}
+async function saveEnterpriseDocument(){
+  if(!enterpriseMode){ toast('Open this designer from Enterprise to save to the register.'); return; }
+  if(!currentUser() || !userId() || !sessionToken()){ toast('Please sign in again before saving to Enterprise.'); return; }
+  const clientName=(state.clientName||'').trim();
+  if(!clientName){ alert('Please enter the client name before saving.'); return; }
+  const amount=amountNumber(state.amount);
+  const oldId=crmParams.get('documentId');
+  const existing=currentEnterpriseDoc || enterpriseDocs.find(d=>d.id===oldId);
+  const type=(crmParams.get('docType') || (existing&&existing.type) || 'Quotation');
+  const title=(state.events||[]).map(e=>e.name).filter(Boolean).join(' + ') || 'Photography coverage';
+  const d={
+    id:existing?existing.id:'doc_'+Date.now().toString(36),
+    type:type,
+    clientId:(enterpriseClients.find(c=>(c.name||'').toLowerCase()===clientName.toLowerCase())||{}).id||'',
+    clientName:clientName,
+    title:title,
+    date:existing&&existing.date?existing.date:new Date().toISOString().slice(0,10),
+    dueDate:existing&&existing.dueDate?existing.dueDate:'',
+    amount:amount,
+    paid:existing?Number(existing.paid||0):0,
+    status:existing?existing.status:'Draft',
+    notes:proposalNotes(state),
+    quotationState:JSON.parse(JSON.stringify(state)),
+    updatedAt:new Date().toISOString()
+  };
+  const next=existing?enterpriseDocs.map(x=>x.id===d.id?d:x):[d,...enterpriseDocs];
+  try{
+    await setSetting('enterprise_documents',next);
+    enterpriseDocs=next; currentEnterpriseDoc=d;
+    if(!crmParams.get('documentId')){ crmParams.set('documentId',d.id); window.history.replaceState({},'',window.location.pathname+'?'+crmParams.toString()); }
+    toast((type==='Invoice'?'Invoice':'Quotation')+' saved to Invoices & Dues.');
+  }catch(e){ toast('Save failed: '+e.message); }
+}
+renderPreview();
+renderLeftPanel();
+if(enterpriseMode) loadEnterpriseDocument();
+
+/* ================= SCROLL SYNC ================= */
+let syncTimeout;
+document.getElementById('leftPanel').addEventListener('scroll', function() {
+  clearTimeout(syncTimeout);
+  syncTimeout = setTimeout(() => {
+    let closestSection = 'logo';
+    let minDistance = Infinity;
+    const sections = ['theme', 'logo', 'intro', 'highlights', 'notes', 'events', 'payments', 'account', 'deliverables', 'terms'];
+    
+    sections.forEach(sec => {
+      const el = document.getElementById('lp-' + sec);
+      if (el) {
+        const distance = Math.abs(el.getBoundingClientRect().top - 54);
+        if (distance < minDistance) {
+          minDistance = distance;
+          closestSection = sec;
+        }
+      }
+    });
+    
+    const previewId = closestSection === 'theme' ? 'logo' : closestSection;
+    const targetElement = document.getElementById('pv-' + previewId);
+    
+    if (targetElement) {
+      const targetY = targetElement.getBoundingClientRect().top + window.scrollY - 80;
+      window.scrollTo({top: targetY, behavior: 'smooth'});
+    }
+  }, 150); 
+});
+</script>
+
+</body>
+</html>
