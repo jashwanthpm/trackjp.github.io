@@ -47,7 +47,7 @@ async function api(path,opts){
  let token=sessionToken();if(!token)throw new Error('Your secure Supabase session was not found. Please sign in again to reconnect Enterprise.');
  if(tokenNeedsRefresh(token)&&refreshTokenValue()){try{token=await refreshSession()||token}catch(e){}}
  const options=opts||{};
- const send=()=>fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store'},options,{headers:authHeaders(options.headers||{})}));
+ const send=()=>{const extra=Object.assign({},options.headers||{});delete extra.Authorization;delete extra.apikey;delete extra['Content-Type'];return fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store'},options,{headers:authHeaders(extra)}))};
  let res=await send();
  if((res.status===401||res.status===403)&&refreshTokenValue()){try{const fresh=await refreshSession();if(fresh)res=await send()}catch(e){}}
  const txt=await res.text();if(!res.ok){let detail=txt;try{const j=JSON.parse(txt);detail=j.message||j.msg||j.hint||txt}catch(e){}throw new Error(detail||('Request failed ('+res.status+')'))}
