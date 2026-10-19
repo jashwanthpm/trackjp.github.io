@@ -777,6 +777,13 @@ function loadProject(input) {
 function resetAll(){
   if(confirm('Reset everything back to the original sample quotation? Your edits will be lost.')){
     state = sampleState();
+    renderPreview();
+    renderLeftPanel();
+  }
+}
+
+ 
+state = sampleState();
 const crmParams = new URLSearchParams(window.location.search);
 const enterpriseMode = crmParams.get('enterprise') === '1';
 const crmClient = crmParams.get('clientName') || '';
