@@ -9,6 +9,8 @@
     "enabled": true
   },
   "vars": {
-    "SUPABASE_URL": "https://smyupcjfusgduaoxqfvu.supabase.co"
+    "SUPABASE_URL": "https://smyupcjfusgduaoxqfvu.supabase.co",
+    "ENABLE_MCP_SERVER": "false",
+    "ENABLE_MCP_WRITES": "false"
   }
 }
