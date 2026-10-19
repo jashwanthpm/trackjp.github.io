@@ -492,7 +492,7 @@ function renderPreview(){
     </div>
 
     <div id="pv-highlights">
-      <h2 class="section-title">Here is our customised proposal</h2>
+      <h2 class="section-title">${enterpriseMode && crmParams.get('docType') === 'Invoice' ? 'Invoice details' : 'Here is our customised proposal'}</h2>
       ${renderCards(state.highlights)}
     </div>
     
@@ -508,7 +508,7 @@ function renderPreview(){
     <div id="pv-payments">
       <h2 class="section-title">Payments</h2>
       <div class="payments-block">
-        <div class="lead">Our total charges for all events will amount to</div>
+        <div class="lead">${enterpriseMode && crmParams.get('docType') === 'Invoice' ? 'Invoice total' : 'Our total charges for all events will amount to'}</div>
         <div class="amount"><span class="currency">₹</span>${esc(state.amount)}</div>
         ${enterpriseMode ? `<div class="terms-note">Issue date: ${esc(enterpriseIssueDate||"—")} · Due date: ${esc(enterpriseDueDate||"—")}</div>` : ""}
         <div class="terms-note">${esc(state.paymentNote)}</div>
