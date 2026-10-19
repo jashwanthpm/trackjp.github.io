@@ -28,7 +28,7 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8
 <div class="panel p-4 lg:col-span-2"><h3 class="text-sm font-bold">Quick actions</h3><div class="grid grid-cols-2 gap-2 mt-3"><a href="calendar.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-calendar-plus"></i> Add shoot</a><a href="clients.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-user-plus"></i> Add client</a><a href="invoices.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-file-invoice"></i> New invoice</a><a href="invite.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-mail-plus"></i> Invite member</a></div><div class="mt-4 rounded-lg border border-neutral-800 p-3"><p class="text-xs text-neutral-300">Keep it simple</p><p class="text-[10px] text-neutral-500 mt-1">Add a client, create a shoot, and track its payment from the same workspace.</p></div></div>
 </section></main><script>
 const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
-const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1IiwiaWF0IjoxNzc5ODYwNzMyLCJleHAiOjIwOTU0MzY3MzJ9.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
 function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
 function sessionToken(){
  const u=currentUser(); if(u&&(u.access_token||u.accessToken))return u.access_token||u.accessToken;
