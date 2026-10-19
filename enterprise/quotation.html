@@ -5,43 +5,43 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Enterprise | Quotation Designer</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;0,800;1,600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Playfair+Display:wght@600;700;800&family=EB+Garamond:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --panel-bg:#1a1815;
-  --panel-bg-raised:#242018;
-  --panel-bg-input:#2b261d;
-  --panel-ink:#eee3cd;
-  --panel-ink-dim:#a89d84;
-  --panel-line:#3c352a;
-  --panel-gold:#c9a15a;
+  --panel-bg:#0f0f0f;
+  --panel-bg-raised:#171717;
+  --panel-bg-input:#0a0a0a;
+  --panel-ink:#e8e8e8;
+  --panel-ink-dim:#969696;
+  --panel-line:#292929;
+  --panel-gold:#c9a96e;
   --panel-accent:#b5673a;
-  --pv-bg:#cdb89d;
-  --pv-header:#d9c7ac;
-  --pv-card:#e9decb;
+  --pv-bg:#f4f0e9;
+  --pv-header:#f4f0e9;
+  --pv-card:#ffffff;
   --pv-ink:#2c2822;
   --pv-ink-soft:#4a4339;
-  --pv-accent:#7d1f2b;
+  --pv-accent:#92713d;
 }
 *{ box-sizing:border-box; }
-html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0d0b; color:var(--panel-ink); }
+html,body{ margin:0; padding:0; font-family:'Plus Jakarta Sans',sans-serif; background:#0a0a0a; color:var(--panel-ink); }
 
 /* ---------------- Top bar ---------------- */
 .topbar{
   position:sticky; top:0; z-index:60;
-  background:var(--panel-bg); color:#eee3cd;
+  background:var(--panel-bg); color:#e8e8e8;
   padding:11px 20px; display:flex; align-items:center; gap:10px; flex-wrap:wrap;
   border-bottom:1px solid var(--panel-line);
 }
-.topbar .title{ font-family:'Playfair Display',serif; font-weight:700; font-size:15px; margin-right:auto; }
+.topbar .title{ font-family:'Plus Jakarta Sans',sans-serif; font-weight:700; font-size:14px; margin-right:auto; }
 .topbar button{
-  background:#2a251e; color:#f2e8d5; border:1px solid #453e32; padding:8px 14px;
-  border-radius:6px; font-family:'EB Garamond',serif; font-size:14px; cursor:pointer;
+  background:#171717; color:#e8e8e8; border:1px solid #333; padding:8px 14px;
+  border-radius:6px; font-family:'Plus Jakarta Sans',sans-serif; font-size:11px; font-weight:700; cursor:pointer;
 }
-.topbar button:hover{ background:#3a3226; }
-.topbar button.primary{ background:var(--pv-accent); border-color:var(--pv-accent); }
-.topbar button.primary:hover{ background:#921d2b; }
-.topbar .hint{ width:100%; font-size:12.5px; color:#b8ab8c; }
+.topbar button:hover{ background:#252525; }
+.topbar button.primary{ background:#c9a96e; color:#090909; border-color:#c9a96e; }
+.topbar button.primary:hover{ background:#e0c184; }
+.topbar .hint{ width:100%; font-size:12.5px; color:#999; }
 .toolbar-group { display:flex; gap:10px; border-right: 1px solid var(--panel-line); padding-right:15px; margin-right:5px; }
 
 /* ---------------- Layout ---------------- */
@@ -54,13 +54,13 @@ html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0
   padding:18px 18px 60px;
   border-right:1px solid var(--panel-line);
 }
-.right-panel{ flex:1; padding:28px 20px 60px; display:flex; justify-content:center; background:#100e0b; min-height:calc(100vh - 54px); }
+.right-panel{ flex:1; padding:28px 20px 60px; display:flex; justify-content:center; background:#0a0a0a; min-height:calc(100vh - 54px); }
 
 .lp-section{ margin-bottom:26px; padding-bottom:22px; border-bottom:1px solid var(--panel-line); }
 .lp-section:last-child{ border-bottom:none; margin-bottom:6px; }
 .lp-section h3{
   display:flex; align-items:center; gap:8px;
-  font-family:'EB Garamond',serif; font-weight:600;
+  font-family:'Plus Jakarta Sans',sans-serif; font-weight:700;
   margin:0 0 14px; text-transform:uppercase; font-size:12px; letter-spacing:.12em; color:var(--panel-gold);
 }
 .lp-section h3 .hicon{ width:15px; height:15px; flex-shrink:0; opacity:.9; }
@@ -78,7 +78,7 @@ html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0
 .left-panel textarea,
 .left-panel select{
   width:100%; background:var(--panel-bg-input); border:1px solid #4a4231; color:var(--panel-ink);
-  padding:8px 10px; border-radius:6px; font-family:'EB Garamond',serif; font-size:14.5px;
+  padding:8px 10px; border-radius:6px; font-family:'Plus Jakarta Sans',sans-serif; font-size:12px;
   appearance:none; -webkit-appearance:none;
 }
 .left-panel select{
@@ -109,7 +109,7 @@ html,body{ margin:0; padding:0; font-family:'EB Garamond',serif; background:#0f0
 .mini-btn.danger:hover{ background:#332119; border-color:#a85c56; color:#e9a29c; }
 .add-btn-full{
   width:100%; margin-top:4px; padding:9px; border-radius:7px; border:1.5px dashed #5c5138;
-  background:transparent; color:var(--panel-gold); font-family:'EB Garamond',serif; font-size:13.5px; cursor:pointer;
+  background:transparent; color:var(--panel-gold); font-family:'Plus Jakarta Sans',sans-serif; font-size:12px; cursor:pointer;
   letter-spacing:.01em;
 }
 .add-btn-full:hover{ background:rgba(201,161,90,.08); border-color:var(--panel-gold); }
@@ -254,17 +254,17 @@ h2.section-title{ text-align:center; font-style:italic; font-weight:600; font-si
   <div class="toolbar-group">
     <button onclick="document.getElementById('fileInput').click()">📂 Load Working Draft</button>
     <button onclick="saveProject()">💾 Save Working Draft</button>
-    <button onclick="saveEnterpriseDocument()">Save to Invoices &amp; Dues</button>
+    <button class="primary" onclick="saveEnterpriseDocument()">Save document</button>
     <button onclick="location.href='invoices.html'">Back to Invoices &amp; Dues</button>
   </div>
   
-  <button class="primary" onclick="window.print()">🖨️ Export Final PDF</button>
+  <button class="primary" onclick="shareDocument()">↗ Share</button><button onclick="window.print()">Save PDF</button>
   <button onclick="resetAll()">↺ Reset</button>
   
   <!-- Hidden file input for loading drafts -->
   <input type="file" id="fileInput" accept=".json" style="display:none" onchange="loadProject(this)">
   
-  <div class="hint"><b>Workspace Files (.json):</b> Save your progress and load it back later to make quick edits. <b>Client Export (.pdf):</b> Generates the final un-editable design to send to your clients.</div>
+  <div class="hint">Edit your document on the left and review the client-facing page on the right. Share copies an internal workspace link (sign-in required); Save PDF creates a client-ready file. Save document first to preserve changes.</div>
 </div>
 
 <div class="workspace">
@@ -360,7 +360,7 @@ function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<d
 
 function sampleState(){
   return {
-    theme:{ bg:'#cdb89d', card:'#e9decb', accent:'#7d1f2b' },
+    theme:{ bg:'#f4f0e9', card:'#ffffff', accent:'#92713d' },
     logo:{ mode:'text', text:'Sakkhi.', image:null },
     divider:'dots',
     clientName:'Ashika',
@@ -859,6 +859,13 @@ async function loadEnterpriseDocument(){
     renderPreview();
     renderLeftPanel();
   }catch(e){ toast('Could not load Enterprise document: '+e.message); }
+}
+async function shareDocument(){
+ if(!enterpriseMode){window.print();return;}
+ if(!currentEnterpriseDoc || !crmParams.get('documentId')){toast('Save this document first, then share its workspace link.');return;}
+ const url=new URL(window.location.href);url.search='';url.searchParams.set('enterprise','1');url.searchParams.set('docType',currentEnterpriseDoc.type);url.searchParams.set('documentId',currentEnterpriseDoc.id);
+ const message='Internal Sakkhi Enterprise '+currentEnterpriseDoc.type+' for '+currentEnterpriseDoc.clientName+'. This link requires your signed-in workspace account. For clients, use Save PDF.';
+ try{if(navigator.share){await navigator.share({title:currentEnterpriseDoc.type+' · '+currentEnterpriseDoc.clientName,text:message,url:url.href});return;}if(navigator.clipboard&&window.isSecureContext){await navigator.clipboard.writeText(url.href);toast('Internal workspace link copied. Use Save PDF for clients.');return;}window.prompt('Copy internal workspace link (sign-in required):',url.href)}catch(e){if(e.name!=='AbortError')toast('Could not share: '+e.message)}
 }
 async function saveEnterpriseDocument(){
   if(!enterpriseMode){ toast('Open this designer from Enterprise to save to the register.'); return; }
