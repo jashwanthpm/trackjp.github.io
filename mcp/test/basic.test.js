@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {iso,paid,publicShoot,visibleShoot} from '../src/index.js';
+import {iso,paid,publicShoot,visibleShoot,indiaDate} from '../src/shoot-utils.js';
 
 test('rejects impossible dates',()=>{
  assert.equal(iso.safeParse('2026-02-30').success,false);
@@ -19,4 +19,9 @@ test('shoots read scope does not expose financial fields',()=>{
  const financial=visibleShoot(s,['shoots:read','payments:read']);
  assert.equal(financial.pending,8000);
  assert.equal(publicShoot(s).paid,2000);
+});
+
+test('India local date is stable across UTC midnight',()=>{
+ assert.equal(indiaDate(Date.parse('2026-10-19T19:00:00Z')),'2026-10-20');
+ assert.equal(indiaDate(Date.parse('2026-10-19T18:00:00Z')),'2026-10-19');
 });
