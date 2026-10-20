@@ -23,4 +23,5 @@ jobs:
           node-version: '22'
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run check
+      - run: node --test test/basic.test.js
       - run: npx wrangler deploy --dry-run --outdir /tmp/sakkhi-mcp-build
