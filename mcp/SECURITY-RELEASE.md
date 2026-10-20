@@ -26,3 +26,18 @@ Reference: https://supabase.com/docs/guides/database/database-linter?lint=0028_a
 - An authenticated `initialize`, `tools/list`, and `tools/call` sequence succeeds.
 - User A cannot retrieve User B's shoot ID.
 - Create shoot appears in User A's Solo app only, after user approval.
+
+## Security hardening status (2026-10-20)
+- **Read-only first release**: `create_shoot` has been removed from runtime registration; `shoots:write` is not an advertised OAuth scope. Health reports `writes:false` regardless of configuration.
+- **Account isolation**: each Supabase REST query filters by the verified Supabase Auth user ID, every returned row is checked against that ID, and mixed-owner responses fail closed (including the separate single-shoot lookup). This is intentional defense in depth because `public.shoots` has both an own-user RLS policy and a broader master-admin RLS policy. Do not remove or alter the latter without auditing Sakkhi's admin UI.
+- **Financial permissions**: shoot reads omit amount/paid/pending/payment status unless the OAuth grant includes `payments:read`; payment and summary tools require their explicit scopes.
+- **Token minimization**: OAuth access-token props omit the Supabase refresh token. The refresh token is retained only in the server-side OAuth grant props.
+- **No silent summary truncation**: reads paginate in batches of 500 and fail closed beyond the supported collection size.
+- **Not certified live**: GitHub connector currently does not expose a successful workflow run for the latest commits, and this environment could not reach npm to run the build. A private two-account end-to-end OAuth test is still required before setting `ENABLE_MCP_SERVER=true` or routing `mcp.sakkhi.co.in`.
+
+### Mandatory private acceptance test
+1. Install dependencies and run the GitHub workflow to green (including Wrangler dry-run and local disabled Worker smoke test).
+2. Configure `SUPABASE_ANON_KEY` as a Cloudflare Worker secret; never use a service-role key. Set up the OAuth KV binding and a controlled preview URL, leaving the public release flag disabled until a separate private test environment is prepared.
+3. Connect test user A, grant `shoots:read` only, and verify no financial fields or payment/summary tools are exposed. Connect test user B with a different set of shoots; verify A cannot fetch B's ID or see B's data in list, next shoot, payments, or summaries, including when A has master-admin privileges.
+4. Test explicit denial, wrong credentials, expired session, token refresh, token revocation, malformed IDs and invalid dates. Ensure the same OAuth token cannot be used after revocation.
+5. Only after passing, configure the real `mcp.sakkhi.co.in` hostname, repeat discovery/PKCE/consent tests on the actual HTTPS origin, then enable read-only access. Keep writes disabled.
