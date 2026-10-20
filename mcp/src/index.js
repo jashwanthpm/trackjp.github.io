@@ -36,7 +36,7 @@ const apiHandler={
   if(!p?.userId||!p.supabaseAccessToken||!p.supabaseExpiresAt||Date.now()>p.supabaseExpiresAt-10000)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
   const verified=await fetch(env.SUPABASE_URL+'/auth/v1/user',{headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+p.supabaseAccessToken},cache:'no-store'});
   if(!verified.ok)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
-  const user=await verified.json();if(user.id!==p.userId)return json({error:'Identity mismatch'},403);
+  const user=await verified.json();if(!user.id||user.is_anonymous||user.id!==p.userId)return json({error:'Identity mismatch'},403);
   const auth={userId:p.userId,token:p.supabaseAccessToken};
   const server=serverFor(env,auth,ctx.auth.scope);
   const transport=new WebStandardStreamableHTTPServerTransport({sessionIdGenerator:undefined,enableJsonResponse:true});
