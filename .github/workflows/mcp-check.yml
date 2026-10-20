@@ -1,5 +1,6 @@
 name: Sakkhi MCP checks
 on:
+  workflow_dispatch:
   push:
     paths:
       - 'mcp/**'
