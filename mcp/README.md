@@ -30,3 +30,6 @@ A dedicated Cloudflare KV namespace named `SAKKHI_MCP_OAUTH` has been created an
 - Confirm User A cannot see User B's shoots; confirm `shoots:read` cannot reveal financial fields
 - Confirm refresh rotation works and expired Supabase sessions fail closed
 - Add tested rate limiting and audit trails before enabling writes
+
+## Compatibility and regression checks (2026-10-20)
+The resource handler now uses the SDK's Web Standard Streamable HTTP transport (the previous Node.js transport accepted IncomingMessage/ServerResponse and was incompatible with Cloudflare fetch Request/Response). The GitHub Actions workflow runs `node --test test/basic.test.js` after dependency installation, alongside syntax checks and Wrangler dry-run. Tests cover impossible dates, payment bounds and the financial read scope. These changes are committed, but **a successful CI result and live OAuth integration tests have not been observed**. Do not enable production solely on the presence of a workflow file.
