@@ -47,13 +47,13 @@ export function createProvider(apiHandler,defaultHandler){
   tokenExchangeCallback:async options=>{
    const p=options.props;
    if(!p?.userId||!p.supabaseRefreshToken)throw new OAuthError('invalid_grant',{description:'Reconnect your Sakkhi account.'});
-   if(options.grantType==='authorization_code' && Date.now()<p.supabaseExpiresAt-60000)return {accessTokenTTL:Math.min(3000,Math.floor((p.supabaseExpiresAt-Date.now())/1000))};
+   if(options.grantType==='authorization_code' && Date.now()<p.supabaseExpiresAt-60000)return {accessTokenProps:{userId:p.userId,supabaseAccessToken:p.supabaseAccessToken,supabaseExpiresAt:p.supabaseExpiresAt},accessTokenTTL:Math.min(3000,Math.floor((p.supabaseExpiresAt-Date.now())/1000))};
    const refreshed=await fetch(options.env.SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:options.env.SUPABASE_ANON_KEY,'content-type':'application/json'},body:JSON.stringify({refresh_token:p.supabaseRefreshToken}),cache:'no-store'});
    if(!refreshed.ok)throw new OAuthError('invalid_grant',{description:'Sakkhi session expired. Reconnect your account.'});
    const s=await refreshed.json();
    if(s.user?.id!==p.userId||!s.access_token||!s.refresh_token||!s.expires_in)throw new OAuthError('invalid_grant',{description:'Sakkhi identity validation failed.'});
    const updated={userId:p.userId,supabaseAccessToken:s.access_token,supabaseRefreshToken:s.refresh_token,supabaseExpiresAt:Date.now()+s.expires_in*1000};
-   return {newProps:updated,accessTokenProps:updated,accessTokenTTL:Math.min(3000,Math.max(60,s.expires_in-60))};
+   return {newProps:updated,accessTokenProps:{userId:updated.userId,supabaseAccessToken:updated.supabaseAccessToken,supabaseExpiresAt:updated.supabaseExpiresAt},accessTokenTTL:Math.min(3000,Math.max(60,s.expires_in-60))};
   }
  });
 }
