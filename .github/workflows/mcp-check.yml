@@ -46,4 +46,6 @@ jobs:
           if [ "$ready" != 1 ]; then cat /tmp/sakkhi-mcp-dev.log; exit 1; fi
           node --input-type=module -e "import fs from 'node:fs'; const h=JSON.parse(fs.readFileSync('/tmp/sakkhi-mcp-health.json','utf8')); if(h.enabled !== false || h.writes !== false || h.oauth !== true) process.exit(1); console.log('Worker starts and is disabled by default')"
           status=$(curl --silent --output /tmp/sakkhi-mcp-response.json --write-out '%{http_code}' http://127.0.0.1:8787/mcp)
-          test "$status" = 503
+          # OAuth may reject an unauthenticated request before it reaches the disabled API handler.
+          # Either outcome must deny access; a successful 2xx response is a security regression.
+          case "$status" in 401|403|503) echo "Unauthenticated MCP request denied: HTTP $status" ;; *) cat /tmp/sakkhi-mcp-response.json; echo "Unexpected MCP status: $status"; exit 1 ;; esac
