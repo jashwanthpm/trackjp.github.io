@@ -25,7 +25,7 @@ export async function authorize(request,env) {
   const login=await fetch(env.SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:env.SUPABASE_ANON_KEY,'content-type':'application/json'},body:JSON.stringify({email,password}),cache:'no-store'});
   if(!login.ok)return errorPage('Sakkhi sign-in failed. Check your credentials. Accounts requiring additional verification are not supported by this connection flow yet.',401);
   const session=await login.json();
-  if(!session.user?.id||!session.access_token||!session.refresh_token||!session.expires_in)return errorPage('Incomplete Sakkhi session.',401);
+  if(!session.user?.id||session.user.is_anonymous||!session.access_token||!session.refresh_token||!session.expires_in)return errorPage('Incomplete Sakkhi session.',401);
   const approved=await oauth.approveConsent(request,handle,{scope:form.getAll('scope').map(String)});
   const completed=await oauth.completeAuthorization({request:approved.request,userId:session.user.id,metadata:{},scope:approved.request.scope,props:{userId:session.user.id,supabaseAccessToken:session.access_token,supabaseRefreshToken:session.refresh_token,supabaseExpiresAt:Date.now()+session.expires_in*1000}});
   approved.headers.set('Location',completed.redirectTo);
