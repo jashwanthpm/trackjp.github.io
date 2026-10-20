@@ -24,4 +24,6 @@ jobs:
       - run: npm install --ignore-scripts --no-audit --no-fund
       - run: npm run check
       - run: node --test test/basic.test.js
+      - name: Verify actual runtime imports and OAuth provider initialization
+        run: node -e "import('./src/index.js').then(m => { if (!m.default || typeof m.default.fetch !== 'function') process.exit(1); console.log('MCP Worker entrypoint loaded'); })"
       - run: npx wrangler deploy --dry-run --outdir /tmp/sakkhi-mcp-build
