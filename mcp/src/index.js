@@ -42,9 +42,10 @@ function serverFor(env,auth,scopes=[]){
 const apiHandler={
  async fetch(request,env,ctx){
   if(env.ENABLE_MCP_SERVER!=='true')return json({error:'Sakkhi MCP not enabled'},503);
+  if(!Array.isArray(ctx.auth?.scope))return json({error:'Invalid authorization'},403);
   if(!ctx.auth.scope.includes('shoots:read'))return insufficientScope(ctx.auth,['shoots:read']);
   const p=ctx.props;
-  if(!p?.userId||!p.supabaseAccessToken||!p.supabaseExpiresAt||Date.now()>p.supabaseExpiresAt-10000)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
+  if(!p?.userId||!p.supabaseAccessToken||!Number.isFinite(p.supabaseExpiresAt)||Date.now()>p.supabaseExpiresAt-10000)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
   const verified=await fetch(env.SUPABASE_URL+'/auth/v1/user',{headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+p.supabaseAccessToken},cache:'no-store'});
   if(!verified.ok)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
   const user=await verified.json();if(!user.id||user.is_anonymous||user.id!==p.userId)return json({error:'Identity mismatch'},403);
