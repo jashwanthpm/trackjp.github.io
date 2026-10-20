@@ -5,20 +5,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js';
 import { z } from 'zod';
 
-// The supplied bearer is a real Supabase Auth access token, never an API key.
-// Production public multi-user AI connections additionally need an OAuth authorization server.
+// MCP access is authenticated by the OAuth resource handler; Supabase JWTs never come from AI clients.
 const json = (data, status=200, extra={}) => new Response(JSON.stringify(data), {status,headers:{'content-type':'application/json; charset=utf-8','cache-control':'no-store',...extra}});
 const err = (message) => ({content:[{type:'text',text:message}],isError:true});
 const result = (data) => ({content:[{type:'text',text:JSON.stringify(data,null,2)}]});
-async function authenticate(request,env){
- const header=request.headers.get('authorization')||'';
- if(!/^Bearer\s+\S+$/i.test(header))throw new Error('A Sakkhi Supabase access token is required.');
- const token=header.replace(/^Bearer\s+/i,'').trim();
- const res=await fetch(env.SUPABASE_URL+'/auth/v1/user',{headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+token},cache:'no-store'});
- if(!res.ok)throw new Error('Invalid or expired Sakkhi session. Reconnect your account.');
- const user=await res.json();if(!user.id || user.is_anonymous)throw new Error('A signed-in Sakkhi account is required.');
- return {token,userId:user.id};
-}
 async function db(env,auth,path,options={}){
  const response=await fetch(env.SUPABASE_URL+'/rest/v1/'+path,{...options,headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+auth.token,'Content-Type':'application/json',...(options.headers||{})},cache:'no-store'});
  const body=await response.text();
