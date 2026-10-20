@@ -1,3 +1,5 @@
+import { authorize, createProvider } from './oauth.js';
+import { insufficientScope } from '@cloudflare/workers-oauth-provider';
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/streamableHttp.js';
 import { z } from 'zod';
@@ -28,30 +30,37 @@ async function db(env,auth,path,options={}){
 }
 const owner = auth => 'user_id=eq.'+encodeURIComponent(auth.userId);
 async function shoots(env,auth){return await db(env,auth,'shoots?'+owner(auth)+'&select=*&order=date.asc&limit=5000')}
-function serverFor(env,auth){
+function serverFor(env,auth,scopes=[]){
  const server=new McpServer({name:'sakkhi-solo',version:'0.1.0'});
  server.registerTool('get_shoots',{description:'List this signed-in Sakkhi Solo user’s shoots, optionally within a date range.',inputSchema:{from:iso.optional(),to:iso.optional(),limit:z.number().int().min(1).max(200).default(50)}},async({from,to,limit})=>{try{let rows=await shoots(env,auth);if(from)rows=rows.filter(s=>s.date>=from);if(to)rows=rows.filter(s=>s.date<=to);return result({total:rows.length,shoots:rows.slice(0,limit).map(publicShoot)})}catch(e){return err(e.message)}});
  server.registerTool('get_next_shoot',{description:'Find the next upcoming shoot in the signed-in Solo account.',inputSchema:{}},async()=>{try{const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date());const next=(await shoots(env,auth)).find(s=>s.date>=today&&s.booking_status!=='cancelled');return result({as_of:today,shoot:next?publicShoot(next):null})}catch(e){return err(e.message)}});
  server.registerTool('get_shoot_details',{description:'Get a single shoot by its Sakkhi ID, restricted to the authenticated user.',inputSchema:{id:z.string().min(1).max(120)}},async({id})=>{try{const rows=await db(env,auth,'shoots?'+owner(auth)+'&id=eq.'+encodeURIComponent(id)+'&select=*&limit=1');return result({shoot:rows[0]?publicShoot(rows[0]):null})}catch(e){return err(e.message)}});
- server.registerTool('get_pending_payments',{description:'List outstanding shoot payments and total due for this Solo user.',inputSchema:{limit:z.number().int().min(1).max(200).default(100)}},async({limit})=>{try{const rows=(await shoots(env,auth)).map(publicShoot).filter(s=>s.pending>0);return result({currency:'INR',total_pending:rows.reduce((n,s)=>n+s.pending,0),count:rows.length,shoots:rows.slice(0,limit)})}catch(e){return err(e.message)}});
- server.registerTool('get_year_summary',{description:'Summarise a calendar year of shoots, invoiced amounts, received payments, and outstanding dues.',inputSchema:{year:z.number().int().min(2000).max(2200)}},async({year})=>{try{const rows=(await shoots(env,auth)).filter(s=>String(s.date||'').startsWith(String(year))).map(publicShoot);return result({year,currency:'INR',shoot_count:rows.length,booked_amount:rows.reduce((n,s)=>n+s.amount,0),received:rows.reduce((n,s)=>n+s.paid,0),pending:rows.reduce((n,s)=>n+s.pending,0),by_event:Object.entries(rows.reduce((a,s)=>(a[s.event||'Other']=(a[s.event||'Other']||0)+1,a),{})).map(([event,count])=>({event,count}))})}catch(e){return err(e.message)}});
- if(env.ENABLE_MCP_WRITES === 'true') server.registerTool('create_shoot',{description:'Create a shoot in this user’s Sakkhi Solo account. This changes real data: obtain the user’s explicit confirmation before calling.',inputSchema:{name:z.string().min(1).max(160),date:iso,event:z.string().min(1).max(100),session:z.string().max(100).default('Full Day'),location:z.string().max(200).default(''),company:z.string().max(160).default(''),notes:z.string().max(1500).default(''),amount:z.number().min(0).max(100000000).default(0)}},async(input)=>{try{const record={id:'mcp_'+crypto.randomUUID(),user_id:auth.userId,name:input.name,date:input.date,event:input.event,session:input.session,location:input.location,company:input.company,notes:input.notes,amount:input.amount,expense:0,expense_status:'pending',pay_status:'pending',part_paid:0,booking_status:'confirmed',created:new Date().toISOString()};const saved=await db(env,auth,'shoots',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(record)});return result({created:true,shoot:publicShoot(saved[0])})}catch(e){return err(e.message)}});
+ if(scopes.includes('payments:read')) server.registerTool('get_pending_payments',{description:'List outstanding shoot payments and total due for this Solo user.',inputSchema:{limit:z.number().int().min(1).max(200).default(100)}},async({limit})=>{try{const rows=(await shoots(env,auth)).map(publicShoot).filter(s=>s.pending>0);return result({currency:'INR',total_pending:rows.reduce((n,s)=>n+s.pending,0),count:rows.length,shoots:rows.slice(0,limit)})}catch(e){return err(e.message)}});
+ if(scopes.includes('summary:read')) server.registerTool('get_year_summary',{description:'Summarise a calendar year of shoots, invoiced amounts, received payments, and outstanding dues.',inputSchema:{year:z.number().int().min(2000).max(2200)}},async({year})=>{try{const rows=(await shoots(env,auth)).filter(s=>String(s.date||'').startsWith(String(year))).map(publicShoot);return result({year,currency:'INR',shoot_count:rows.length,booked_amount:rows.reduce((n,s)=>n+s.amount,0),received:rows.reduce((n,s)=>n+s.paid,0),pending:rows.reduce((n,s)=>n+s.pending,0),by_event:Object.entries(rows.reduce((a,s)=>(a[s.event||'Other']=(a[s.event||'Other']||0)+1,a),{})).map(([event,count])=>({event,count}))})}catch(e){return err(e.message)}});
+ if(env.ENABLE_MCP_WRITES === 'true' && scopes.includes('shoots:write')) server.registerTool('create_shoot',{description:'Create a shoot in this user’s Sakkhi Solo account. This changes real data: obtain the user’s explicit confirmation before calling.',inputSchema:{name:z.string().min(1).max(160),date:iso,event:z.string().min(1).max(100),session:z.string().max(100).default('Full Day'),location:z.string().max(200).default(''),company:z.string().max(160).default(''),notes:z.string().max(1500).default(''),amount:z.number().min(0).max(100000000).default(0)}},async(input)=>{try{const record={id:'mcp_'+crypto.randomUUID(),user_id:auth.userId,name:input.name,date:input.date,event:input.event,session:input.session,location:input.location,company:input.company,notes:input.notes,amount:input.amount,expense:0,expense_status:'pending',pay_status:'pending',part_paid:0,booking_status:'confirmed',created:new Date().toISOString()};const saved=await db(env,auth,'shoots',{method:'POST',headers:{Prefer:'return=representation'},body:JSON.stringify(record)});return result({created:true,shoot:publicShoot(saved[0])})}catch(e){return err(e.message)}});
  return server;
 }
-export default {
+const apiHandler={
  async fetch(request,env,ctx){
-  const url=new URL(request.url);
-  if(url.pathname==='/health'&&request.method==='GET')return json({service:'sakkhi-solo-mcp',status:'ready',note:'Authentication required for MCP.'});
-  if(url.pathname!=='/mcp')return json({error:'Not found'},404);
-  if(request.method==='OPTIONS')return new Response(null,{status:405,headers:{Allow:'POST, GET, DELETE'}});
-  if(!['POST','GET','DELETE'].includes(request.method))return json({error:'Method not allowed'},405,{Allow:'POST, GET, DELETE'});
-  const origin=request.headers.get('origin');
-  if(origin && new URL(origin).host!==url.host && !(env.ALLOWED_ORIGINS||'').split(',').map(x=>x.trim()).includes(origin))return json({error:'Origin not allowed'},403);
-  if(env.ENABLE_MCP_SERVER !== 'true')return json({error:'Sakkhi MCP is not enabled for public access yet.'},503);
-  if(!env.SUPABASE_ANON_KEY||!env.SUPABASE_URL)return json({error:'Server configuration incomplete'},503);
-  let auth;try{auth=await authenticate(request,env)}catch(e){return json({error:e.message},401,{'WWW-Authenticate':'Bearer realm="Sakkhi MCP"'})}
-  const server=serverFor(env,auth);
+  if(env.ENABLE_MCP_SERVER!=='true')return json({error:'Sakkhi MCP not enabled'},503);
+  if(!ctx.auth.scope.includes('shoots:read'))return insufficientScope(ctx.auth,['shoots:read']);
+  const p=ctx.props;
+  if(!p?.userId||!p.supabaseAccessToken||!p.supabaseExpiresAt||Date.now()>p.supabaseExpiresAt-10000)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
+  const verified=await fetch(env.SUPABASE_URL+'/auth/v1/user',{headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+p.supabaseAccessToken},cache:'no-store'});
+  if(!verified.ok)return json({error:'Sakkhi session expired. Reconnect your account.'},401);
+  const user=await verified.json();if(user.id!==p.userId)return json({error:'Identity mismatch'},403);
+  const auth={userId:p.userId,token:p.supabaseAccessToken};
+  const server=serverFor(env,auth,ctx.auth.scope);
   const transport=new StreamableHTTPServerTransport({sessionIdGenerator:undefined,enableJsonResponse:true});
   try{await server.connect(transport);return await transport.handleRequest(request)}catch(e){return json({jsonrpc:'2.0',error:{code:-32603,message:'Internal MCP error'},id:null},500)}finally{ctx.waitUntil(server.close())}
  }
 };
+const defaultHandler={
+ fetch(request,env){
+  const path=new URL(request.url).pathname;
+  if(path==='/authorize')return authorize(request,env);
+  if(path==='/health')return json({service:'sakkhi-solo-mcp',enabled:env.ENABLE_MCP_SERVER==='true',oauth:true,writes:env.ENABLE_MCP_WRITES==='true'});
+  return json({error:'Not found'},404);
+ }
+};
+export default createProvider(apiHandler,defaultHandler);
