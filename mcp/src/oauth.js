@@ -20,8 +20,9 @@ export async function authorize(request,env) {
    const denied=await oauth.denyConsent(request,handle);
    return new Response(null,{status:302,headers:denied.headers});
   }
+  if(!env.SUPABASE_URL||!env.SUPABASE_ANON_KEY)return errorPage('Sakkhi connection configuration is incomplete.',503);
   const email=String(form.get('email')||'').trim(),password=String(form.get('password')||'');
-  if(!email||!password||!env.SUPABASE_ANON_KEY)return errorPage('Sign-in information is missing.');
+  if(!email||!password)return errorPage('Sign-in information is missing.');
   const login=await fetch(env.SUPABASE_URL+'/auth/v1/token?grant_type=password',{method:'POST',headers:{apikey:env.SUPABASE_ANON_KEY,'content-type':'application/json'},body:JSON.stringify({email,password}),cache:'no-store'});
   if(!login.ok)return errorPage('Sakkhi sign-in failed. Check your credentials. Accounts requiring additional verification are not supported by this connection flow yet.',401);
   const session=await login.json();
@@ -46,7 +47,7 @@ export function createProvider(apiHandler,defaultHandler){
   requiredScopes:['shoots:read'],clientIdMetadataDocumentEnabled:true,
   tokenExchangeCallback:async options=>{
    const p=options.props;
-   if(!p?.userId||!p.supabaseRefreshToken)throw new OAuthError('invalid_grant',{description:'Reconnect your Sakkhi account.'});
+   if(!p?.userId||!p.supabaseRefreshToken||!options.env.SUPABASE_URL||!options.env.SUPABASE_ANON_KEY)throw new OAuthError('invalid_grant',{description:'Reconnect your Sakkhi account.'});
    if(options.grantType==='authorization_code' && Date.now()<p.supabaseExpiresAt-60000)return {accessTokenProps:{userId:p.userId,supabaseAccessToken:p.supabaseAccessToken,supabaseExpiresAt:p.supabaseExpiresAt},accessTokenTTL:Math.min(3000,Math.floor((p.supabaseExpiresAt-Date.now())/1000))};
    const refreshed=await fetch(options.env.SUPABASE_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:options.env.SUPABASE_ANON_KEY,'content-type':'application/json'},body:JSON.stringify({refresh_token:p.supabaseRefreshToken}),cache:'no-store'});
    if(!refreshed.ok)throw new OAuthError('invalid_grant',{description:'Sakkhi session expired. Reconnect your account.'});
