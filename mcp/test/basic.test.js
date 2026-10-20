@@ -35,3 +35,10 @@ test('account isolation rejects another user even with a broader admin database 
  assert.equal(ownerFilter('user-a'),'user_id=eq.user-a');
  assert.throws(()=>ownerFilter(''));
 });
+
+test('malformed financial values cannot generate negative or non-finite totals',()=>{
+ for(const amount of ['Infinity','not-a-number',-200]){
+  const item=publicShoot({amount,pay_status:'part',part_paid:'Infinity'});
+  for(const key of ['amount','paid','pending'])assert.ok(Number.isFinite(item[key])&&item[key]>=0);
+ }
+});
