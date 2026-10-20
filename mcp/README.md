@@ -13,3 +13,6 @@ From `mcp/`: `npm install`; configure the public Supabase anon/publishable key a
 
 ## Next release before general user connections
 Implement OAuth 2.1 + PKCE, client registration/metadata, consent and revoke UI in Sakkhi, token storage and rotation, rate limits, per-user audit logging, production RLS migration, and end-to-end tests against a test Solo account. Verify each target AI platform's current MCP connector requirements separately.
+
+## OAuth storage provisioned (2026-10-20)
+A dedicated Cloudflare KV namespace named `SAKKHI_MCP_OAUTH` has been created and bound as `OAUTH_KV` in `wrangler.jsonc`. The OAuth provider dependency is installed in the manifest, but **no authorization server is wired to it yet**. Keep `ENABLE_MCP_SERVER=false`; KV alone does not authenticate users or protect MCP tokens. The server still uses direct Supabase bearer tokens in its prototype handler, which is unsuitable for public AI connector onboarding. Do not deploy publicly until consent, OAuth token issuance/refresh/revocation and isolation tests are complete.
