@@ -22,6 +22,9 @@ jobs:
         with:
           node-version: '22'
       - run: npm install --ignore-scripts --no-audit --no-fund
+      - name: Verify installed SDK and OAuth package exports
+        run: |
+          node --input-type=module -e "import { OAuthProvider } from '@cloudflare/workers-oauth-provider'; import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js'; import { WebStandardStreamableHTTPServerTransport } from '@modelcontextprotocol/sdk/server/webStandardStreamableHttp.js'; if (![OAuthProvider,McpServer,WebStandardStreamableHTTPServerTransport].every(x => typeof x === 'function')) process.exit(1); console.log('Required runtime exports exist')"
       - run: npm run check
       - run: node --test test/basic.test.js
       - name: Verify actual runtime imports and OAuth provider initialization
