@@ -12,7 +12,7 @@ const result = (data) => ({content:[{type:'text',text:JSON.stringify(data,null,2
 async function db(env,auth,path,options={}){
  const response=await fetch(env.SUPABASE_URL+'/rest/v1/'+path,{...options,headers:{apikey:env.SUPABASE_ANON_KEY,Authorization:'Bearer '+auth.token,'Content-Type':'application/json',...(options.headers||{})},cache:'no-store'});
  const body=await response.text();
- if(!response.ok)throw new Error('Sakkhi request failed ('+response.status+'): '+body.slice(0,300));
+ if(!response.ok)throw new Error('Sakkhi request failed (HTTP '+response.status+').');
  return body?JSON.parse(body):null;
 }
 const owner = auth => 'user_id=eq.'+encodeURIComponent(auth.userId);
