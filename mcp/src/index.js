@@ -58,7 +58,7 @@ const defaultHandler={
  fetch(request,env){
   const path=new URL(request.url).pathname;
   if(path==='/authorize')return authorize(request,env);
-  if(path==='/health')return json({service:'sakkhi-solo-mcp',enabled:env.ENABLE_MCP_SERVER==='true',oauth:true,writes:env.ENABLE_MCP_WRITES==='true'});
+  if(path==='/health')return json({service:'sakkhi-solo-mcp',enabled:env.ENABLE_MCP_SERVER==='true',oauth:true,writes:false});
   return json({error:'Not found'},404);
  }
 };
