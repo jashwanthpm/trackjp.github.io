@@ -27,7 +27,7 @@ export async function authorize(request,env) {
   const session=await login.json();
   if(!session.user?.id||!session.access_token||!session.refresh_token||!session.expires_in)return errorPage('Incomplete Sakkhi session.',401);
   const approved=await oauth.approveConsent(request,handle,{scope:form.getAll('scope').map(String)});
-  const completed=await oauth.completeAuthorization({request:approved.request,userId:session.user.id,metadata:{},scope:approved.request.scope,props:{userId:session.user.id,supabaseAccessToken:session.access_token,supabaseRefreshToken:session.refresh_token,supabaseExpiresAt:Date.now()+session.expires_in*1000}});
+  const completed=await oauth.completeAuthorization({request:approved.request,userId:session.user.id,metadata:{},scope:approved.scope,props:{userId:session.user.id,supabaseAccessToken:session.access_token,supabaseRefreshToken:session.refresh_token,supabaseExpiresAt:Date.now()+session.expires_in*1000}});
   approved.headers.set('Location',completed.redirectTo);
   return new Response(null,{status:302,headers:approved.headers});
  }catch(e){
