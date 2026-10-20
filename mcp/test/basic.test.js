@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {iso,paid,publicShoot,visibleShoot,indiaDate} from '../src/shoot-utils.js';
+import {iso,paid,publicShoot,visibleShoot,indiaDate,ownedShoot,ownedShoots,ownerFilter} from '../src/shoot-utils.js';
 
 test('rejects impossible dates',()=>{
  assert.equal(iso.safeParse('2026-02-30').success,false);
@@ -24,4 +24,14 @@ test('shoots read scope does not expose financial fields',()=>{
 test('India local date is stable across UTC midnight',()=>{
  assert.equal(indiaDate(Date.parse('2026-10-19T19:00:00Z')),'2026-10-20');
  assert.equal(indiaDate(Date.parse('2026-10-19T18:00:00Z')),'2026-10-19');
+});
+
+test('account isolation rejects another user even with a broader admin database policy',()=>{
+ const rows=[{id:'a',user_id:'user-a',name:'A'},{id:'b',user_id:'user-b',name:'B'}];
+ assert.deepEqual(ownedShoots(rows,'user-a').map(x=>x.id),['a']);
+ assert.equal(ownedShoot(rows[1],'user-a'),false);
+ assert.equal(ownedShoot(rows[0],'user-a'),true);
+ assert.equal(ownedShoot(rows[0],''),false);
+ assert.equal(ownerFilter('user-a'),'user_id=eq.user-a');
+ assert.throws(()=>ownerFilter(''));
 });
