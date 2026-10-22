@@ -61,7 +61,7 @@ test('CSP only allows Google\'s sign-in script with the per-page nonce', () => {
   const { csp } = shell('x', { nonce: 'abc', google: true });
   assert.match(csp, /script-src 'nonce-abc' https:\/\/accounts\.google\.com\/gsi\/client/);
   assert.match(csp, /frame-ancestors 'none'/);
-  assert.match(csp, /form-action 'self'/);
+  assert.doesNotMatch(csp, /form-action/); // OAuth POST redirects to the validated client callback
   assert.doesNotMatch(csp, /unsafe-eval/);
   assert.match(shell('x').csp, /script-src 'none'/);
 });
