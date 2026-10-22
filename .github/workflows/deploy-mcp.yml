@@ -1,15 +1,14 @@
 name: Deploy Sakkhi Connect (MCP) to Cloudflare
 
 # Manual on purpose: Actions tab -> "Deploy Sakkhi Connect (MCP) to Cloudflare" -> Run workflow.
-# Run it once with "Switch on" OFF to publish it switched off, check the health link in the log,
-# then run it again with "Switch on" ticked to let ChatGPT / Claude connect.
+# The enable checkbox defaults ON for normal deployments; untick it only to intentionally disable connections.
 on:
   workflow_dispatch:
     inputs:
       enable:
         description: 'Switch on (lets ChatGPT / Claude connect). Leave off for a first, switched-off deploy.'
         type: boolean
-        default: false
+        default: true
 
 permissions:
   contents: read
