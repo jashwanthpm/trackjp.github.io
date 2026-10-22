@@ -55,7 +55,9 @@ test('only known permissions are ever offered; unknown ones are dropped', () => 
 });
 test('a permission the app did not ask for is not offered', () => {
   const p = consentBody({ details: { ...details, scope: ['shoots:read'] }, handle: 'h', googleClientId: 'c', nonce: 'n' });
-  assert.doesNotMatch(p, /payments:read|summary:read/);
+  assert.match(p, /type="hidden" name="scope" value="shoots:read"/);
+  assert.doesNotMatch(p, /type="hidden" name="scope" value="(?:payments:read|summary:read)"/);
+  assert.doesNotMatch(p, /<div class="t">(?:View payments|View summary)<\/div>/);
 });
 test('CSP only allows Google\'s sign-in script with the per-page nonce', () => {
   const { csp } = shell('x', { nonce: 'abc', google: true });
