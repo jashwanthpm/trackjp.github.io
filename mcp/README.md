@@ -1,35 +1,44 @@
-# Sakkhi Connect — Solo MCP (initial server)
+# Sakkhi Connect — Solo MCP
 
-A **remote MCP server**, not a chatbot. It connects compatible MCP clients to the signed-in user's existing Sakkhi Solo `shoots` records.
+A **remote MCP server** that lets ChatGPT, Claude and other MCP-compatible AI apps read a Sakkhi Solo user's own shoots, payments and yearly summary. It is read-only and each person only ever sees their own data.
 
-## Current status
-Source is committed; **not deployed or connected to ChatGPT, Claude or Gemini yet**. This initial implementation accepts a **Supabase user access token** in the Authorization header, validates it with Supabase Auth, and explicitly filters every query by the verified user's ID. It does **not** implement OAuth discovery, dynamic client registration, consent screens, token refresh, or public multi-user onboarding. Do not advertise this as a production-ready public connector or paste access tokens into third-party websites. Add a proper OAuth 2.1 authorization server and per-user revocation before public launch. Audit the existing Solo database RLS: older setup scripts included permissive policies. The MCP's explicit owner filter does not fix direct database access elsewhere.
+## How a person connects
+1. In the AI app, add the connector URL: `https://mcp.sakkhi.co.in/mcp`
+2. The AI app opens a Sakkhi page showing what it wants to see. The person ticks the permissions they're happy with and presses **Continue with Google**.
+3. They sign in with the **same Google account they use for Sakkhi**. That's the only way in: there is no password or email sign-in anywhere in this flow, and the AI app never receives a Sakkhi/Supabase credential.
 
-## Setup
-From `mcp/`: `npm install`; configure the public Supabase anon/publishable key as a Worker secret using `npx wrangler secret put SUPABASE_ANON_KEY`; `npm run dev` or `npm run deploy` after security review. Never use a Supabase service-role key. Set `ALLOWED_ORIGINS` only for trusted browser MCP clients, when necessary. The deployed endpoint is `https://<worker-host>/mcp` and health is `/health`.
+The sign-in is the same method the Sakkhi app itself uses: the Google ID token is exchanged with Supabase (`grant_type=id_token`). A Google account that has never signed in to Sakkhi is refused (connecting an AI must not be how someone first joins), and non-Google logins are refused.
 
-## Tools
-`get_shoots`, `get_next_shoot`, `get_shoot_details`, `get_pending_payments`, `get_year_summary`, `create_shoot`. The create tool writes a real booking, so clients must request explicit user confirmation before invoking it. No payment mutation or deletion in V1.
+## One-time setup
+1. **Google Cloud Console** → *APIs & Services → Credentials* → open the OAuth client whose ID is in `wrangler.jsonc` (`GOOGLE_CLIENT_ID`, the same one the Sakkhi app uses) → add `https://mcp.sakkhi.co.in` under **Authorized JavaScript origins**. Without this Google refuses to show its button on the connect page.
+2. **Cloudflare**: the domain `sakkhi.co.in` must be in the same Cloudflare account. Create an API token from the *Edit Cloudflare Workers* template and also give it **Zone → DNS → Edit** for `sakkhi.co.in` (the deploy creates the `mcp.sakkhi.co.in` custom domain). Note the Account ID.
+3. **GitHub** → repo *Settings → Secrets and variables → Actions* → add `CLOUDFLARE_API_TOKEN` and `CLOUDFLARE_ACCOUNT_ID`. (`SUPABASE_ANON_KEY` is optional: if missing, the workflow takes the public key from `app/index.html`. Never use a service-role key.)
+4. **Deploy**: Actions → *Deploy Sakkhi Connect (MCP) to Cloudflare* → Run workflow. First run with **Switch on** *unticked*, open `https://mcp.sakkhi.co.in/health` (should show `"enabled":false,"signIn":"google"`). Then run it again with **Switch on** ticked.
+5. **Connect** from ChatGPT / Claude with the URL above and sign in with Google.
 
-## Next release before general user connections
-Implement OAuth 2.1 + PKCE, client registration/metadata, consent and revoke UI in Sakkhi, token storage and rotation, rate limits, per-user audit logging, production RLS migration, and end-to-end tests against a test Solo account. Verify each target AI platform's current MCP connector requirements separately.
+Each run of the deploy workflow sets the switch from its checkbox, so tick it every time you want the connector to stay on.
 
-## OAuth storage provisioned (2026-10-20)
-A dedicated Cloudflare KV namespace named `SAKKHI_MCP_OAUTH` has been created and bound as `OAUTH_KV` in `wrangler.jsonc`. The OAuth provider dependency is installed in the manifest, but **no authorization server is wired to it yet**. Keep `ENABLE_MCP_SERVER=false`; KV alone does not authenticate users or protect MCP tokens. The server still uses direct Supabase bearer tokens in its prototype handler, which is unsuitable for public AI connector onboarding. Do not deploy publicly until consent, OAuth token issuance/refresh/revocation and isolation tests are complete.
+## Tools and permissions
+| Tool | Needs permission | What it does |
+|---|---|---|
+| `get_shoots` | `shoots:read` | Lists shoots (money fields only with `payments:read`) |
+| `get_next_shoot` | `shoots:read` | The next upcoming shoot |
+| `get_shoot_details` | `shoots:read` | One shoot by id |
+| `get_pending_payments` | `payments:read` | Money still due on **completed** shoots, matching the Due figure in the Sakkhi dashboard; balances on upcoming shoots are reported separately |
+| `get_year_summary` | `payments:read` + `summary:read` | Totals for a calendar year (dues count completed shoots only) |
 
-## OAuth implementation added (2026-10-20)
-`src/oauth.js` now implements the provider's browser-bound consent helpers, Supabase password sign-in, OAuth authorization completion and upstream Supabase session rotation through `tokenExchangeCallback`. `src/index.js` now routes through OAuthProvider and validates Supabase identity on every MCP request. Tool exposure follows granted scopes. Financial fields are omitted from shoot read tools without `payments:read`. Write scope is deliberately not offered in OAuth V1.
+Every tool is marked read-only. There is no write or delete tool.
 
-**Not yet production verified.** This OAuth sign-in path currently supports email/password, not every Supabase login/MFA method. Do not switch on the Worker for general customers until dependency installation, Worker build, OAuth discovery, sign-in, PKCE, consent denial, token refresh/revocation and cross-user isolation have been tested against dedicated test accounts. No production deployment or customer connections were performed by this code commit. The MCP resource URL in `oauth.js` is a proposed hostname; provision and verify `mcp.sakkhi.co.in` before deployment. Review the Supabase security advisor warnings.
+## Tests
+- `npm test`: unit tests (Google-only sign-in rules, consent page escaping, scopes, shoot helpers).
+- `npm run test:e2e`: starts the real Worker locally plus a fake Supabase and plays the part of an AI app: registration, Google sign-in, PKCE, tokens, refresh, tools, permission limits, and isolation between two users (including when the database is too permissive). The Google button itself is simulated, because it needs a real browser.
+- GitHub runs both on every change to `mcp/` (`mcp-check.yml`).
 
-### Required verification
-- `cd mcp && npm install && npm run check && npx wrangler deploy --dry-run`
-- Provision `SUPABASE_ANON_KEY` as a Worker secret (public anon/publishable key only; never service role)
-- Verify `OAUTH_KV` binding, real hostname, OAuth discovery and authorization code + PKCE
-- Confirm denied consent never creates a grant; confirm token revocation prevents subsequent access
-- Confirm User A cannot see User B's shoots; confirm `shoots:read` cannot reveal financial fields
-- Confirm refresh rotation works and expired Supabase sessions fail closed
-- Add tested rate limiting and audit trails before enabling writes
+## Security notes
+- Each query is filtered by the verified user id and every returned row is re-checked; mixed-owner responses fail closed.
+- Authorization codes are single use (replaying one revokes what it produced), PKCE is required, consent is bound to the browser that started it.
+- The connect page has a strict Content-Security-Policy that only allows Google's sign-in script.
+- Audit the existing database RLS and the Supabase security advisor warnings separately; this server's explicit owner filter does not protect direct database access elsewhere.
 
-## Compatibility and regression checks (2026-10-20)
-The resource handler now uses the SDK's Web Standard Streamable HTTP transport (the previous Node.js transport accepted IncomingMessage/ServerResponse and was incompatible with Cloudflare fetch Request/Response). The GitHub Actions workflow runs `node --test test/basic.test.js` after dependency installation, alongside syntax checks and Wrangler dry-run. Tests cover impossible dates, payment bounds and the financial read scope. These changes are committed, but **a successful CI result and live OAuth integration tests have not been observed**. Do not enable production solely on the presence of a workflow file.
+## Not yet verified against the live services
+Everything above is tested locally. Still to be confirmed once deployed: Google's button on the real `mcp.sakkhi.co.in` origin, a real ChatGPT and Claude connection, and a two-account check with real accounts. See `SECURITY-RELEASE.md`.

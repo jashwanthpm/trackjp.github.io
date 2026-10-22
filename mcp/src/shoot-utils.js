@@ -5,8 +5,6 @@ export function paid(s){const amount=number(s.amount);return s.pay_status==='don
 export function publicShoot(s){return {id:s.id,name:s.name,date:s.date,event:s.event,session:s.session,location:s.location,company:s.company,notes:s.notes,amount:number(s.amount),paid:paid(s),pending:Math.max(0,number(s.amount)-paid(s)),payment_status:s.pay_status,booking_status:s.booking_status}}
 export function visibleShoot(s,scopes=[]){const item=publicShoot(s);if(!scopes.includes('payments:read')){delete item.amount;delete item.paid;delete item.pending;delete item.payment_status;}return item;}
 export function indiaDate(now=Date.now()){return new Date(now+330*60000).toISOString().slice(0,10)}
-
-// Explicit ownership is required even if the database has a broader admin RLS policy.
 export function ownedShoot(row,userId){return typeof userId==='string'&&userId.length>0&&row?.user_id===userId;}
 export function ownedShoots(rows,userId){return rows.filter(row=>ownedShoot(row,userId));}
 export function ownerFilter(userId){if(typeof userId!=='string'||!userId)throw new Error('Missing authenticated owner');return 'user_id=eq.'+encodeURIComponent(userId);}

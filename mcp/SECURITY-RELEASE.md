@@ -1,5 +1,13 @@
 # Sakkhi Solo MCP — live integration audit (2026-10-20)
 
+## Update 2026-10-22: Google-only sign-in
+- The connect page no longer asks for an email/password. It uses **Continue with Google** and exchanges the Google ID token with Supabase exactly like the Sakkhi app. Password grants are never attempted (asserted in the end-to-end test).
+- Sessions that did not come from Google, anonymous sessions, and accounts created by the sign-in itself (never seen in Sakkhi before) are refused.
+- Pending/summary tools now count dues on completed shoots only, matching the dashboard; upcoming balances are reported separately.
+- All tools carry read-only annotations. The connect page has a nonce-based CSP allowing only Google's sign-in script.
+- Locally verified (`npm test`, `npm run test:e2e`): 17 unit tests and 13 end-to-end tests covering registration, PKCE, consent denial, wrong/forged credentials, a hijack attempt without the browser cookie, code replay (revokes the grant), refresh rotation, permission limits and two-user isolation even with a too-permissive database.
+- **Not yet verified live:** Google's button on the real origin (needs the origin added in Google Cloud Console), real ChatGPT/Claude connections, and a two-real-account test.
+
 ## Verified against connected Supabase project
 - Project ref matches `mcp/wrangler.jsonc`.
 - `public.shoots` and `public.settings` have RLS enabled.
@@ -39,5 +47,5 @@ Reference: https://supabase.com/docs/guides/database/database-linter?lint=0028_a
 1. Install dependencies and run the GitHub workflow to green (including Wrangler dry-run and local disabled Worker smoke test).
 2. Configure `SUPABASE_ANON_KEY` as a Cloudflare Worker secret; never use a service-role key. Set up the OAuth KV binding and a controlled preview URL, leaving the public release flag disabled until a separate private test environment is prepared.
 3. Connect test user A, grant `shoots:read` only, and verify no financial fields or payment/summary tools are exposed. Connect test user B with a different set of shoots; verify A cannot fetch B's ID or see B's data in list, next shoot, payments, or summaries, including when A has master-admin privileges.
-4. Test explicit denial, wrong credentials, expired session, token refresh, token revocation, malformed IDs and invalid dates. Ensure the same OAuth token cannot be used after revocation.
+4. Test explicit denial, a wrong Google account, expired session, token refresh, token revocation, malformed IDs and invalid dates. Ensure the same OAuth token cannot be used after revocation.
 5. Only after passing, configure the real `mcp.sakkhi.co.in` hostname, repeat discovery/PKCE/consent tests on the actual HTTPS origin, then enable read-only access. Keep writes disabled.

@@ -6,11 +6,15 @@
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  "routes": [
+    { "pattern": "mcp.sakkhi.co.in", "custom_domain": true }
+  ],
   "observability": {
     "enabled": true
   },
   "vars": {
     "SUPABASE_URL": "https://smyupcjfusgduaoxqfvu.supabase.co",
+    "GOOGLE_CLIENT_ID": "83032248418-seee8ht2aimn3k9frvbuoiumkump80lo.apps.googleusercontent.com",
     "ENABLE_MCP_SERVER": "false",
     "ENABLE_MCP_WRITES": "false"
   },

@@ -1,0 +1,15 @@
+{
+  // Used only by `npm run test:e2e`: the real Worker, run locally, talking to a fake Supabase.
+  "name": "sakkhi-solo-mcp-e2e",
+  "main": "src/index.js",
+  "compatibility_date": "2026-10-20",
+  "compatibility_flags": ["nodejs_compat"],
+  "vars": {
+    "SUPABASE_URL": "http://127.0.0.1:54399",
+    "SUPABASE_ANON_KEY": "test-anon-key",
+    "GOOGLE_CLIENT_ID": "test-client.apps.googleusercontent.com",
+    "ENABLE_MCP_SERVER": "true",
+    "ENABLE_MCP_WRITES": "false"
+  },
+  "kv_namespaces": [{ "binding": "OAUTH_KV", "id": "e2e-local" }]
+}
