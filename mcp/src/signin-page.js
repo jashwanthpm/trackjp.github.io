@@ -92,6 +92,7 @@ export function consentBody({ details, handle, googleClientId, nonce }) {
     + (details.redirectIsLoopback ? '<div class="warn">This sends access to an app running on this computer. Continue only if you just started the connection from it.</div>' : '')
     + '<form id="f" method="post"><input type="hidden" name="handle" value="' + esc(handle) + '"><input type="hidden" name="credential" id="credential">'
     + '<div class="label">This app will be able to</div><ul>' + rows.join('') + '</ul>'
+    + (!asked.has('payments:read') ? '<p class="hint">This AI app did not request payment access. Amounts and revenue will stay hidden. To see them, reconnect using an AI client that requests the payments:read permission.</p>' : '')
     + '<p class="hint">Continue with the same Google account you use for Sakkhi.</p>'
     + '<div class="gbtn" id="gbtn"></div><noscript><p class="status">JavaScript is needed to sign in with Google.</p></noscript>'
     + '<div class="status" id="status"></div>'
