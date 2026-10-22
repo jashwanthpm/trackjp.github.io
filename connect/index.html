@@ -29,18 +29,25 @@
     :focus-visible { outline: 2px solid #c9a96e; outline-offset: 3px; border-radius: 8px; }
     section[id] { scroll-margin-top: 90px; }
 
-    /* One orchestrated moment: the sample chat plays once on load */
-    .msg { opacity: 0; transform: translateY(10px); animation: msg-in .6s ease forwards; }
-    .msg.m1 { animation-delay: .5s; } .msg.m2 { animation-delay: 1.4s; } .msg.m3 { animation-delay: 2.4s; }
-    @keyframes msg-in { to { opacity: 1; transform: none; } }
+    /* Sample chat: plays through each question in turn */
+    .cm { opacity: 0; transform: translateY(10px); transition: opacity .5s ease, transform .5s ease; }
+    .cm.in { opacity: 1; transform: none; }
+    #chat.out { opacity: 0; transition: opacity .35s ease; }
     .dots span { width: 5px; height: 5px; border-radius: 9999px; background: #c9a96e; display: inline-block; animation: dot 1s infinite ease-in-out; }
     .dots span:nth-child(2) { animation-delay: .15s; } .dots span:nth-child(3) { animation-delay: .3s; }
     @keyframes dot { 0%,80%,100% { opacity: .25; } 40% { opacity: 1; } }
+    .cdot { width: 28px; height: 28px; display: flex; align-items: center; justify-content: center; }
+    .cdot i { display: block; width: 6px; height: 6px; border-radius: 9999px; background: #3a3a3a; transition: all .3s; }
+    .cdot[aria-current="true"] i { width: 20px; background: #c9a96e; }
     @media (prefers-reduced-motion: reduce) {
-      .msg { opacity: 1; transform: none; animation: none; }
+      .cm { opacity: 1; transform: none; transition: none; }
+      #chat.out { transition: none; }
       .dots span { animation: none; }
       html { scroll-behavior: auto; }
     }
+    .app-tab { border-color: rgba(255,255,255,.08); color: #a3a3a3; }
+    .app-tab:hover { color: #fff; }
+    .app-tab[aria-selected="true"] { background: rgba(201,169,110,.1); border-color: rgba(201,169,110,.4); color: #e6c98a; }
     .prompt-card.copied { border-color: rgba(201,169,110,.5); }
   </style>
 </head>
@@ -99,29 +106,10 @@
                 <div class="flex items-center gap-2 text-xs text-neutral-500"><i class="ti ti-plug-connected text-[#c9a96e] text-base"></i> Sakkhi connected</div>
                 <span class="text-[10px] font-bold uppercase tracking-widest text-neutral-600">Sample</span>
               </div>
-              <div class="p-5 sm:p-6 space-y-5 min-h-[340px]" aria-hidden="true">
-                <div class="msg m1 flex justify-end">
-                  <div class="bg-white/5 border border-white/10 text-neutral-200 text-sm rounded-2xl rounded-br-md px-4 py-3 max-w-[85%]">When is my next shoot, and where is it?</div>
-                </div>
-                <div class="msg m2 flex items-center gap-2 text-xs text-neutral-500">
-                  <span class="w-6 h-6 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/20 text-[#c9a96e] flex items-center justify-center"><i class="ti ti-aperture text-sm"></i></span>
-                  Checking your Sakkhi schedule
-                  <span class="dots flex gap-1 ml-1"><span></span><span></span><span></span></span>
-                </div>
-                <div class="msg m3 space-y-3">
-                  <p class="text-sm text-neutral-300 font-light">Your next shoot is this Saturday, morning session.</p>
-                  <div class="rounded-xl border border-[#c9a96e]/25 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] p-4 space-y-3 shadow-[0_0_30px_rgba(201,169,110,0.06)]">
-                    <div class="flex items-center justify-between">
-                      <h4 class="text-white font-bold text-sm">Rao &amp; Meera Wedding</h4>
-                      <span class="text-[10px] font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-full px-2.5 py-0.5">Confirmed</span>
-                    </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs text-neutral-400 font-light">
-                      <div class="flex items-center gap-2"><i class="ti ti-calendar-event text-[#c9a96e] text-base"></i> Sat, 14 Nov</div>
-                      <div class="flex items-center gap-2"><i class="ti ti-clock text-[#c9a96e] text-base"></i> Morning</div>
-                      <div class="flex items-center gap-2 col-span-2"><i class="ti ti-map-pin text-[#c9a96e] text-base"></i> Palace Grounds, Mysuru</div>
-                    </div>
-                  </div>
-                </div>
+              <div id="chat" class="p-5 sm:p-6 min-h-[400px] sm:min-h-[380px]" aria-hidden="true"></div>
+              <div class="flex items-center justify-between px-5 py-3 border-t border-white/5">
+                <p id="chat-label" class="text-xs text-neutral-500 font-light">Schedule</p>
+                <div class="flex items-center gap-1" role="group" aria-label="Choose a sample conversation" id="chat-dots"></div>
               </div>
             </div>
           </div>
@@ -202,7 +190,7 @@
         <ol class="grid md:grid-cols-2 gap-6">
           <li class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-7 hover:border-white/10 transition-colors flex gap-5">
             <span class="shrink-0 w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/20 text-[#c9a96e] font-bold flex items-center justify-center">1</span>
-            <div><h3 class="text-white font-bold text-lg mb-2">Open your AI app</h3><p class="text-sm text-neutral-400 leading-relaxed font-light">In ChatGPT, Claude or another app that supports remote MCP, find the custom connector or integration settings.</p></div>
+            <div><h3 class="text-white font-bold text-lg mb-2">Open your AI app</h3><p class="text-sm text-neutral-400 leading-relaxed font-light">Use ChatGPT, Claude, Gemini or another app that supports remote MCP. The buttons below take you to the right settings page.</p></div>
           </li>
           <li class="bg-gradient-to-b from-[#121212] to-[#0a0a0a] border border-white/5 rounded-2xl p-7 hover:border-white/10 transition-colors flex gap-5">
             <span class="shrink-0 w-10 h-10 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/20 text-[#c9a96e] font-bold flex items-center justify-center">2</span>
@@ -218,9 +206,45 @@
           </li>
         </ol>
 
-        <div class="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
-          <a href="https://chatgpt.com/" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto border border-[#c9a96e]/50 text-[#d7bd89] hover:bg-[#c9a96e]/10 font-bold text-sm px-8 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2">Open ChatGPT <i class="ti ti-external-link"></i></a>
-          <a href="https://claude.ai/" target="_blank" rel="noopener noreferrer" class="w-full sm:w-auto border border-[#c9a96e]/50 text-[#d7bd89] hover:bg-[#c9a96e]/10 font-bold text-sm px-8 py-3.5 rounded-xl transition-all duration-300 flex items-center justify-center gap-2">Open Claude <i class="ti ti-external-link"></i></a>
+        <div class="mt-14 rounded-2xl border border-white/10 bg-[#0a0a0a]/90 backdrop-blur p-6 sm:p-8 shadow-2xl">
+          <h3 class="text-white font-bold text-xl mb-1">Jump straight to the right page</h3>
+          <p class="text-sm text-neutral-500 font-light mb-6">Pick your app. We copy the URL when you open its settings, so you can paste it right away.</p>
+
+          <div role="tablist" aria-label="AI app" class="flex gap-2 mb-6 border-b border-white/5 pb-4 overflow-x-auto">
+            <button role="tab" id="tab-chatgpt" aria-selected="true" aria-controls="panel-chatgpt" class="app-tab px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors whitespace-nowrap flex items-center gap-2"><i class="ti ti-brand-openai"></i> ChatGPT</button>
+            <button role="tab" id="tab-claude" aria-selected="false" aria-controls="panel-claude" tabindex="-1" class="app-tab px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors whitespace-nowrap flex items-center gap-2"><i class="ti ti-sparkles"></i> Claude</button>
+            <button role="tab" id="tab-gemini" aria-selected="false" aria-controls="panel-gemini" tabindex="-1" class="app-tab px-5 py-2.5 rounded-xl text-sm font-bold border transition-colors whitespace-nowrap flex items-center gap-2"><i class="ti ti-brand-google"></i> Gemini</button>
+          </div>
+
+          <div role="tabpanel" id="panel-chatgpt" aria-labelledby="tab-chatgpt">
+            <ol class="space-y-3 text-sm text-neutral-300 font-light mb-6">
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Go to <b class="text-white font-semibold">Settings → Apps → Advanced settings</b> and turn on <b class="text-white font-semibold">Developer mode</b>.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Back in <b class="text-white font-semibold">Apps</b>, click <b class="text-white font-semibold">Create</b>, name it Sakkhi and paste the URL.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Choose OAuth, continue with Google, then pick Sakkhi from the tools menu in a new chat.</span></li>
+            </ol>
+            <p class="text-xs text-neutral-500 font-light mb-6">Needs a plan with developer mode. On workspace plans an admin may have to allow custom apps first. OpenAI moves these menus around, so if you don't see Apps, look under Connectors.</p>
+            <a href="https://chatgpt.com/#settings/Connectors" target="_blank" rel="noopener noreferrer" data-open class="inline-flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300"><i class="ti ti-copy"></i> Copy URL &amp; open ChatGPT settings</a>
+          </div>
+
+          <div role="tabpanel" id="panel-claude" aria-labelledby="tab-claude" hidden>
+            <ol class="space-y-3 text-sm text-neutral-300 font-light mb-6">
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Open <b class="text-white font-semibold">Settings → Connectors</b> and click <b class="text-white font-semibold">Add custom connector</b>.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Name it Sakkhi, paste the URL and click <b class="text-white font-semibold">Add</b>.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Continue with Google, then turn Sakkhi on from the tools menu in a chat.</span></li>
+            </ol>
+            <p class="text-xs text-neutral-500 font-light mb-6">Works on claude.ai, Claude Desktop and the mobile apps once added. Free plans allow one custom connector. On Team and Enterprise, an owner adds it for the organization first.</p>
+            <a href="https://claude.ai/settings/connectors" target="_blank" rel="noopener noreferrer" data-open class="inline-flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300"><i class="ti ti-copy"></i> Copy URL &amp; open Claude connectors</a>
+          </div>
+
+          <div role="tabpanel" id="panel-gemini" aria-labelledby="tab-gemini" hidden>
+            <ol class="space-y-3 text-sm text-neutral-300 font-light mb-6">
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Open <b class="text-white font-semibold">Connected Apps</b> in Gemini on the web.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Under <b class="text-white font-semibold">Custom apps</b>, choose <b class="text-white font-semibold">Add a custom app</b> and paste the URL.</span></li>
+              <li class="flex gap-3"><i class="ti ti-point-filled text-[#c9a96e] mt-1"></i><span>Click Next, continue with Google and approve access.</span></li>
+            </ol>
+            <p class="text-xs text-neutral-500 font-light mb-6">Google is rolling custom apps out gradually. For now they need a personal Google account with Keep Activity on, may not be available in every country or plan, and can only be added on the web, not in the mobile app.</p>
+            <a href="https://gemini.google.com/apps" target="_blank" rel="noopener noreferrer" data-open class="inline-flex items-center gap-2 bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] hover:from-[#d4b98c] hover:to-[#e6c98a] text-black font-bold text-sm px-6 py-3.5 rounded-xl shadow-[0_0_20px_rgba(201,169,110,0.2)] hover:-translate-y-0.5 transition-all duration-300"><i class="ti ti-copy"></i> Copy URL &amp; open Gemini apps</a>
+          </div>
         </div>
       </div>
     </section>
@@ -327,6 +351,82 @@
         setTimeout(function () { hint.innerHTML = original; card.classList.remove('copied'); }, 1800);
       });
     });
+
+    // App tabs + deep links (copy URL, then let the link open the app's settings)
+    (function () {
+      var tabs = Array.prototype.slice.call(document.querySelectorAll('.app-tab'));
+      function select(tab) {
+        tabs.forEach(function (t) {
+          var on = t === tab;
+          t.setAttribute('aria-selected', on);
+          t.tabIndex = on ? 0 : -1;
+          document.getElementById(t.getAttribute('aria-controls')).hidden = !on;
+        });
+      }
+      tabs.forEach(function (t, i) {
+        t.addEventListener('click', function () { select(t); });
+        t.addEventListener('keydown', function (e) {
+          var n = e.key === 'ArrowRight' ? i + 1 : e.key === 'ArrowLeft' ? i - 1 : null;
+          if (n === null) return;
+          var next = tabs[(n + tabs.length) % tabs.length];
+          select(next); next.focus();
+        });
+      });
+      document.querySelectorAll('[data-open]').forEach(function (a) {
+        a.addEventListener('click', function () { copyText(document.getElementById('url').textContent.trim()); });
+      });
+    })();
+
+    // Hero: rotating sample conversations
+    (function () {
+      var chat = document.getElementById('chat'), label = document.getElementById('chat-label'), dotsBox = document.getElementById('chat-dots');
+      var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      var row = function (ic, cls, t) { return '<div class="flex items-center gap-2"><i class="ti ' + ic + ' ' + cls + ' text-base"></i> ' + t + '</div>'; };
+      var card = function (inner) { return '<div class="rounded-xl border border-[#c9a96e]/25 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] p-4 shadow-[0_0_30px_rgba(201,169,110,0.06)]">' + inner + '</div>'; };
+      var shoot = function (n, d, st) { return '<div class="flex items-center justify-between gap-3 py-2.5 border-b border-white/5 last:border-0"><div><p class="text-sm text-white font-semibold">' + n + '</p><p class="text-xs text-neutral-500 font-light">' + d + '</p></div><span class="text-xs font-bold text-[#c9a96e] whitespace-nowrap">' + st + '</span></div>'; };
+      var S = [
+        { tag: 'Schedule', q: 'When is my next shoot, and where is it?', intro: 'Your next shoot is this Saturday, morning session.',
+          body: card('<div class="flex items-center justify-between mb-3"><h4 class="text-white font-bold text-sm">Rao &amp; Meera Wedding</h4><span class="text-[10px] font-bold text-[#c9a96e] border border-[#c9a96e]/30 rounded-full px-2.5 py-0.5">Confirmed</span></div><div class="grid grid-cols-2 gap-3 text-xs text-neutral-400 font-light">' + row('ti-calendar-event','text-[#c9a96e]','Sat, 14 Nov') + row('ti-clock','text-[#c9a96e]','Morning') + '<div class="col-span-2">' + row('ti-map-pin','text-[#c9a96e]','Palace Grounds, Mysuru') + '</div></div>') },
+        { tag: 'This month', q: 'Show my shoots scheduled this month.', intro: 'You have 3 shoots left in November.',
+          body: card(shoot('Rao &amp; Meera Wedding','Sat, 14 Nov · Morning','Mysuru') + shoot('Studio Lumen Product Shoot','Wed, 18 Nov · Full day','Bengaluru') + shoot('Anika Birthday Candids','Sun, 29 Nov · Evening','Bengaluru')) },
+        { tag: 'Payments due', q: 'How much payment is still due on completed shoots?', intro: 'You have ₹42,500 pending across 2 completed shoots.',
+          body: card(shoot('Sharma Pre-wedding','Completed 2 Nov','₹25,000') + shoot('Kaveri Jewellers Catalogue','Completed 9 Oct','₹17,500') + '<div class="flex justify-between pt-3 mt-1 border-t border-[#c9a96e]/20 text-sm"><span class="text-neutral-400 font-light">Total due</span><span class="text-white font-bold">₹42,500</span></div>') },
+        { tag: 'Year overview', q: 'Summarize my shoots and earnings this year.', intro: 'Here is your year so far.',
+          body: card('<div class="grid grid-cols-3 gap-3 text-center"><div><p class="text-2xl text-white font-bold">38</p><p class="text-xs text-neutral-500 font-light">Shoots</p></div><div><p class="text-2xl text-white font-bold">₹4.8L</p><p class="text-xs text-neutral-500 font-light">Earned</p></div><div><p class="text-2xl text-[#c9a96e] font-bold">₹42.5K</p><p class="text-xs text-neutral-500 font-light">Pending</p></div></div>') }
+      ];
+      var i = 0, timers = [], paused = false;
+      S.forEach(function (sc, n) {
+        var b = document.createElement('button');
+        b.type = 'button'; b.className = 'cdot'; b.setAttribute('aria-label', sc.tag); b.innerHTML = '<i></i>';
+        b.addEventListener('click', function () { go(n); });
+        dotsBox.appendChild(b);
+      });
+      function later(fn, ms) { timers.push(setTimeout(fn, ms)); }
+      function clear() { timers.forEach(clearTimeout); timers = []; }
+      function mark() { Array.prototype.forEach.call(dotsBox.children, function (d, n) { d.setAttribute('aria-current', n === i); }); label.textContent = S[i].tag; }
+      function play() {
+        var sc = S[i]; mark();
+        chat.classList.remove('out');
+        chat.innerHTML =
+          '<div class="space-y-5">' +
+          '<div class="cm flex justify-end"><div class="bg-white/5 border border-white/10 text-neutral-200 text-sm rounded-2xl rounded-br-md px-4 py-3 max-w-[85%]">' + sc.q + '</div></div>' +
+          '<div class="cm flex items-center gap-2 text-xs text-neutral-500"><span class="w-6 h-6 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/20 text-[#c9a96e] flex items-center justify-center"><i class="ti ti-aperture text-sm"></i></span>Checking your Sakkhi records<span class="dots flex gap-1 ml-1"><span></span><span></span><span></span></span></div>' +
+          '<div class="cm space-y-3"><p class="text-sm text-neutral-300 font-light">' + sc.intro + '</p>' + sc.body + '</div></div>';
+        var m = chat.querySelectorAll('.cm');
+        var show = function (k) { m[k].classList.add('in'); };
+        if (reduce) { m.forEach(function (x) { x.classList.add('in'); }); m[1].style.display = 'none'; return; }
+        later(function () { show(0); }, 150);
+        later(function () { show(1); }, 1000);
+        later(function () { m[1].style.display = 'none'; show(2); }, 2000);
+        later(next, 7500);
+      }
+      function next() { if (paused) { later(next, 1000); return; } chat.classList.add('out'); later(function () { i = (i + 1) % S.length; play(); }, 380); }
+      function go(n) { clear(); i = n; play(); }
+      var wrap = chat.closest('.group');
+      wrap.addEventListener('mouseenter', function () { paused = true; });
+      wrap.addEventListener('mouseleave', function () { paused = false; });
+      play();
+    })();
   </script>
 </body>
 </html>
