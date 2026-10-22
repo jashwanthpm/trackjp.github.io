@@ -236,11 +236,13 @@ $('addWordmark').onclick=()=>add(tx('Sakkhi.',75,80,750,120,90,GOLD,'Arka'));
 /* ---------- linked Post <-> Story sync (by element id) ---------- */
 const rebase=()=>{let L=lay();base={bg:L.bg,img:L.img&&{...L.img},items:L.items.map(i=>({...i}))}};
 const imgEq=(a,b)=>a===b||(a&&b&&Object.keys({...a,...b}).every(k=>a[k]===b[k]));
+function adaptItem(it,from,to){let k=H[to]/H[from],a={...it};a.y=Math.round(it.y*k);a.h=Math.max(1,Math.round(it.h*k));return a}
+function adaptLayout(source,from,to){return{bg:source.bg,img:source.img&&{...source.img},items:source.items.map(it=>adaptItem(it,from,to))}}
 function diffSync(){let pg=page();if(!pg.linked||!base)return;let of=otherF(),o=pg[of],k=H[of]/H[fmt],L=lay(),B=base;
 if(L.bg!==B.bg)o.bg=L.bg;if(!imgEq(L.img,B.img))o.img=L.img&&{...L.img};
 let bm=new Map(B.items.map(i=>[i.id,i])),om=new Map(o.items.map(i=>[i.id,i]));
-for(const it of L.items){let b=bm.get(it.id),t=om.get(it.id);if(!b){if(!t)o.items.push({...it,y:Math.round(it.y*k)});continue}if(!t)continue;
-for(const key in it){if(it[key]===b[key])continue;if(key==='x')t.x+=it.x-b.x;else if(key==='y')t.y=Math.round(t.y+(it.y-b.y)*k);else t[key]=it[key]}}
+for(const it of L.items){let b=bm.get(it.id),t=om.get(it.id);if(!b){if(!t)o.items.push(adaptItem(it,fmt,of));continue}if(!t)continue;
+for(const key in it){if(it[key]===b[key])continue;if(key==='x')t.x+=it.x-b.x;else if(key==='y'||key==='h')t[key]=Math.round(t[key]+(it[key]-b[key])*k);else t[key]=it[key]}}
 let live=new Set(L.items.map(i=>i.id));o.items=o.items.filter(t=>live.has(t.id)||!bm.has(t.id));
 let ord=new Map(L.items.map((i,n)=>[i.id,n]));o.items.sort((a,c)=>(ord.get(a.id)??1e9)-(ord.get(c.id)??1e9))}
 
@@ -261,7 +263,8 @@ function chrome(){document.querySelectorAll('[data-f]').forEach(b=>b.classList.t
 function setFmt(f){if(f===fmt)return;flush();fmt=f;zz=null;rebase();render()}
 function setPage(n){flush();pi=n;sel=[];zz=null;rebase();render()}
 document.querySelectorAll('[data-f]').forEach(b=>b.onclick=()=>setFmt(b.dataset.f));
-$('lock').onclick=()=>{let pg=page();pg.linked=!pg.linked;rebase();save();chrome();toast(pg.linked?'Linked: Post and Story now update together.':'Separated: Post and Story are now independent.')};
+$('lock').onclick=()=>{let pg=page();if(pg.linked){flush();pg.linked=false;rebase();save();chrome();toast('Separated: Post and Story can now be edited independently.');return}
+showConfirm('Sync Post and Story?','The current '+(fmt==='post'?'Post':'Story')+' layout will be adapted to the other format, including its vertical positions and sizes. The other format’s existing layout will be replaced. You can separate them again at any time.','Sync layouts',()=>{flush();pg[otherF()]=adaptLayout(lay(),fmt,otherF());pg.linked=true;rebase();render();save();toast('Synced: both formats now fill their own canvas.')})};
 function renderSlides(){let root=$('slides');root.replaceChildren();project.pages.forEach((p,n)=>{let L=p[fmt],hh=H[fmt],k=54/W,b=document.createElement('button');b.className='sl'+(n===pi?' active':'');b.setAttribute('aria-label','Page '+(n+1));let th=document.createElement('div');th.className='th';th.style.cssText=`width:54px;height:${hh*k}px`;let a=document.createElement('div');a.className='art';a.style.cssText=`width:${W}px;height:${hh}px;transform:scale(${k})`;paintLayout(a,L,hh);th.append(a);let l=document.createElement('small');l.innerHTML=`${n+1} <i class="ti ti-${p.linked?'link':'link-off'}"></i>`;b.append(th,l);b.onclick=()=>setPage(n);root.append(b)});
 [['ti-plus','Add page',()=>{flush();project.pages.push(mkPage());pi=project.pages.length-1;sel=[];rebase();render();save()}],['ti-copy','Duplicate page',()=>{flush();let c=structuredClone(page());c.id=uid();project.pages.splice(pi+1,0,c);pi++;sel=[];rebase();render();save()}],['ti-trash','Remove page',()=>{if(project.pages.length===1)return toast('Keep at least one page.');project.pages.splice(pi,1);pi=Math.min(pi,project.pages.length-1);sel=[];rebase();render();save()}]].forEach(([c,t,f])=>{let b=document.createElement('button');b.className='sa';b.title=t;b.innerHTML=`<i class="ti ${c}"></i><small>${t.split(' ')[0]}</small>`;b.onclick=f;root.append(b)})}
 
