@@ -91,7 +91,7 @@ export function createProvider(apiHandler, defaultHandler) {
     authorizeEndpoint: '/authorize', tokenEndpoint: '/oauth/token', clientRegistrationEndpoint: '/oauth/register',
     scopesSupported: ['shoots:read', 'payments:read', 'summary:read', 'offline_access'],
     resourceMetadata: { resource: 'https://mcp.sakkhi.co.in/mcp', authorization_servers: ['https://mcp.sakkhi.co.in'] },
-    requiredScopes: ['shoots:read'], clientIdMetadataDocumentEnabled: true,
+    requiredScopes: ['shoots:read', 'payments:read', 'summary:read'], clientIdMetadataDocumentEnabled: true,
     tokenExchangeCallback: async options => {
       const p = options.props;
       if (!p?.userId || !p.supabaseRefreshToken || !options.env.SUPABASE_URL || !options.env.SUPABASE_ANON_KEY) throw new OAuthError('invalid_grant', { description: 'Reconnect your Sakkhi account.' });
