@@ -1,0 +1,68 @@
+name: Deploy Sakkhi Connect (MCP) to Cloudflare
+
+# Manual on purpose: Actions tab -> "Deploy Sakkhi Connect (MCP) to Cloudflare" -> Run workflow.
+# Run it once with "Switch on" OFF to publish it switched off, check the health link in the log,
+# then run it again with "Switch on" ticked to let ChatGPT / Claude connect.
+on:
+  workflow_dispatch:
+    inputs:
+      enable:
+        description: 'Switch on (lets ChatGPT / Claude connect). Leave off for a first, switched-off deploy.'
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-mcp
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    defaults:
+      run:
+        working-directory: mcp
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Check the Cloudflare secrets are set
+        run: |
+          [ -n "$CLOUDFLARE_API_TOKEN" ] || { echo "::error::Add the CLOUDFLARE_API_TOKEN secret (see mcp/README.md, step 3)"; exit 1; }
+          [ -n "$CLOUDFLARE_ACCOUNT_ID" ] || { echo "::error::Add the CLOUDFLARE_ACCOUNT_ID secret (see mcp/README.md, step 3)"; exit 1; }
+
+      - run: npm install --ignore-scripts --no-audit --no-fund
+      - run: npm run check
+      - run: npm test
+      - name: End-to-end test
+        run: npm run test:e2e
+
+      - name: Deploy
+        run: npx wrangler deploy --var ENABLE_MCP_SERVER:${{ inputs.enable && 'true' || 'false' }}
+
+      - name: Save the Supabase public key as a Worker secret
+        env:
+          SUPABASE_ANON_KEY: ${{ secrets.SUPABASE_ANON_KEY }}
+        run: |
+          KEY="$SUPABASE_ANON_KEY"
+          # The public (anon) key is already in the Sakkhi app, so the secret is optional.
+          if [ -z "$KEY" ]; then KEY=$(grep -oP "const SUPABASE_KEY = '\K[^']+" ../app/index.html | head -1 || true); fi
+          [ -n "$KEY" ] || { echo "::error::Could not find the Supabase public key. Add the SUPABASE_ANON_KEY secret."; exit 1; }
+          printf '%s' "$KEY" | npx wrangler secret put SUPABASE_ANON_KEY
+
+      - name: Health check (may take a minute to appear the first time)
+        continue-on-error: true
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if curl -fsS https://mcp.sakkhi.co.in/health; then echo; exit 0; fi
+            echo "not reachable yet, retrying..."; sleep 15
+          done
+          echo "::warning::https://mcp.sakkhi.co.in/health was not reachable. DNS can take a few minutes; check the Cloudflare dashboard if it stays down."; exit 1
