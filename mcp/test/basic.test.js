@@ -42,3 +42,14 @@ test('malformed financial values cannot generate negative or non-finite totals',
   for(const key of ['amount','paid','pending'])assert.ok(Number.isFinite(item[key])&&item[key]>=0);
  }
 });
+
+// Presentation metadata must never override scope-based financial redaction.
+test('structured card source preserves date/session and hides payments without permission',()=>{
+ const row={id:'shoot-1',name:'Wedding',date:'2026-11-14',session:'Morning',location:'Mysuru',amount:12000,pay_status:'part',part_paid:2000};
+ const safe=visibleShoot(row,['shoots:read']);
+ assert.equal(safe.date,'2026-11-14');
+ assert.equal(safe.session,'Morning');
+ assert.equal(safe.location,'Mysuru');
+ assert.equal(Object.hasOwn(safe,'pending'),false);
+ assert.equal(visibleShoot(row,['shoots:read','payments:read']).pending,10000);
+});
