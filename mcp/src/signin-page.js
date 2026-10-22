@@ -52,7 +52,9 @@ export function shell(body, { nonce = '', google = false } = {}) {
     google ? 'connect-src https://accounts.google.com/gsi/' : "connect-src 'none'",
     "style-src 'unsafe-inline'" + (google ? ' https://accounts.google.com/gsi/style' : ''),
     'img-src https://sakkhi.co.in data: https://*.googleusercontent.com',
-    "form-action 'self'",
+    // OAuth completion redirects the POST to the registered AI client callback.
+    // A form-action self restriction also blocks that redirect in browsers enforcing it.
+    // The form itself has no external action; the OAuth provider validates redirect URIs.
     "frame-ancestors 'none'",
     "base-uri 'none'"
   ].join('; ');
