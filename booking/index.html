@@ -57,6 +57,23 @@
       background-position: right 1rem center;
       background-size: 1em;
     }
+
+    /* ===== Mobile hub: phones only (laptops/desktops keep the normal page) ===== */
+    #mobile-hub { display: none; }
+    .m-back { display: none; }
+    @media (max-width: 767px) {
+      body.mhub #mobile-hub { display: flex; }
+      body.mhub #booking-container,
+      body.mhub #company-shoots-container { display: none !important; }
+      body.mview-book #company-shoots-container { display: none !important; }
+      body.mview-shoots #booking-container { display: none !important; }
+      body.mview-book .m-back, body.mview-shoots .m-back { display: inline-flex; }
+    }
+    @keyframes hubIn { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+    .hub-in { opacity: 0; animation: hubIn .5s cubic-bezier(.2,.8,.2,1) forwards; }
+    .hub-card { -webkit-tap-highlight-color: transparent; transition: transform .15s ease, border-color .2s ease; }
+    .hub-card:active { transform: scale(.98); }
+    @media (prefers-reduced-motion: reduce) { .hub-in { animation: none; opacity: 1; } .hub-card { transition: none; } }
   </style>
 </head>
 <body class="min-h-screen flex flex-col items-center justify-start sm:justify-center p-4 pt-8 sm:pt-4 relative overflow-x-hidden">
@@ -64,10 +81,55 @@
   <!-- Background Decorative Glow -->
   <div class="fixed top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] bg-[#c9a96e] opacity-[0.03] blur-[100px] rounded-full pointer-events-none z-0"></div>
 
+  <!-- Mobile hub: a short "what would you like to do?" screen, phones only -->
+  <section id="mobile-hub" aria-live="polite" class="w-full max-w-md mx-auto flex-col my-auto relative z-10">
+    <div class="hub-in bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] p-6 shadow-[0_0_50px_rgba(0,0,0,0.3)]">
+      <div class="text-center relative mb-7">
+        <div class="absolute inset-0 bg-[#c9a96e] opacity-10 blur-2xl rounded-full w-20 h-20 mx-auto"></div>
+        <div class="w-14 h-14 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(201,169,110,0.1)] relative z-10">
+          <i class="ti ti-camera text-2xl text-[#c9a96e]"></i>
+        </div>
+        <h1 id="hub-title" class="text-2xl font-bold text-white tracking-tight leading-tight break-words"></h1>
+        <p id="hub-studio" class="text-[10px] text-[#c9a96e] mt-2.5 font-bold tracking-widest uppercase bg-[#c9a96e]/10 inline-block px-3 py-1 rounded-full border border-[#c9a96e]/20 max-w-full truncate"></p>
+      </div>
+
+      <p class="text-center text-xs text-neutral-500 mb-4">What would you like to do?</p>
+
+      <div class="space-y-3">
+        <button id="hub-book" type="button" onclick="mobileGo('book')" style="animation-delay:.08s"
+          class="hub-card hub-in w-full text-left flex items-center gap-4 p-4 rounded-2xl bg-gradient-to-r from-[#c9a96e] to-[#d4b98c] text-black shadow-[0_8px_30px_rgba(201,169,110,0.18)]">
+          <span class="w-12 h-12 rounded-xl bg-black/15 flex items-center justify-center text-2xl shrink-0"><i class="ti ti-calendar-plus"></i></span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-[15px] font-bold leading-tight">Book a shoot</span>
+            <span class="block text-xs font-medium text-black/60 mt-0.5">Pick a date and send a request</span>
+          </span>
+          <i class="ti ti-chevron-right text-xl text-black/50"></i>
+        </button>
+
+        <button id="hub-shoots" type="button" onclick="mobileGo('shoots')" style="animation-delay:.16s"
+          class="hub-card hub-in w-full text-left flex items-center gap-4 p-4 rounded-2xl bg-[#0f0f0f] border border-white/10 hover:border-[#c9a96e]/40 text-white">
+          <span class="w-12 h-12 rounded-xl bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 flex items-center justify-center text-2xl text-[#c9a96e] shrink-0"><i class="ti ti-calendar-event"></i></span>
+          <span class="flex-1 min-w-0">
+            <span class="block text-[15px] font-bold leading-tight">Upcoming shoots</span>
+            <span id="hub-shoots-sub" class="block text-xs text-neutral-500 mt-0.5 truncate"></span>
+          </span>
+          <span id="hub-shoots-count" class="min-w-[1.75rem] h-7 px-2 rounded-full bg-[#c9a96e]/10 border border-[#c9a96e]/20 text-[#c9a96e] text-xs font-bold flex items-center justify-center shrink-0"></span>
+          <i class="ti ti-chevron-right text-xl text-neutral-600"></i>
+        </button>
+      </div>
+
+      <a id="hub-whatsapp" href="#" target="_blank" rel="noopener" style="display:none"
+        class="hub-in mt-4 items-center justify-center gap-2 text-xs font-bold text-emerald-400 bg-emerald-950/30 border border-emerald-900/40 rounded-xl py-3 transition">
+        <i class="ti ti-brand-whatsapp text-base"></i> <span id="hub-whatsapp-label">Message on WhatsApp</span>
+      </a>
+    </div>
+  </section>
+
   <div class="flex flex-col lg:flex-row w-full max-w-5xl mx-auto items-center lg:items-start justify-center gap-8 lg:gap-16 relative z-10 transition-all duration-500">
     
     <div id="booking-container" class="bg-[#0a0a0a]/90 backdrop-blur-xl border border-white/5 rounded-[2rem] w-full max-w-md p-6 sm:p-10 shadow-[0_0_50px_rgba(0,0,0,0.3)] hidden overflow-visible transition-all duration-500 shrink-0 mx-auto lg:mx-0">
       
+      <button type="button" onclick="mobileGo('hub')" class="m-back items-center gap-1.5 mb-4 text-[11px] font-bold text-neutral-400 hover:text-white bg-white/5 border border-white/10 rounded-full px-3 py-1.5 transition"><i class="ti ti-arrow-left"></i> Back</button>
       <div class="text-center mb-8 relative">
         <div class="absolute inset-0 bg-[#c9a96e] opacity-10 blur-2xl rounded-full w-20 h-20 mx-auto"></div>
         <div class="w-14 h-14 bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-[0_0_15px_rgba(201,169,110,0.1)] relative z-10">
@@ -174,6 +236,7 @@
     </div>
 
     <div id="company-shoots-container" class="w-full max-w-md hidden px-2 sm:px-0 shrink-0 lg:mt-6 mx-auto lg:mx-0">
+      <button type="button" onclick="mobileGo('hub')" class="m-back items-center gap-1.5 mb-4 text-[11px] font-bold text-neutral-400 hover:text-white bg-white/5 border border-white/10 rounded-full px-3 py-1.5 transition"><i class="ti ti-arrow-left"></i> Back</button>
       <div class="flex items-center gap-3 mb-4">
         <div class="h-px bg-white/10 flex-1"></div>
         <h3 class="text-[10px] uppercase tracking-widest font-bold text-neutral-500">Your Upcoming Shoots</h3>
@@ -202,6 +265,7 @@
       <i class="ti ti-brand-whatsapp text-base"></i> Message on WhatsApp
     </a>
     <button onclick="startNewBooking()" class="mt-3 w-full bg-neutral-900 border border-white/10 hover:bg-neutral-800 text-white font-bold py-3 rounded-xl text-xs transition-all">Submit Another Request</button>
+    <button type="button" onclick="mobileGo('hub')" class="m-back mt-3 w-full items-center justify-center gap-1.5 text-xs font-bold text-neutral-400 hover:text-white py-2 transition"><i class="ti ti-layout-grid"></i> Back to menu</button>
   </div>
 
   <!-- Pending Request Container (shown on a repeat visit to this same link) -->
@@ -475,6 +539,7 @@ By ticking the box and submitting this booking request, you confirm that you hav
             }, 50);
             
             applyPortalAvailability(portal);
+            setupMobileHub(displayBizName);
           } else {
             throw new Error("Link expired or invalid");
           }
@@ -493,6 +558,70 @@ By ticking the box and submitting this booking request, you confirm that you hav
         }
       });
     });
+
+    // ==========================================
+    // MOBILE HUB (phones only)
+    // ------------------------------------------
+    // On a phone the booking form and the upcoming-shoots list used to be
+    // stacked one under the other. Now a short screen asks which one the
+    // visitor wants. The CSS above only applies below 768px, so laptops and
+    // desktops never see any of this. With no upcoming shoots there is
+    // nothing to choose between, so the form just opens as before.
+    // ==========================================
+    let hubActive = false;
+
+    function upcomingShootList() {
+      const now = new Date();
+      const todayStr = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
+      return (currentStudioShoots || []).filter(s => s && s.date && s.date >= todayStr).sort((a, b) => a.date.localeCompare(b.date));
+    }
+
+    function setHubView(view) {
+      const b = document.body;
+      b.classList.remove('mhub', 'mview-book', 'mview-shoots');
+      b.classList.add(view === 'book' ? 'mview-book' : view === 'shoots' ? 'mview-shoots' : 'mhub');
+    }
+
+    function mobileGo(view) {
+      if (view === 'hub') {
+        // Leave a view exactly like the phone's own Back button would, so the browser history stays tidy.
+        if (history.state && history.state.m && history.state.m !== 'hub') { history.back(); return; }
+        setHubView('hub');
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+        return;
+      }
+      setHubView(view);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      history.pushState({ m: view }, '');
+    }
+
+    function setupMobileHub(displayBizName) {
+      try {
+        const upcoming = upcomingShootList();
+        if (!upcoming.length) return;
+        document.getElementById('hub-title').textContent = `Book with ${displayBizName}`;
+        document.getElementById('hub-studio').textContent = `Exclusive link for ${activeStudio}`;
+
+        const [y, m, d] = upcoming[0].date.split('-');
+        const nextLabel = `${parseInt(d, 10)} ${MONTHS[parseInt(m, 10) - 1].substring(0, 3)}`;
+        document.getElementById('hub-shoots-count').textContent = String(upcoming.length);
+        document.getElementById('hub-shoots-sub').textContent = upcoming.length === 1 ? `Next: ${nextLabel}` : `Next: ${nextLabel} \u00B7 ${upcoming.length} shoots`;
+
+        if (studioPhoneDigits) {
+          const wa = document.getElementById('hub-whatsapp');
+          wa.href = `https://wa.me/${studioPhoneDigits}`;
+          document.getElementById('hub-whatsapp-label').textContent = `Message ${displayBizName} on WhatsApp`;
+          wa.style.display = 'flex';
+        }
+
+        if (!hubActive) {
+          hubActive = true;
+          history.replaceState({ m: 'hub' }, '');
+          window.addEventListener('popstate', e => { setHubView((e.state && e.state.m) || 'hub'); window.scrollTo(0, 0); });
+        }
+        setHubView('hub');
+      } catch (e) { console.warn('Mobile menu skipped:', e); }
+    }
 
     // ==========================================
     // 3. FETCH DATES & STUDIO SHOOTS
