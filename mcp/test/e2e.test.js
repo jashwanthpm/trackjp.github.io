@@ -66,6 +66,17 @@ function startFakeSupabase(port) {
       const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
       return uid ? send(res, 200, { ...USERS[uid], is_anonymous: false }) : send(res, 401, { msg: 'invalid JWT' });
     }
+    if (url.pathname === '/rest/v1/edits') {
+      const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
+      if (!uid) return send(res, 401, { message: 'JWT expired' });
+      const want = url.searchParams.get('user_id')?.replace('eq.', '');
+      const rows = [
+        { id: 'e1', user_id: 'user-a', company_name: 'TARA Weddings', client_name: 'Test edit', date: day(-5), amount: 8000, pay_status: 'part', part_paid: 3000, work_status: 'inprogress' },
+        { id: 'eb', user_id: 'user-b', company_name: 'Private editing', date: day(-5), amount: 99999, pay_status: 'pending', part_paid: 0 }
+      ].filter(e => e.user_id === uid && (!want || e.user_id === want));
+      const offset = Number(url.searchParams.get('offset') || 0), limit = Number(url.searchParams.get('limit') || 1000);
+      return send(res, 200, rows.slice(offset, offset + limit));
+    }
     if (url.pathname === '/rest/v1/shoots') {
       const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
       if (!uid) return send(res, 401, { message: 'JWT expired' });
