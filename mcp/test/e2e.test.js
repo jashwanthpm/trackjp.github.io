@@ -66,6 +66,14 @@ function startFakeSupabase(port) {
       const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
       return uid ? send(res, 200, { ...USERS[uid], is_anonymous: false }) : send(res, 401, { msg: 'invalid JWT' });
     }
+    if (url.pathname === '/rest/v1/settings') {
+      const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
+      if (!uid) return send(res, 401, { message: 'JWT expired' });
+      const want = url.searchParams.get('user_id')?.replace('eq.', '');
+      const rows = [{ user_id: 'user-a', key: 'user-a_companies', value: ['With Love'] }]
+        .filter(x => x.user_id === uid && (!want || x.user_id === want));
+      return send(res, 200, rows.map(({key,value})=>({key,value})));
+    }
     if (url.pathname === '/rest/v1/edits') {
       const uid = state.tokens.get((req.headers.authorization || '').replace(/^Bearer /, ''));
       if (!uid) return send(res, 401, { message: 'JWT expired' });
