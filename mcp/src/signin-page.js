@@ -6,7 +6,7 @@ export const esc = v => String(v ?? '').replace(/[&<>"']/g, c => '&#' + c.charCo
 
 // What each permission means, in plain words. Anything not listed here is never shown or granted.
 export const SCOPE_INFO = {
-  'shoots:read': ['View shoots, editing jobs and company links', 'Your own shoot details, editing work and saved booking/ledger portal links; no changes allowed'],
+  'shoots:read': ['View your shoots', 'Names, dates, places, editing jobs and saved company portal links (read-only)'],
   'payments:read': ['View payment amounts', 'Amounts, money received and pending dues'],
   'summary:read': ['View yearly summaries', 'Totals per year (also needs payment access)'],
   'offline_access': ['Stay connected', 'Keeps the connection working without signing in again every hour']
