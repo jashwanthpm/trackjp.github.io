@@ -24,6 +24,8 @@ Each run of the deploy workflow sets the switch from its checkbox, so tick it ev
 | `get_shoots` | `shoots:read` | Lists shoots (money fields only with `payments:read`) |
 | `get_next_shoot` | `shoots:read` | The next upcoming shoot |
 | `get_shoot_details` | `shoots:read` | One shoot by id |
+| `get_editing_jobs` / `get_editing_job_details` | `shoots:read` | Own editing jobs; financial fields only with `payments:read` |
+| `get_company_portal_links` | `shoots:read` | Saved company Booking and Ledger (sometimes called Lecture) links, never generates or modifies them |
 | `get_pending_payments` | `payments:read` | Money still due on **completed** shoots, matching the Due figure in the Sakkhi dashboard; balances on upcoming shoots are reported separately |
 | `get_year_summary` | `payments:read` + `summary:read` | Totals for a calendar year (dues count completed shoots only) |
 
