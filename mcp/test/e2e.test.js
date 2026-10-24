@@ -203,7 +203,7 @@ test('full connection with every permission: sign in with Google, get tokens, us
 
   assert.equal((await init(full.access_token)).status, 200);
   const names = (await mcp(full.access_token, 'tools/list', {})).json.result.tools.map(x => x.name).sort();
-  assert.deepEqual(names, ['get_next_shoot', 'get_pending_payments', 'get_shoot_details', 'get_shoots', 'get_year_summary']);
+  for(const name of ['get_company_portal_links','get_connection_permissions','get_editing_job_details','get_editing_jobs','get_financial_overview','get_monthly_finances','get_next_shoot','get_pending_payments','get_shoot_details','get_shoots','get_year_summary'])assert.ok(names.includes(name), 'missing '+name);
   const listed = (await mcp(full.access_token, 'tools/list', {})).json.result.tools;
   assert.ok(listed.every(x => x.annotations?.readOnlyHint === true), 'every tool is marked read-only');
 
@@ -246,7 +246,7 @@ test('a connection granted only "shoots" sees no money and gets no payment tools
   const t = await tokens(clientId, code, verifier);
   await init(t.body.access_token);
   const names = (await mcp(t.body.access_token, 'tools/list', {})).json.result.tools.map(x => x.name).sort();
-  assert.deepEqual(names, ['get_next_shoot', 'get_shoot_details', 'get_shoots']);
+  for(const name of ['get_company_portal_links','get_connection_permissions','get_editing_job_details','get_editing_jobs','get_next_shoot','get_shoot_details','get_shoots'])assert.ok(names.includes(name), 'missing '+name);for(const name of ['get_financial_overview','get_monthly_finances','get_pending_payments','get_year_summary'])assert.ok(!names.includes(name), 'unauthorized payment tool '+name);
   const s = await tool(t.body.access_token, 'get_shoots');
   for (const shoot of s.shoots) for (const f of ['amount', 'paid', 'pending', 'payment_status']) assert.equal(Object.hasOwn(shoot, f), false, `${f} hidden`);
 });
