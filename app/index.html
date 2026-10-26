@@ -8608,19 +8608,19 @@ async function toggleBlockDate(dateStr) {
     function inferInventoryGear(raw) {
       const n = String(raw || '').toLowerCase().replace(/[^a-z0-9]+/g, ' ').trim();
       if (!n) return null;
-      if (/\\b(?:pavotube|pavo tube|power tube|nanlite|aputure|amaran|softbox|light stand|led panel|strobe|speedlight|flash|godox|tube light|15c|30c)\\b/.test(n)) return { icon: 'bulb', category: 'Light' };
-      if (/\\b(?:lens|lenses|tamron|sigma|sony fe|rf lens|ef lens|85\\s*mm|50\\s*mm|35\\s*mm|24\\s*70|28\\s*75|70\\s*200|85\\s*95|85\\s*to\\s*95)\\b/.test(n)) return { icon: 'aperture', category: 'Lens' };
-      if (/\\b(?:canon|eos|r5|r6|r3|r7|r8|5d|sony a7|a7iv|a7m4|a7s|a7r|fx3|fx30|nikon|z6|z8|z9|fujifilm|lumix|camera body|dslr|mirrorless)\\b/.test(n)) return { icon: 'camera', category: 'Camera' };
-      if (/\\b(?:drone|mavic|dji mini|air 3)\\b/.test(n)) return { icon: 'drone', category: 'Drone' };
-      if (/\\b(?:macbook|laptop|thinkpad)\\b/.test(n)) return { icon: 'device-laptop', category: 'Laptop' };
-      if (/\\b(?:monitor|display|screen)\\b/.test(n)) return { icon: 'device-desktop', category: 'Monitor' };
-      if (/\\b(?:microphone|mic|rode wireless|dji mic)\\b/.test(n)) return { icon: 'microphone', category: 'Microphone' };
-      if (/\\b(?:tripod|gimbal|stabilizer|cage|camera strap|filter|adapter|mount)\\b/.test(n)) return { icon: 'box', category: 'Camera accessory' };
-      if (/\\b(?:ssd|hdd|hard drive|memory card|sd card|cfexpress|seagate)\\b/.test(n)) return { icon: 'database', category: 'Storage' };
-      if (/\\b(?:battery|np fz100|power bank)\\b/.test(n)) return { icon: 'battery-charging', category: 'Battery' };
-      if (/\\b(?:charger|cable|usb c|type c)\\b/.test(n)) return { icon: 'plug', category: 'Cable or charger' };
-      if (/\\b(?:card reader)\\b/.test(n)) return { icon: 'usb', category: 'Card reader' };
-      if (/\\b(?:backpack|camera bag|gear bag)\\b/.test(n)) return { icon: 'backpack', category: 'Bag' };
+      if (/\b(?:pavotube|pavo tube|power tube|nanlite|aputure|amaran|softbox|light stand|led panel|strobe|speedlight|flash|godox|tube light|15c|30c)\b/.test(n)) return { icon: 'bulb', category: 'Light' };
+      if (/\b(?:lens|lenses|tamron|sigma|sony fe|rf lens|ef lens|85\s*mm|50\s*mm|35\s*mm|24\s*70|28\s*75|70\s*200|85\s*95|85\s*to\s*95)\b/.test(n)) return { icon: 'aperture', category: 'Lens' };
+      if (/\b(?:canon|eos|r5|r6|r3|r7|r8|5d|sony a7|a7iv|a7m4|a7s|a7r|fx3|fx30|nikon|z6|z8|z9|fujifilm|lumix|camera body|dslr|mirrorless)\b/.test(n)) return { icon: 'camera', category: 'Camera' };
+      if (/\b(?:drone|mavic|dji mini|air 3)\b/.test(n)) return { icon: 'drone', category: 'Drone' };
+      if (/\b(?:macbook|laptop|thinkpad)\b/.test(n)) return { icon: 'device-laptop', category: 'Laptop' };
+      if (/\b(?:monitor|display|screen)\b/.test(n)) return { icon: 'device-desktop', category: 'Monitor' };
+      if (/\b(?:microphone|mic|rode wireless|dji mic)\b/.test(n)) return { icon: 'microphone', category: 'Microphone' };
+      if (/\b(?:tripod|gimbal|stabilizer|cage|camera strap|filter|adapter|mount)\b/.test(n)) return { icon: 'box', category: 'Camera accessory' };
+      if (/\b(?:ssd|hdd|hard drive|memory card|sd card|cfexpress|seagate)\b/.test(n)) return { icon: 'database', category: 'Storage' };
+      if (/\b(?:battery|np fz100|power bank)\b/.test(n)) return { icon: 'battery-charging', category: 'Battery' };
+      if (/\b(?:charger|cable|usb c|type c)\b/.test(n)) return { icon: 'plug', category: 'Cable or charger' };
+      if (/\b(?:card reader)\b/.test(n)) return { icon: 'usb', category: 'Card reader' };
+      if (/\b(?:backpack|camera bag|gear bag)\b/.test(n)) return { icon: 'backpack', category: 'Bag' };
       return null;
     }
     let _invAutoIcon = true, _invAutoCategory = true;
