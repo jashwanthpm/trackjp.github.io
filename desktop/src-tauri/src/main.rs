@@ -92,6 +92,12 @@ fn get_storage_context(app: AppHandle) -> Result<StorageContext, String> {
 }
 
 #[tauri::command]
+fn open_pairing_url(app: AppHandle, url: String) -> Result<(), String> {
+    if !url.starts_with("https://sakkhi.co.in/app/") { return Err("Only the official Sakkhi pairing page can be opened.".to_string()); }
+    app.opener().open_url(url, None::<&str>).map_err(|e| format!("Could not open browser: {e}"))
+}
+
+#[tauri::command]
 fn open_storage_folder(
     app: AppHandle,
     root_path: String,
@@ -136,7 +142,8 @@ pub fn run() {
         .plugin(tauri_plugin_opener::init())
         .invoke_handler(tauri::generate_handler![
             get_storage_context,
-            open_storage_folder
+            open_storage_folder,
+            open_pairing_url
         ])
         .run(tauri::generate_context!())
         .expect("error while running Sakkhi Desktop");
