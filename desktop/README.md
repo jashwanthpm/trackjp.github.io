@@ -32,3 +32,5 @@ The web app must show "Not registered on this device" if no local location exist
 ## Build
 
 The desktop shell is a Tauri v2 app. Build artifacts should be signed/notarized for macOS and signed for Windows before public distribution. See the repository workflow for platform builds.
+
+Build matrix validates the pinned Tauri runtime dependency set on macOS and Windows.
