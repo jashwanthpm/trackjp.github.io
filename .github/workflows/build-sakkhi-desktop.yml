@@ -29,6 +29,11 @@ jobs:
           node-version: 22
       - name: Install frontend dependencies
         run: npm install
+      - name: Prepare platform icons
+        run: |
+          python -m pip install --disable-pip-version-check Pillow
+          python scripts/prepare_icon.py
+          npx tauri icon ./src-tauri/icon-source.png --output ./src-tauri/icons
       - name: Build native desktop app
         run: npm run tauri build
       - name: Upload installers
