@@ -36,4 +36,4 @@ jobs:
             VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}"
 
       - name: Deploy the send-push function
-        run: supabase functions deploy send-push --project-ref "$PROJECT_REF"
+        run: supabase functions deploy send-push --project-ref "$PROJECT_REF" --yes
