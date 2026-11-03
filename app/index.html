@@ -570,54 +570,6 @@
   </section>
 
 
-      <section id="section-storage" class="app-section hidden space-y-5">
-        <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-neutral-900 pb-4 gap-3">
-          <div>
-            <p class="text-[10px] uppercase tracking-[0.2em] text-[#c9a96e] font-bold">Local + synced metadata</p>
-            <h2 class="text-xl font-bold text-white mt-1">Storage Management</h2>
-            <p class="text-xs text-neutral-500 mt-1">Track where each shoot lives. Your photos and videos stay on your drives.</p>
-          </div>
-          <div class="flex gap-2">
-            <button onclick="refreshStorageTracker()" class="px-3 py-2 rounded-lg border border-neutral-800 bg-neutral-900/60 text-xs text-neutral-300 hover:text-white"><i class="ti ti-refresh mr-1"></i> Refresh</button>
-            <button onclick="refreshStorageTracker(true)" class="px-3 py-2 rounded-lg bg-[#c9a96e] text-black text-xs font-bold hover:bg-[#e6c98a]"><i class="ti ti-device-desktop-plus mr-1"></i> Connect this device</button>
-          </div>
-        </div>
-        <div id="storage-companion-status" class="rounded-xl border border-neutral-800 bg-[#0f0f0f] p-4 text-xs text-neutral-400">
-          Checking for Sakkhi Desktop Companion…
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
-            <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-white"><i class="ti ti-device-desktop text-[#c9a96e] mr-1.5"></i>Registered devices</h3><span id="storage-device-count" class="text-[10px] text-neutral-500">0 devices</span></div>
-            <div id="storage-device-list" class="space-y-2"><p class="text-xs text-neutral-600">No devices registered yet.</p></div>
-          </div>
-          <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
-            <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-white"><i class="ti ti-hard-drive text-[#c9a96e] mr-1.5"></i>Registered drives</h3><span id="storage-drive-count" class="text-[10px] text-neutral-500">0 drives</span></div>
-            <div id="storage-drive-list" class="space-y-2"><p class="text-xs text-neutral-600">No drives registered yet.</p></div>
-          </div>
-        </div>
-        <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
-          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
-            <div><h3 class="text-sm font-bold text-white"><i class="ti ti-folders text-[#c9a96e] mr-1.5"></i>Shoot locations</h3><p class="text-[10px] text-neutral-500 mt-1">Paths are stored per device. A path from your Mac won't be opened on Windows.</p></div>
-            <button onclick="openStorageLocationForm()" class="px-3 py-2 rounded-lg border border-[#c9a96e]/40 text-[#c9a96e] text-xs font-bold hover:bg-[#c9a96e]/10"><i class="ti ti-plus mr-1"></i> Add location</button>
-          </div>
-          <div id="storage-location-form" class="hidden mb-4 p-3 rounded-lg border border-neutral-800 bg-neutral-950 space-y-3">
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              <label class="text-[10px] text-neutral-500">Shoot<select id="storage-shoot-select" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="">Choose shoot</option></select></label>
-              <label class="text-[10px] text-neutral-500">Drive<select id="storage-drive-select" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="">Connect a device first</option></select></label>
-              <label class="text-[10px] text-neutral-500">Folder label<input id="storage-location-label" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white" placeholder="Wedding RAW / Final exports"></label>
-              <label class="text-[10px] text-neutral-500">Category<select id="storage-location-category" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="main">Main folder</option><option value="raw">RAW photos</option><option value="video">Video</option><option value="edited">Edited photos</option><option value="deliverables">Final deliverables</option><option value="backup">Backup</option><option value="other">Other</option></select></label>
-            </div>
-            <div class="flex flex-col sm:flex-row gap-2">
-              <input id="storage-relative-path" readonly class="flex-1 min-w-0 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-300" placeholder="Choose a folder on this computer">
-              <button onclick="chooseStorageFolder()" class="px-3 py-2 rounded-lg bg-neutral-800 text-white text-xs font-semibold hover:bg-neutral-700 whitespace-nowrap"><i class="ti ti-folder-open mr-1"></i> Choose folder</button>
-            </div>
-            <div class="flex justify-end gap-2"><button onclick="closeStorageLocationForm()" class="px-3 py-2 text-xs text-neutral-500">Cancel</button><button onclick="saveStorageLocation()" class="px-4 py-2 rounded-lg bg-[#c9a96e] text-black text-xs font-bold">Save location</button></div>
-            <p class="text-[10px] text-neutral-600">Folder selection and native opening require Sakkhi Desktop Companion. Only the folder path metadata is synced.</p>
-          </div>
-          <div id="storage-location-list" class="space-y-2"><p class="text-xs text-neutral-600">No shoot locations registered yet.</p></div>
-        </div>
-      </section>
-
       <section id="section-calendar" class="app-section hidden space-y-6">
         <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
           <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
@@ -1982,7 +1934,6 @@
     <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
       <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
       <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
-      <button onclick="switchTab('storage')" id="tab-storage" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-device-hard-drive text-xl"></i>Storage</button>
       <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab relative flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all">
         <span class="relative inline-block">
           <i class="ti ti-camera text-xl"></i>
