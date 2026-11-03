@@ -10,6 +10,9 @@ tauri-build = "=2.5.1"
 
 [dependencies]
 tauri = { version = "=2.8.5", features = [] }
+# Keep Tauri runtime crates aligned with the 2.8.5 framework release.
+tauri-runtime = "=2.8.1"
+tauri-runtime-wry = "=2.8.1"
 tauri-plugin-dialog = "=2.4.0"
 tauri-plugin-opener = "=2.5.2"
 serde = { version = "=1.0.219", features = ["derive"] }
