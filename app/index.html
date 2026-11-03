@@ -5930,10 +5930,31 @@ async function deleteEditJob() {
       return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
+    const _storageNativeRequests = new Map();
+    let _storageNativeRequestSeq = 0;
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent || !event.data || event.data.source !== 'sakkhi-desktop') return;
+      const pending = _storageNativeRequests.get(event.data.request_id);
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      _storageNativeRequests.delete(event.data.request_id);
+      if (event.data.ok) pending.resolve(event.data.result);
+      else pending.reject(new Error(event.data.error || 'Desktop companion request failed.'));
+    });
+
     function storageNativeInvoke(command, args = {}) {
       const invoke = window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke;
-      if (typeof invoke !== 'function') throw new Error('Open Sakkhi Desktop Companion on this computer to use local folders.');
-      return invoke(command, args);
+      if (typeof invoke === 'function') return invoke(command, args);
+      if (window.parent === window) return Promise.reject(new Error('Open Sakkhi Desktop Companion on this computer to use local folders.'));
+      const request_id = 'storage-' + (++_storageNativeRequestSeq) + '-' + Date.now();
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          _storageNativeRequests.delete(request_id);
+          reject(new Error('Sakkhi Desktop Companion did not respond. Make sure it is running.'));
+        }, 15000);
+        _storageNativeRequests.set(request_id, {resolve, reject, timer});
+        window.parent.postMessage({source:'sakkhi-web', request_id, command, args}, '*');
+      });
     }
 
     async function storageRequest(path, options = {}) {
