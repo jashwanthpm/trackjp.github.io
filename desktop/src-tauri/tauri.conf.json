@@ -28,11 +28,9 @@
     "active": true,
     "category": "Photography",
     "shortDescription": "Local storage companion for Sakkhi Shoot Management",
-    "longDescription": "Register local drives and open shoot folders in Finder or File Explorer. Media files remain on the user's computer."
-  },
-  "plugins": {
-    "opener": {
-      "requireLiteralLeadingDot": false
-    }
+    "longDescription": "Register local drives and open shoot folders in Finder or File Explorer. Media files remain on the user's computer.",
+    "icon": [
+      "../../icon-512.png"
+    ]
   }
 }
