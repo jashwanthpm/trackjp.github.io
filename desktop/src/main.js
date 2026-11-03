@@ -67,6 +67,11 @@ async function checkPairing() {
 window.addEventListener('message', async (event) => {
   if (event.source !== frame.contentWindow || event.origin !== SAKKHI_ORIGIN) return;
   const message = event.data;
+  if (message?.source === 'sakkhi-web' && message.command === 'auth_state') {
+    if (message.authenticated) { pairing.hidden = true; }
+    else { beginPairing(); }
+    return;
+  }
   if (!message || message.source !== 'sakkhi-web' || !message.request_id) return;
   const reply = (payload) => frame.contentWindow.postMessage({ source: 'sakkhi-desktop', request_id: message.request_id, ...payload }, SAKKHI_ORIGIN);
   try {
@@ -83,4 +88,3 @@ window.addEventListener('message', async (event) => {
 });
 
 frame.addEventListener('load', () => { document.getElementById('boot')?.remove(); });
-beginPairing();
