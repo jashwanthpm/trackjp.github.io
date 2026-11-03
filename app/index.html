@@ -5933,7 +5933,7 @@ async function deleteEditJob() {
     const _storageNativeRequests = new Map();
     let _storageNativeRequestSeq = 0;
     window.addEventListener('message', event => {
-      if (event.source !== window.parent || !event.data || event.data.source !== 'sakkhi-desktop') return;
+      if (event.source !== window.parent || !['tauri://localhost','http://tauri.localhost','https://tauri.localhost'].includes(event.origin) || !event.data || event.data.source !== 'sakkhi-desktop') return;
       const pending = _storageNativeRequests.get(event.data.request_id);
       if (!pending) return;
       clearTimeout(pending.timer);
@@ -6168,7 +6168,7 @@ async function deleteEditJob() {
       }
       const path = drive.mount_point.replace(/[\\/]+$/, '') + (location.relative_path === '.' ? '' : (drive.mount_point.includes('\\') ? '\\' : '/') + location.relative_path);
       try {
-        await storageNativeInvoke('open_storage_folder', {path});
+        await storageNativeInvoke('open_storage_folder', {rootPath: drive.mount_point, relativePath: location.relative_path});
       } catch (error) {
         showToast(error.message || 'Could not open folder. Check that the drive is connected.', 'error');
       }
