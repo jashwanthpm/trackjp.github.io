@@ -1,7 +1,7 @@
 [package]
-name = "sakkhi-desktop"
+name = "sakkhi-drive"
 version = "0.1.0"
-description = "Sakkhi local storage companion"
+description = "Sakkhi Drive local storage companion"
 authors = ["Sakkhi"]
 edition = "2021"
 
