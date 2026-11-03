@@ -92,20 +92,34 @@ fn get_storage_context(app: AppHandle) -> Result<StorageContext, String> {
 }
 
 #[tauri::command]
-fn open_storage_folder(app: AppHandle, path: String) -> Result<(), String> {
-    let requested = PathBuf::from(path.trim());
-    if !requested.is_absolute() {
-        return Err("The saved folder path is not an absolute local path.".to_string());
+fn open_storage_folder(
+    app: AppHandle,
+    root_path: String,
+    relative_path: String
+) -> Result<(), String> {
+    let requested_root = PathBuf::from(root_path.trim());
+    let relative = PathBuf::from(relative_path.trim());
+    if !requested_root.is_absolute() || relative.is_absolute() {
+        return Err("The saved storage location is not a valid local relative path.".to_string());
     }
-    let canonical = fs::canonicalize(&requested)
+    if relative.components().any(|part| matches!(part, std::path::Component::ParentDir | std::path::Component::Prefix(_))) {
+        return Err("The saved folder path contains an invalid parent or drive segment.".to_string());
+    }
+
+    let canonical_root = fs::canonicalize(&requested_root)
+        .map_err(|_| "Drive is unavailable. Connect the registered drive and try again.".to_string())?;
+    let canonical = fs::canonicalize(canonical_root.join(relative))
         .map_err(|_| "Folder is unavailable. Connect the registered drive and try again.".to_string())?;
+    if !canonical.starts_with(&canonical_root) {
+        return Err("The selected folder is outside its registered drive root.".to_string());
+    }
     if !canonical.is_dir() {
         return Err("The registered location is not a folder.".to_string());
     }
 
     // Only open folders on currently mounted volumes; never execute shell commands.
     let disks = Disks::new_with_refreshed_list();
-    let mounted = disks.list().iter().any(|disk| canonical.starts_with(disk.mount_point()));
+    let mounted = disks.list().iter().any(|disk| canonical_root.starts_with(disk.mount_point()));
     if !mounted {
         return Err("The folder is not on a currently mounted drive.".to_string());
     }
