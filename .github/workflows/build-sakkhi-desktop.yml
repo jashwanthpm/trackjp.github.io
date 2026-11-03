@@ -1,0 +1,39 @@
+name: Build Sakkhi Desktop
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/local-storage-tracker
+    paths:
+      - "desktop/**"
+      - ".github/workflows/build-sakkhi-desktop.yml"
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest]
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install frontend dependencies
+        run: npm install
+      - name: Build native desktop app
+        run: npm run tauri build
+      - name: Upload installers
+        uses: actions/upload-artifact@v4
+        with:
+          name: sakkhi-desktop-${{ matrix.os }}
+          path: desktop/src-tauri/target/release/bundle/**
+          if-no-files-found: error
