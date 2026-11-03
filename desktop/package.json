@@ -1,0 +1,19 @@
+{
+  "name": "sakkhi-desktop",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 127.0.0.1",
+    "build": "vite build",
+    "tauri": "tauri"
+  },
+  "dependencies": {
+    "@tauri-apps/api": "2.8.0",
+    "@tauri-apps/plugin-dialog": "2.4.0"
+  },
+  "devDependencies": {
+    "@tauri-apps/cli": "2.8.4",
+    "vite": "6.4.1"
+  }
+}
