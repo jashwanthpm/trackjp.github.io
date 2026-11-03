@@ -15,3 +15,5 @@ with Image.open(source) as original:
     image.save(output, format="PNG", optimize=True)
 
 print(f"Prepared RGBA Tauri icon: {output} ({image.size})")
+
+# CI build trigger: regenerate native icons from the current checked-in brand asset.
