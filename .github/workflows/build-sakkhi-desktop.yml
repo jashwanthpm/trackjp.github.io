@@ -1,10 +1,10 @@
-name: Build Sakkhi Desktop
+name: Build Sakkhi Drive
 
 on:
   workflow_dispatch:
   push:
     branches:
-      - feature/local-storage-tracker
+      - main
     paths:
       - "desktop/**"
       - ".github/workflows/build-sakkhi-desktop.yml"
@@ -39,6 +39,6 @@ jobs:
       - name: Upload installers
         uses: actions/upload-artifact@v4
         with:
-          name: sakkhi-desktop-${{ matrix.os }}
+          name: sakkhi-drive-${{ matrix.os }}
           path: desktop/src-tauri/target/release/bundle/**
           if-no-files-found: error
