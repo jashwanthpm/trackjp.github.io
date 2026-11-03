@@ -585,6 +585,17 @@
         <div id="storage-companion-status" class="rounded-xl border border-neutral-800 bg-[#0f0f0f] p-4 text-xs text-neutral-400">
           Checking for Sakkhi Desktop Companion…
         </div>
+        <div class="rounded-xl border border-[#c9a96e]/30 bg-[#0f0f0f] p-4 space-y-3">
+          <div>
+            <h3 class="text-sm font-bold text-white"><i class="ti ti-link text-[#c9a96e] mr-1.5"></i>Connect Sakkhi Drive</h3>
+            <p class="text-xs text-neutral-500 mt-1">Open Sakkhi Drive on your computer. Enter the 8-character code shown there, then approve the connection.</p>
+          </div>
+          <div class="flex flex-col sm:flex-row gap-2">
+            <input id="storage-pairing-code" maxlength="8" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ENTER 8-CHARACTER CODE" class="flex-1 min-w-0 bg-[#0a0a0a] border border-neutral-700 rounded-lg px-3 py-3 text-sm text-white tracking-[0.25em] font-bold uppercase placeholder:text-neutral-600 placeholder:tracking-normal outline-none focus:border-[#c9a96e]" oninput="this.value=this.value.toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,8)" onkeydown="if(event.key==='Enter') approveStorageDrivePairing()">
+            <button id="storage-pairing-submit" onclick="approveStorageDrivePairing()" class="px-5 py-3 rounded-lg bg-[#c9a96e] text-black text-xs font-bold hover:bg-[#e6c98a] whitespace-nowrap"><i class="ti ti-device-desktop-check mr-1"></i> Approve & connect</button>
+          </div>
+          <p id="storage-pairing-help" class="text-[10px] text-neutral-500">The code expires after 5 minutes. Only approve a code displayed by your own Sakkhi Drive app.</p>
+        </div>
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
           <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
             <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-white"><i class="ti ti-device-desktop text-[#c9a96e] mr-1.5"></i>Registered devices</h3><span id="storage-device-count" class="text-[10px] text-neutral-500">0 devices</span></div>
@@ -2583,6 +2594,41 @@ setTimeout(() => {
           btn.style.justifyContent = 'center';
         }
       }, 100);
+    }
+
+    async function approveStorageDrivePairing() {
+      const input = document.getElementById('storage-pairing-code');
+      const button = document.getElementById('storage-pairing-submit');
+      const help = document.getElementById('storage-pairing-help');
+      const code = (input?.value || '').trim().toUpperCase();
+      if (!currentUser?.token) {
+        showToast('Please sign in to Sakkhi first.', 'error');
+        return;
+      }
+      if (!/^[A-Z0-9]{8}$/.test(code)) {
+        showToast('Enter the 8-character code shown in Sakkhi Drive.', 'error');
+        input?.focus();
+        return;
+      }
+      if (button) { button.disabled = true; button.textContent = 'Approving…'; }
+      if (help) help.textContent = 'Checking the code and requesting secure connection…';
+      try {
+        const response = await fetch(`${SUPABASE_URL}/functions/v1/sakkhi-drive-pairing`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', apikey: SUPABASE_KEY, Authorization: 'Bearer ' + currentUser.token },
+          body: JSON.stringify({ action: 'approve', user_code: code })
+        });
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not approve this pairing.');
+        if (input) input.value = '';
+        if (help) help.textContent = 'Approved. Return to Sakkhi Drive; it will finish signing in automatically.';
+        showToast('Sakkhi Drive approved. Return to the desktop app.', 'success');
+      } catch (error) {
+        if (help) help.textContent = error.message || 'Pairing failed. Check the code and try again.';
+        showToast(error.message || 'Pairing failed. Please try again.', 'error');
+      } finally {
+        if (button) { button.disabled = false; button.innerHTML = '<i class="ti ti-device-desktop-check mr-1"></i> Approve & connect'; }
+      }
     }
 
     async function handleDrivePairing(user) {
