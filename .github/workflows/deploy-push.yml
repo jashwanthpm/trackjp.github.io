@@ -30,7 +30,7 @@ jobs:
 
       - name: Save the push keys as function secrets
         run: |
-          supabase secrets set --project-ref "$PROJECT_REF" \
+          supabase secrets set --project-ref "$PROJECT_REF" --yes \
             VAPID_PUBLIC_KEY="BD8RkPD5_buDJqb0IumbKkgeLaP_-DqIjpWJgHqroxrswZtm5SRk6V96jTuAWfT9R_ReJNAiJ4XPSCC97Kapn-o" \
             VAPID_SUBJECT="mailto:jashwanthjp18@gmail.com" \
             VAPID_PRIVATE_KEY="${{ secrets.VAPID_PRIVATE_KEY }}"
