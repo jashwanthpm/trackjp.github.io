@@ -2947,6 +2947,7 @@ setTimeout(() => {
       catchEmailVerificationToken();
 
       const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
+      if (window.parent !== window) window.parent.postMessage({ source: 'sakkhi-web', command: 'auth_state', authenticated: !!savedUser }, '*');
       if (savedUser) {
         currentUser = JSON.parse(savedUser);
         await handleDrivePairing(currentUser);
