@@ -569,6 +569,55 @@
    </div> <!-- Closes the lg:grid-cols-12 grid -->
   </section>
 
+
+      <section id="section-storage" class="app-section hidden space-y-5">
+        <div class="flex flex-col sm:flex-row sm:items-end justify-between border-b border-neutral-900 pb-4 gap-3">
+          <div>
+            <p class="text-[10px] uppercase tracking-[0.2em] text-[#c9a96e] font-bold">Local + synced metadata</p>
+            <h2 class="text-xl font-bold text-white mt-1">Storage Management</h2>
+            <p class="text-xs text-neutral-500 mt-1">Track where each shoot lives. Your photos and videos stay on your drives.</p>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="refreshStorageTracker()" class="px-3 py-2 rounded-lg border border-neutral-800 bg-neutral-900/60 text-xs text-neutral-300 hover:text-white"><i class="ti ti-refresh mr-1"></i> Refresh</button>
+            <button onclick="refreshStorageTracker(true)" class="px-3 py-2 rounded-lg bg-[#c9a96e] text-black text-xs font-bold hover:bg-[#e6c98a]"><i class="ti ti-device-desktop-plus mr-1"></i> Connect this device</button>
+          </div>
+        </div>
+        <div id="storage-companion-status" class="rounded-xl border border-neutral-800 bg-[#0f0f0f] p-4 text-xs text-neutral-400">
+          Checking for Sakkhi Desktop Companion…
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+          <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-white"><i class="ti ti-device-desktop text-[#c9a96e] mr-1.5"></i>Registered devices</h3><span id="storage-device-count" class="text-[10px] text-neutral-500">0 devices</span></div>
+            <div id="storage-device-list" class="space-y-2"><p class="text-xs text-neutral-600">No devices registered yet.</p></div>
+          </div>
+          <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
+            <div class="flex items-center justify-between mb-3"><h3 class="text-sm font-bold text-white"><i class="ti ti-hard-drive text-[#c9a96e] mr-1.5"></i>Registered drives</h3><span id="storage-drive-count" class="text-[10px] text-neutral-500">0 drives</span></div>
+            <div id="storage-drive-list" class="space-y-2"><p class="text-xs text-neutral-600">No drives registered yet.</p></div>
+          </div>
+        </div>
+        <div class="rounded-xl border border-neutral-900 bg-[#0f0f0f] p-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <div><h3 class="text-sm font-bold text-white"><i class="ti ti-folders text-[#c9a96e] mr-1.5"></i>Shoot locations</h3><p class="text-[10px] text-neutral-500 mt-1">Paths are stored per device. A path from your Mac won't be opened on Windows.</p></div>
+            <button onclick="openStorageLocationForm()" class="px-3 py-2 rounded-lg border border-[#c9a96e]/40 text-[#c9a96e] text-xs font-bold hover:bg-[#c9a96e]/10"><i class="ti ti-plus mr-1"></i> Add location</button>
+          </div>
+          <div id="storage-location-form" class="hidden mb-4 p-3 rounded-lg border border-neutral-800 bg-neutral-950 space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="text-[10px] text-neutral-500">Shoot<select id="storage-shoot-select" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="">Choose shoot</option></select></label>
+              <label class="text-[10px] text-neutral-500">Drive<select id="storage-drive-select" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="">Connect a device first</option></select></label>
+              <label class="text-[10px] text-neutral-500">Folder label<input id="storage-location-label" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white" placeholder="Wedding RAW / Final exports"></label>
+              <label class="text-[10px] text-neutral-500">Category<select id="storage-location-category" class="w-full mt-1 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-white"><option value="main">Main folder</option><option value="raw">RAW photos</option><option value="video">Video</option><option value="edited">Edited photos</option><option value="deliverables">Final deliverables</option><option value="backup">Backup</option><option value="other">Other</option></select></label>
+            </div>
+            <div class="flex flex-col sm:flex-row gap-2">
+              <input id="storage-relative-path" readonly class="flex-1 min-w-0 bg-[#0a0a0a] border border-neutral-800 rounded-lg px-3 py-2 text-xs text-neutral-300" placeholder="Choose a folder on this computer">
+              <button onclick="chooseStorageFolder()" class="px-3 py-2 rounded-lg bg-neutral-800 text-white text-xs font-semibold hover:bg-neutral-700 whitespace-nowrap"><i class="ti ti-folder-open mr-1"></i> Choose folder</button>
+            </div>
+            <div class="flex justify-end gap-2"><button onclick="closeStorageLocationForm()" class="px-3 py-2 text-xs text-neutral-500">Cancel</button><button onclick="saveStorageLocation()" class="px-4 py-2 rounded-lg bg-[#c9a96e] text-black text-xs font-bold">Save location</button></div>
+            <p class="text-[10px] text-neutral-600">Folder selection and native opening require Sakkhi Desktop Companion. Only the folder path metadata is synced.</p>
+          </div>
+          <div id="storage-location-list" class="space-y-2"><p class="text-xs text-neutral-600">No shoot locations registered yet.</p></div>
+        </div>
+      </section>
+
       <section id="section-calendar" class="app-section hidden space-y-6">
         <div class="flex items-center justify-between border-b border-neutral-900 pb-4 mb-4">
           <h2 id="cal-month-label" class="text-lg md:text-xl font-bold text-white brand-serif tracking-wide"></h2>
@@ -1933,6 +1982,7 @@
     <nav class="fixed bottom-0 inset-x-0 bg-[#0a0a0a] border-t border-neutral-900 p-2 flex justify-around items-center z-40 shadow-xl backdrop-blur-md pb-safe">
       <button onclick="switchTab('dashboard')" id="tab-dashboard" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all active-tab text-[#c9a96e] bg-amber-500/5 border border-amber-500/10"><i class="ti ti-layout-dashboard text-xl"></i>Dashboard</button>
       <button onclick="switchTab('calendar')" id="tab-calendar" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-calendar text-xl"></i>Calendar</button>
+      <button onclick="switchTab('storage')" id="tab-storage" class="nav-tab flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all"><i class="ti ti-device-hard-drive text-xl"></i>Storage</button>
       <button onclick="switchTab('shoots')" id="tab-shoots" class="nav-tab relative flex flex-col items-center gap-1 text-neutral-500 py-1 px-3 rounded-lg text-[10px] tracking-wide font-medium transition-all">
         <span class="relative inline-block">
           <i class="ti ti-camera text-xl"></i>
@@ -3720,6 +3770,7 @@ function refreshActiveSectionUI() {
   else if (tab === 'calendar') renderCalendar();
   else if (tab === 'shoots') renderShootsList();
   else if (tab === 'payments') renderPayments();
+  else if (tab === 'storage') refreshStorageTracker();
   else if (tab === 'editing') renderEditingList();
   updateShootsNavBadge();
 }
@@ -5865,6 +5916,279 @@ async function deleteEditJob() {
       else navTab.classList.add('hidden');
     }
 
+
+    // ==========================================
+    // LOCAL STORAGE TRACKER (metadata only)
+    // ==========================================
+    let _storageContext = null;
+    let _storageDevices = [];
+    let _storageDrives = [];
+    let _storageLocations = [];
+    let _storageSelectedPath = '';
+    let _storageAutoRefreshTimer = null;
+
+    function storageEscape(value) {
+      return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+
+    const _storageNativeRequests = new Map();
+    let _storageNativeRequestSeq = 0;
+    window.addEventListener('message', event => {
+      if (event.source !== window.parent || !['tauri://localhost','http://tauri.localhost','https://tauri.localhost'].includes(event.origin) || !event.data || event.data.source !== 'sakkhi-desktop') return;
+      const pending = _storageNativeRequests.get(event.data.request_id);
+      if (!pending) return;
+      clearTimeout(pending.timer);
+      _storageNativeRequests.delete(event.data.request_id);
+      if (event.data.ok) pending.resolve(event.data.result);
+      else pending.reject(new Error(event.data.error || 'Desktop companion request failed.'));
+    });
+
+    function storageNativeInvoke(command, args = {}) {
+      const invoke = window.__TAURI__ && window.__TAURI__.core && window.__TAURI__.core.invoke;
+      if (typeof invoke === 'function') return invoke(command, args);
+      if (window.parent === window) return Promise.reject(new Error('Open Sakkhi Desktop Companion on this computer to use local folders.'));
+      const request_id = 'storage-' + (++_storageNativeRequestSeq) + '-' + Date.now();
+      return new Promise((resolve, reject) => {
+        const timer = setTimeout(() => {
+          _storageNativeRequests.delete(request_id);
+          reject(new Error('Sakkhi Desktop Companion did not respond. Make sure it is running.'));
+        }, 15000);
+        _storageNativeRequests.set(request_id, {resolve, reject, timer});
+        window.parent.postMessage({source:'sakkhi-web', request_id, command, args}, '*');
+      });
+    }
+
+    async function storageRequest(path, options = {}) {
+      if (!currentUser || !currentUser.id) throw new Error('Please sign in to Sakkhi first.');
+      const headers = {
+        'apikey': SUPABASE_KEY,
+        'Authorization': 'Bearer ' + ((currentUser && currentUser.token) || SUPABASE_KEY),
+        'Content-Type': 'application/json',
+        ...(options.headers || {})
+      };
+      return fetch(`${SUPABASE_URL}/rest/v1/${path}`, {...options, headers});
+    }
+
+    async function getStorageContext() {
+      _storageContext = await storageNativeInvoke('get_storage_context');
+      return _storageContext;
+    }
+
+    async function syncStorageDeviceAndDrives(context) {
+      const devicePayload = {
+        user_id: currentUser.id,
+        device_key: context.device_key,
+        device_name: context.device_name,
+        platform: context.platform,
+        app_version: context.app_version || null,
+        last_seen_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      let res = await storageRequest('storage_devices?on_conflict=user_id,device_key', {
+        method: 'POST',
+        headers: {'Prefer':'resolution=merge-duplicates,return=representation'},
+        body: JSON.stringify(devicePayload)
+      });
+      if (!res.ok) throw new Error('Could not sync this device: ' + await res.text());
+      const rows = await res.json();
+      const device = rows[0];
+      if (!device) throw new Error('Sakkhi could not register this device.');
+      for (const drive of (context.drives || [])) {
+        const payload = {
+          user_id: currentUser.id,
+          device_id: device.id,
+          drive_key: drive.drive_key,
+          volume_name: drive.volume_name,
+          mount_point: drive.mount_point,
+          filesystem: drive.filesystem || null,
+          total_bytes: drive.total_bytes || null,
+          available_bytes: drive.available_bytes || null,
+          is_removable: !!drive.is_removable,
+          last_seen_at: new Date().toISOString(),
+          updated_at: new Date().toISOString()
+        };
+        const saved = await storageRequest('storage_drives?on_conflict=device_id,drive_key', {
+          method: 'POST',
+          headers: {'Prefer':'resolution=merge-duplicates,return=representation'},
+          body: JSON.stringify(payload)
+        });
+        if (!saved.ok) throw new Error('Could not sync drive ' + drive.volume_name + ': ' + await saved.text());
+      }
+      return device;
+    }
+
+    function startStorageAutoRefresh() {
+      if (_storageAutoRefreshTimer) return;
+      _storageAutoRefreshTimer = setInterval(() => {
+        const section = document.getElementById('section-storage');
+        if (!section || section.classList.contains('hidden')) {
+          clearInterval(_storageAutoRefreshTimer);
+          _storageAutoRefreshTimer = null;
+          return;
+        }
+        refreshStorageTracker(true);
+      }, 30000);
+    }
+
+    async function refreshStorageTracker(connectLocal = false) {
+      const status = document.getElementById('storage-companion-status');
+      if (!status) return;
+      try {
+        if (connectLocal || (window.__TAURI__ && window.__TAURI__.core) || window.parent !== window) {
+          status.textContent = 'Reading local drives…';
+          const context = await getStorageContext();
+          await syncStorageDeviceAndDrives(context);
+          startStorageAutoRefresh();
+          status.innerHTML = '<span class="text-emerald-400"><i class="ti ti-circle-check mr-1"></i> This computer is connected.</span> <span class="text-neutral-500">Drive and device details synced; media files remain local.</span>';
+        } else {
+          status.innerHTML = '<span class="text-amber-400"><i class="ti ti-info-circle mr-1"></i> Desktop companion not detected.</span> <span class="text-neutral-500">You can view synced records here. Install/open Sakkhi Desktop on this computer to register folders and open them in Finder or File Explorer.</span>';
+        }
+        const [devicesRes, drivesRes, locationsRes] = await Promise.all([
+          storageRequest('storage_devices?select=*&order=last_seen_at.desc'),
+          storageRequest('storage_drives?select=*&order=volume_name.asc'),
+          storageRequest('storage_locations?select=*&order=updated_at.desc')
+        ]);
+        for (const response of [devicesRes, drivesRes, locationsRes]) {
+          if (!response.ok) throw new Error('Could not load storage records: ' + await response.text());
+        }
+        [_storageDevices, _storageDrives, _storageLocations] = await Promise.all([devicesRes.json(), drivesRes.json(), locationsRes.json()]);
+        renderStorageTrackerLists();
+      } catch (error) {
+        status.innerHTML = '<span class="text-red-400"><i class="ti ti-alert-circle mr-1"></i>' + storageEscape(error.message || 'Storage connection failed') + '</span>';
+      }
+    }
+
+    function renderStorageTrackerLists() {
+      const deviceList = document.getElementById('storage-device-list');
+      const driveList = document.getElementById('storage-drive-list');
+      const locationList = document.getElementById('storage-location-list');
+      if (!deviceList || !driveList || !locationList) return;
+      document.getElementById('storage-device-count').textContent = _storageDevices.length + ' devices';
+      document.getElementById('storage-drive-count').textContent = _storageDrives.length + ' drives';
+      deviceList.innerHTML = _storageDevices.length ? _storageDevices.map(d => {
+        const isThis = _storageContext && d.device_key === _storageContext.device_key;
+        return '<div class="flex items-center gap-2 rounded-lg bg-neutral-950 border border-neutral-900 p-2.5"><i class="ti ti-device-laptop text-[#c9a96e]"></i><div class="min-w-0 flex-1"><p class="text-xs text-white font-semibold truncate">' + storageEscape(d.device_name) + (isThis ? ' <span class="text-emerald-400 text-[9px]">THIS DEVICE</span>' : '') + '</p><p class="text-[10px] text-neutral-600">' + storageEscape(d.platform) + ' · Last seen ' + storageEscape(new Date(d.last_seen_at).toLocaleString()) + '</p></div></div>';
+      }).join('') : '<p class="text-xs text-neutral-600">No devices registered yet. Connect Sakkhi Desktop to begin.</p>';
+      driveList.innerHTML = _storageDrives.length ? _storageDrives.map(d => {
+        const device = _storageDevices.find(x => x.id === d.device_id);
+        const local = _storageContext && device && device.device_key === _storageContext.device_key;
+        const live = local && (_storageContext.drives || []).some(x => x.drive_key === d.drive_key);
+        return '<div class="flex items-center gap-2 rounded-lg bg-neutral-950 border border-neutral-900 p-2.5"><i class="ti ti-hard-drive text-[#c9a96e]"></i><div class="min-w-0 flex-1"><p class="text-xs text-white font-semibold truncate">' + storageEscape(d.volume_name) + '</p><p class="text-[10px] text-neutral-600 truncate">' + storageEscape(device ? device.device_name : 'Unknown device') + ' · ' + storageEscape(d.mount_point) + '</p></div><span class="text-[9px] ' + (live ? 'text-emerald-400' : 'text-neutral-600') + '">' + (live ? 'Connected' : 'Last registered') + '</span></div>';
+      }).join('') : '<p class="text-xs text-neutral-600">No drives registered yet.</p>';
+      const shootById = new Map((_shoots || []).map(s => [String(s.id), s]));
+      locationList.innerHTML = _storageLocations.length ? _storageLocations.map(loc => {
+        const shoot = shootById.get(String(loc.shoot_id));
+        const drive = _storageDrives.find(d => d.id === loc.drive_id);
+        const device = _storageDevices.find(d => d.id === loc.device_id);
+        const isLocal = !!(_storageContext && device && device.device_key === _storageContext.device_key);
+        const title = shoot ? (shoot.name || 'Shoot') : 'Shoot location';
+        return '<div class="flex flex-col sm:flex-row sm:items-center gap-2 rounded-lg bg-neutral-950 border border-neutral-900 p-3"><i class="ti ti-folder text-[#c9a96e] text-lg"></i><div class="min-w-0 flex-1"><p class="text-xs text-white font-semibold">' + storageEscape(title) + ' <span class="text-[9px] text-neutral-500 font-normal">· ' + storageEscape(loc.category) + '</span></p><p class="text-[10px] text-neutral-500 truncate">' + storageEscape(drive ? drive.volume_name : 'Drive') + ' / ' + storageEscape(loc.relative_path) + '</p><p class="text-[10px] text-neutral-600">' + storageEscape(device ? device.device_name : 'Device') + '</p></div><button onclick="openStorageLocation(\'' + storageEscape(loc.id) + '\')" class="px-3 py-2 rounded-lg ' + (isLocal ? 'bg-[#c9a96e] text-black' : 'bg-neutral-800 text-neutral-400') + ' text-[10px] font-bold whitespace-nowrap">' + (isLocal ? '<i class="ti ti-folder-open mr-1"></i>Open folder' : '<i class="ti ti-device-desktop mr-1"></i>Not on this device') + '</button></div>';
+      }).join('') : '<p class="text-xs text-neutral-600">No shoot locations registered yet. Add a folder to a shoot to get started.</p>';
+      const shootSelect = document.getElementById('storage-shoot-select');
+      if (shootSelect && shootSelect.options.length <= 1) {
+        shootSelect.innerHTML = '<option value="">Choose shoot</option>' + (_shoots || []).map(s => '<option value="' + storageEscape(s.id) + '">' + storageEscape(s.name || 'Untitled shoot') + '</option>').join('');
+      }
+      const driveSelect = document.getElementById('storage-drive-select');
+      if (driveSelect) {
+        const localDevice = _storageDevices.find(d => _storageContext && d.device_key === _storageContext.device_key);
+        const localDrives = _storageDrives.filter(d => localDevice && d.device_id === localDevice.id);
+        driveSelect.innerHTML = '<option value="">Choose drive</option>' + localDrives.map(d => '<option value="' + storageEscape(d.id) + '">' + storageEscape(d.volume_name) + ' · ' + storageEscape(d.mount_point) + '</option>').join('');
+      }
+    }
+
+    function openStorageLocationForm() {
+      const form = document.getElementById('storage-location-form');
+      if (form) form.classList.remove('hidden');
+      renderStorageTrackerLists();
+    }
+    function closeStorageLocationForm() {
+      const form = document.getElementById('storage-location-form');
+      if (form) form.classList.add('hidden');
+      _storageSelectedPath = '';
+      const path = document.getElementById('storage-relative-path');
+      if (path) path.value = '';
+    }
+
+    async function chooseStorageFolder() {
+      try {
+        if (!_storageContext) await getStorageContext();
+        const path = await storageNativeInvoke('pick_storage_folder');
+        if (!path) return;
+        const normal = String(path).replace(/\\/g, '/');
+        const drives = _storageContext.drives || [];
+        const drive = drives.filter(d => {
+          const root = String(d.mount_point || '').replace(/\\/g, '/').replace(/\/$/, '');
+          return normal.toLowerCase() === root.toLowerCase() || normal.toLowerCase().startsWith(root.toLowerCase() + '/');
+        }).sort((a,b) => b.mount_point.length - a.mount_point.length)[0];
+        if (!drive) throw new Error('The selected folder is not inside a detected drive. Refresh drives and try again.');
+        const root = String(drive.mount_point).replace(/\\/g, '/').replace(/\/$/, '');
+        _storageSelectedPath = normal;
+        document.getElementById('storage-drive-select').value = (_storageDrives.find(d => d.drive_key === drive.drive_key && _storageDevices.some(dev => dev.id === d.device_id && dev.device_key === _storageContext.device_key)) || {}).id || '';
+        document.getElementById('storage-relative-path').value = normal.slice(root.length).replace(/^\//, '') || '.';
+        if (!document.getElementById('storage-location-label').value) document.getElementById('storage-location-label').value = path.split(/[\\/]/).filter(Boolean).pop() || 'Shoot folder';
+      } catch (error) {
+        showToast(error.message || 'Could not select folder', 'error');
+      }
+    }
+
+    async function saveStorageLocation() {
+      try {
+        if (!_storageContext) throw new Error('Connect this device first.');
+        const shootId = document.getElementById('storage-shoot-select').value;
+        const driveId = document.getElementById('storage-drive-select').value;
+        const label = document.getElementById('storage-location-label').value.trim();
+        const relativePath = document.getElementById('storage-relative-path').value.trim();
+        if (!shootId || !driveId || !label || !relativePath) throw new Error('Choose a shoot, drive, folder and label.');
+        const drive = _storageDrives.find(d => d.id === driveId);
+        const device = _storageDevices.find(d => d.id === drive?.device_id);
+        if (!drive || !device || device.device_key !== _storageContext.device_key) throw new Error('Choose a drive connected to this device.');
+        const response = await storageRequest('storage_locations', {
+          method: 'POST',
+          headers: {'Prefer':'return=representation'},
+          body: JSON.stringify({
+            user_id: currentUser.id,
+            shoot_id: shootId,
+            device_id: device.id,
+            drive_id: drive.id,
+            label,
+            category: document.getElementById('storage-location-category').value,
+            relative_path: relativePath,
+            is_primary: false,
+            is_available: true,
+            last_verified_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+          })
+        });
+        if (!response.ok) throw new Error('Could not save location: ' + await response.text());
+        closeStorageLocationForm();
+        await refreshStorageTracker();
+        showToast('Storage location saved and synced.', 'success');
+      } catch (error) {
+        showToast(error.message || 'Could not save storage location', 'error');
+      }
+    }
+
+    async function openStorageLocation(locationId) {
+      const location = _storageLocations.find(x => x.id === locationId);
+      if (!location) return;
+      const drive = _storageDrives.find(x => x.id === location.drive_id);
+      const device = _storageDevices.find(x => x.id === location.device_id);
+      if (!_storageContext || !device || device.device_key !== _storageContext.device_key) {
+        showToast('This folder is registered on ' + (device ? device.device_name : 'another device') + '. Register its local folder on this computer to open it here.', 'info');
+        return;
+      }
+      if (!drive) {
+        showToast('Drive record not found. Refresh storage and reconnect the drive.', 'error');
+        return;
+      }
+      const path = drive.mount_point.replace(/[\\/]+$/, '') + (location.relative_path === '.' ? '' : (drive.mount_point.includes('\\') ? '\\' : '/') + location.relative_path);
+      try {
+        await storageNativeInvoke('open_storage_folder', {rootPath: drive.mount_point, relativePath: location.relative_path});
+      } catch (error) {
+        showToast(error.message || 'Could not open folder. Check that the drive is connected.', 'error');
+      }
+    }
+
     function switchTab(tab) {
       document.querySelectorAll('.app-section').forEach(s => s.classList.add('hidden'));
       document.querySelectorAll('.nav-tab').forEach(t => {
@@ -5884,6 +6208,7 @@ async function deleteEditJob() {
       if (tab === 'calendar') renderCalendar();
       if (tab === 'shoots') renderShootsList();
       if (tab === 'payments') renderPayments();
+      if (tab === 'storage') refreshStorageTracker();
       // PASTE THIS NEW LINE:
       if (tab === 'editing') renderEditingList();
       
