@@ -1,0 +1,19 @@
+[package]
+name = "sakkhi-desktop"
+version = "0.1.0"
+description = "Sakkhi local storage companion"
+authors = ["Sakkhi"]
+edition = "2021"
+
+[build-dependencies]
+tauri-build = "=2.5.1"
+
+[dependencies]
+tauri = { version = "=2.8.5", features = [] }
+tauri-plugin-dialog = "=2.4.0"
+tauri-plugin-opener = "=2.5.2"
+serde = { version = "=1.0.219", features = ["derive"] }
+sysinfo = "=0.35.2"
+sha2 = "=0.10.9"
+uuid = { version = "=1.18.1", features = ["v4"] }
+hostname = "=0.4.1"
