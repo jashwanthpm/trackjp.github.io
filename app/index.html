@@ -5925,6 +5925,7 @@ async function deleteEditJob() {
     let _storageDrives = [];
     let _storageLocations = [];
     let _storageSelectedPath = '';
+    let _storageAutoRefreshTimer = null;
 
     function storageEscape(value) {
       return String(value == null ? '' : value).replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -6016,14 +6017,28 @@ async function deleteEditJob() {
       return device;
     }
 
+    function startStorageAutoRefresh() {
+      if (_storageAutoRefreshTimer) return;
+      _storageAutoRefreshTimer = setInterval(() => {
+        const section = document.getElementById('section-storage');
+        if (!section || section.classList.contains('hidden')) {
+          clearInterval(_storageAutoRefreshTimer);
+          _storageAutoRefreshTimer = null;
+          return;
+        }
+        refreshStorageTracker(true);
+      }, 30000);
+    }
+
     async function refreshStorageTracker(connectLocal = false) {
       const status = document.getElementById('storage-companion-status');
       if (!status) return;
       try {
-        if (connectLocal || (window.__TAURI__ && window.__TAURI__.core)) {
+        if (connectLocal || (window.__TAURI__ && window.__TAURI__.core) || window.parent !== window) {
           status.textContent = 'Reading local drives…';
           const context = await getStorageContext();
           await syncStorageDeviceAndDrives(context);
+          startStorageAutoRefresh();
           status.innerHTML = '<span class="text-emerald-400"><i class="ti ti-circle-check mr-1"></i> This computer is connected.</span> <span class="text-neutral-500">Drive and device details synced; media files remain local.</span>';
         } else {
           status.innerHTML = '<span class="text-amber-400"><i class="ti ti-info-circle mr-1"></i> Desktop companion not detected.</span> <span class="text-neutral-500">You can view synced records here. Install/open Sakkhi Desktop on this computer to register folders and open them in Finder or File Explorer.</span>';
