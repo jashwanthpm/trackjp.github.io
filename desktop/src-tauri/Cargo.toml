@@ -6,16 +6,14 @@ authors = ["Sakkhi"]
 edition = "2021"
 
 [build-dependencies]
-tauri-build = "=2.5.1"
+tauri-build = "~2.7.2"
 
 [dependencies]
-tauri = { version = "~2.8.5", features = [] }
-# Keep Tauri runtime crates aligned with the 2.8.5 framework release.
-# This avoids Cargo selecting newer semver-compatible runtime internals with incompatible APIs.
-tauri-runtime = "~2.8.0"
-tauri-runtime-wry = "~2.8.1"
-tauri-plugin-dialog = "=2.4.0"
-tauri-plugin-opener = "=2.5.2"
+# Keep the framework and plugins on the current Tauri 2.12 release line.
+# The 2.12 line includes the menu error variants referenced by the core menu module.
+tauri = { version = "~2.12.3", features = [] }
+tauri-plugin-dialog = "~2.8.2"
+tauri-plugin-opener = "~2.7.1"
 serde = { version = "~1.0.219", features = ["derive"] }
 sysinfo = "=0.35.2"
 sha2 = "=0.10.9"
