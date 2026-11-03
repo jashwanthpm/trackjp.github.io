@@ -31,7 +31,10 @@ window.addEventListener('message', async (event) => {
         });
         break;
       case 'open_storage_folder':
-        result = await invoke('open_storage_folder', { path: message.args?.path || '' });
+        result = await invoke('open_storage_folder', {
+          rootPath: message.args?.rootPath || '',
+          relativePath: message.args?.relativePath || ''
+        });
         break;
       default:
         throw new Error('Unsupported desktop request.');
