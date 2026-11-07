@@ -1,93 +1,126 @@
 <!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Sakkhi | Overview</title><script src="https://cdn.tailwindcss.com"></script><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet"><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"><style>
-body{font-family:'Plus Jakarta Sans',sans-serif;background:#0a0a0a;color:#e8e8e8}
-::-webkit-scrollbar{width:4px;height:4px}::-webkit-scrollbar-thumb{background:#2a2a2a;border-radius:8px}
-.panel{background:#0f0f0f;border:1px solid #202020;border-radius:12px}
-.field{width:100%;background:#090909;border:1px solid #292929;border-radius:8px;padding:9px 11px;color:#eee;font-size:12px;outline:none}
-.field:focus{border-color:rgba(201,169,110,.7)}
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;border-radius:8px;padding:9px 12px;font-size:12px;font-weight:700;transition:.15s}
-.btn-gold{background:#c9a96e;color:#090909}.btn-gold:hover{background:#e0c184}
-.btn-ghost{border:1px solid #303030;color:#d4d4d4}.btn-ghost:hover{border-color:#c9a96e;color:#c9a96e}
-.eyebrow{font-size:9px;font-weight:800;letter-spacing:.13em;text-transform:uppercase;color:#777}
-.muted{color:#858585}
-.table-wrap{overflow-x:auto}table{width:100%;border-collapse:collapse}th{text-align:left;font-size:9px;letter-spacing:.12em;text-transform:uppercase;color:#777;font-weight:800;border-bottom:1px solid #252525;padding:10px 12px}td{font-size:12px;color:#ddd;border-bottom:1px solid #1e1e1e;padding:11px 12px;vertical-align:middle}
-.badge{display:inline-flex;align-items:center;border:1px solid #333;border-radius:999px;padding:3px 8px;font-size:10px;color:#aaa}
-.toast{position:fixed;right:18px;bottom:18px;z-index:80;background:#151515;border:1px solid #333;padding:10px 14px;border-radius:10px;font-size:12px;box-shadow:0 10px 30px #0008}
-</style></head>
-<body class="min-h-screen p-3 sm:p-5"><main class="max-w-5xl mx-auto space-y-4">
-<header class="flex items-center justify-between border-b border-neutral-900 pb-3"><div><h2 class="text-lg md:text-xl font-bold text-white flex items-center gap-2"><i class="ti ti-layout-dashboard text-[#c9a96e]"></i> Overview</h2><p class="text-[11px] text-neutral-500 mt-1">A compact view of shoots, clients, payments, and what needs attention.</p></div><span id="sync-pill" class="badge"><span class="w-1.5 h-1.5 rounded-full bg-neutral-500 mr-1.5"></span>Workspace</span></header>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Overview</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="assets/ent.css">
+</head>
+<body class="ent">
+<div class="max-w-6xl mx-auto px-4 sm:px-8 py-7">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-6">
+    <div>
+      <h1 class="e-h1" id="hello">Overview</h1>
+      <p class="e-sub mt-1" id="sub">A live view of enquiries, bookings and money for your company.</p>
+    </div>
+    <div class="flex gap-2">
+      <button class="e-btn" id="b-form"><i class="ti ti-forms"></i> Enquiry form</button>
+      <button class="e-btn primary" id="b-lead"><i class="ti ti-plus"></i> Add lead</button>
+    </div>
+  </div>
 
-<section class="grid grid-cols-2 xl:grid-cols-4 gap-3">
-<article class="panel p-3"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400">Active shoots</span><i class="ti ti-camera text-[#c9a96e]"></i></div><p id="active-count" class="text-2xl font-bold mt-2">—</p><p class="text-[10px] text-neutral-600 mt-1">Not yet delivered</p></article>
-<article class="panel p-3"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400">Upcoming</span><i class="ti ti-calendar-event text-[#c9a96e]"></i></div><p id="upcoming-count" class="text-2xl font-bold mt-2">—</p><p class="text-[10px] text-neutral-600 mt-1">Future bookings</p></article>
-<article class="panel p-3"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400">Outstanding</span><i class="ti ti-wallet text-[#c9a96e]"></i></div><p id="dues-count" class="text-xl font-bold mt-2">—</p><p class="text-[10px] text-neutral-600 mt-1">From shoot records</p></article>
-<article class="panel p-3"><div class="flex items-center justify-between"><span class="text-xs text-neutral-400">Studio clients</span><i class="ti ti-building text-[#c9a96e]"></i></div><p id="clients-count" class="text-2xl font-bold mt-2">—</p><p class="text-[10px] text-neutral-600 mt-1">Saved in workspace</p></article>
-</section>
-<section class="grid grid-cols-1 lg:grid-cols-5 gap-3">
-<div class="panel p-4 lg:col-span-3"><div class="flex items-center justify-between"><div><h3 class="text-sm font-bold">Next up</h3><p class="text-[10px] text-neutral-500 mt-1">Upcoming bookings and events</p></div><a class="btn btn-ghost" href="calendar.html" target="app-viewer">Open calendar</a></div><div id="next-list" class="mt-3 space-y-2"><p class="text-xs text-neutral-500">Loading your schedule…</p></div></div>
-<div class="panel p-4 lg:col-span-2"><h3 class="text-sm font-bold">Quick actions</h3><div class="grid grid-cols-2 gap-2 mt-3"><a href="calendar.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-calendar-plus"></i> Add shoot</a><a href="clients.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-user-plus"></i> Add client</a><a href="invoices.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-file-invoice"></i> New invoice</a><a href="invite.html" target="app-viewer" class="btn btn-ghost"><i class="ti ti-mail-plus"></i> Invite member</a></div><div class="mt-4 rounded-lg border border-neutral-800 p-3"><p class="text-xs text-neutral-300">Keep it simple</p><p class="text-[10px] text-neutral-500 mt-1">Add a client, create a shoot, and track its payment from the same workspace.</p></div></div>
-</section></main><script>
-const DB_URL='https://smyupcjfusgduaoxqfvu.supabase.co';
-const DB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
-function currentUser(){try{return JSON.parse(localStorage.getItem('currentUser')||sessionStorage.getItem('currentUser')||'null')}catch(e){return null}}
-function storedAuthSession(){
- for(const store of [localStorage,sessionStorage]){
-  for(let i=0;i<store.length;i++){const k=store.key(i);if(!k||!k.startsWith('sb-')||!k.endsWith('-auth-token'))continue;
-   try{const raw=JSON.parse(store.getItem(k));const session=raw&&raw.currentSession?raw.currentSession:raw;if(session&&(session.access_token||session.refresh_token))return {store,key:k,raw,session,nested:!!(raw&&raw.currentSession)}}catch(e){}
+  <div id="setup" class="e-card p-5 mb-5 hidden"></div>
+
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5" id="kpis">
+    <div class="e-card p-4 e-skel" style="height:104px"></div><div class="e-card p-4 e-skel" style="height:104px"></div>
+    <div class="e-card p-4 e-skel" style="height:104px"></div><div class="e-card p-4 e-skel" style="height:104px"></div>
+  </div>
+
+  <div class="grid lg:grid-cols-3 gap-4">
+    <section class="e-card lg:col-span-2">
+      <div class="flex items-center justify-between px-5 pt-4"><h2 class="text-sm font-bold text-white">Recent enquiries</h2><button class="e-btn sm" data-go="leads.html">View all</button></div>
+      <div id="recent" class="p-2"></div>
+    </section>
+    <section class="e-card">
+      <div class="px-5 pt-4"><h2 class="text-sm font-bold text-white">Pipeline</h2><p class="e-sub">Where your leads are right now</p></div>
+      <div id="funnel" class="p-5 space-y-3"></div>
+    </section>
+    <section class="e-card">
+      <div class="px-5 pt-4"><h2 class="text-sm font-bold text-white">Follow-ups due</h2><p class="e-sub">People waiting to hear from you</p></div>
+      <div id="followups" class="p-2"></div>
+    </section>
+    <section class="e-card">
+      <div class="px-5 pt-4"><h2 class="text-sm font-bold text-white">Upcoming events</h2><p class="e-sub">Booked (won) enquiries</p></div>
+      <div id="events" class="p-2"></div>
+    </section>
+    <section class="e-card">
+      <div class="flex items-center justify-between px-5 pt-4"><div><h2 class="text-sm font-bold text-white">Overdue invoices</h2><p class="e-sub">Past their due date</p></div><button class="e-btn sm" data-go="invoices.html">Invoices</button></div>
+      <div id="overdue" class="p-2"></div>
+    </section>
+  </div>
+</div>
+<script src="assets/ent.js"></script>
+<script>
+(async function () {
+  const $ = id => document.getElementById(id);
+  const go = p => { try { parent.ENT_SHELL.go(p); } catch (e) { location.href = p; } };
+  document.addEventListener('click', e => { const b = e.target.closest('[data-go]'); if (b) go(b.dataset.go); });
+  const ctx = await ENT.init(), W = ctx.ws.id, cur = ctx.ws.currency;
+  const first = (ctx.user.name || '').split(' ')[0];
+  const hr = new Date().getHours();
+  $('hello').textContent = (hr < 12 ? 'Good morning' : hr < 18 ? 'Good afternoon' : 'Good evening') + (first ? ', ' + first : '');
+  $('sub').textContent = ctx.ws.name + ' · live overview';
+  $('b-lead').onclick = () => go('leads.html?new=1');
+  $('b-form').onclick = () => go('forms.html');
+
+  const row = (title, sub, right, page) => '<button data-go="' + ENT.esc(page) + '" class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl hover:bg-[#101010]"><span class="min-w-0 flex-1"><span class="block text-[13px] font-semibold text-white truncate">' + ENT.esc(title) + '</span><span class="block text-[11px] text-[#8a8a8a] truncate">' + ENT.esc(sub) + '</span></span>' + (right || '') + '</button>';
+  const empty = (icon, msg) => '<div class="e-empty"><i class="ti ' + icon + '"></i>' + msg + '</div>';
+  const badge = s => '<span class="e-badge ' + s + '">' + s.replace('_', ' ') + '</span>';
+
+  try {
+    const [leads, invoices, forms, members] = await Promise.all([
+      ENT.sb('enterprise_leads?workspace_id=eq.' + W + '&select=id,contact_name,event_type,event_date,budget,status,created_at,follow_up_at,source&order=created_at.desc&limit=1000'),
+      ENT.sb('enterprise_invoices?workspace_id=eq.' + W + '&select=id,invoice_number,status,total,amount_paid,due_date&limit=1000'),
+      ENT.sb('enterprise_inquiry_forms?workspace_id=eq.' + W + '&select=id&limit=1'),
+      ENT.sb('enterprise_workspace_members?workspace_id=eq.' + W + '&select=id&limit=50')
+    ]);
+    const L = leads || [], I = invoices || [], today = ENT.todayStr(), now = Date.now();
+    const weekAgo = now - 7 * 864e5, monthStart = today.slice(0, 8) + '01';
+    const open = L.filter(l => !['won', 'lost'].includes(l.status));
+    const sum = (a, f) => a.reduce((t, x) => t + (Number(f(x)) || 0), 0);
+    const owing = I.filter(i => ['issued', 'part_paid', 'overdue'].includes(i.status));
+    const outstanding = sum(owing, i => i.total - i.amount_paid);
+    const won = L.filter(l => l.status === 'won' && (l.created_at || '').slice(0, 10) >= monthStart);
+    const kpi = (label, val, note, icon) => '<div class="e-card e-kpi p-4"><div class="flex items-center justify-between"><span class="e-sub font-semibold">' + label + '</span><i class="ti ' + icon + ' text-[#c9a96e]"></i></div><div class="v mt-2">' + val + '</div><div class="e-sub mt-1">' + note + '</div></div>';
+    $('kpis').innerHTML =
+      kpi('New enquiries', L.filter(l => new Date(l.created_at) >= weekAgo).length, 'in the last 7 days', 'ti-user-plus') +
+      kpi('Open pipeline', ENT.money(sum(open, l => l.budget), cur), open.length + ' active lead' + (open.length === 1 ? '' : 's'), 'ti-chart-funnel') +
+      kpi('Won this month', won.length, ENT.money(sum(won, l => l.budget), cur) + ' in bookings', 'ti-trophy') +
+      kpi('Outstanding', ENT.money(outstanding, cur), owing.length + ' unpaid invoice' + (owing.length === 1 ? '' : 's'), 'ti-wallet');
+
+    // setup checklist: shown until the basics are done
+    const steps = [
+      ['Add your company phone & address', !!(ctx.ws.phone && ctx.ws.address), 'account.html', 'ti-building-store'],
+      ['Share your enquiry form', (forms || []).length > 0, 'forms.html', 'ti-forms'],
+      ['Add or receive your first lead', L.length > 0, 'leads.html?new=1', 'ti-user-plus'],
+      ['Invite a team member', (members || []).length > 1, 'team.html', 'ti-users']
+    ];
+    const doneN = steps.filter(s => s[1]).length;
+    if (doneN < steps.length) {
+      $('setup').classList.remove('hidden');
+      $('setup').innerHTML = '<div class="flex items-center justify-between mb-3"><div><h2 class="text-sm font-bold text-white">Get your company set up</h2><p class="e-sub">' + doneN + ' of ' + steps.length + ' done</p></div><div class="w-32 h-1.5 rounded-full bg-[#161616] overflow-hidden"><div style="width:' + (doneN / steps.length * 100) + '%" class="h-full bg-[#c9a96e]"></div></div></div><div class="grid sm:grid-cols-2 gap-2">' +
+        steps.map(s => '<button data-go="' + s[2] + '" class="flex items-center gap-3 p-3 rounded-xl border border-[#1a1a1a] hover:border-[#2c2c2c] text-left"><span class="w-8 h-8 rounded-lg flex items-center justify-center ' + (s[1] ? 'bg-[rgba(74,222,128,.1)] text-[#4ade80]' : 'bg-[#111] text-[#c9a96e]') + '"><i class="ti ' + (s[1] ? 'ti-check' : s[3]) + '"></i></span><span class="text-[13px] ' + (s[1] ? 'text-[#737373] line-through' : 'text-white font-semibold') + '">' + s[0] + '</span></button>').join('') + '</div>';
+    }
+
+    $('recent').innerHTML = L.length ? L.slice(0, 6).map(l => row(l.contact_name || 'Unnamed', [l.event_type, l.event_date ? ENT.dayShort(l.event_date) : '', l.source].filter(Boolean).join(' · '), badge(l.status) + '<span class="text-[10px] text-[#525252] w-14 text-right">' + ENT.ago(l.created_at) + '</span>', 'leads.html?id=' + l.id)).join('') : empty('ti-inbox', 'No enquiries yet. Share your enquiry form to start receiving them.');
+
+    const stages = ['new', 'contacted', 'qualified', 'quoted', 'won', 'lost'], max = Math.max(1, ...stages.map(s => L.filter(l => l.status === s).length));
+    $('funnel').innerHTML = stages.map(s => { const n = L.filter(l => l.status === s).length; return '<div><div class="flex justify-between text-[12px] mb-1"><span class="text-[#d4d4d4] capitalize">' + s + '</span><span class="font-bold text-white">' + n + '</span></div><div class="h-1.5 rounded-full bg-[#141414] overflow-hidden"><div class="h-full rounded-full ' + (s === 'lost' ? 'bg-[#f87171]' : s === 'won' ? 'bg-[#4ade80]' : 'bg-[#c9a96e]') + '" style="width:' + (n / max * 100) + '%"></div></div></div>'; }).join('');
+
+    const fu = open.filter(l => l.follow_up_at && new Date(l.follow_up_at) <= new Date(now + 864e5)).sort((a, b) => new Date(a.follow_up_at) - new Date(b.follow_up_at)).slice(0, 5);
+    $('followups').innerHTML = fu.length ? fu.map(l => row(l.contact_name || 'Unnamed', (new Date(l.follow_up_at) < now ? 'Overdue ' : 'Due ') + ENT.ago(l.follow_up_at).replace(' ago', ''), '<i class="ti ti-phone-call text-[#c9a96e]"></i>', 'leads.html?id=' + l.id)).join('') : empty('ti-circle-check', 'No follow-ups waiting.');
+
+    const ev = L.filter(l => l.status === 'won' && l.event_date && l.event_date >= today).sort((a, b) => a.event_date.localeCompare(b.event_date)).slice(0, 5);
+    $('events').innerHTML = ev.length ? ev.map(l => row(l.contact_name || 'Unnamed', l.event_type || 'Event', '<span class="text-[11px] font-bold text-[#c9a96e]">' + ENT.dayShort(l.event_date) + '</span>', 'leads.html?id=' + l.id)).join('') : empty('ti-calendar-event', 'No upcoming booked events.');
+
+    const od = owing.filter(i => i.due_date && i.due_date < today).sort((a, b) => a.due_date.localeCompare(b.due_date)).slice(0, 5);
+    $('overdue').innerHTML = od.length ? od.map(i => row(i.invoice_number, 'Due ' + ENT.dayShort(i.due_date), '<span class="text-[12px] font-bold text-[#f87171]">' + ENT.money(i.total - i.amount_paid, cur) + '</span>', 'invoices.html')).join('') : empty('ti-circle-check', 'Nothing overdue. Nice.');
+  } catch (e) {
+    $('kpis').innerHTML = '<div class="e-card p-5 col-span-full text-[13px]" style="color:var(--bad)">Could not load the overview: ' + ENT.esc(e.message) + '</div>';
   }
- }
- return null;
-}
-function sessionToken(){const s=storedAuthSession();if(s&&s.session.access_token)return s.session.access_token;const u=currentUser();return u&&(u.access_token||u.accessToken||u.token)||null}
-function refreshTokenValue(){const s=storedAuthSession();if(s&&s.session.refresh_token)return s.session.refresh_token;const u=currentUser();return u&&(u.refresh_token||u.refreshToken)||null}
-function tokenNeedsRefresh(t){try{const p=JSON.parse(atob(t.split('.')[1].replace(/-/g,'+').replace(/_/g,'/')));return !!p.exp&&p.exp*1000<Date.now()+45000}catch(e){return false}}
-async function refreshSession(){
- const rt=refreshTokenValue();if(!rt)return null;
- const res=await fetch(DB_URL+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:DB_KEY,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:rt}),cache:'no-store'});
- const txt=await res.text();if(!res.ok)throw new Error(txt||'Session refresh failed');const next=JSON.parse(txt),s=storedAuthSession();
- if(s){if(s.nested)s.raw.currentSession=Object.assign({},s.raw.currentSession,next);else s.raw=Object.assign({},s.raw,next);s.store.setItem(s.key,JSON.stringify(s.raw))}
- try{for(const store of [localStorage,sessionStorage]){const raw=store.getItem('currentUser');if(!raw)continue;const u=JSON.parse(raw);if(u&&typeof u==='object'){if('access_token'in u)u.access_token=next.access_token;if('accessToken'in u)u.accessToken=next.access_token;if('token'in u)u.token=next.access_token;if(next.refresh_token&&'refresh_token'in u)u.refresh_token=next.refresh_token;store.setItem('currentUser',JSON.stringify(u))}}}catch(e){}
- return next.access_token;
-}
-function userId(){const u=currentUser();return u&&(u.id||u.user_id)}
-function authHeaders(extra){const t=sessionToken();return Object.assign({'apikey':DB_KEY,'Authorization':'Bearer '+(t||DB_KEY),'Content-Type':'application/json'},extra||{})}
-async function api(path,opts){
- if(!currentUser()||!userId())throw new Error('Please sign in to Sakkhi again before using Enterprise.');
- let token=sessionToken();if(!token)throw new Error('Your secure Supabase session was not found. Please sign in again to reconnect Enterprise.');
- if(tokenNeedsRefresh(token)&&refreshTokenValue()){try{token=await refreshSession()||token}catch(e){}}
- const options=opts||{};
- const send=()=>{const extra=Object.assign({},options.headers||{});delete extra.Authorization;delete extra.apikey;delete extra['Content-Type'];return fetch(DB_URL+'/rest/v1/'+path,Object.assign({cache:'no-store'},options,{headers:authHeaders(extra)}))};
- let res=await send();
- if((res.status===401||res.status===403)&&refreshTokenValue()){try{const fresh=await refreshSession();if(fresh)res=await send()}catch(e){}}
- const txt=await res.text();if(!res.ok){let detail=txt;try{const j=JSON.parse(txt);detail=j.message||j.msg||j.hint||txt}catch(e){}throw new Error(detail||('Request failed ('+res.status+')'))}
- return txt?JSON.parse(txt):null;
-}
-
-function enc(v){return encodeURIComponent(String(v==null?'':v))}
-function esc(v){return String(v==null?'':v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
-function money(v){return new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(Number(v)||0)}
-function toast(msg){const el=document.createElement('div');el.className='toast';el.textContent=msg;document.body.appendChild(el);setTimeout(()=>el.remove(),3200)}
-async function getSetting(suffix, fallback){
- const key=userId()+'_'+suffix;const rows=await api('enterprise_settings?key=eq.'+enc(key)+'&select=value');
- return rows&&rows.length?rows[0].value:fallback;
-}
-async function setSetting(suffix,value){
- const id=userId(),key=id+'_'+suffix;
- await api('enterprise_settings?on_conflict=key%2Cuser_id',{method:'POST',headers:authHeaders({'Prefer':'resolution=merge-duplicates,return=representation'}),body:JSON.stringify({key:key,user_id:id,value:value})});
-}
-function requireUser(){if(!currentUser()||!userId()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Sign in required</h2><p class="text-sm text-neutral-400 mt-2">Please sign in to Sakkhi and reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}if(!sessionToken()){document.body.innerHTML='<div class="min-h-screen flex items-center justify-center p-6"><div class="panel p-6 max-w-sm text-center"><h2 class="font-bold text-white">Session refresh needed</h2><p class="text-sm text-neutral-400 mt-2">A secure Supabase session is needed to save changes. Sign out and sign in again, then reopen Enterprise.</p><a class="btn btn-gold mt-4" href="/">Go to Sakkhi</a></div></div>';return false}return true}
-
-
-async function init(){if(!requireUser())return;try{
- const rows=await api('enterprise_shoots?select=id,name,date,event,company,amount,part_paid,pay_status,booking_status&order=date.asc');
- const now=new Date();const active=rows.filter(r=>!['delivered','complete','completed'].includes(String(r.booking_status||'').toLowerCase()));
- const upcoming=rows.filter(r=>r.date&&new Date(r.date)>=new Date(now.toDateString()));
- document.getElementById('active-count').textContent=active.length;
- document.getElementById('upcoming-count').textContent=upcoming.length;
- document.getElementById('dues-count').textContent=money(rows.reduce((n,r)=>n+Math.max(0,Number(r.amount||0)-Number(r.part_paid||0)),0));
- const clients=await getSetting('enterprise_clients',[]);document.getElementById('clients-count').textContent=clients.length;
- const list=document.getElementById('next-list');const upcomingRows=upcoming.slice(0,5);
- list.innerHTML=upcomingRows.length?upcomingRows.map(r=>'<div class="flex items-center justify-between gap-3 border-b border-neutral-900 pb-2"><div class="min-w-0"><p class="text-xs font-semibold truncate">'+esc(r.name||'Untitled shoot')+'</p><p class="text-[10px] text-neutral-500">'+esc(r.date||'No date')+' · '+esc(r.event||'Shoot')+(r.company?' · '+esc(r.company):'')+'</p></div><span class="badge">'+esc(r.booking_status||'Upcoming')+'</span></div>').join(''):'<p class="text-xs text-neutral-500 py-4">No upcoming shoots yet. Add one from Master Calendar.</p>';
- document.getElementById('sync-pill').innerHTML='<span class="w-1.5 h-1.5 rounded-full bg-emerald-500 mr-1.5"></span>Synced';
- }catch(e){toast('Could not load workspace: '+e.message);document.getElementById('next-list').textContent='Check your sign-in session and database access.'}}
-init();</script></body></html>
+})();
+</script>
+</body>
+</html>

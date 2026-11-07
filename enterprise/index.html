@@ -1,338 +1,281 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Sakkhi | Enterprise Hub</title>
-  
-  <link rel="icon" type="image/png" href="../sakkhi 300px.png" />
-  
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <title>Sakkhi Enterprise</title>
+  <link rel="icon" type="image/png" href="/sakkhi%20300px.png">
   <script src="https://cdn.tailwindcss.com"></script>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css"/>
-  
+  <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="assets/ent.css">
   <style>
-    body { font-family: 'Plus Jakarta Sans', sans-serif; background-color: #050505; color: #e8e8e8; }
-    
-    /* Active State for Sub-Links */
-    .nav-link.active {
-      background: linear-gradient(90deg, rgba(201, 169, 110, 0.1) 0%, transparent 100%);
-      border-left: 2px solid #c9a96e;
-      color: #c9a96e;
-    }
-    .nav-link { border-left: 2px solid transparent; }
-
-    /* Custom Scrollbar */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-thumb { background: #1f1f1f; border-radius: 10px; }
-    ::-webkit-scrollbar-thumb:hover { background: #c9a96e; }
-
-    /* Fade Animation for Dropdowns */
-    .dropdown-anim {
-      animation: dropFade 0.2s ease-out forwards;
-      transform-origin: top right;
-    }
-    @keyframes dropFade {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
+    .nav-group-btn{display:flex;width:100%;align-items:center;gap:.7rem;padding:.7rem .75rem;border-radius:.75rem;font-size:13px;font-weight:700;color:#e5e5e5;transition:background .15s}
+    .nav-group-btn:hover{background:#0f0f0f}
+    .nav-link{display:flex;align-items:center;justify-content:space-between;gap:.5rem;padding:.55rem .75rem .55rem 2.35rem;border-radius:.65rem;font-size:13px;font-weight:500;color:#9a9a9a;transition:background .15s,color .15s;border-left:2px solid transparent}
+    .nav-link:hover{background:#0c0c0c;color:#fff}
+    .nav-link.on{background:rgba(201,169,110,.09);color:var(--gold);font-weight:700;border-left-color:var(--gold)}
+    .pop{position:absolute;right:0;top:calc(100% + 10px);background:var(--card2);border:1px solid var(--line2);border-radius:16px;box-shadow:0 24px 60px rgba(0,0,0,.6);opacity:0;pointer-events:none;transform:translateY(-6px);transition:.15s;z-index:50}
+    .pop.open{opacity:1;pointer-events:auto;transform:none}
+    .pill{min-width:18px;height:18px;padding:0 5px;border-radius:999px;background:var(--gold);color:#000;font-size:10px;font-weight:800;display:inline-flex;align-items:center;justify-content:center}
+    #side{transition:transform .25s cubic-bezier(.2,.8,.2,1)}
+    @media (max-width:1023px){#side{position:fixed;inset:0 auto 0 0;z-index:70;transform:translateX(-100%);width:280px}#side.open{transform:none}}
   </style>
 </head>
-<body class="h-screen overflow-hidden flex selection:bg-[#c9a96e]/30 selection:text-white">
+<body class="ent h-screen flex overflow-hidden">
 
-  <div id="mobile-overlay" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 hidden md:hidden" onclick="toggleSidebar()"></div>
-
-  <aside id="sidebar" class="w-64 bg-[#050505] border-r border-neutral-900/80 flex flex-col h-full z-50 absolute md:relative transform -translate-x-full md:translate-x-0 transition-transform duration-300">
-    
-    <div class="h-16 flex items-center px-6 border-b border-neutral-900/80 shrink-0 justify-between bg-[#0a0a0a]/50">
-      <div class="flex items-center gap-2">
-        <img src="../SAKKHIheader.png" alt="Sakkhi Logo" class="h-7 w-auto" onerror="this.src='https://placehold.co/100x30/050505/c9a96e?text=SAKKHI'"/>
-        <span class="text-[8px] border border-[#c9a96e]/30 bg-[#c9a96e]/10 text-[#c9a96e] px-1.5 py-0.5 rounded uppercase font-bold tracking-widest hidden lg:block">Enterprise</span>
-      </div>
-      <button class="md:hidden text-neutral-500 hover:text-white transition" onclick="toggleSidebar()">
-        <i class="ti ti-x text-lg"></i>
-      </button>
+  <div id="side-ov" class="e-overlay lg:hidden" style="z-index:65"></div>
+  <aside id="side" class="w-64 flex-shrink-0 bg-[#050505] border-r border-[#141414] flex flex-col">
+    <div class="h-[72px] px-5 flex items-center gap-3 border-b border-[#141414] flex-shrink-0">
+      <img src="/SAKKHIheader.png" alt="Sakkhi" class="h-9 rounded-md">
+      <span class="text-[9px] font-extrabold tracking-[.14em] text-[#c9a96e] border border-[#c9a96e]/40 bg-[#c9a96e]/10 rounded px-1.5 py-1">ENTERPRISE</span>
     </div>
-
-    <div class="flex-1 overflow-y-auto py-4 space-y-2">
-      <div>
-        <button onclick="toggleFolder('folder-main', 'icon-main')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-apps text-neutral-500"></i> Main Menu</div>
-          <i id="icon-main" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
-        </button>
-        <div id="folder-main" class="flex flex-col mt-1 pl-4 pr-2 space-y-1">
-          <a href="dashboard.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Overview</a>
-          <a href="calendar.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Master Calendar</a>
+    <nav id="nav" class="flex-1 overflow-y-auto p-3 space-y-1" aria-label="Main">
+      <div class="nav-group" data-open="1">
+        <button class="nav-group-btn" type="button"><i class="ti ti-layout-grid text-[#737373]"></i><span class="flex-1 text-left">Main Menu</span><i class="ti ti-chevron-down text-[#525252] text-sm chev"></i></button>
+        <div class="grp mt-1 space-y-0.5">
+          <a href="dashboard.html" class="nav-link" data-perm="dashboard">Overview</a>
+          <a href="leads.html" class="nav-link" data-perm="leads"><span>Leads &amp; Enquiries</span><span id="nav-leads-pill" class="pill hidden"></span></a>
+          <a href="calendar.html" class="nav-link">Master Calendar</a>
         </div>
       </div>
-      <div>
-        <button onclick="toggleFolder('folder-prod', 'icon-prod')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-video text-neutral-500"></i> Production</div>
-          <i id="icon-prod" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200"></i>
-        </button>
-        <div id="folder-prod" class="flex flex-col mt-1 pl-4 pr-2 space-y-1">
-          <a href="pipelines.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Active Pipelines</a>
-          <a href="/shooters/" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Shooters</a>
+      <div class="nav-group" data-open="1">
+        <button class="nav-group-btn" type="button"><i class="ti ti-camera text-[#737373]"></i><span class="flex-1 text-left">Production</span><i class="ti ti-chevron-down text-[#525252] text-sm chev"></i></button>
+        <div class="grp mt-1 space-y-0.5">
+          <a href="pipelines.html" class="nav-link">Active Pipelines</a>
+          <a href="/shooters/" class="nav-link">Shooters</a>
         </div>
       </div>
-      <div>
-        <button onclick="toggleFolder('folder-finance', 'icon-finance')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-wallet text-neutral-500"></i> Ledgers</div>
-          <i id="icon-finance" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
-        </button>
-        <div id="folder-finance" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1">
-          <a href="clients.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Studio Clients</a>
-          <a href="crm.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">CRM &amp; Leads</a>
-          <a href="invoices.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Invoices &amp; Dues</a>
+      <div class="nav-group" data-open="1">
+        <button class="nav-group-btn" type="button"><i class="ti ti-wallet text-[#737373]"></i><span class="flex-1 text-left">Ledgers</span><i class="ti ti-chevron-down text-[#525252] text-sm chev"></i></button>
+        <div class="grp mt-1 space-y-0.5">
+          <a href="clients.html" class="nav-link">Studio Clients</a>
+          <a href="invoices.html" class="nav-link" data-perm="invoices">Invoices &amp; Dues</a>
         </div>
       </div>
-      <div class="mt-8 border-t border-neutral-900/80 pt-2">
-        <button onclick="toggleFolder('folder-mgmt', 'icon-mgmt')" class="w-full flex items-center justify-between px-4 py-2 text-sm font-bold text-neutral-300 hover:text-white hover:bg-neutral-900/40 transition">
-          <div class="flex items-center gap-2"><i class="ti ti-settings text-neutral-500"></i> Management</div>
-          <i id="icon-mgmt" class="ti ti-chevron-down text-neutral-600 transition-transform duration-200 -rotate-90"></i>
-        </button>
-        <div id="folder-mgmt" class="hidden flex-col mt-1 pl-4 pr-2 space-y-1">
-          <a href="account.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Company Settings</a>
-          <a href="team.html" target="app-viewer" onclick="setActive(this)" class="nav-link w-full flex items-center gap-3 px-3 py-2 text-xs font-medium text-neutral-400 hover:text-white hover:bg-neutral-900/50 rounded-r-lg transition">Team Access</a>
+      <div class="nav-group" data-open="1">
+        <button class="nav-group-btn" type="button"><i class="ti ti-settings text-[#737373]"></i><span class="flex-1 text-left">Management</span><i class="ti ti-chevron-down text-[#525252] text-sm chev"></i></button>
+        <div class="grp mt-1 space-y-0.5">
+          <a href="forms.html" class="nav-link" data-perm="forms">Enquiry Forms</a>
+          <a href="account.html" class="nav-link">Company Settings</a>
+          <a href="team.html" class="nav-link" data-perm="team">Team Access</a>
         </div>
       </div>
+    </nav>
+    <div class="p-3 border-t border-[#141414] flex-shrink-0">
+      <a href="/app/" class="e-btn w-full" id="side-solo"><i class="ti ti-arrows-exchange"></i> Switch to Solo</a>
     </div>
   </aside>
 
-  <main class="flex-1 flex flex-col h-full bg-[#0a0a0a] min-w-0">
-    
-    <header class="h-16 border-b border-neutral-900/80 bg-[#050505]/80 backdrop-blur-md flex items-center justify-between px-4 sm:px-8 shrink-0 z-30">
-      
-      <div class="flex items-center gap-4 w-full max-w-md">
-        <button class="md:hidden text-neutral-400 hover:text-white transition" onclick="toggleSidebar()">
-          <i class="ti ti-menu-2 text-xl"></i>
-        </button>
-        
-        <div class="relative w-full hidden sm:block">
-          <i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"></i>
-          <input type="text" placeholder="Global Search... (Press '/')" class="w-full bg-[#121212] border border-neutral-800 rounded-full pl-10 pr-4 py-1.5 text-sm text-white outline-none focus:border-[#c9a96e]/50 transition">
-        </div>
+  <div class="flex-1 flex flex-col min-w-0">
+    <header class="h-[72px] flex-shrink-0 flex items-center gap-3 px-4 sm:px-6 border-b border-[#141414] bg-[#050505]">
+      <button id="burger" class="lg:hidden e-btn sm" aria-label="Open menu"><i class="ti ti-menu-2 text-base"></i></button>
+      <div class="relative flex-1 max-w-xl">
+        <i class="ti ti-search absolute left-4 top-1/2 -translate-y-1/2 text-[#525252]"></i>
+        <input id="gs" class="e-input" style="padding-left:2.6rem;border-radius:999px;background:#0a0a0a" placeholder="Search leads, clients, invoices...  ( / )" autocomplete="off" aria-label="Global search">
+        <div id="gs-pop" class="pop" style="left:0;right:0;max-height:70vh;overflow:auto"></div>
       </div>
-
-      <div class="flex items-center gap-4 sm:gap-5">
-        
+      <div class="ml-auto flex items-center gap-2">
         <div class="relative">
-          <button onclick="toggleDropdown('notif-dropdown')" id="notif-btn" class="relative text-neutral-400 hover:text-white transition mt-1.5">
-            <i class="ti ti-bell text-xl"></i>
-            <span class="absolute -top-0.5 -right-0.5 w-2 h-2 bg-red-500 rounded-full border border-[#050505]"></span>
+          <button id="bell" class="e-btn" style="width:42px;height:42px;padding:0;border-radius:999px;position:relative" aria-label="Notifications"><i class="ti ti-bell text-lg"></i><span id="bell-dot" class="pill hidden" style="position:absolute;top:-4px;right:-4px"></span></button>
+          <div id="bell-pop" class="pop" style="width:min(380px,calc(100vw - 24px));right:-60px">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#1a1a1a]">
+              <span class="text-sm font-bold text-white">Notifications</span>
+              <button id="mark-all" class="text-[11px] font-bold text-[#c9a96e] hover:underline">Mark all read</button>
+            </div>
+            <div id="bell-list" style="max-height:min(60vh,420px);overflow:auto"></div>
+          </div>
+        </div>
+        <div class="relative">
+          <button id="me" class="flex items-center gap-2 pl-1 pr-2 py-1 rounded-full hover:bg-[#0f0f0f]" aria-label="Account menu">
+            <span id="me-av" class="w-9 h-9 rounded-full bg-gradient-to-br from-[#c9a96e] to-[#dab77e] text-black text-xs font-extrabold flex items-center justify-center">··</span>
+            <i class="ti ti-chevron-down text-[#525252] text-sm hidden sm:block"></i>
           </button>
-          
-          <div id="notif-dropdown" class="hidden absolute right-0 mt-4 w-72 sm:w-80 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
-            <div class="p-4 border-b border-neutral-800 flex justify-between items-center bg-[#0a0a0a]">
-              <h4 class="text-sm font-bold text-white">Notifications</h4>
-              <button class="text-[10px] text-[#c9a96e] hover:underline">Mark all read</button>
+          <div id="me-pop" class="pop" style="width:260px">
+            <div class="px-4 py-3 border-b border-[#1a1a1a]">
+              <div id="me-name" class="text-sm font-bold text-white truncate"></div>
+              <div id="me-email" class="e-sub truncate"></div>
+              <div class="mt-2 flex items-center gap-2"><span id="me-role" class="e-badge qualified"></span><span id="me-ws" class="e-sub truncate"></span></div>
             </div>
-            <div class="max-h-72 overflow-y-auto">
-              <a href="#" class="block p-4 border-b border-neutral-800/50 hover:bg-[#121212] transition">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-emerald-950/40 text-emerald-500 flex items-center justify-center shrink-0 mt-0.5"><i class="ti ti-cash"></i></div>
-                  <div>
-                    <p class="text-xs font-bold text-white mb-0.5">Payment Received</p>
-                    <p class="text-[10px] text-neutral-400 leading-relaxed">TechCorp Media Hub paid ₹1,20,000 for the Keynote project.</p>
-                    <p class="text-[9px] text-neutral-600 mt-1">10 mins ago</p>
-                  </div>
-                </div>
-              </a>
-              <a href="#" class="block p-4 hover:bg-[#121212] transition">
-                <div class="flex items-start gap-3">
-                  <div class="w-8 h-8 rounded-full bg-red-950/40 text-red-400 flex items-center justify-center shrink-0 mt-0.5"><i class="ti ti-alert-circle"></i></div>
-                  <div>
-                    <p class="text-xs font-bold text-red-400 mb-0.5">Pipeline Alert</p>
-                    <p class="text-[10px] text-neutral-400 leading-relaxed">Oberoi Wedding edits are currently past the client deadline.</p>
-                    <p class="text-[9px] text-neutral-600 mt-1">2 hours ago</p>
-                  </div>
-                </div>
-              </a>
-            </div>
-            <div class="p-2 border-t border-neutral-800 bg-[#0a0a0a] text-center">
-              <button class="text-xs text-neutral-400 hover:text-white font-medium transition py-1">View All Activity</button>
+            <div class="p-2 text-[13px]">
+              <a href="account.html" class="me-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#151515] text-[#d4d4d4]"><i class="ti ti-user-circle text-base text-[#737373]"></i>Account &amp; profile</a>
+              <a href="account.html" class="me-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#151515] text-[#d4d4d4]"><i class="ti ti-building-store text-base text-[#737373]"></i>Company settings</a>
+              <a href="team.html" data-perm="team" class="me-link flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#151515] text-[#d4d4d4]"><i class="ti ti-users text-base text-[#737373]"></i>Team access</a>
+              <a href="/app/" id="me-solo" class="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#151515] text-[#d4d4d4]"><i class="ti ti-arrows-exchange text-base text-[#737373]"></i>Switch to Solo</a>
+              <button id="signout" class="w-full flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#151515] text-[#f87171]"><i class="ti ti-logout text-base"></i>Sign out</button>
             </div>
           </div>
         </div>
-
-        <div class="w-px h-5 bg-neutral-800 hidden sm:block"></div>
-
-        <div class="relative">
-          <button onclick="toggleDropdown('profile-dropdown')" id="profile-btn" class="flex items-center gap-2 hover:opacity-80 transition">
-            <div id="user-avatar" class="w-8 h-8 rounded-full bg-gradient-to-tr from-[#c9a96e] to-[#a3854a] text-black flex items-center justify-center font-bold text-xs shadow-[0_0_10px_rgba(201,169,110,0.2)]">HQ</div>
-            <i class="ti ti-chevron-down text-neutral-500 text-xs hidden sm:block"></i>
-          </button>
-
-          <div id="profile-dropdown" class="hidden absolute right-0 mt-4 w-56 bg-[#0f0f0f] border border-neutral-800 rounded-xl shadow-2xl overflow-hidden z-50 dropdown-anim">
-            <div class="p-4 border-b border-neutral-800 bg-[#0a0a0a]">
-              <p id="user-name" class="text-xs font-bold text-white mb-0.5">Sakkhi Enterprise</p>
-              <p id="user-email" class="text-[10px] text-neutral-500 truncate">admin@sakkhi.co.in</p>
-            </div>
-            <div class="py-2">
-              <a href="account.html" target="app-viewer" onclick="hideAllDropdowns()" class="block px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#121212] transition"><i class="ti ti-settings mr-2 text-neutral-500"></i> Account Settings</a>
-              <a href="team.html" target="app-viewer" onclick="hideAllDropdowns()" class="block px-4 py-2 text-xs font-medium text-neutral-300 hover:text-white hover:bg-[#121212] transition"><i class="ti ti-users mr-2 text-neutral-500"></i> Manage Team</a>
-            </div>
-            <div class="py-2 border-t border-neutral-800">
-              <a href="/app" class="block px-4 py-2 text-xs font-medium text-blue-400 hover:bg-blue-950/20 transition"><i class="ti ti-switch-horizontal mr-2"></i> Switch to Solo App</a>
-              <a href="#" onclick="handleSignOut(event)" class="block px-4 py-2 text-xs font-medium text-red-400 hover:bg-red-950/20 transition"><i class="ti ti-logout mr-2"></i> Sign Out</a>
-            </div>
-          </div>
-        </div>
-
       </div>
     </header>
+    <div id="mig" class="hidden px-4 py-2.5 text-[12px] font-semibold flex items-center gap-2" style="background:rgba(250,204,21,.08);border-bottom:1px solid rgba(250,204,21,.25);color:#facc15"><i class="ti ti-alert-triangle"></i><span>One-time database update needed. On GitHub open <b>Actions</b> → <b>Apply Enterprise database update</b> → <b>Run workflow</b>, then refresh this page.</span></div>
+    <main class="flex-1 min-h-0 relative">
+      <iframe id="view" name="app-viewer" title="Enterprise workspace" class="w-full h-full border-0 bg-[#050505]"></iframe>
+    </main>
+  </div>
 
-    <iframe name="app-viewer" src="dashboard.html" class="w-full flex-1 border-none bg-[#0a0a0a]"></iframe>
+  <!-- first run: no company yet -->
+  <div id="onb-ov" class="e-overlay" style="z-index:80"></div>
+  <div id="onb" class="e-modal" style="z-index:81;width:min(460px,calc(100% - 24px))">
+    <div style="padding:26px">
+      <div class="w-12 h-12 rounded-2xl bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/25 flex items-center justify-center mb-4"><i class="ti ti-building-store text-2xl text-[#c9a96e]"></i></div>
+      <h2 class="e-h1" style="font-size:19px">Set up your company</h2>
+      <p class="e-sub mt-1 mb-5" style="line-height:1.6">Create a workspace for your photography company. You can invite your team, collect enquiries and send invoices from here.</p>
+      <label class="e-label" for="onb-name">Company name</label>
+      <input id="onb-name" class="e-input" placeholder="e.g. Acme Weddings" maxlength="80">
+      <p id="onb-err" class="text-[12px] mt-2" style="color:var(--bad);min-height:16px"></p>
+      <div class="flex gap-2 mt-3">
+        <a href="/app/" class="e-btn flex-1">Use Solo instead</a>
+        <button id="onb-go" class="e-btn primary flex-1">Create workspace</button>
+      </div>
+    </div>
+  </div>
 
-  </main>
-
+  <script src="assets/ent.js"></script>
   <script>
-    // 1. Script to handle opening/closing folders in sidebar
-    function toggleFolder(folderId, iconId) {
-      const folder = document.getElementById(folderId);
-      const icon = document.getElementById(iconId);
-      
-      if (folder.classList.contains('hidden')) {
-        // Open it
-        folder.classList.remove('hidden');
-        folder.classList.add('flex');
-        icon.classList.remove('-rotate-90'); // Point arrow down
-      } else {
-        // Close it
-        folder.classList.add('hidden');
-        folder.classList.remove('flex');
-        icon.classList.add('-rotate-90'); // Point arrow right
-      }
+  (function () {
+    const $ = id => document.getElementById(id);
+    const PAGE_OK = /^(?:[a-z0-9_-]+\.html(?:\?[A-Za-z0-9_=&%.-]*)?|\/shooters\/)$/;
+    let ctx = null, notifTimer = null, items = [], loadSeq = 0;   // loadSeq: only the newest refresh may update the list
+
+    /* ---------- navigation ---------- */
+    function activate(page) {
+      const base = page.split('?')[0];
+      document.querySelectorAll('#nav .nav-link').forEach(a => a.classList.toggle('on', a.getAttribute('href') === base));
     }
-
-    // 2. Script to highlight the active sub-link and close sidebar on mobile
-    function setActive(clickedElement) {
-      document.querySelectorAll('.nav-link').forEach(link => {
-        link.classList.remove('active');
-      });
-      clickedElement.classList.add('active');
-      
-      // Auto-close sidebar on mobile after clicking a link
-      if (window.innerWidth < 768) {
-        toggleSidebar();
-      }
+    function go(page) {
+      if (!PAGE_OK.test(page)) page = 'dashboard.html';
+      const link = [...document.querySelectorAll('#nav .nav-link')].find(a => a.getAttribute('href') === page.split('?')[0]);
+      if (link && link.dataset.perm && !ENT.can(ctx.role, link.dataset.perm)) page = 'dashboard.html';
+      activate(page);
+      $('view').src = page;
+      history.replaceState(null, '', '#' + page);
+      closeSide(); closePops();
     }
+    document.getElementById('nav').addEventListener('click', e => {
+      const g = e.target.closest('.nav-group-btn');
+      if (g) { const grp = g.parentElement; const open = grp.dataset.open !== '1'; grp.dataset.open = open ? '1' : '0'; grp.querySelector('.grp').style.display = open ? '' : 'none'; grp.querySelector('.chev').style.transform = open ? '' : 'rotate(-90deg)'; return; }
+      const a = e.target.closest('.nav-link'); if (a) { e.preventDefault(); go(a.getAttribute('href')); }
+    });
+    document.querySelectorAll('.me-link').forEach(a => a.addEventListener('click', e => { e.preventDefault(); go(a.getAttribute('href')); }));
+    const openSide = () => { $('side').classList.add('open'); $('side-ov').classList.add('open'); };
+    const closeSide = () => { $('side').classList.remove('open'); $('side-ov').classList.remove('open'); };
+    $('burger').onclick = openSide; $('side-ov').onclick = closeSide;
 
-    // 3. Mobile Sidebar Toggle
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar');
-      const overlay = document.getElementById('mobile-overlay');
-      
-      if (sidebar.classList.contains('-translate-x-full')) {
-        sidebar.classList.remove('-translate-x-full');
-        overlay.classList.remove('hidden');
-      } else {
-        sidebar.classList.add('-translate-x-full');
-        overlay.classList.add('hidden');
-      }
-    }
-
-    // 4. Dropdown Toggle Logic
-    function toggleDropdown(id) {
-      const dropdown = document.getElementById(id);
-      const isHidden = dropdown.classList.contains('hidden');
-      
-      // Close all dropdowns first
-      hideAllDropdowns();
-      
-      // If it was hidden, open it
-      if (isHidden) {
-        dropdown.classList.remove('hidden');
-      }
-    }
-
-    function hideAllDropdowns() {
-      document.getElementById('notif-dropdown').classList.add('hidden');
-      document.getElementById('profile-dropdown').classList.add('hidden');
-    }
-
-    // Close dropdowns when clicking outside
-    document.addEventListener('click', (event) => {
-      const notifBtn = document.getElementById('notif-btn');
-      const profileBtn = document.getElementById('profile-btn');
-      const notifDrop = document.getElementById('notif-dropdown');
-      const profileDrop = document.getElementById('profile-dropdown');
-
-      // If the click is not inside the dropdowns AND not on the buttons, close them
-      if (!notifBtn.contains(event.target) && !notifDrop.contains(event.target)) {
-        notifDrop.classList.add('hidden');
-      }
-      if (!profileBtn.contains(event.target) && !profileDrop.contains(event.target)) {
-        profileDrop.classList.add('hidden');
-      }
+    /* ---------- popovers ---------- */
+    const pops = { bell: 'bell-pop', me: 'me-pop' };
+    function closePops() { Object.values(pops).concat('gs-pop').forEach(p => $(p).classList.remove('open')); }
+    Object.keys(pops).forEach(k => $(k).addEventListener('click', e => { e.stopPropagation(); const p = $(pops[k]), was = p.classList.contains('open'); closePops(); if (!was) p.classList.add('open'); if (k === 'bell' && !was) loadNotifs(); }));
+    document.addEventListener('click', e => { if (!e.target.closest('.pop') && !e.target.closest('#gs')) closePops(); });
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape') { closePops(); closeSide(); }
+      if (e.key === '/' && !/INPUT|TEXTAREA|SELECT/.test((document.activeElement || {}).tagName)) { e.preventDefault(); $('gs').focus(); }
     });
 
-    // Handle slash '/' shortcut for search
-    document.addEventListener('keydown', (e) => {
-      if (e.key === '/' && document.activeElement.tagName !== 'INPUT') {
-        e.preventDefault();
-        const searchInput = document.querySelector('input[type="text"]');
-        if (searchInput) searchInput.focus();
-      }
+    /* ---------- notifications: stored (database) + live alerts (computed) ---------- */
+    const ICON = { lead: 'ti-user-plus', invoice: 'ti-file-invoice', followup: 'ti-phone-call', info: 'ti-info-circle' };
+    async function loadNotifs() {
+      if (!ctx || !ctx.ws) return;
+      const mine = ++loadSeq, w = ctx.ws.id, uid = ctx.user.id, list = [];
+      const jobs = [ENT.sb('enterprise_notifications?workspace_id=eq.' + w + '&select=*&order=created_at.desc&limit=30').then(rows => (rows || []).forEach(n => list.push({
+        id: n.id, stored: true, kind: n.kind, title: n.title, body: n.body, link: n.link, at: n.created_at, unread: !(n.read_by || []).includes(uid) }))).catch(() => {})];
+      if (ENT.can(ctx.role, 'invoices')) jobs.push(ENT.sb('enterprise_invoices?workspace_id=eq.' + w + '&status=in.(issued,part_paid,overdue)&due_date=lt.' + ENT.todayStr() + '&select=id,invoice_number,total,amount_paid,due_date&order=due_date.asc&limit=20').then(rows => (rows || []).forEach(i => list.push({
+        id: 'inv-' + i.id, kind: 'invoice', title: 'Invoice ' + i.invoice_number + ' is overdue', body: ENT.money(i.total - i.amount_paid, ctx.ws.currency) + ' due since ' + ENT.dayShort(i.due_date), link: 'invoices.html', at: i.due_date, unread: true, live: true }))).catch(() => {}));
+      if (ENT.can(ctx.role, 'leads')) jobs.push(ENT.sb('enterprise_leads?workspace_id=eq.' + w + '&follow_up_at=lte.' + encodeURIComponent(new Date().toISOString()) + '&status=not.in.(won,lost)&select=id,contact_name,follow_up_at&order=follow_up_at.asc&limit=20').then(rows => (rows || []).forEach(l => list.push({
+        id: 'fu-' + l.id, kind: 'followup', title: 'Follow up with ' + (l.contact_name || 'a lead'), body: 'Was due ' + ENT.ago(l.follow_up_at), link: 'leads.html?id=' + l.id, at: l.follow_up_at, unread: true, live: true }))).catch(() => {}));
+      await Promise.all(jobs);
+      if (mine !== loadSeq) return;     // something newer (a refresh, or you marking items read) happened meanwhile
+      items = list.sort((a, b) => (b.unread - a.unread) || (new Date(b.at) - new Date(a.at)));
+      renderNotifs();
+    }
+    function renderNotifs() {
+      const unread = items.filter(i => i.unread).length;
+      const dot = $('bell-dot'); dot.textContent = unread > 9 ? '9+' : unread; dot.classList.toggle('hidden', !unread);
+      const newLeads = items.filter(i => i.stored && i.kind === 'lead' && i.unread).length;
+      const lp = $('nav-leads-pill'); lp.textContent = newLeads; lp.classList.toggle('hidden', !newLeads);
+      $('bell-list').innerHTML = items.length ? items.map((n, i) => '<button data-i="' + i + '" class="w-full text-left flex gap-3 px-4 py-3 hover:bg-[#151515] border-b border-[#141414]">' +
+        '<span class="w-9 h-9 rounded-xl flex-shrink-0 flex items-center justify-center ' + (n.live ? 'bg-[rgba(248,113,113,.1)] text-[#f87171]' : 'bg-[rgba(201,169,110,.1)] text-[#c9a96e]') + '"><i class="ti ' + (ICON[n.kind] || ICON.info) + '"></i></span>' +
+        '<span class="min-w-0 flex-1"><span class="block text-[13px] ' + (n.unread ? 'font-bold text-white' : 'text-[#a3a3a3]') + ' truncate">' + ENT.esc(n.title) + '</span>' +
+        '<span class="block text-[12px] text-[#8a8a8a] truncate">' + ENT.esc(n.body || '') + '</span><span class="block text-[10px] text-[#525252] mt-0.5">' + ENT.ago(n.at) + '</span></span>' +
+        (n.unread ? '<span class="w-2 h-2 rounded-full bg-[#c9a96e] mt-2 flex-shrink-0"></span>' : '') + '</button>').join('')
+        : '<div class="e-empty"><i class="ti ti-bell-off"></i>You are all caught up.</div>';
+    }
+    $('bell-list').addEventListener('click', async e => {
+      const b = e.target.closest('button[data-i]'); if (!b) return;
+      const n = items[+b.dataset.i];
+      if (n.stored && n.unread) { loadSeq++; n.unread = false; renderNotifs(); ENT.rpc('enterprise_mark_notifications_read', { p_workspace_id: ctx.ws.id, p_ids: [n.id] }).catch(() => {}); }
+      if (n.link) go(n.link);
     });
+    $('mark-all').onclick = async () => {
+      try { loadSeq++; await ENT.rpc('enterprise_mark_notifications_read', { p_workspace_id: ctx.ws.id }); loadSeq++; items.forEach(i => { if (i.stored) i.unread = false; }); renderNotifs(); }
+      catch (e) { ENT.toast('Could not update notifications', 'err'); }
+    };
 
-    // 5. Auth State Session Synchronization Check
-    document.addEventListener('DOMContentLoaded', () => {
-      // Pull authorization data matching Solo Creator Storage layout
-      const savedUser = localStorage.getItem('currentUser') || sessionStorage.getItem('currentUser');
-      
-      if (savedUser) {
-        try {
-          const currentUser = JSON.parse(savedUser);
-          
-          // Extract profile identities dynamically
-          const email = currentUser.email || '';
-          const name = currentUser.user_metadata?.name || currentUser.name || email.split('@')[0] || 'User';
-          
-          // Update enterprise dashboard header nodes natively
-          if (document.getElementById('user-name')) {
-            document.getElementById('user-name').textContent = name;
-          }
-          if (document.getElementById('user-email')) {
-            document.getElementById('user-email').textContent = email;
-          }
-          if (document.getElementById('user-avatar')) {
-            // Generate automatic two-letter initials placeholder
-            document.getElementById('user-avatar').textContent = name.substring(0, 2).toUpperCase();
-          }
-        } catch (e) {
-          console.error("Failed parsing valid security credentials context:", e);
-          redirectToAuth();
-        }
-      } else {
-        // No active user detected; kick out to the core sign-in portal
-        redirectToAuth();
-      }
-    });
+    /* ---------- global search ---------- */
+    const clean = s => s.replace(/[,()*%\\:"']/g, ' ').trim();
+    async function search(term) {
+      const t = clean(term), pop = $('gs-pop');
+      if (t.length < 2) { pop.classList.remove('open'); return; }
+      const w = ctx.ws.id, like = '*' + encodeURIComponent(t) + '*', jobs = [];
+      if (ENT.can(ctx.role, 'leads')) jobs.push(ENT.sb('enterprise_leads?workspace_id=eq.' + w + '&or=(contact_name.ilike.' + like + ',contact_email.ilike.' + like + ',contact_phone.ilike.' + like + ',event_type.ilike.' + like + ')&select=id,contact_name,event_type,status&limit=5').then(r => ({ label: 'Leads', icon: 'ti-user-plus', rows: (r || []).map(x => ({ t: x.contact_name || 'Lead', s: [x.event_type, x.status].filter(Boolean).join(' · '), go: 'leads.html?id=' + x.id })) })).catch(() => null));
+      if (ENT.can(ctx.role, 'clients')) jobs.push(ENT.sb('enterprise_clients?workspace_id=eq.' + w + '&or=(name.ilike.' + like + ',email.ilike.' + like + ',phone.ilike.' + like + ')&select=id,name,email&limit=5').then(r => ({ label: 'Clients', icon: 'ti-building', rows: (r || []).map(x => ({ t: x.name, s: x.email || '', go: 'clients.html' })) })).catch(() => null));
+      if (ENT.can(ctx.role, 'invoices')) jobs.push(ENT.sb('enterprise_invoices?workspace_id=eq.' + w + '&invoice_number=ilike.' + like + '&select=id,invoice_number,status,total&limit=5').then(r => ({ label: 'Invoices', icon: 'ti-file-invoice', rows: (r || []).map(x => ({ t: x.invoice_number, s: x.status + ' · ' + ENT.money(x.total, ctx.ws.currency), go: 'invoices.html' })) })).catch(() => null));
+      const groups = (await Promise.all(jobs)).filter(g => g && g.rows.length);
+      if ($('gs').value.trim() !== term.trim()) return;       // a newer search is already running
+      pop.innerHTML = groups.length ? groups.map(g => '<div class="px-4 pt-3 pb-1 e-label">' + g.label + '</div>' + g.rows.map(r => '<button data-go="' + ENT.esc(r.go) + '" class="w-full text-left flex items-center gap-3 px-4 py-2.5 hover:bg-[#151515]"><i class="ti ' + g.icon + ' text-[#737373]"></i><span class="min-w-0"><span class="block text-[13px] font-semibold text-white truncate">' + ENT.esc(r.t) + '</span><span class="block text-[11px] text-[#8a8a8a] truncate">' + ENT.esc(r.s) + '</span></span></button>').join('')).join('')
+        : '<div class="e-empty" style="padding:1.4rem"><i class="ti ti-search-off"></i>No matches for “' + ENT.esc(t) + '”</div>';
+      closePops(); pop.classList.add('open');
+    }
+    $('gs').addEventListener('input', ENT.debounce(e => search(e.target.value), 250));
+    $('gs').addEventListener('keydown', e => { if (e.key === 'Enter') { const b = $('gs-pop').querySelector('button[data-go]'); if (b) b.click(); } });
+    $('gs-pop').addEventListener('click', e => { const b = e.target.closest('button[data-go]'); if (b) { $('gs').value = ''; go(b.dataset.go); } });
 
-    function redirectToAuth() {
-      // Direct unauthenticated users back to the main app index
-      window.location.href = '/'; 
+    /* ---------- sign out ---------- */
+    $('signout').onclick = () => {
+      const dev = localStorage.getItem('current_device_id');
+      localStorage.clear(); sessionStorage.clear();
+      if (dev) localStorage.setItem('current_device_id', dev);
+      location.href = '/';
+    };
+
+    /* ---------- first run ---------- */
+    function onboarding() {
+      $('onb-ov').classList.add('open'); $('onb').classList.add('open'); $('onb-name').focus();
+      const submit = async () => {
+        const name = $('onb-name').value.trim();
+        if (name.length < 2) { $('onb-err').textContent = 'Please enter your company name.'; return; }
+        $('onb-go').disabled = true; $('onb-go').textContent = 'Creating...'; $('onb-err').textContent = '';
+        try { ctx = await ENT.createWorkspace(name); if (!ctx || !ctx.ws) throw new Error('Workspace was not created. Please try again.'); $('onb-ov').classList.remove('open'); $('onb').classList.remove('open'); start(); }
+        catch (e) { $('onb-err').textContent = e.message; $('onb-go').disabled = false; $('onb-go').textContent = 'Create workspace'; }
+      };
+      $('onb-go').onclick = submit; $('onb-name').onkeydown = e => { if (e.key === 'Enter') submit(); };
     }
 
-    function handleSignOut(event) {
-      if (event) event.preventDefault();
-      
-      // Cache the unique device tracking asset to avoid resetting session device limits
-      const currentDeviceId = localStorage.getItem('current_device_id');
-      
-      // Wipe session allocations safely
-      localStorage.clear();
-      sessionStorage.clear();
-      
-      // Re-establish hardware signatures
-      if (currentDeviceId) {
-        localStorage.setItem('current_device_id', currentDeviceId);
-      }
-      
-      // Purge to homepage sign-in viewport layout
-      window.location.href = '/';
+    function start() {
+      window.ENT_CTX = ctx;
+      $('mig').classList.toggle('hidden', !ctx.needsMigration);
+      const u = ctx.user, name = u.name || u.email || 'You';
+      $('me-name').textContent = name; $('me-email').textContent = u.email || ''; $('me-role').textContent = ctx.role; $('me-ws').textContent = ctx.ws.name;
+      $('me-av').textContent = name.split(/\s+/).map(s => s[0]).slice(0, 2).join('').toUpperCase() || '··';
+      document.querySelectorAll('[data-perm]').forEach(el => { if (!ENT.can(ctx.role, el.dataset.perm)) el.style.display = 'none'; });
+      const hash = decodeURIComponent((location.hash || '').slice(1));
+      go(PAGE_OK.test(hash) ? hash : (ENT.can(ctx.role, 'dashboard') ? 'dashboard.html' : 'calendar.html'));
+      loadNotifs(); clearInterval(notifTimer); notifTimer = setInterval(loadNotifs, 60000);
+      document.addEventListener('visibilitychange', () => { if (!document.hidden) loadNotifs(); });
     }
+    window.ENT_SHELL = { go, refresh: loadNotifs };
+
+    (async function boot() {
+      try {
+        ctx = await ENT.loadContext();
+        if (!ctx) { location.href = '/'; return; }
+        if (!ctx.ws) { onboarding(); return; }
+        start();
+      } catch (e) { ENT.toast('Could not load your workspace: ' + e.message, 'err'); }
+    })();
+  })();
   </script>
 </body>
 </html>

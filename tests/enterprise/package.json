@@ -1,0 +1,6 @@
+{
+  "name": "sakkhi-enterprise-tests",
+  "private": true,
+  "scripts": { "test": "node --test --test-timeout=60000 enterprise.test.js" },
+  "devDependencies": { "jsdom": "^30.1.3" }
+}

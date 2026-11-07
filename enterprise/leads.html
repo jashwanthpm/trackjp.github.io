@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Leads &amp; Enquiries</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="assets/ent.css">
+  <style>
+    .board{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(250px,1fr);gap:12px;overflow-x:auto;padding-bottom:12px;scroll-snap-type:x proximity}
+    .col{background:#080808;border:1px solid var(--line);border-radius:16px;display:flex;flex-direction:column;min-height:200px;scroll-snap-align:start}
+    .col.over{border-color:var(--gold);background:#0b0a07}
+    .lcard{background:var(--card2);border:1px solid var(--line2);border-radius:12px;padding:12px;cursor:pointer;transition:border-color .15s,transform .15s}
+    .lcard:hover{border-color:#3a3a3a}.lcard.drag{opacity:.4}
+    .touch-only{display:none}@media (hover:none){.touch-only{display:block}}
+    .stat-chip{font-size:11px}
+  </style>
+</head>
+<body class="ent">
+<div class="px-4 sm:px-8 py-7 max-w-[1500px] mx-auto">
+  <div class="flex flex-wrap items-end justify-between gap-3 mb-5">
+    <div><h1 class="e-h1">Leads &amp; Enquiries</h1><p class="e-sub mt-1" id="sub">Every enquiry, from first message to booked event.</p></div>
+    <div class="flex flex-wrap gap-2">
+      <div class="flex rounded-xl border border-[#262626] overflow-hidden" role="tablist">
+        <button class="e-btn" style="border:0;border-radius:0" id="v-board" role="tab"><i class="ti ti-layout-kanban"></i> Board</button>
+        <button class="e-btn" style="border:0;border-radius:0" id="v-list" role="tab"><i class="ti ti-list"></i> List</button>
+      </div>
+      <button class="e-btn" id="export"><i class="ti ti-download"></i> Export</button>
+      <button class="e-btn primary" id="add"><i class="ti ti-plus"></i> Add lead</button>
+    </div>
+  </div>
+
+  <div class="flex flex-wrap items-center gap-2 mb-4">
+    <div class="relative w-full sm:w-72"><i class="ti ti-search absolute left-3 top-1/2 -translate-y-1/2 text-[#525252]"></i><input id="q" class="e-input" style="padding-left:2.2rem" placeholder="Search name, phone, event, place" aria-label="Search leads"></div>
+    <select id="src" class="e-select" style="width:auto" aria-label="Filter by source"><option value="">All sources</option></select>
+    <div id="chips" class="flex flex-wrap gap-2"></div>
+  </div>
+
+  <div id="main"><div class="e-card e-skel" style="height:260px"></div></div>
+</div>
+
+<div id="ov" class="e-overlay"></div>
+<aside id="dr" class="e-drawer" aria-label="Lead details">
+  <div class="flex items-center justify-between px-5 py-4 border-b border-[#1a1a1a]">
+    <div class="min-w-0"><h2 id="dr-title" class="text-base font-bold text-white truncate">Lead</h2><p id="dr-meta" class="e-sub truncate"></p></div>
+    <button id="dr-x" class="e-btn sm" aria-label="Close"><i class="ti ti-x"></i></button>
+  </div>
+  <div class="flex-1 overflow-y-auto px-5 py-4 space-y-4" id="dr-body"></div>
+  <div class="flex items-center gap-2 px-5 py-3 border-t border-[#1a1a1a]" id="dr-foot"></div>
+</aside>
+
+<div id="lostov" class="e-overlay" style="z-index:70"></div>
+<div id="lostm" class="e-modal" style="z-index:71"><div style="padding:22px">
+  <p class="text-sm font-bold text-white">Mark as lost</p><p class="e-sub mt-1 mb-3">Why didn't this one book? (optional, it helps you spot patterns.)</p>
+  <select id="lost-r" class="e-select mb-2"><option value="">Choose a reason</option><option>Budget too high</option><option>Chose another studio</option><option>Date not available</option><option>No response</option><option>Event cancelled</option><option>Other</option></select>
+  <div class="flex justify-end gap-2 mt-3"><button class="e-btn" id="lost-skip">Skip</button><button class="e-btn danger" id="lost-ok">Mark lost</button></div>
+</div></div>
+
+<script src="assets/ent.js"></script>
+<script>
+(async function () {
+  const $ = id => document.getElementById(id);
+  const STAGES = ['new', 'contacted', 'qualified', 'quoted', 'won', 'lost'];
+  const SOURCES = ['Enquiry form', 'Phone call', 'WhatsApp', 'Instagram', 'Referral', 'Walk-in', 'Website', 'Other'];
+  const ctx = await ENT.init();
+  if (!ENT.can(ctx.role, 'leads')) { document.body.innerHTML = '<div class="e-empty" style="padding:4rem"><i class="ti ti-lock"></i>Your role does not have access to leads.</div>'; return; }
+  const W = ctx.ws.id, cur = ctx.ws.currency, me = ctx.user.id, isLead = ENT.can(ctx.role, 'forms');
+  let leads = [], members = [], view = sessionStorage.getItem('ent_leads_view') || 'board', q = '', srcF = '', stF = '', openId = null, lostFor = null;
+
+  const refreshShell = () => { try { parent.ENT_SHELL.refresh(); } catch (e) {} };
+  const who = uid => { const m = members.find(x => x.user_id === uid); return m ? (m.display_name || m.email) : ''; };
+  const initials = s => (s || '?').split(/[\s@.]+/).filter(Boolean).map(x => x[0]).slice(0, 2).join('').toUpperCase();
+  const toLocal = iso => { if (!iso) return ''; const d = new Date(iso), p = n => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+
+  /* ---------- load ---------- */
+  async function load() {
+    try {
+      const [l, m] = await Promise.all([
+        ENT.sb('enterprise_leads?workspace_id=eq.' + W + '&select=*&order=created_at.desc&limit=1000'),
+        ENT.sb('enterprise_workspace_members?workspace_id=eq.' + W + '&status=eq.active&select=user_id,display_name,email,role')
+      ]);
+      leads = l || []; members = m || [];
+      const srcs = [...new Set(SOURCES.concat(leads.map(x => x.source).filter(Boolean)))];
+      $('src').innerHTML = '<option value="">All sources</option>' + srcs.map(s => '<option>' + ENT.esc(s) + '</option>').join('');
+      render();
+      const p = new URLSearchParams(location.search);
+      if (p.get('id')) { if (leads.some(x => x.id === p.get('id'))) openLead(p.get('id')); else ENT.toast('That lead no longer exists', 'err'); }
+      else if (p.get('new')) openLead(null);
+    } catch (e) { $('main').innerHTML = '<div class="e-card e-empty"><i class="ti ti-alert-triangle"></i>Could not load leads: ' + ENT.esc(e.message) + '</div>'; }
+  }
+
+  /* ---------- filtering + render ---------- */
+  function visible(includeStatus) {
+    const t = q.trim().toLowerCase();
+    return leads.filter(l => (!srcF || l.source === srcF) && (!includeStatus || !stF || l.status === stF) &&
+      (!t || [l.contact_name, l.contact_phone, l.contact_email, l.event_type, l.location].some(v => (v || '').toLowerCase().includes(t))));
+  }
+  function render() {
+    $('v-board').style.color = view === 'board' ? 'var(--gold)' : ''; $('v-list').style.color = view === 'list' ? 'var(--gold)' : '';
+    const all = visible(false);
+    $('chips').innerHTML = '<button class="e-chip ' + (!stF ? 'on' : '') + '" data-st="">All ' + all.length + '</button>' + STAGES.map(s => '<button class="e-chip ' + (stF === s ? 'on' : '') + '" data-st="' + s + '">' + s + ' ' + all.filter(l => l.status === s).length + '</button>').join('');
+    $('chips').style.display = view === 'list' ? '' : 'none';
+    $('sub').textContent = leads.length + ' total · ' + leads.filter(l => !['won', 'lost'].includes(l.status)).length + ' active';
+    view === 'board' ? renderBoard(all) : renderList(visible(true));
+  }
+  function card(l) {
+    const late = l.follow_up_at && new Date(l.follow_up_at) < new Date() && !['won', 'lost'].includes(l.status);
+    return '<div class="lcard" draggable="true" data-id="' + l.id + '"><div class="flex items-start justify-between gap-2"><div class="min-w-0"><div class="text-[13px] font-bold text-white truncate">' + ENT.esc(l.contact_name || 'Unnamed') + '</div>' +
+      '<div class="e-sub truncate">' + ENT.esc([l.event_type, l.event_date ? ENT.dayShort(l.event_date) : ''].filter(Boolean).join(' · ') || 'No event details') + '</div></div>' +
+      (l.priority === 'high' ? '<i class="ti ti-flame text-[#fb923c]" title="High priority"></i>' : '') + '</div>' +
+      '<div class="flex items-center justify-between mt-3 text-[11px]"><span class="font-bold text-[#c9a96e]">' + (Number(l.budget) ? ENT.money(l.budget, cur) : '<span class="text-[#525252] font-medium">No budget</span>') + '</span>' +
+      '<span class="flex items-center gap-2">' + (late ? '<span class="e-badge bad"><i class="ti ti-clock"></i>follow up</span>' : '') + (l.assigned_to ? '<span class="w-6 h-6 rounded-full bg-[#1a1a1a] text-[9px] font-bold flex items-center justify-center" title="' + ENT.esc(who(l.assigned_to)) + '">' + ENT.esc(initials(who(l.assigned_to))) + '</span>' : '') + '</span></div>' +
+      '<select class="e-select touch-only mt-2" data-mv="' + l.id + '" style="padding:.35rem .5rem;font-size:11px">' + STAGES.map(s => '<option ' + (s === l.status ? 'selected' : '') + '>' + s + '</option>').join('') + '</select></div>';
+  }
+  function renderBoard(rows) {
+    if (!leads.length) { $('main').innerHTML = emptyState(); return; }
+    $('main').innerHTML = '<div class="board">' + STAGES.map(s => {
+      const c = rows.filter(l => l.status === s), val = c.reduce((t, l) => t + (Number(l.budget) || 0), 0);
+      return '<div class="col" data-col="' + s + '"><div class="flex items-center justify-between px-3 pt-3 pb-2"><div class="flex items-center gap-2"><span class="e-badge ' + s + '">' + s + '</span><span class="text-[11px] text-[#737373] font-bold">' + c.length + '</span></div><span class="text-[11px] text-[#737373]">' + (val ? ENT.money(val, cur) : '') + '</span></div><div class="px-2 pb-2 space-y-2 flex-1">' + (c.map(card).join('') || '<div class="text-center text-[11px] text-[#3a3a3a] py-6">Drop a lead here</div>') + '</div></div>';
+    }).join('') + '</div>';
+  }
+  function renderList(rows) {
+    if (!leads.length) { $('main').innerHTML = emptyState(); return; }
+    $('main').innerHTML = rows.length ? '<div class="e-card overflow-x-auto"><table class="e-table"><thead><tr><th>Name</th><th>Event</th><th>Event date</th><th>Budget</th><th>Source</th><th>Status</th><th>Owner</th><th>Received</th></tr></thead><tbody>' +
+      rows.map(l => '<tr class="cursor-pointer" data-row="' + l.id + '"><td><div class="font-bold text-white">' + ENT.esc(l.contact_name || 'Unnamed') + '</div><div class="e-sub">' + ENT.esc(l.contact_phone || l.contact_email || '') + '</div></td><td>' + ENT.esc(l.event_type || '') + '</td><td>' + ENT.esc(ENT.day(l.event_date)) + '</td><td>' + (Number(l.budget) ? ENT.money(l.budget, cur) : '') + '</td><td>' + ENT.esc(l.source || '') + '</td><td><span class="e-badge ' + l.status + '">' + l.status + '</span></td><td>' + ENT.esc(who(l.assigned_to)) + '</td><td class="e-sub">' + ENT.ago(l.created_at) + '</td></tr>').join('') + '</tbody></table></div>'
+      : '<div class="e-card e-empty"><i class="ti ti-filter-off"></i>No leads match these filters.</div>';
+  }
+  function emptyState() {
+    return '<div class="e-card e-empty" style="padding:3.5rem 1rem"><i class="ti ti-inbox"></i><p class="text-white font-bold text-[15px] mb-1">No leads yet</p>Share your enquiry form and new enquiries land here automatically.<div class="flex gap-2 justify-center mt-4"><button class="e-btn primary" id="e-form"><i class="ti ti-forms"></i> Get my form link</button><button class="e-btn" id="e-add"><i class="ti ti-plus"></i> Add a lead</button></div></div>';
+  }
+
+  /* ---------- board drag and drop + status moves ---------- */
+  const main = $('main');
+  main.addEventListener('dragstart', e => { const c = e.target.closest('.lcard'); if (!c) return; e.dataTransfer.setData('text/plain', c.dataset.id); e.dataTransfer.effectAllowed = 'move'; c.classList.add('drag'); });
+  main.addEventListener('dragend', e => { const c = e.target.closest('.lcard'); if (c) c.classList.remove('drag'); main.querySelectorAll('.col.over').forEach(x => x.classList.remove('over')); });
+  main.addEventListener('dragover', e => { const col = e.target.closest('.col'); if (col) { e.preventDefault(); main.querySelectorAll('.col.over').forEach(x => x !== col && x.classList.remove('over')); col.classList.add('over'); } });
+  main.addEventListener('drop', e => { const col = e.target.closest('.col'); if (!col) return; e.preventDefault(); col.classList.remove('over'); move(e.dataTransfer.getData('text/plain'), col.dataset.col); });
+  main.addEventListener('change', e => { const s = e.target.closest('[data-mv]'); if (s) move(s.dataset.mv, s.value); });
+  main.addEventListener('click', e => {
+    if (e.target.closest('[data-mv]')) return;
+    const c = e.target.closest('.lcard'), r = e.target.closest('[data-row]');
+    if (c) openLead(c.dataset.id); else if (r) openLead(r.dataset.row);
+    if (e.target.closest('#e-add')) openLead(null);
+    if (e.target.closest('#e-form')) { try { parent.ENT_SHELL.go('forms.html'); } catch (x) { location.href = 'forms.html'; } }
+  });
+
+  async function move(id, status, reason) {
+    const l = leads.find(x => x.id === id); if (!l || l.status === status) return;
+    if (status === 'lost' && reason === undefined) { lostFor = id; $('lost-r').value = ''; $('lostov').classList.add('open'); $('lostm').classList.add('open'); render(); return; }
+    const prev = { status: l.status, lost_reason: l.lost_reason };
+    l.status = status; if (status === 'lost') l.lost_reason = reason || null; render();
+    try {
+      await ENT.sb('enterprise_leads?id=eq.' + id, { method: 'PATCH', body: { status, lost_reason: status === 'lost' ? (reason || null) : null, updated_at: new Date().toISOString() } });
+      if (status === 'won') ENT.toast('Marked as won. Open it to turn it into a client.', 'ok');
+      refreshShell();
+    } catch (e) { Object.assign(l, prev); render(); ENT.toast('Could not move the lead: ' + e.message, 'err'); }
+  }
+  const closeLost = () => { $('lostov').classList.remove('open'); $('lostm').classList.remove('open'); lostFor = null; };
+  $('lost-ok').onclick = () => { const id = lostFor, r = $('lost-r').value; closeLost(); move(id, 'lost', r); };
+  $('lost-skip').onclick = () => { const id = lostFor; closeLost(); move(id, 'lost', ''); };
+  $('lostov').onclick = closeLost;
+
+  /* ---------- drawer ---------- */
+  const field = (id, label, input) => '<div><label class="e-label" for="' + id + '">' + label + '</label>' + input + '</div>';
+  function openLead(id) {
+    openId = id; const l = id ? leads.find(x => x.id === id) : null;
+    $('dr-title').textContent = l ? (l.contact_name || 'Lead') : 'New lead';
+    $('dr-meta').textContent = l ? 'Received ' + ENT.ago(l.created_at) + (l.source ? ' · ' + l.source : '') : 'Add an enquiry you received outside the form';
+    const v = k => ENT.esc(l && l[k] != null ? l[k] : '');
+    const sel = (list, cur) => list.map(s => '<option ' + (s === cur ? 'selected' : '') + '>' + ENT.esc(s) + '</option>').join('');
+    const wa = l && l.contact_phone ? ENT.waLink(l.contact_phone, 'Hi ' + (l.contact_name || '') + ', thank you for your enquiry with ' + ctx.ws.name + '.') : '';
+    $('dr-body').innerHTML =
+      (l ? '<div class="flex gap-2 flex-wrap">' + (l.contact_phone ? '<a class="e-btn sm" href="tel:' + ENT.esc(l.contact_phone) + '"><i class="ti ti-phone"></i> Call</a>' : '') + (wa ? '<a class="e-btn sm" target="_blank" rel="noopener" href="' + ENT.esc(wa) + '"><i class="ti ti-brand-whatsapp"></i> WhatsApp</a>' : '') + (l.contact_email ? '<a class="e-btn sm" href="mailto:' + ENT.esc(l.contact_email) + '"><i class="ti ti-mail"></i> Email</a>' : '') + '</div>' : '') +
+      field('f-name', 'Name *', '<input id="f-name" class="e-input" maxlength="120" value="' + v('contact_name') + '">') +
+      '<div class="grid grid-cols-2 gap-3">' + field('f-phone', 'Phone', '<input id="f-phone" class="e-input" inputmode="tel" maxlength="30" value="' + v('contact_phone') + '">') + field('f-email', 'Email', '<input id="f-email" type="email" class="e-input" maxlength="160" value="' + v('contact_email') + '">') + '</div>' +
+      '<div class="grid grid-cols-2 gap-3">' + field('f-type', 'Event type', '<input id="f-type" class="e-input" list="types" maxlength="60" value="' + v('event_type') + '"><datalist id="types"><option>Wedding</option><option>Pre-wedding</option><option>Engagement</option><option>Birthday</option><option>Corporate event</option><option>Product / Commercial</option></datalist>') + field('f-date', 'Event date', '<input id="f-date" type="date" class="e-input" value="' + v('event_date') + '">') + '</div>' +
+      '<div class="grid grid-cols-2 gap-3">' + field('f-loc', 'Location', '<input id="f-loc" class="e-input" maxlength="160" value="' + v('location') + '">') + field('f-budget', 'Budget (' + cur + ')', '<input id="f-budget" type="number" min="0" step="1" class="e-input" value="' + (l && Number(l.budget) ? Number(l.budget) : '') + '">') + '</div>' +
+      '<div class="grid grid-cols-2 gap-3">' + field('f-status', 'Status', '<select id="f-status" class="e-select">' + sel(STAGES, l ? l.status : 'new') + '</select>') + field('f-source', 'Source', '<select id="f-source" class="e-select">' + sel(SOURCES, l ? l.source : 'Phone call') + '</select>') + '</div>' +
+      '<div class="grid grid-cols-2 gap-3">' + field('f-assign', 'Assigned to', '<select id="f-assign" class="e-select"><option value="">Unassigned</option>' + members.map(m => '<option value="' + ENT.esc(m.user_id) + '" ' + (l && l.assigned_to === m.user_id ? 'selected' : '') + '>' + ENT.esc(m.display_name || m.email) + '</option>').join('') + '</select>') + field('f-prio', 'Priority', '<select id="f-prio" class="e-select"><option value="normal" ' + (!l || l.priority !== 'high' ? 'selected' : '') + '>Normal</option><option value="high" ' + (l && l.priority === 'high' ? 'selected' : '') + '>High</option></select>') + '</div>' +
+      field('f-fu', 'Follow up on', '<input id="f-fu" type="datetime-local" class="e-input" value="' + toLocal(l && l.follow_up_at) + '">') +
+      field('f-msg', 'What they asked for', '<textarea id="f-msg" class="e-textarea" maxlength="2000">' + v('message') + '</textarea>') +
+      field('f-notes', 'Internal notes', '<textarea id="f-notes" class="e-textarea" maxlength="2000" placeholder="Only your team sees this">' + v('notes') + '</textarea>') +
+      (l && l.status === 'lost' && l.lost_reason ? '<div class="e-sub">Lost because: <b class="text-white">' + ENT.esc(l.lost_reason) + '</b></div>' : '');
+    $('dr-foot').innerHTML = (l && isLead ? '<button class="e-btn danger" id="d-del"><i class="ti ti-trash"></i></button>' : '') + (l && !l.client_id ? '<button class="e-btn" id="d-conv"><i class="ti ti-user-check"></i> Make client</button>' : (l ? '<span class="e-badge ok"><i class="ti ti-check"></i>Client</span>' : '')) + '<button class="e-btn primary ml-auto" id="d-save">' + (l ? 'Save changes' : 'Add lead') + '</button>';
+    $('ov').classList.add('open'); $('dr').classList.add('open'); setTimeout(() => $('f-name').focus(), 250);
+  }
+  const closeDrawer = () => { $('ov').classList.remove('open'); $('dr').classList.remove('open'); openId = null; };
+  $('dr-x').onclick = closeDrawer; $('ov').onclick = closeDrawer;
+  document.addEventListener('keydown', e => { if (e.key === 'Escape') { closeDrawer(); closeLost(); } });
+  $('dr').addEventListener('keydown', e => { if (e.key === 'Enter' && e.target.tagName === 'INPUT') { e.preventDefault(); save(); } });
+
+  function readForm() {
+    const g = id => ($(id).value || '').trim(), name = g('f-name'), email = g('f-email'), budget = g('f-budget');
+    if (!name) throw new Error('Please enter a name.');
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) throw new Error('That email address does not look right.');
+    if (budget && (isNaN(budget) || Number(budget) < 0)) throw new Error('Budget must be a positive number.');
+    const status = g('f-status');
+    return { contact_name: name, contact_phone: g('f-phone') || null, contact_email: email.toLowerCase() || null, event_type: g('f-type') || null, event_date: g('f-date') || null, location: g('f-loc') || null,
+      budget: budget ? Number(budget) : 0, status, source: g('f-source') || null, assigned_to: g('f-assign') || null, priority: g('f-prio'), follow_up_at: g('f-fu') ? new Date(g('f-fu')).toISOString() : null,
+      message: g('f-msg') || null, requirements: g('f-msg') || null, notes: g('f-notes') || null };
+  }
+  async function save() {
+    let body; try { body = readForm(); } catch (e) { ENT.toast(e.message, 'err'); return; }
+    const btn = $('d-save'); btn.disabled = true; btn.textContent = 'Saving...';
+    try {
+      if (openId) {
+        body.updated_at = new Date().toISOString();
+        if (body.status !== 'lost') body.lost_reason = null;
+        await ENT.sb('enterprise_leads?id=eq.' + openId, { method: 'PATCH', body });
+        Object.assign(leads.find(x => x.id === openId), body);
+      } else {
+        const rows = await ENT.sb('enterprise_leads', { method: 'POST', prefer: 'return=representation', body: Object.assign({ workspace_id: W, created_by: me }, body) });
+        leads.unshift(rows[0]);
+      }
+      ENT.toast(openId ? 'Lead updated' : 'Lead added', 'ok'); closeDrawer(); render(); refreshShell();
+    } catch (e) { ENT.toast('Could not save: ' + e.message, 'err'); btn.disabled = false; btn.textContent = openId ? 'Save changes' : 'Add lead'; }
+  }
+  $('dr-foot').addEventListener('click', async e => {
+    if (e.target.closest('#d-save')) return save();
+    const l = leads.find(x => x.id === openId);
+    if (e.target.closest('#d-del') && l) {
+      if (!await ENT.confirm('This permanently removes ' + (l.contact_name || 'this lead') + '.', { title: 'Delete lead?', danger: true, ok: 'Delete' })) return;
+      try { await ENT.sb('enterprise_leads?id=eq.' + l.id, { method: 'DELETE' }); leads = leads.filter(x => x.id !== l.id); closeDrawer(); render(); refreshShell(); ENT.toast('Lead deleted'); }
+      catch (x) { ENT.toast('Could not delete: ' + x.message, 'err'); }
+    }
+    if (e.target.closest('#d-conv') && l) {
+      const b = e.target.closest('#d-conv'); b.disabled = true;
+      try {
+        const rows = await ENT.sb('enterprise_clients', { method: 'POST', prefer: 'return=representation', body: { workspace_id: W, name: l.contact_name || 'Client', contact_name: l.contact_name, email: l.contact_email, phone: l.contact_phone, created_by: me } });
+        await ENT.sb('enterprise_leads?id=eq.' + l.id, { method: 'PATCH', body: { client_id: rows[0].id, status: 'won', updated_at: new Date().toISOString() } });
+        l.client_id = rows[0].id; l.status = 'won'; closeDrawer(); render(); refreshShell(); ENT.toast(l.contact_name + ' is now a client', 'ok');
+      } catch (x) { b.disabled = false; ENT.toast('Could not create the client: ' + x.message, 'err'); }
+    }
+  });
+
+  /* ---------- toolbar ---------- */
+  $('add').onclick = () => openLead(null);
+  $('v-board').onclick = () => { view = 'board'; sessionStorage.setItem('ent_leads_view', view); render(); };
+  $('v-list').onclick = () => { view = 'list'; sessionStorage.setItem('ent_leads_view', view); render(); };
+  $('q').addEventListener('input', ENT.debounce(e => { q = e.target.value; render(); }, 150));
+  $('src').onchange = e => { srcF = e.target.value; render(); };
+  $('chips').addEventListener('click', e => { const c = e.target.closest('[data-st]'); if (c) { stF = c.dataset.st; render(); } });
+  $('export').onclick = () => {
+    const rows = visible(view === 'list'); if (!rows.length) { ENT.toast('Nothing to export'); return; }
+    ENT.csv(rows, [{ label: 'Name', key: 'contact_name' }, { label: 'Phone', key: 'contact_phone' }, { label: 'Email', key: 'contact_email' }, { label: 'Event', key: 'event_type' }, { label: 'Event date', key: 'event_date' }, { label: 'Location', key: 'location' }, { label: 'Budget', key: 'budget' },
+      { label: 'Status', key: 'status' }, { label: 'Source', key: 'source' }, { label: 'Assigned to', value: r => who(r.assigned_to) }, { label: 'Follow up', key: 'follow_up_at' }, { label: 'Message', key: 'message' }, { label: 'Received', key: 'created_at' }], 'leads-' + ENT.todayStr() + '.csv');
+  };
+  load();
+})();
+</script>
+</body>
+</html>

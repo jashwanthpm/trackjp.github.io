@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#050505">
+  <meta name="robots" content="noindex">
+  <title>Send an enquiry</title>
+  <link rel="icon" type="image/png" href="/sakkhi%20300px.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <style>
+    body{background:#050505;color:#e8e8e8;font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+    .glow{position:fixed;top:-20vh;left:50%;transform:translateX(-50%);width:70vw;height:50vh;background:radial-gradient(closest-side,rgba(201,169,110,.13),transparent);pointer-events:none}
+    .card{background:rgba(10,10,10,.92);border:1px solid rgba(255,255,255,.06);border-radius:2rem;box-shadow:0 0 60px rgba(0,0,0,.4)}
+    .lbl{display:block;font-size:10px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:#737373;margin-bottom:.4rem}
+    .inp{width:100%;background:#050505;border:1px solid #262626;border-radius:.9rem;padding:.8rem .95rem;font-size:15px;color:#fff;outline:none;font-family:inherit;transition:border-color .15s}
+    .inp:focus{border-color:#c9a96e}.inp::placeholder{color:#4a4a4a}.inp.bad{border-color:#f87171}
+    textarea.inp{min-height:96px;resize:vertical}
+    .hp{position:absolute;left:-9999px;width:1px;height:1px;opacity:0}
+    .chip{padding:.55rem .9rem;border-radius:999px;border:1px solid #262626;font-size:13px;font-weight:600;color:#a3a3a3;background:transparent;cursor:pointer;transition:.15s}
+    .chip.on{background:#c9a96e;border-color:#c9a96e;color:#000}
+    .go{width:100%;display:flex;align-items:center;justify-content:center;gap:.5rem;padding:.95rem;border-radius:.95rem;font-weight:800;font-size:15px;color:#000;background:linear-gradient(135deg,#c9a96e,#dab77e);border:0;cursor:pointer;transition:filter .15s,transform .1s}
+    .go:hover{filter:brightness(1.07)}.go:active{transform:scale(.99)}.go:disabled{opacity:.6;cursor:not-allowed}
+    @keyframes up{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}.up{animation:up .45s ease both}
+    @media (prefers-reduced-motion:reduce){.up{animation:none}}
+  </style>
+</head>
+<body class="min-h-screen flex flex-col items-center p-4 pt-8 sm:pt-12 relative overflow-x-hidden">
+  <div class="glow"></div>
+  <main class="w-full max-w-lg relative z-10">
+    <div id="load" class="card p-8 text-center"><i class="ti ti-loader-2 text-3xl text-[#c9a96e]" style="display:inline-block;animation:spin 1s linear infinite"></i><style>@keyframes spin{to{transform:rotate(360deg)}}</style></div>
+
+    <div id="gone" class="card p-8 text-center hidden">
+      <div class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-[#111] border border-[#262626] flex items-center justify-center"><i class="ti ti-link-off text-2xl text-[#737373]"></i></div>
+      <h1 class="text-xl font-bold text-white">This form isn't available</h1>
+      <p class="text-sm text-[#8a8a8a] mt-2">The link may have changed, or this studio isn't taking enquiries right now. Please ask them for a fresh link.</p>
+    </div>
+
+    <form id="form" class="card p-6 sm:p-8 hidden up" novalidate autocomplete="on">
+      <div class="text-center mb-7">
+        <div id="logo" class="w-14 h-14 mx-auto mb-4 rounded-2xl bg-gradient-to-b from-[#1a1610] to-[#0a0a0a] border border-[#c9a96e]/20 flex items-center justify-center overflow-hidden"><i class="ti ti-camera text-2xl text-[#c9a96e]"></i></div>
+        <p id="studio" class="text-[10px] font-bold tracking-[.16em] uppercase text-[#c9a96e] bg-[#c9a96e]/10 border border-[#c9a96e]/20 rounded-full inline-block px-3 py-1 max-w-full truncate"></p>
+        <h1 id="title" class="text-2xl font-bold text-white mt-3 leading-tight break-words"></h1>
+        <p id="intro" class="text-sm text-[#8a8a8a] mt-2 leading-relaxed"></p>
+      </div>
+
+      <div class="space-y-4">
+        <div><label class="lbl" for="name">Your name *</label><input id="name" class="inp" maxlength="120" autocomplete="name" placeholder="Full name" required></div>
+        <div class="grid sm:grid-cols-2 gap-4">
+          <div><label class="lbl" for="phone">Phone / WhatsApp</label><input id="phone" class="inp" type="tel" inputmode="tel" maxlength="30" autocomplete="tel" placeholder="98765 43210"></div>
+          <div><label class="lbl" for="email">Email</label><input id="email" class="inp" type="email" maxlength="160" autocomplete="email" placeholder="you@example.com"></div>
+        </div>
+        <div><span class="lbl">What are you planning?</span><div id="types" class="flex flex-wrap gap-2" role="radiogroup" aria-label="Event type"></div></div>
+        <div id="r-date-loc" class="grid sm:grid-cols-2 gap-4">
+          <div id="w-date"><label class="lbl" for="date">Event date</label><input id="date" class="inp" type="date"></div>
+          <div id="w-loc"><label class="lbl" for="loc">Location</label><input id="loc" class="inp" maxlength="160" placeholder="City or venue"></div>
+        </div>
+        <div id="w-budget"><label class="lbl" for="budget">Budget (approx.)</label><input id="budget" class="inp" inputmode="numeric" maxlength="12" placeholder="e.g. 150000"></div>
+        <div><label class="lbl" for="msg">Anything else we should know?</label><textarea id="msg" class="inp" maxlength="2000" placeholder="Tell us about your event, style you like, number of days..."></textarea></div>
+        <div class="hp" aria-hidden="true"><label>Website<input id="website" tabindex="-1" autocomplete="off"></label></div>
+        <p id="err" role="alert" class="text-[13px] text-[#f87171] min-h-[18px]"></p>
+        <button id="send" class="go" type="submit"><i class="ti ti-send"></i> Send enquiry</button>
+        <p class="text-[11px] text-[#525252] text-center">Your details go only to this studio so they can reply to you.</p>
+      </div>
+    </form>
+
+    <div id="done" class="card p-8 text-center hidden up">
+      <div class="w-16 h-16 mx-auto mb-4 rounded-full bg-[rgba(74,222,128,.1)] border border-[rgba(74,222,128,.3)] flex items-center justify-center"><i class="ti ti-check text-3xl text-[#4ade80]"></i></div>
+      <h1 class="text-2xl font-bold text-white">Enquiry sent</h1>
+      <p id="ok" class="text-sm text-[#a3a3a3] mt-2 leading-relaxed"></p>
+      <a id="wa" class="hidden mt-6 items-center justify-center gap-2 rounded-xl py-3 text-sm font-bold text-[#4ade80] border border-[rgba(74,222,128,.3)] bg-[rgba(74,222,128,.06)]" target="_blank" rel="noopener"><i class="ti ti-brand-whatsapp text-lg"></i> Chat on WhatsApp</a>
+      <button id="again" class="mt-4 text-xs text-[#737373] hover:text-white underline">Send another enquiry</button>
+    </div>
+    <p class="text-center text-[10px] text-[#3f3f3f] mt-6 tracking-wider uppercase">Powered by Sakkhi</p>
+  </main>
+
+<script>
+(function () {
+  var URL_ = 'https://smyupcjfusgduaoxqfvu.supabase.co', KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InNteXVwY2pmdXNnZHVhb3hxZnZ1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzk4NjA3MzIsImV4cCI6MjA5NTQzNjczMn0.pGg9ZIYWpZ70R_HNtRl7FHrzeUNA5vlZT6hNkjDzhqo';
+  var $ = function (id) { return document.getElementById(id); };
+  var token = new URLSearchParams(location.search).get('f') || '', formInfo = null, eventType = '', busy = false;
+
+  function show(id) { ['load', 'gone', 'form', 'done'].forEach(function (x) { $(x).classList.toggle('hidden', x !== id); }); window.scrollTo({ top: 0 }); }
+  function call(fn, args) {
+    return fetch(URL_ + '/rest/v1/rpc/' + fn, { method: 'POST', headers: { apikey: KEY, Authorization: 'Bearer ' + KEY, 'Content-Type': 'application/json' }, body: JSON.stringify(args) })
+      .then(function (r) { return r.text().then(function (t) { var d = null; try { d = t ? JSON.parse(t) : null; } catch (e) {} if (!r.ok) { var e = new Error((d && d.message) || 'Something went wrong. Please try again.'); throw e; } return d; }); });
+  }
+  function waLink(phone, text) { var d = String(phone || '').replace(/\D/g, ''); if (d.length === 10) d = '91' + d; return d ? 'https://wa.me/' + d + (text ? '?text=' + encodeURIComponent(text) : '') : ''; }
+
+  function build(info) {
+    formInfo = info;
+    $('studio').textContent = info.studio; $('title').textContent = info.title; $('intro').textContent = info.intro;
+    document.title = 'Enquiry · ' + info.studio;
+    if (info.logo && /^https:\/\//.test(info.logo)) { var img = new Image(); img.alt = ''; img.className = 'w-full h-full object-cover'; img.onload = function () { $('logo').textContent = ''; $('logo').appendChild(img); }; img.src = info.logo; }
+    var box = $('types'); box.textContent = '';
+    (info.event_types || []).forEach(function (t) {
+      var b = document.createElement('button'); b.type = 'button'; b.className = 'chip'; b.textContent = t; b.setAttribute('role', 'radio'); b.setAttribute('aria-checked', 'false');
+      b.onclick = function () { eventType = (eventType === t) ? '' : t; Array.prototype.forEach.call(box.children, function (c) { var on = c.textContent === eventType; c.classList.toggle('on', on); c.setAttribute('aria-checked', on); }); };
+      box.appendChild(b);
+    });
+    $('w-date').style.display = info.ask_date ? '' : 'none'; $('w-loc').style.display = info.ask_location ? '' : 'none';
+    $('r-date-loc').style.display = (info.ask_date || info.ask_location) ? '' : 'none'; $('w-budget').style.display = info.ask_budget ? '' : 'none';
+    var t = new Date(); $('date').min = t.getFullYear() + '-' + String(t.getMonth() + 1).padStart(2, '0') + '-' + String(t.getDate()).padStart(2, '0');
+    show('form');
+  }
+
+  function fail(el, msg) { $('err').textContent = msg; if (el) { el.classList.add('bad'); el.focus(); } }
+  document.addEventListener('input', function (e) { if (e.target.classList) e.target.classList.remove('bad'); $('err').textContent = ''; });
+
+  $('form').addEventListener('submit', function (e) {
+    e.preventDefault(); if (busy) return;
+    var name = $('name').value.trim(), phone = $('phone').value.trim(), email = $('email').value.trim();
+    if (!name) return fail($('name'), 'Please enter your name.');
+    if (!phone && !email) return fail($('phone'), 'Please add a phone number or an email so the studio can reply.');
+    if (phone && phone.replace(/\D/g, '').length < 7) return fail($('phone'), 'That phone number looks too short.');
+    if (email && !/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return fail($('email'), 'That email address does not look right.');
+    busy = true; var btn = $('send'); btn.disabled = true; btn.innerHTML = '<i class="ti ti-loader-2" style="animation:spin 1s linear infinite"></i> Sending...';
+    call('enterprise_submit_inquiry', { p_token: token, p_payload: { name: name, phone: phone, email: email, event_type: eventType, event_date: formInfo.ask_date ? $('date').value : '', location: formInfo.ask_location ? $('loc').value.trim() : '', budget: formInfo.ask_budget ? $('budget').value.trim() : '', message: $('msg').value.trim(), website: $('website').value } })
+      .then(function (r) {
+        $('ok').textContent = (r && r.message) || formInfo.success_message || 'Thank you! We will be in touch soon.';
+        if (formInfo.phone) { var w = waLink(formInfo.phone, 'Hi ' + formInfo.studio + ', I just sent an enquiry on your website. My name is ' + name + '.'); if (w) { $('wa').href = w; $('wa').classList.remove('hidden'); $('wa').classList.add('flex'); } }
+        show('done');
+      })
+      .catch(function (err) { fail(null, err.message); })
+      .then(function () { busy = false; btn.disabled = false; btn.innerHTML = '<i class="ti ti-send"></i> Send enquiry'; });
+  });
+  $('again').onclick = function () { $('form').reset(); eventType = ''; Array.prototype.forEach.call($('types').children, function (c) { c.classList.remove('on'); c.setAttribute('aria-checked', 'false'); }); show('form'); };
+
+  if (!/^[a-f0-9]{8,64}$/.test(token)) { show('gone'); return; }
+  call('enterprise_get_public_form', { p_token: token }).then(function (info) { info ? build(info) : show('gone'); }).catch(function () { show('gone'); });
+})();
+</script>
+</body>
+</html>
