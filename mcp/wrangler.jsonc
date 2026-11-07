@@ -6,6 +6,7 @@
     "nodejs_compat",
     "global_fetch_strictly_public"
   ],
+  "previews": {},
   "routes": [
     { "pattern": "mcp.sakkhi.co.in", "custom_domain": true }
   ],
