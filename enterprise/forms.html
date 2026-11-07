@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Enquiry Forms</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/tabler-icons.min.css">
+  <link rel="stylesheet" href="assets/ent.css">
+</head>
+<body class="ent">
+<div class="max-w-6xl mx-auto px-4 sm:px-8 py-7">
+  <div class="mb-6"><h1 class="e-h1">Enquiry Forms</h1><p class="e-sub mt-1">Share one link. Every enquiry lands in Leads and notifies your team.</p></div>
+  <div id="main"><div class="e-card e-skel" style="height:300px"></div></div>
+</div>
+<script src="assets/ent.js"></script>
+<script>
+(async function () {
+  const $ = id => document.getElementById(id);
+  const ctx = await ENT.init();
+  if (!ENT.can(ctx.role, 'forms')) { $('main').innerHTML = '<div class="e-card e-empty"><i class="ti ti-lock"></i>Only owners, admins and managers can manage enquiry forms.</div>'; return; }
+  const W = ctx.ws.id, me = ctx.user.id;
+  let form = null, count30 = 0;
+  const link = () => location.origin + '/enquiry/?f=' + form.token;
+  const hex = n => Array.from(crypto.getRandomValues(new Uint8Array(n)), b => b.toString(16).padStart(2, '0')).join('');
+
+  async function load() {
+    try {
+      let rows = await ENT.sb('enterprise_inquiry_forms?workspace_id=eq.' + W + '&select=*&order=created_at.asc&limit=1');
+      if (!rows.length) rows = await ENT.sb('enterprise_inquiry_forms', { method: 'POST', prefer: 'return=representation', body: { workspace_id: W, created_by: me } });
+      form = rows[0];
+      const since = new Date(Date.now() - 30 * 864e5).toISOString();
+      const cnt = await ENT.sb('enterprise_leads?workspace_id=eq.' + W + '&form_id=eq.' + form.id + '&created_at=gte.' + encodeURIComponent(since) + '&select=id');
+      count30 = (cnt || []).length;
+      render();
+    } catch (e) { $('main').innerHTML = '<div class="e-card e-empty"><i class="ti ti-alert-triangle"></i>Could not load your form: ' + ENT.esc(e.message) + '</div>'; }
+  }
+
+  function render() {
+    const f = form, esc = ENT.esc;
+    const chk = (id, label, on) => '<label class="flex items-center justify-between gap-3 p-3 rounded-xl border border-[#1a1a1a] cursor-pointer"><span class="text-[13px] text-[#d4d4d4]">' + label + '</span><input type="checkbox" id="' + id + '" ' + (on ? 'checked' : '') + ' class="w-4 h-4" style="accent-color:#c9a96e"></label>';
+    $('main').innerHTML = '<div class="grid lg:grid-cols-5 gap-5">' +
+      '<section class="e-card p-5 lg:col-span-3 space-y-4">' +
+        '<div class="flex items-center justify-between"><h2 class="text-sm font-bold text-white">Form settings</h2><label class="flex items-center gap-2 text-[12px] font-bold ' + (f.is_active ? 'text-[#4ade80]' : 'text-[#8a8a8a]') + ' cursor-pointer"><input type="checkbox" id="f-active" ' + (f.is_active ? 'checked' : '') + ' class="w-4 h-4" style="accent-color:#4ade80">' + (f.is_active ? 'Accepting enquiries' : 'Paused') + '</label></div>' +
+        '<div><label class="e-label" for="f-title">Heading</label><input id="f-title" class="e-input" maxlength="90" value="' + esc(f.title) + '"></div>' +
+        '<div><label class="e-label" for="f-intro">Short introduction</label><textarea id="f-intro" class="e-textarea" maxlength="300">' + esc(f.intro) + '</textarea></div>' +
+        '<div><label class="e-label" for="f-types">Event types (one per line)</label><textarea id="f-types" class="e-textarea" style="min-height:130px">' + esc((f.event_types || []).join('\n')) + '</textarea></div>' +
+        '<div class="grid sm:grid-cols-3 gap-2">' + chk('f-date', 'Ask event date', f.ask_date) + chk('f-loc', 'Ask location', f.ask_location) + chk('f-budget', 'Ask budget', f.ask_budget) + '</div>' +
+        '<div><label class="e-label" for="f-ok">Message after sending</label><textarea id="f-ok" class="e-textarea" maxlength="300">' + esc(f.success_message) + '</textarea></div>' +
+        '<div class="flex justify-end"><button id="save" class="e-btn primary"><i class="ti ti-device-floppy"></i> Save form</button></div>' +
+      '</section>' +
+      '<section class="lg:col-span-2 space-y-4">' +
+        '<div class="e-card p-5"><h2 class="text-sm font-bold text-white mb-1">Share your form</h2><p class="e-sub mb-3">' + (f.is_active ? 'Anyone with this link can send you an enquiry.' : 'The link shows “not accepting enquiries” while paused.') + '</p>' +
+          '<div class="flex gap-2"><input id="lnk" readonly class="e-input" value="' + esc(link()) + '" aria-label="Public form link"><button class="e-btn" id="copy" title="Copy link"><i class="ti ti-copy"></i></button></div>' +
+          '<div class="grid grid-cols-2 gap-2 mt-3"><a class="e-btn" target="_blank" rel="noopener" href="' + esc(link()) + '"><i class="ti ti-external-link"></i> Preview</a><a class="e-btn" target="_blank" rel="noopener" href="' + esc(ENT.waLink('', '') || 'https://wa.me/?text=' + encodeURIComponent('Planning an event? Send us your details here: ' + link())) + '"><i class="ti ti-brand-whatsapp"></i> Share</a></div>' +
+          '<button id="reset" class="e-btn danger w-full mt-2"><i class="ti ti-refresh"></i> Reset link (old link stops working)</button></div>' +
+        '<div class="e-card p-5"><h2 class="text-sm font-bold text-white mb-1">Put it on your website</h2><p class="e-sub mb-3">Paste this where you want the form to appear.</p>' +
+          '<textarea id="emb" readonly class="e-textarea" style="min-height:90px;font-family:ui-monospace,monospace;font-size:11px" aria-label="Embed code">' + esc('<iframe src="' + link() + '" width="100%" height="820" style="border:0;border-radius:16px" title="Enquiry form"></iframe>') + '</textarea>' +
+          '<button class="e-btn mt-2 w-full" id="copy2"><i class="ti ti-code"></i> Copy embed code</button></div>' +
+        '<div class="e-card p-5 flex items-center gap-4"><span class="w-11 h-11 rounded-xl bg-[rgba(201,169,110,.1)] text-[#c9a96e] flex items-center justify-center text-xl"><i class="ti ti-inbox"></i></span><div><div class="text-2xl font-extrabold text-white">' + count30 + '</div><div class="e-sub">enquiries from this form in the last 30 days</div></div></div>' +
+        (!ctx.ws.phone ? '<div class="e-card p-4 text-[12px]" style="border-color:rgba(250,204,21,.3);color:#facc15"><i class="ti ti-alert-triangle"></i> Add your company phone in Company Settings so clients can WhatsApp you from the thank-you page.</div>' : '') +
+      '</section></div>';
+  }
+
+  document.addEventListener('click', async e => {
+    const t = e.target.closest('button'); if (!t || !form) return;
+    const copy = async (v, msg) => { try { await navigator.clipboard.writeText(v); ENT.toast(msg, 'ok'); } catch (x) { const el = $('lnk'); el.select(); document.execCommand('copy'); ENT.toast(msg, 'ok'); } };
+    if (t.id === 'copy') copy(link(), 'Link copied');
+    if (t.id === 'copy2') copy($('emb').value, 'Embed code copied');
+    if (t.id === 'reset') {
+      if (!await ENT.confirm('Anyone using the current link will see “not accepting enquiries”. Share the new link afterwards.', { title: 'Reset the form link?', danger: true, ok: 'Reset link' })) return;
+      try { const token = hex(9); await ENT.sb('enterprise_inquiry_forms?id=eq.' + form.id, { method: 'PATCH', body: { token, updated_at: new Date().toISOString() } }); form.token = token; render(); ENT.toast('New link created', 'ok'); }
+      catch (x) { ENT.toast('Could not reset: ' + x.message, 'err'); }
+    }
+    if (t.id === 'save') {
+      const types = $('f-types').value.split('\n').map(s => s.trim()).filter(Boolean).slice(0, 15);
+      if (!$('f-title').value.trim()) return ENT.toast('Please add a heading', 'err');
+      if (!types.length) return ENT.toast('Add at least one event type', 'err');
+      t.disabled = true;
+      const body = { title: $('f-title').value.trim(), intro: $('f-intro').value.trim(), event_types: types, ask_date: $('f-date').checked, ask_location: $('f-loc').checked, ask_budget: $('f-budget').checked, success_message: $('f-ok').value.trim() || 'Thank you! We will be in touch soon.', is_active: $('f-active').checked, updated_at: new Date().toISOString() };
+      try { await ENT.sb('enterprise_inquiry_forms?id=eq.' + form.id, { method: 'PATCH', body }); Object.assign(form, body); render(); ENT.toast('Form saved', 'ok'); }
+      catch (x) { t.disabled = false; ENT.toast('Could not save: ' + x.message, 'err'); }
+    }
+  });
+  load();
+})();
+</script>
+</body>
+</html>
